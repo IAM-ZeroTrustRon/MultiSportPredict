@@ -834,6 +834,10 @@ class SoccerPredictor(SportPredictorBase):
         corner_total = estimate_corner_total(home_corner, away_corner, 0, 0, 0, 0)
         
         # Build comprehensive output
+        p_corners_85 = poisson_over_prob(corner_total, 8.5)
+        p_corners_95 = poisson_over_prob(corner_total, 9.5)
+        p_corners_105 = poisson_over_prob(corner_total, 10.5)
+        
         result = {
             "sport": "soccer",
             "league": league,
@@ -873,6 +877,12 @@ class SoccerPredictor(SportPredictorBase):
                 "over_15_prob": round(p_over_15, 3),
                 "over_25_prob": round(p_over_25, 3),
                 "over_35_prob": round(p_over_35, 3),
+            },
+            "corners_analysis": {
+                "projection": round(corner_total, 1),
+                "over_85_prob": round(p_corners_85, 3),
+                "over_95_prob": round(p_corners_95, 3),
+                "over_105_prob": round(p_corners_105, 3),
             },
             "btts_probability": round(btts_prob, 3),
             "corner_projection": round(corner_total, 1),

@@ -604,6 +604,16 @@ def run_soccer_game(home_team: str, away_team: str, league: str = "Premier Leagu
         print(f"Projected: {home_team} {game.get('projected_home_goals', 0):.2f}"
               f" - {away_team} {game.get('projected_away_goals', 0):.2f}")
 
+        # Corner projection
+        corner_proj = result.get("corner_projection")
+        if corner_proj is not None:
+            print(f"Corner Projection: {corner_proj:.1f}")
+            corners_over_85 = result.get("corners_analysis", {}).get("over_85_prob")
+            corners_over_95 = result.get("corners_analysis", {}).get("over_95_prob")
+            corners_over_105 = result.get("corners_analysis", {}).get("over_105_prob")
+            if corners_over_105 is not None:
+                print(f"  Over 8.5: {corners_over_85:.1%} | Over 9.5: {corners_over_95:.1%} | Over 10.5: {corners_over_105:.1%}")
+
         # Handle Anytime Goalscorer (graceful degradation for low-liquidity)
         league_lower = league.lower() if league else ""
         if league_lower in LOW_LIQUIDITY_LEAGUES:
