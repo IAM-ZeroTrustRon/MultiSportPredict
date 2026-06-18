@@ -651,20 +651,6 @@ def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
         print(f"Run Diff: {game.get('projected_run_differential', 0):+.2f}")
         print(f"Win Prob: {home_team} {game.get('home_win_probability', 0):.1%}")
 
-        # Player props
-        try:
-            from models.props_engine import generate_player_props
-            props = generate_player_props('baseball', home_team, away_team, league)
-            result['player_props'] = props
-            pitcher_props = props.get("pitcher_props", [])
-            if pitcher_props:
-                print(f"\n--- Pitcher Props ---")
-                for prop in pitcher_props[:3]:
-                    print(f"  {prop['player_name']}: {prop['prop_type']} "
-                          f"Line: {prop['line']}, Proj: {prop['projection']}")
-        except Exception:
-            pass
-
         out_dir = Path("output/baseball")
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / f"{home_team.replace(' ', '_')}_vs_{away_team.replace(' ', '_')}.json"

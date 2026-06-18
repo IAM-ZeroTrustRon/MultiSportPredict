@@ -34,6 +34,12 @@ try:
 except ImportError:
     HAS_PANDAS = False
 
+# Import shared utilities to avoid duplication
+from core.utils import (
+    sigmoid, clamp, to_num, to_bool, color_score,
+    poisson_pmf, poisson_over_prob, poisson_at_least_one
+)
+
 
 # ============================================================================
 # CONFIGURATION
@@ -57,42 +63,6 @@ PROB_THRESHOLD_SLIGHT = 0.53
 # UTILITY FUNCTIONS (Shared across all sports)
 # ============================================================================
 
-def sigmoid(x: float) -> float:
-    """Sigmoid function for probability conversion"""
-    x = max(-500, min(500, x))
-    return 1 / (1 + math.exp(-x))
-
-
-def clamp(x: float, low: float = 0.0, high: float = 1.0) -> float:
-    """Clamp value between low and high bounds"""
-    return max(low, min(high, x))
-
-
-def color_score(x) -> float:
-    """Convert color rating to numeric score"""
-    return {"green": 1.0, "yellow": 0.0, "red": -1.0}.get(str(x).strip().lower(), 0.0)
-
-
-def to_num(v, default: float = 0.0) -> float:
-    """Convert value to number with default"""
-    if v is None or (isinstance(v, float) and math.isnan(v)):
-        return default
-    try:
-        if isinstance(v, str):
-            v = v.strip().replace(",", "")
-            if v == "":
-                return default
-        return float(v)
-    except Exception:
-        return default
-
-
-def to_bool(v) -> bool:
-    """Convert value to boolean"""
-    if v is None:
-        return False
-    s = str(v).strip().lower()
-    return s in {"true", "t", "1", "y", "yes"}
 
 
 def score_to_prob(score: float) -> float:
@@ -830,34 +800,6 @@ class SoccerHandicapper:
         }
 
 
-def poisson_pmf(k: int, lam: float) -> float:
-    """Poisson probability mass function"""
-    if lam <= 0:
-        return 0.0 if k > 0 else 1.0
-    if k < 0:
-        return 0.0
-    # Use logarithms to avoid overflow for large k
-    try:
-        log_pmf = -lam + k * math.log(lam) - math.lgamma(k + 1)
-        return math.exp(log_pmf)
-    except (ValueError, OverflowError):
-        return 0.0
-
-
-def poisson_over_prob(lam: float, line: float) -> float:
-    """Calculate probability of over a given line using Poisson distribution"""
-    n = int(math.floor(line))
-    frac = line - n
-    if abs(frac) < 1e-9:
-        return 1 - sum(poisson_pmf(k, lam) for k in range(0, n + 1))
-    else:
-        threshold = math.floor(line)
-        return 1 - sum(poisson_pmf(k, lam) for k in range(0, threshold + 1))
-
-
-def poisson_at_least_one(lam: float) -> float:
-    """Probability of at least one event occurring"""
-    return 1 - math.exp(-lam)
 
 
 def team_goal_strength(xg_for: float, xg_against: float, shots: float, sot: float,

@@ -27,39 +27,13 @@ import numpy as np
 
 from base_predictor import SportPredictorBase
 
+# Import shared utilities to avoid duplication
+from core.utils import sigmoid, clamp, to_num, color_score
+
 
 # ============================================================================
 # UTILITY FUNCTIONS (Adapted from MultiSportModel.py)
 # ============================================================================
-
-def sigmoid(x: float) -> float:
-    """Sigmoid function for probability conversion"""
-    x = max(-500, min(500, x))
-    return 1 / (1 + math.exp(-x))
-
-
-def clamp(x: float, low: float = 0.0, high: float = 1.0) -> float:
-    """Clamp value between low and high bounds"""
-    return max(low, min(high, x))
-
-
-def color_score(x) -> float:
-    """Convert color rating to numeric score"""
-    return {"green": 1.0, "yellow": 0.0, "red": -1.0}.get(str(x).strip().lower(), 0.0)
-
-
-def to_num(v, default: float = 0.0) -> float:
-    """Convert value to number with default"""
-    if v is None or (isinstance(v, float) and math.isnan(v)):
-        return default
-    try:
-        if isinstance(v, str):
-            v = v.strip().replace(",", "")
-            if v == "":
-                return default
-        return float(v)
-    except Exception:
-        return default
 
 
 # ============================================================================

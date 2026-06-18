@@ -231,9 +231,15 @@ class AutoDispatcher:
         self.processed_dir = PROCESSED_DIR
         self.output_dir = OUTPUT_DIR
 
-    def predict_match(self, sport: str, home_team: str, away_team: str) -> bool:
+    def predict_match(self, sport: str, home_team: str, away_team: str, league: str = None) -> bool:
         """
         Run prediction for a match without requiring pre-built CSV.
+
+        Args:
+            sport: Sport type (soccer, basketball, kbo)
+            home_team: Home team name
+            away_team: Away team name
+            league: Optional league identifier
 
         Returns True if successful, False otherwise.
         """
@@ -249,19 +255,22 @@ class AutoDispatcher:
             if sport == "soccer":
                 # Try to run prediction; if match not found, add it and retry
                 try:
-                    from models.soccer_predict import run_soccer_game
+                    from models.soccer_predictor import SoccerPredictor
                     LOG.info(f"Running soccer prediction...")
-                    # Auto-detect league for better model tuning
-                    detector = LeagueDetector()
-                    detected_league = detector.detect_from_row(
-                        pd.Series({"home_team": home_team})
+                    predictor = SoccerPredictor(league=league or "Premier League")
+                    result = predictor.predict(
+                        features=None, model=None,
+                        home_team=home_team, away_team=away_team
                     )
-                    result = run_soccer_game(home_team, away_team, league=detected_league)
                 except ValueError as e:
                     if "No soccer game found" in str(e):
                         LOG.warning(f"Match not in CSV. Adding {home_team} vs {away_team}...")
                         if self._add_match_to_csv(sport, home_team, away_team):
-                            result = run_soccer_game(home_team, away_team, league=detected_league)
+                            predictor = SoccerPredictor(league=league or "Premier League")
+                            result = predictor.predict(
+                                features=None, model=None,
+                                home_team=home_team, away_team=away_team
+                            )
                         else:
                             raise
                     else:
@@ -269,14 +278,22 @@ class AutoDispatcher:
 
             elif sport == "basketball":
                 try:
-                    from models.basketball_predict import run_basketball_game
+                    from models.basketball_predictor import BasketballPredictor
                     LOG.info(f"Running basketball prediction...")
-                    result = run_basketball_game(home_team, away_team)
+                    predictor = BasketballPredictor(league=league or "EuroLeague")
+                    result = predictor.predict(
+                        features=None, model=None,
+                        home_team=home_team, away_team=away_team
+                    )
                 except ValueError as e:
                     if "No basketball game found" in str(e):
                         LOG.warning(f"Match not in CSV. Adding {home_team} vs {away_team}...")
                         if self._add_match_to_csv(sport, home_team, away_team):
-                            result = run_basketball_game(home_team, away_team)
+                            predictor = BasketballPredictor(league=league or "EuroLeague")
+                            result = predictor.predict(
+                                features=None, model=None,
+                                home_team=home_team, away_team=away_team
+                            )
                         else:
                             raise
                     else:
@@ -284,14 +301,20 @@ class AutoDispatcher:
 
             elif sport == "kbo":
                 try:
-                    from models.kbo_predict import run_kbo_game
+                    from models.baseball_predictor import BaseballPredictor
                     LOG.info(f"Running KBO prediction...")
-                    result = run_kbo_game(home_team, away_team)
+                    predictor = BaseballPredictor()
+                    data = predictor.load_data(league="KBO", home_team=home_team, away_team=away_team)
+                    features = predictor.feature_engineering(data)
+                    result = predictor.predict(features, None, home_team, away_team, "KBO")
                 except ValueError as e:
                     if "No kbo game found" in str(e).lower():
                         LOG.warning(f"Match not in CSV. Adding {home_team} vs {away_team}...")
                         if self._add_match_to_csv(sport, home_team, away_team):
-                            result = run_kbo_game(home_team, away_team)
+                            predictor = BaseballPredictor()
+                            data = predictor.load_data(league="KBO", home_team=home_team, away_team=away_team)
+                            features = predictor.feature_engineering(data)
+                            result = predictor.predict(features, None, home_team, away_team, "KBO")
                         else:
                             raise
                     else:

@@ -28,34 +28,16 @@ from scipy.stats import poisson
 
 from base_predictor import SportPredictorBase
 
+# Import shared utilities to avoid duplication
+from core.utils import (
+    sigmoid, clamp, to_num,
+    poisson_pmf, poisson_over_prob, poisson_at_least_one
+)
+
 
 # ============================================================================
 # UTILITY FUNCTIONS
 # ============================================================================
-
-def sigmoid(x: float) -> float:
-    """Sigmoid function for probability conversion"""
-    x = max(-500, min(500, x))
-    return 1 / (1 + math.exp(-x))
-
-
-def clamp(x: float, low: float = 0.0, high: float = 1.0) -> float:
-    """Clamp value between low and high bounds"""
-    return max(low, min(high, x))
-
-
-def to_num(v, default: float = 0.0) -> float:
-    """Convert value to number with default"""
-    if v is None or (isinstance(v, float) and math.isnan(v)):
-        return default
-    try:
-        if isinstance(v, str):
-            v = v.strip().replace(",", "")
-            if v == "":
-                return default
-        return float(v)
-    except Exception:
-        return default
 
 
 # ============================================================================
@@ -823,7 +805,7 @@ class SoccerPredictor(SportPredictorBase):
             
             side_confidence = confidence_score(side_edge, volatility=0.50)
             total_confidence = confidence_score(total_edge, volatility=0.55)
-            btts_confidence = confidence_score(btts_edge * 100, volatility=0.48)
+            btts_confidence = confidence_score(btts_edge * 10, volatility=0.48)
             
             side_rec = bet_recommendation(side_confidence)
             total_rec = bet_recommendation(total_confidence)
@@ -832,7 +814,7 @@ class SoccerPredictor(SportPredictorBase):
             # Fallback if core module not available
             side_confidence = min(100, max(0, 50 + side_edge * 10))
             total_confidence = min(100, max(0, 50 + total_edge * 10))
-            btts_confidence = min(100, max(0, 50 + btts_edge * 100))
+            btts_confidence = min(100, max(0, 50 + btts_edge * 10))
             
             side_rec = "BET" if side_confidence > 60 else "PASS"
             total_rec = "BET" if total_confidence > 60 else "PASS"
