@@ -1,0 +1,96 @@
+{
+  "game_info": {
+    "home_team": "Kristianstads (W)",
+    "away_team": "IK Uppsala (W)",
+    "league": "Damallsvenskan",
+    "date": "2026-06-18",
+    "priority_market": "Corners"
+  },
+  "corners_analysis": {
+    "projected_total": 11.4,
+    "home_corner_strength": 1.46,
+    "away_corner_strength": 0.13,
+    "probabilities": {
+      "over_8.5": 0.804,
+      "over_9.5": 0.704,
+      "over_10.5": 0.59,
+      "over_11.5": 0.472,
+      "over_12.5": 0.359
+    },
+    "recommendations": [
+      {
+        "line": 8.5,
+        "probability": 0.8040127579172244,
+        "edge": 0.3040127579172244,
+        "confidence": 80.9,
+        "recommendation": "STRONG BET",
+        "lean": "OVER"
+      },
+      {
+        "line": 9.5,
+        "probability": 0.7043300587075325,
+        "edge": 0.2043300587075325,
+        "confidence": 80.9,
+        "recommendation": "STRONG BET",
+        "lean": "OVER"
+      },
+      {
+        "line": 10.5,
+        "probability": 0.5903876247725204,
+        "edge": 0.09038762477252038,
+        "confidence": 80.7,
+        "recommendation": "STRONG BET",
+        "lean": "OVER"
+      },
+      {
+        "line": 11.5,
+        "probability": 0.4719857688293768,
+        "edge": -0.028014231170623183,
+        "confidence": 66.2,
+        "recommendation": "BET",
+        "lean": "PASS"
+      },
+      {
+        "line": 12.5,
+        "probability": 0.35920294429760147,
+        "edge": -0.14079705570239853,
+        "confidence": 80.9,
+        "recommendation": "STRONG BET",
+        "lean": "UNDER"
+      }
+    ]
+  },
+  "goals_analysis": {
+    "home_expected": 2.15,
+    "away_expected": 1.59,
+    "total_expected": 3.74,
+    "over_15_prob": 0.887,
+    "over_25_prob": 0.721,
+    "over_35_prob": 0.514,
+    "market_line": 2.5,
+    "edge": 1.239,
+    "confidence": 79.4,
+    "recommendation": "STRONG BET",
+    "lean": "OVER"
+  },
+  "btts_analysis": {
+    "probability": 0.673,
+    "lean": "YES BTTS",
+    "confidence": 80.2
+  },
+  "match_outcome": {
+    "home_win_prob": 0.499,
+    "draw_prob": 0.213,
+    "away_win_prob": 0.288,
+    "lean": "Draw",
+    "confidence": 49.9
+  },
+  "player_props": {
+    "sport": "soccer",
+    "matchup": "Kristianstads (W) vs IK Uppsala (W)",
+    "pitch_factor": 1.0,
+    "player_props": [],
+    "top_recommendations": []
+  },
+  "timestamp": "2026-06-18T11:20:07.406334"
+}

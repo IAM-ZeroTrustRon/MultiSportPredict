@@ -1,0 +1,50 @@
+{
+  "sport": "soccer",
+  "game": {
+    "home_team": "Boston River",
+    "away_team": "Torque",
+    "projected_home_goals": 2.12,
+    "projected_away_goals": 1.77,
+    "projected_total_goals": 3.96,
+    "home_win_prob": 0.563,
+    "draw_prob": 0.364,
+    "away_win_prob": 0.073
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.35,
+      "market_line": 0.25,
+      "edge": 0.1,
+      "confidence": 27.0,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.957,
+      "market_total": 2.5,
+      "edge": 1.457,
+      "confidence": 49.2,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.565,
+      "confidence": 79.1,
+      "recommendation": "STRONG BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.905,
+    "over_25_prob": 0.756,
+    "over_35_prob": 0.558
+  },
+  "btts_probability": 0.565,
+  "meta": {
+    "ref_data": {
+      "yellow_cards_per_game": 4.2,
+      "red_cards_per_game": 0.25,
+      "penalties_per_game": 0.18,
+      "home_card_diff": -0.3,
+      "fouls_per_game": 22.5,
+      "strictness_rating": 0.65
+    }
+  }
+}

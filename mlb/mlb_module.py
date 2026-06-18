@@ -26,9 +26,12 @@ from sklearn.preprocessing import StandardScaler
 from core.confidence_engine import confidence_score, bet_recommendation, get_volatility
 
 try:
+    import pybaseball as pyb
     from pybaseball import statcast
+    pyb.cache.enable()
 except Exception:
     statcast = None
+    pyb = None
 
 # Directory configuration
 DATA_DIR = Path("data/mlb")
@@ -145,6 +148,91 @@ def _safe_rate(num, den):
 
 
 # =============================================================================
+# MLB HR & STARTING PITCHER COLOR-CODED FEATURES
+# =============================================================================
+
+def engineer_mlb_hr_and_sp_metrics(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Translates the Color-Coded MLB logic and new HR variables into ML features.
+    
+    Args:
+        df: DataFrame with game/player statistics
+        
+    Returns:
+        DataFrame with engineered HR and SP features
+    """
+    df = df.copy()
+    
+    # 1. Advanced HR Metrics & Vulnerability
+    if "sp_innings_pitched" in df.columns:
+        df["sp_hr_per_9"] = (df.get("sp_hr_allowed", 0) / df["sp_innings_pitched"].replace(0, np.nan)) * 9
+    else:
+        df["sp_hr_per_9"] = 0
+    
+    if "park_factor_hr" in df.columns:
+        df["park_hr_modifier"] = df["park_factor_hr"] / 100.0
+    else:
+        df["park_hr_modifier"] = 1.0
+    
+    if "wind_direction" in df.columns and "temp_f" in df.columns:
+        df["weather_hr_boost"] = np.where(
+            (df["wind_direction"] == "Out") & (df["temp_f"] >= 85), 1.25, 1.0
+        )
+    else:
+        df["weather_hr_boost"] = 1.0
+    
+    df["hr_vulnerability_index"] = df["sp_hr_per_9"] * df["park_hr_modifier"] * df["weather_hr_boost"]
+    
+    # 2. Starting Pitcher Color Coding (Green / Yellow / Red)
+    if "sp_k_pct" in df.columns and "sp_bb_pct" in df.columns:
+        df["sp_k_minus_bb_pct"] = df["sp_k_pct"] - df["sp_bb_pct"]
+    else:
+        df["sp_k_minus_bb_pct"] = 0
+    
+    conditions = [
+        # GREEN FLAG: K-BB >= 16%, WHIP <= 1.18, low HR/9
+        (df["sp_k_minus_bb_pct"] >= 0.16) & (df.get("sp_whip", 999) <= 1.18) & (df["sp_hr_per_9"] <= 1.1),
+        # RED FLAG: WHIP >= 1.32 or HR/9 >= 1.3
+        (df.get("sp_whip", 0) >= 1.32) | (df["sp_hr_per_9"] >= 1.3)
+    ]
+    choices = ["Green", "Red"]
+    df["sp_color_code"] = np.select(conditions, choices, default="Yellow")
+    
+    # 3. Market Alignment Filter
+    if "moneyline_odds" in df.columns:
+        df["is_inflated_favorite"] = np.where(
+            (df["moneyline_odds"] <= -160) & (df["sp_color_code"] != "Green"), 1, 0
+        )
+    else:
+        df["is_inflated_favorite"] = 0
+    
+    return df
+
+
+def generate_actionable_mlb_signal(row: pd.Series) -> str:
+    """
+    Outputs the suggested betting angle based on SP color coding and market alignment.
+    
+    Args:
+        row: Series representing a single game matchup
+        
+    Returns:
+        Betting signal string
+    """
+    sp_color = row.get("sp_color_code", "Yellow")
+    inflated_fav = row.get("is_inflated_favorite", 0)
+    hr_vuln = row.get("hr_vulnerability_index", 0)
+    
+    if sp_color == "Green" and inflated_fav == 0:
+        return "Safe F5 / ML Play"
+    elif sp_color == "Red" or hr_vuln > 1.5:
+        return "Avoid ML / Fade F5"
+    elif inflated_fav == 1:
+        return "Market Inflated - Skip or Fade"
+    return "No Edge"
+
+
+# =============================================================================
 # DATA INGESTION
 # =============================================================================
 
@@ -174,6 +262,36 @@ def ingest_statcast(start_dt: str, end_dt: str, save: bool = True) -> pd.DataFra
     return df
 
 
+def load_live_statcast_data(days_back: int = 7) -> pd.DataFrame:
+    """
+    Scrapes live, up-to-date pitch-level data using pybaseball with cache enabled.
+    
+    Args:
+        days_back: Number of days to look back
+        
+    Returns:
+        DataFrame with Statcast data
+    """
+    if statcast is None:
+        raise ImportError("pybaseball is not installed. Run: pip install pybaseball")
+    
+    end_date = date.today().strftime('%Y-%m-%d')
+    start_date = (date.today() - timedelta(days=days_back)).strftime('%Y-%m-%d')
+    
+    print(f"Scraping Statcast data from {start_date} to {end_date}...")
+    df = statcast(start_dt=start_date, end_dt=end_date)
+    
+    # Save raw data
+    out_path = RAW_DIR / f"statcast_{start_date}_to_{end_date}.csv"
+    if not df.empty:
+        df.to_csv(out_path, index=False)
+        print(f"Saved {len(df)} rows to {out_path}")
+    else:
+        print("Warning: No data retrieved from Statcast")
+    
+    return df
+
+
 def ingest_recent(days_back: int = 1, save: bool = True) -> pd.DataFrame:
     """
     Ingest Statcast data for the last N days.
@@ -185,13 +303,7 @@ def ingest_recent(days_back: int = 1, save: bool = True) -> pd.DataFrame:
     Returns:
         DataFrame with Statcast data
     """
-    end = date.today()
-    start = end - timedelta(days=days_back)
-    return ingest_statcast(
-        start.strftime("%Y-%m-%d"),
-        end.strftime("%Y-%m-%d"),
-        save=save
-    )
+    return load_live_statcast_data(days_back=days_back)
 
 
 # =============================================================================
@@ -700,7 +812,7 @@ def build_model_and_save(force_retrain: bool = False) -> MLBFullGameModel:
 # MAIN PREDICTION FUNCTION
 # =============================================================================
 
-def run_daily_pipeline(days_back: int = 1) -> None:
+def run_daily_pipeline(days_back: int = 7) -> None:
     """
     Run the complete daily MLB data pipeline.
     
@@ -718,7 +830,7 @@ def run_daily_pipeline(days_back: int = 1) -> None:
     try:
         # Step 1: Ingest recent Statcast data
         print("Step 1: Ingesting Statcast data...")
-        df = ingest_recent(days_back=days_back, save=True)
+        df = load_live_statcast_data(days_back=days_back)
         if df.empty:
             print("Warning: No Statcast data retrieved. Using existing data.")
         else:

@@ -1,0 +1,106 @@
+{
+  "sport": "soccer",
+  "game": {
+    "home_team": "Yacoub El Mansour",
+    "away_team": "Hassania Agadir",
+    "projected_home_goals": 2.12,
+    "projected_away_goals": 1.77,
+    "projected_total_goals": 3.96,
+    "home_win_prob": 0.563,
+    "draw_prob": 0.364,
+    "away_win_prob": 0.073
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.35,
+      "market_line": 0.25,
+      "edge": 0.1,
+      "confidence": 27.0,
+      "recommendation": "PASS"
+    },
+    "double_chance": {
+      "home_or_draw": 0.927,
+      "draw_or_away": 0.437,
+      "home_dnb_prob": 0.886,
+      "away_dnb_prob": 0.114,
+      "confidence": {
+        "home_or_draw": 79.9,
+        "draw_or_away": 0.0
+      },
+      "recommendation": {
+        "home_or_draw": "STRONG BET",
+        "draw_or_away": "PASS"
+      }
+    },
+    "total": {
+      "model_total_xg": 3.957,
+      "market_total": 2.5,
+      "edge": 1.457,
+      "confidence": 49.2,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "yes_probability": 0.565,
+      "no_probability": 0.435,
+      "confidence": 79.1,
+      "recommendation": "STRONG BET"
+    }
+  },
+  "goals_analysis": {
+    "over_05_prob": 0.981,
+    "over_15_prob": 0.905,
+    "over_25_prob": 0.756,
+    "over_35_prob": 0.558,
+    "over_45_prob": 0.363
+  },
+  "correct_score_probabilities": {
+    "0_0": 0.021,
+    "1_0": 0.044,
+    "0_1": 0.036,
+    "1_1": 0.077,
+    "2_0": 0.046,
+    "0_2": 0.032,
+    "2_1": 0.081,
+    "1_2": 0.068,
+    "2_2": 0.072,
+    "3_0": 0.033,
+    "0_3": 0.019
+  },
+  "match_outcome": {
+    "home_win": 0.563,
+    "draw": 0.364,
+    "away_win": 0.073
+  },
+  "corners_analysis": {
+    "home_corner_strength": 1.65,
+    "away_corner_strength": 0.67,
+    "projected_total": 10.9,
+    "recalibrated_total": 8.2,
+    "blended_total": 9.3,
+    "over_85_prob": 0.586,
+    "over_95_prob": 0.455,
+    "over_105_prob": 0.333,
+    "market_line": 9.5,
+    "edge": 1.44,
+    "confidence": 48.2,
+    "recommendation": "PASS",
+    "tactical_context": {
+      "home_possession_pct": 51.4,
+      "away_possession_pct": 46.8,
+      "home_corner_gen_style": "possession",
+      "away_corner_gen_style": "counter",
+      "sharp_angle": "Yacoub El Mansour (possession) vs counter style"
+    }
+  },
+  "btts_probability": 0.565,
+  "meta": {
+    "ref_data": {
+      "yellow_cards_per_game": 4.2,
+      "red_cards_per_game": 0.25,
+      "penalties_per_game": 0.18,
+      "home_card_diff": -0.3,
+      "fouls_per_game": 22.5,
+      "strictness_rating": 0.65
+    }
+  }
+}

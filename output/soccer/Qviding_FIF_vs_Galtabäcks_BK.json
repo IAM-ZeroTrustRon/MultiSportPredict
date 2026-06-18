@@ -1,0 +1,106 @@
+{
+  "sport": "soccer",
+  "game": {
+    "home_team": "Qviding FIF",
+    "away_team": "Galtab\u00e4cks BK",
+    "projected_home_goals": 1.88,
+    "projected_away_goals": 1.89,
+    "projected_total_goals": 3.85,
+    "home_win_prob": 0.524,
+    "draw_prob": 0.401,
+    "away_win_prob": 0.075
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.01,
+      "market_line": 0.0,
+      "edge": -0.01,
+      "confidence": 25.0,
+      "recommendation": "PASS"
+    },
+    "double_chance": {
+      "home_or_draw": 0.925,
+      "draw_or_away": 0.476,
+      "home_dnb_prob": 0.875,
+      "away_dnb_prob": 0.125,
+      "confidence": {
+        "home_or_draw": 79.9,
+        "draw_or_away": 0.0
+      },
+      "recommendation": {
+        "home_or_draw": "STRONG BET",
+        "draw_or_away": "PASS"
+      }
+    },
+    "total": {
+      "model_total_xg": 3.847,
+      "market_total": 2.5,
+      "edge": 1.347,
+      "confidence": 47.6,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "yes_probability": 0.546,
+      "no_probability": 0.454,
+      "confidence": 75.6,
+      "recommendation": "STRONG BET"
+    }
+  },
+  "goals_analysis": {
+    "over_05_prob": 0.979,
+    "over_15_prob": 0.897,
+    "over_25_prob": 0.739,
+    "over_35_prob": 0.536,
+    "over_45_prob": 0.341
+  },
+  "correct_score_probabilities": {
+    "0_0": 0.023,
+    "1_0": 0.043,
+    "0_1": 0.043,
+    "1_1": 0.082,
+    "2_0": 0.041,
+    "0_2": 0.041,
+    "2_1": 0.077,
+    "1_2": 0.077,
+    "2_2": 0.073,
+    "3_0": 0.026,
+    "0_3": 0.026
+  },
+  "match_outcome": {
+    "home_win": 0.524,
+    "draw": 0.401,
+    "away_win": 0.075
+  },
+  "corners_analysis": {
+    "home_corner_strength": 4.02,
+    "away_corner_strength": 0.99,
+    "projected_total": 13.0,
+    "recalibrated_total": 10.2,
+    "blended_total": 11.3,
+    "over_85_prob": 0.794,
+    "over_95_prob": 0.691,
+    "over_105_prob": 0.576,
+    "market_line": 9.5,
+    "edge": 3.45,
+    "confidence": 68.7,
+    "recommendation": "BET",
+    "tactical_context": {
+      "home_possession_pct": 51.0,
+      "away_possession_pct": 49.0,
+      "home_corner_gen_style": "possession",
+      "away_corner_gen_style": "counter",
+      "sharp_angle": "Qviding FIF (possession) vs counter style"
+    }
+  },
+  "btts_probability": 0.546,
+  "meta": {
+    "ref_data": {
+      "yellow_cards_per_game": 4.2,
+      "red_cards_per_game": 0.25,
+      "penalties_per_game": 0.18,
+      "home_card_diff": -0.3,
+      "fouls_per_game": 22.5,
+      "strictness_rating": 0.65
+    }
+  }
+}

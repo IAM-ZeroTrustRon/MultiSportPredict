@@ -1,0 +1,521 @@
+{
+  "game_info": {
+    "home_team": "Olimpia Milano",
+    "away_team": "Reyer Venezia",
+    "league": "EuroLeague",
+    "date": "2026-06-18",
+    "venue": "Taliercio, Venezia",
+    "matchup_narrative": "Pace vs. Execution - Milano methodical defense vs Venezia high-variance 3-point offense"
+  },
+  "narrative_summary": {
+    "depth_delta": {
+      "description": "Milano has 10-11 rotation players vs Venezia's 8",
+      "impact": "3rd/4th quarter attrition advantage for Milano",
+      "markets": [
+        "Milano Q4 ML",
+        "Milano Live 2H Spread"
+      ]
+    },
+    "pace_suppression": {
+      "description": "Milano controls tempo, limits fast break opportunities",
+      "impact": "Lower total, especially late in game",
+      "markets": [
+        "Game Total UNDER",
+        "1H Total UNDER"
+      ]
+    },
+    "home_adrenaline": {
+      "description": "Venezia home crowd creates early game energy",
+      "impact": "Tight 1H, Venezia stays competitive early",
+      "markets": [
+        "Venezia +1H spread",
+        "Q1 tight"
+      ]
+    },
+    "variance_dependency": {
+      "description": "Venezia needs >33% 3PT% to beat Milano defense",
+      "impact": "Venezia unders likely if shooting variance regresses",
+      "markets": [
+        "Venezia Team Total UNDER",
+        "Milano Team Total OVER"
+      ]
+    },
+    "fatigue_red_flag": {
+      "description": "Venezia guards face heavy usage vs Milano's rotating defense",
+      "impact": "Late game turnovers, short jumpers",
+      "markets": [
+        "Milano 3Q/4Q coverage",
+        "Game TOTAL 2H UNDER"
+      ]
+    }
+  },
+  "q1": {
+    "projected_home_score": 19.8,
+    "projected_away_score": 19.0,
+    "projected_total": 38.0,
+    "model_score": 6.8,
+    "lean": "Strong lean",
+    "confidence": 55.0,
+    "recommendation": "PASS"
+  },
+  "first_half": {
+    "projected_home_score": 45.3,
+    "projected_away_score": 43.3,
+    "projected_total": 88.6,
+    "spread": 2.0,
+    "home_win_prob": 0.5918,
+    "away_win_prob": 0.4082,
+    "lean": "Moderate Home 1H",
+    "confidence": 79.4,
+    "recommendation": "BET"
+  },
+  "full_game": {
+    "projected_home_score": 97.4,
+    "projected_away_score": 83.5,
+    "projected_total": 180.9,
+    "home_win_prob": 0.5814,
+    "away_win_prob": 0.41859999999999997,
+    "model_edge": 5.72,
+    "historical_gap": 3.82,
+    "rest_gap": 1.0,
+    "context_gap": 2.0,
+    "lean": "Pass",
+    "confidence": 62.0
+  },
+  "totals": {
+    "projected_total": 180.9,
+    "market_line": 149.5,
+    "edge": 31.4,
+    "confidence": 80.2,
+    "lean": "OVER",
+    "recommendation": "STRONG BET",
+    "alternate_lines": [
+      {
+        "line": 145.5,
+        "edge": 35.4
+      },
+      {
+        "line": 150.5,
+        "edge": 30.4
+      },
+      {
+        "line": 155.5,
+        "edge": 25.4
+      }
+    ]
+  },
+  "sides": {
+    "spread_line": -6.5,
+    "milano_win_prob": 0.5814,
+    "venezia_win_prob": 0.41859999999999997,
+    "edge": 7.64,
+    "confidence": 80.2,
+    "lean": "MILANO",
+    "recommendation": "STRONG BET"
+  },
+  "player_props": {
+    "sport": "basketball",
+    "matchup": "Olimpia Milano vs Reyer Venezia",
+    "player_props": [
+      {
+        "player_name": "Nicolo Melli",
+        "team": "Olimpia Milano",
+        "position": "PF",
+        "prop_type": "Points",
+        "line": 9.5,
+        "projection": 8.3,
+        "edge": -1.2,
+        "confidence": 35.6,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Home court"
+      },
+      {
+        "player_name": "Nicolo Melli",
+        "team": "Olimpia Milano",
+        "position": "PF",
+        "prop_type": "Rebounds",
+        "line": 5.0,
+        "projection": 4.9,
+        "edge": -0.1,
+        "confidence": 48.5,
+        "recommendation": "Pass",
+        "lean": "No Lean"
+      },
+      {
+        "player_name": "Shavon Shields",
+        "team": "Olimpia Milano",
+        "position": "SF",
+        "prop_type": "Points",
+        "line": 11.0,
+        "projection": 9.8,
+        "edge": -1.2,
+        "confidence": 35.6,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Home court"
+      },
+      {
+        "player_name": "Shavon Shields",
+        "team": "Olimpia Milano",
+        "position": "SF",
+        "prop_type": "Rebounds",
+        "line": 3.5,
+        "projection": 3.6,
+        "edge": 0.1,
+        "confidence": 51.5,
+        "recommendation": "Pass",
+        "lean": "No Lean"
+      },
+      {
+        "player_name": "Kevin Punter",
+        "team": "Olimpia Milano",
+        "position": "SG",
+        "prop_type": "Points",
+        "line": 14.5,
+        "projection": 13.0,
+        "edge": -1.5,
+        "confidence": 32.0,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Home court"
+      },
+      {
+        "player_name": "Kevin Punter",
+        "team": "Olimpia Milano",
+        "position": "SG",
+        "prop_type": "Assists",
+        "line": 2.0,
+        "projection": 2.1,
+        "edge": 0.1,
+        "confidence": 51.5,
+        "recommendation": "Pass",
+        "lean": "No Lean"
+      },
+      {
+        "player_name": "Sergio Rodriguez",
+        "team": "Olimpia Milano",
+        "position": "PG",
+        "prop_type": "Points",
+        "line": 8.5,
+        "projection": 7.5,
+        "edge": -1.0,
+        "confidence": 38.0,
+        "recommendation": "Pass",
+        "lean": "No Lean",
+        "matchup_factor": "Home court"
+      },
+      {
+        "player_name": "Sergio Rodriguez",
+        "team": "Olimpia Milano",
+        "position": "PG",
+        "prop_type": "Assists",
+        "line": 5.5,
+        "projection": 5.8,
+        "edge": 0.3,
+        "confidence": 54.5,
+        "recommendation": "Pass",
+        "lean": "No Lean"
+      },
+      {
+        "player_name": "Cleveland Melvin",
+        "team": "Olimpia Milano",
+        "position": "C",
+        "prop_type": "Points",
+        "line": 10.0,
+        "projection": 8.9,
+        "edge": -1.1,
+        "confidence": 36.8,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Home court"
+      },
+      {
+        "player_name": "Cleveland Melvin",
+        "team": "Olimpia Milano",
+        "position": "C",
+        "prop_type": "Rebounds",
+        "line": 4.5,
+        "projection": 4.3,
+        "edge": -0.2,
+        "confidence": 47.0,
+        "recommendation": "Pass",
+        "lean": "No Lean"
+      },
+      {
+        "player_name": "Michele Vitali",
+        "team": "Reyer Venezia",
+        "position": "SG",
+        "prop_type": "Points",
+        "line": 12.5,
+        "projection": 10.2,
+        "edge": -2.3,
+        "confidence": 22.4,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      },
+      {
+        "player_name": "Michele Vitali",
+        "team": "Reyer Venezia",
+        "position": "SG",
+        "prop_type": "Assists",
+        "line": 2.0,
+        "projection": 2.3,
+        "edge": 0.3,
+        "confidence": 54.5,
+        "recommendation": "Pass",
+        "lean": "No Lean"
+      },
+      {
+        "player_name": "Jordan Theodore",
+        "team": "Reyer Venezia",
+        "position": "PG",
+        "prop_type": "Points",
+        "line": 13.0,
+        "projection": 10.6,
+        "edge": -2.4,
+        "confidence": 21.2,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      },
+      {
+        "player_name": "Jordan Theodore",
+        "team": "Reyer Venezia",
+        "position": "PG",
+        "prop_type": "Assists",
+        "line": 5.5,
+        "projection": 6.1,
+        "edge": 0.6,
+        "confidence": 59.0,
+        "recommendation": "Over",
+        "lean": "Over"
+      },
+      {
+        "player_name": "Austin Daye",
+        "team": "Reyer Venezia",
+        "position": "PF",
+        "prop_type": "Points",
+        "line": 11.5,
+        "projection": 9.4,
+        "edge": -2.1,
+        "confidence": 24.8,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      },
+      {
+        "player_name": "Austin Daye",
+        "team": "Reyer Venezia",
+        "position": "PF",
+        "prop_type": "Rebounds",
+        "line": 4.0,
+        "projection": 4.0,
+        "edge": 0.0,
+        "confidence": 50.0,
+        "recommendation": "Pass",
+        "lean": "No Lean"
+      },
+      {
+        "player_name": "Stefano Tonut",
+        "team": "Reyer Venezia",
+        "position": "SG",
+        "prop_type": "Points",
+        "line": 10.5,
+        "projection": 8.8,
+        "edge": -1.7,
+        "confidence": 29.6,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      },
+      {
+        "player_name": "Stefano Tonut",
+        "team": "Reyer Venezia",
+        "position": "SG",
+        "prop_type": "Assists",
+        "line": 2.5,
+        "projection": 2.6,
+        "edge": 0.1,
+        "confidence": 51.5,
+        "recommendation": "Pass",
+        "lean": "No Lean"
+      },
+      {
+        "player_name": "Isacco Casarin",
+        "team": "Reyer Venezia",
+        "position": "SF",
+        "prop_type": "Points",
+        "line": 6.5,
+        "projection": 5.3,
+        "edge": -1.2,
+        "confidence": 35.6,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      },
+      {
+        "player_name": "Isacco Casarin",
+        "team": "Reyer Venezia",
+        "position": "SF",
+        "prop_type": "Rebounds",
+        "line": 2.0,
+        "projection": 2.1,
+        "edge": 0.1,
+        "confidence": 51.5,
+        "recommendation": "Pass",
+        "lean": "No Lean"
+      }
+    ],
+    "top_recommendations": [
+      {
+        "player_name": "Jordan Theodore",
+        "team": "Reyer Venezia",
+        "position": "PG",
+        "prop_type": "Points",
+        "line": 13.0,
+        "projection": 10.6,
+        "edge": -2.4,
+        "confidence": 21.2,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      },
+      {
+        "player_name": "Michele Vitali",
+        "team": "Reyer Venezia",
+        "position": "SG",
+        "prop_type": "Points",
+        "line": 12.5,
+        "projection": 10.2,
+        "edge": -2.3,
+        "confidence": 22.4,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      },
+      {
+        "player_name": "Austin Daye",
+        "team": "Reyer Venezia",
+        "position": "PF",
+        "prop_type": "Points",
+        "line": 11.5,
+        "projection": 9.4,
+        "edge": -2.1,
+        "confidence": 24.8,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      },
+      {
+        "player_name": "Stefano Tonut",
+        "team": "Reyer Venezia",
+        "position": "SG",
+        "prop_type": "Points",
+        "line": 10.5,
+        "projection": 8.8,
+        "edge": -1.7,
+        "confidence": 29.6,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      },
+      {
+        "player_name": "Kevin Punter",
+        "team": "Olimpia Milano",
+        "position": "SG",
+        "prop_type": "Points",
+        "line": 14.5,
+        "projection": 13.0,
+        "edge": -1.5,
+        "confidence": 32.0,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Home court"
+      },
+      {
+        "player_name": "Nicolo Melli",
+        "team": "Olimpia Milano",
+        "position": "PF",
+        "prop_type": "Points",
+        "line": 9.5,
+        "projection": 8.3,
+        "edge": -1.2,
+        "confidence": 35.6,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Home court"
+      },
+      {
+        "player_name": "Shavon Shields",
+        "team": "Olimpia Milano",
+        "position": "SF",
+        "prop_type": "Points",
+        "line": 11.0,
+        "projection": 9.8,
+        "edge": -1.2,
+        "confidence": 35.6,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Home court"
+      },
+      {
+        "player_name": "Isacco Casarin",
+        "team": "Reyer Venezia",
+        "position": "SF",
+        "prop_type": "Points",
+        "line": 6.5,
+        "projection": 5.3,
+        "edge": -1.2,
+        "confidence": 35.6,
+        "recommendation": "Under",
+        "lean": "Under",
+        "matchup_factor": "Milano elite defense"
+      }
+    ]
+  },
+  "betting_recommendations": {
+    "primary_bets": [
+      {
+        "market": "Game Total",
+        "recommendation": "STRONG BET OVER 149.5",
+        "confidence": 80.2,
+        "reasoning": "Milano pace suppression + defensive efficiency -> lower scoring"
+      },
+      {
+        "market": "Game Spread",
+        "recommendation": "STRONG BET Milano -6.5",
+        "confidence": 80.2,
+        "reasoning": "Depth Delta + defensive edge = 4th quarter separation"
+      },
+      {
+        "market": "1H Spread",
+        "recommendation": "BET Venezia +2.5 1H",
+        "confidence": 79.4,
+        "reasoning": "Home adrenaline keeps Venezia close early"
+      }
+    ],
+    "player_props_top3": [
+      {
+        "player": "Jordan Theodore",
+        "prop": "Points",
+        "recommendation": "Under",
+        "confidence": 21.2
+      },
+      {
+        "player": "Michele Vitali",
+        "prop": "Points",
+        "recommendation": "Under",
+        "confidence": 22.4
+      },
+      {
+        "player": "Austin Daye",
+        "prop": "Points",
+        "recommendation": "Under",
+        "confidence": 24.8
+      }
+    ]
+  },
+  "timestamp": "2026-06-18T11:04:52.973355"
+}

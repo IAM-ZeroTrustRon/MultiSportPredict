@@ -1,0 +1,126 @@
+{
+  "game_info": {
+    "home_team": "IFK Norrkoping (W)",
+    "away_team": "Vaxjo (W)",
+    "league": "Damallsvenskan",
+    "date": "2026-06-18",
+    "venue": "Nya Parken / Vaxjo IP",
+    "match_type": "Women's Damallsvenskan",
+    "priority_market": "Corners"
+  },
+  "corners_analysis": {
+    "projected_total": 11.4,
+    "home_corner_strength": 1.07,
+    "away_corner_strength": -0.13,
+    "probabilities": {
+      "over_85": 0.801,
+      "over_95": 0.7,
+      "over_105": 0.586,
+      "over_115": 0.467,
+      "over_125": 0.355
+    },
+    "recommendations": [
+      {
+        "line": 8.5,
+        "probability": 0.801,
+        "edge": 0.301,
+        "confidence": 80.9,
+        "recommendation": "STRONG BET",
+        "lean": "OVER"
+      },
+      {
+        "line": 9.5,
+        "probability": 0.7,
+        "edge": 0.2,
+        "confidence": 80.9,
+        "recommendation": "STRONG BET",
+        "lean": "OVER"
+      },
+      {
+        "line": 10.5,
+        "probability": 0.586,
+        "edge": 0.086,
+        "confidence": 80.6,
+        "recommendation": "STRONG BET",
+        "lean": "OVER"
+      },
+      {
+        "line": 11.5,
+        "probability": 0.467,
+        "edge": -0.033,
+        "confidence": 69.7,
+        "recommendation": "BET",
+        "lean": "PASS"
+      }
+    ],
+    "primary_pick": {
+      "line": 11.5,
+      "probability": 0.467,
+      "edge": -0.033,
+      "confidence": 69.7,
+      "recommendation": "BET",
+      "lean": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "home_expected": 2.03,
+    "away_expected": 1.54,
+    "total_expected": 3.57,
+    "over_15_prob": 0.871,
+    "over_25_prob": 0.692,
+    "over_35_prob": 0.478,
+    "market_line": 2.5,
+    "edge": 1.07,
+    "confidence": 79.3,
+    "recommendation": "STRONG BET",
+    "lean": "OVER"
+  },
+  "btts_analysis": {
+    "probability": 0.658,
+    "home_btts_strength": 0.65,
+    "away_btts_strength": 0.39,
+    "lean": "YES BTTS",
+    "confidence": 80.2
+  },
+  "match_outcome": {
+    "home_win_prob": 0.483,
+    "draw_prob": 0.219,
+    "away_win_prob": 0.297,
+    "lean": "Draw"
+  },
+  "player_props": {
+    "sport": "soccer",
+    "matchup": "IFK Norrkoping (W) vs Vaxjo (W)",
+    "pitch_factor": 1.0,
+    "player_props": [],
+    "top_recommendations": []
+  },
+  "betting_recommendations": {
+    "priority_corners": [
+      {
+        "market": "Corners 11.5",
+        "recommendation": "BET PASS 11.5",
+        "confidence": 69.7,
+        "probability": 0.467
+      }
+    ],
+    "secondary_markets": [
+      {
+        "market": "Total Goals",
+        "recommendation": "STRONG BET OVER 2.5",
+        "confidence": 79.3
+      },
+      {
+        "market": "BTTS",
+        "recommendation": "YES BTTS",
+        "confidence": 80.2
+      },
+      {
+        "market": "Match Outcome",
+        "recommendation": "Draw",
+        "confidence": 48.3
+      }
+    ]
+  },
+  "timestamp": "2026-06-18T11:10:22.472979"
+}

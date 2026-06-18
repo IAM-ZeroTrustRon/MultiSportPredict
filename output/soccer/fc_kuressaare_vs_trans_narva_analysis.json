@@ -4,7 +4,7 @@
   "matchup": "FC Kuressaare vs Trans Narva",
   "venue": "Kuressaare linnastaadion",
   "date": "2026-06-16",
-  "generated_at": "2026-06-15 22:57",
+  "generated_at": "2026-06-16 15:26",
   "home_team": {
     "name": "FC Kuressaare",
     "abbreviation": "KUR",
@@ -67,7 +67,7 @@
     "draw_prob": 0.2521,
     "away_win_prob": 0.3373,
     "ml_rec": "Pass (consider Double Chance)",
-    "ml_confidence": 80.7
+    "ml_confidence": 41.9
   },
   "totals_analysis": {
     "model_total": 2.79,
@@ -84,7 +84,7 @@
   "btts_analysis": {
     "probability": 0.5922,
     "edge": 0.0922,
-    "confidence": 80.2,
+    "confidence": 41.9,
     "recommendation": "Yes BTTS"
   },
   "corner_projection": {
