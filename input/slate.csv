@@ -1,0 +1,8 @@
+sport,home_team,away_team,league,market_line,market_total
+soccer,Liverpool,Aston Villa,EPL,0.25,2.5
+soccer,Bayern Munich,Dortmund,Bundesliga,0.5,3.0
+mlb,NYY,BOS,MLB,0.0,8.5
+mlb,LAD,SF,MLB,0.0,8.0
+basketball,Real Madrid,FC Barcelona,EuroLeague,0.0,0.0
+basketball,Anadolu Efes,Fenerbahce,EuroLeague,0.0,0.0
+tennis,Djokovic,Alcaraz,Grass,0.0,0.0

@@ -1,6 +1,6 @@
 # MultiSportPredict
 
-A comprehensive machine learning platform for predicting outcomes across multiple sports worldwide.
+A comprehensive machine learning platform for predicting outcomes across multiple sports worldwide. Features live web scraping hooks, SQLite backtesting, and a daily slate runner for batch processing.
 
 ## Overview
 
@@ -10,6 +10,7 @@ MultiSportPredict provides multi-sport prediction capabilities with sabermetric 
 - **🏀 Basketball**: EuroLeague/NBA/Taiwan P. League+ - full game, spread, totals, moneyline, Q1 projections, player props
 - **⚽ Soccer**: Match outcome (1X2), goals over/under, BTTS, corner totals, xG-based Poisson modeling
 - **🇺🇸 MLB**: NRFI/YRFI, strikeout props, home run props, full game predictions with Statcast data
+- **🎾 Tennis**: Dominance Ratio analysis, fatigue delta tracking, live betting triggers
 
 ## Quick Start
 
@@ -24,20 +25,37 @@ pip install -r MultiSportPredict/requirements.txt
 Predict any sport with a single command:
 
 ```bash
-# KBO (Korean Baseball Organization)
+# Universal Runner (all sports)
+python run_match.py --sport baseball --home "NYY" --away "BOS" --store-to-db
+python run_match.py --sport soccer --home "Liverpool" --away "Aston Villa" --market-total 2.5
+python run_match.py --sport basketball --home "Real Madrid" --away "FC Barcelona" --league "EuroLeague"
+python run_match.py --sport tennis --home "Djokovic" --away "Alcaraz" --surface "Grass"
+
+# Legacy Unified CLI
 python predict_match.py kbo "Doosan Bears" "LG Twins"
-python predict_match.py kbo "NC Dinos" "Hanwha Eagles"
-
-# Basketball
-python predict_match.py basketball "UCAM Murcia" "FC Barcelona"
-
-# Soccer
 python predict_match.py soccer "Liverpool" "Aston Villa"
-
-# Baseball/MLB
-python predict_match.py baseball "Yankees" "Red Sox"
-python predict_match.py mlb "LAD" "SF"
+python predict_match.py mlb "NYY" "BOS"
 ```
+
+### Batch Slate Processing
+
+Process multiple matchups at once by creating a CSV and running:
+
+```bash
+python run_slate.py                              # Uses input/slate.csv
+python run_slate.py --input my_matches.csv       # Custom CSV
+python run_slate.py --store-to-db                # Save all to SQLite
+```
+
+Example CSV format (`input/slate.csv`):
+```csv
+sport,home_team,away_team,league,market_line,market_total
+soccer,Liverpool,Aston Villa,EPL,0.25,2.5
+mlb,NYY,BOS,MLB,0.0,8.5
+tennis,Djokovic,Alcaraz,Grass,0.0,0.0
+```
+
+Output is a sorted Markdown report by **Highest Confidence Score**.
 
 ### Run Pre-built Analysis Scripts
 
