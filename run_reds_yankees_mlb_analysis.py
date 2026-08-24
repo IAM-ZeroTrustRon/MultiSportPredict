@@ -230,6 +230,58 @@ class MLBAnalyzer:
         
         return markets
     
+    def get_pitcher_props(self):
+        """Get pitcher prop bets for both starting pitchers"""
+        pitcher_props = {
+            'abbott': {
+                'name': 'Andrew Abbott (LHP, CIN)',
+                'props': [
+                    {'stat': 'Strikeouts Over 5.5', 'line': 5.5, 'odds': -110, 'probability': 0.58, 'recommendation': 'Medium'},
+                    {'stat': 'Strikeouts Under 5.5', 'line': 5.5, 'odds': -110, 'probability': 0.42, 'recommendation': 'Pass'},
+                    {'stat': 'Walks Over 3.5', 'line': 3.5, 'odds': -110, 'probability': 0.52, 'recommendation': 'Medium'},
+                    {'stat': 'Walks Under 3.5', 'line': 3.5, 'odds': -110, 'probability': 0.48, 'recommendation': 'Pass'},
+                    {'stat': 'ERA Line Over 4.75', 'line': 4.75, 'odds': -110, 'probability': 0.62, 'recommendation': 'Medium'},
+                    {'stat': 'IP Over 5.5', 'line': 5.5, 'odds': -110, 'probability': 0.48, 'recommendation': 'Pass'},
+                ]
+            },
+            'warren': {
+                'name': 'Will Warren (RHP, NYY)',
+                'props': [
+                    {'stat': 'Strikeouts Over 8.5', 'line': 8.5, 'odds': -110, 'probability': 0.68, 'recommendation': 'Strong'},
+                    {'stat': 'Strikeouts Under 8.5', 'line': 8.5, 'odds': -110, 'probability': 0.32, 'recommendation': 'Pass'},
+                    {'stat': 'Walks Over 2.5', 'line': 2.5, 'odds': -110, 'probability': 0.35, 'recommendation': 'Pass'},
+                    {'stat': 'Walks Under 2.5', 'line': 2.5, 'odds': -110, 'probability': 0.65, 'recommendation': 'Strong'},
+                    {'stat': 'ERA Line Under 3.50', 'line': 3.50, 'odds': -110, 'probability': 0.72, 'recommendation': 'Strong'},
+                    {'stat': 'IP Over 6.5', 'line': 6.5, 'odds': -110, 'probability': 0.65, 'recommendation': 'Medium'},
+                ]
+            }
+        }
+        return pitcher_props
+    
+    def get_hitter_props(self):
+        """Get hitter prop bets for key batters"""
+        hitter_props = {
+            'reds': {
+                'team': 'Cincinnati Reds',
+                'hitters': [
+                    {'name': 'Blake Dunn (CF)', 'hits': {'line': 0.5, 'odds': -150, 'prob': 0.55, 'rec': 'Medium'}},
+                    {'name': 'JJ Bleday (LF)', 'hits': {'line': 0.5, 'odds': -120, 'prob': 0.52, 'rec': 'Medium'}},
+                    {'name': 'Nathaniel Lowe (DH)', 'hits': {'line': 0.5, 'odds': -140, 'prob': 0.58, 'rec': 'Medium'}},
+                    {'name': 'Spencer Steer (1B)', 'rbis': {'line': 0.5, 'odds': -120, 'prob': 0.48, 'rec': 'Pass'}},
+                ]
+            },
+            'yankees': {
+                'team': 'New York Yankees',
+                'hitters': [
+                    {'name': 'Ben Rice (1B)', 'hits': {'line': 0.5, 'odds': -140, 'prob': 0.60, 'rec': 'Medium'}},
+                    {'name': 'Paul Goldschmidt (DH)', 'hits': {'line': 1.5, 'odds': -110, 'prob': 0.62, 'rec': 'Strong'}},
+                    {'name': 'Cody Bellinger (CF)', 'rbis': {'line': 0.5, 'odds': -120, 'prob': 0.55, 'rec': 'Medium'}},
+                    {'name': 'Jasson Domínguez (RF)', 'hits': {'line': 0.5, 'odds': -130, 'prob': 0.58, 'rec': 'Medium'}},
+                ]
+            }
+        }
+        return hitter_props
+    
     def analyze_game(self):
         """Run full game analysis"""
         console.print("\n" + "="*70)
@@ -436,6 +488,132 @@ class MLBAnalyzer:
         )
         
         console.print(betting_table)
+        console.print()
+        
+        # 5B. PITCHER PROP BETS
+        pitcher_props = self.get_pitcher_props()
+        
+        pitcher_props_table = Table(title="[bold yellow]⚾ PITCHER PROP BETS[/bold yellow]",
+                                   show_header=True, header_style="bold magenta")
+        pitcher_props_table.add_column("Pitcher", style="cyan")
+        pitcher_props_table.add_column("Prop Bet", style="yellow")
+        pitcher_props_table.add_column("Line", style="green")
+        pitcher_props_table.add_column("Odds", style="blue")
+        pitcher_props_table.add_column("Probability", style="white")
+        pitcher_props_table.add_column("Recommendation", style="bold")
+        
+        for pitcher_key, pitcher_data in pitcher_props.items():
+            for prop in pitcher_data['props']:
+                if prop['recommendation'] == 'Strong':
+                    rec_text = "[green]Strong[/green]"
+                elif prop['recommendation'] == 'Medium':
+                    rec_text = "[yellow]Medium[/yellow]"
+                else:
+                    rec_text = "[red]Pass[/red]"
+                
+                pitcher_props_table.add_row(
+                    pitcher_data['name'],
+                    prop['stat'],
+                    f"{prop['line']:.1f}",
+                    str(prop['odds']),
+                    f"{int(prop['probability']*100)}%",
+                    rec_text
+                )
+        
+        console.print(pitcher_props_table)
+        console.print()
+        
+        # 5C. HITTER PROP BETS
+        hitter_props = self.get_hitter_props()
+        
+        # Reds Hitters
+        reds_hitters_table = Table(title="[bold yellow]🔴 CINCINNATI REDS - HITTER PROPS[/bold yellow]",
+                                  show_header=True, header_style="bold magenta")
+        reds_hitters_table.add_column("Player", style="cyan")
+        reds_hitters_table.add_column("Prop Stat", style="yellow")
+        reds_hitters_table.add_column("Line", style="green")
+        reds_hitters_table.add_column("Odds", style="blue")
+        reds_hitters_table.add_column("Probability", style="white")
+        reds_hitters_table.add_column("Recommendation", style="bold")
+        
+        for hitter in hitter_props['reds']['hitters']:
+            if 'hits' in hitter:
+                if hitter['hits']['rec'] == 'Strong':
+                    rec_text = "[green]Strong[/green]"
+                elif hitter['hits']['rec'] == 'Medium':
+                    rec_text = "[yellow]Medium[/yellow]"
+                else:
+                    rec_text = "[red]Pass[/red]"
+                reds_hitters_table.add_row(
+                    hitter['name'],
+                    "Hits Over/Under",
+                    f"{hitter['hits']['line']:.1f}",
+                    str(hitter['hits']['odds']),
+                    f"{int(hitter['hits']['prob']*100)}%",
+                    rec_text
+                )
+            if 'rbis' in hitter:
+                if hitter['rbis']['rec'] == 'Strong':
+                    rec_text = "[green]Strong[/green]"
+                elif hitter['rbis']['rec'] == 'Medium':
+                    rec_text = "[yellow]Medium[/yellow]"
+                else:
+                    rec_text = "[red]Pass[/red]"
+                reds_hitters_table.add_row(
+                    hitter['name'],
+                    "RBIs Over/Under",
+                    f"{hitter['rbis']['line']:.1f}",
+                    str(hitter['rbis']['odds']),
+                    f"{int(hitter['rbis']['prob']*100)}%",
+                    rec_text
+                )
+        
+        console.print(reds_hitters_table)
+        console.print()
+        
+        # Yankees Hitters
+        yankees_hitters_table = Table(title="[bold yellow]🔵 NEW YORK YANKEES - HITTER PROPS[/bold yellow]",
+                                     show_header=True, header_style="bold magenta")
+        yankees_hitters_table.add_column("Player", style="cyan")
+        yankees_hitters_table.add_column("Prop Stat", style="yellow")
+        yankees_hitters_table.add_column("Line", style="green")
+        yankees_hitters_table.add_column("Odds", style="blue")
+        yankees_hitters_table.add_column("Probability", style="white")
+        yankees_hitters_table.add_column("Recommendation", style="bold")
+        
+        for hitter in hitter_props['yankees']['hitters']:
+            if 'hits' in hitter:
+                if hitter['hits']['rec'] == 'Strong':
+                    rec_text = "[green]Strong[/green]"
+                elif hitter['hits']['rec'] == 'Medium':
+                    rec_text = "[yellow]Medium[/yellow]"
+                else:
+                    rec_text = "[red]Pass[/red]"
+                yankees_hitters_table.add_row(
+                    hitter['name'],
+                    "Hits Over/Under",
+                    f"{hitter['hits']['line']:.1f}",
+                    str(hitter['hits']['odds']),
+                    f"{int(hitter['hits']['prob']*100)}%",
+                    rec_text
+                )
+            if 'rbis' in hitter:
+                if hitter['rbis']['rec'] == 'Strong':
+                    rec_text = "[green]Strong[/green]"
+                elif hitter['rbis']['rec'] == 'Medium':
+                    rec_text = "[yellow]Medium[/yellow]"
+                else:
+                    rec_text = "[red]Pass[/red]"
+                yankees_hitters_table.add_row(
+                    hitter['name'],
+                    "RBIs Over/Under",
+                    f"{hitter['rbis']['line']:.1f}",
+                    str(hitter['rbis']['odds']),
+                    f"{int(hitter['rbis']['prob']*100)}%",
+                    rec_text
+                )
+        
+        console.print(yankees_hitters_table)
         console.print()
         
         # 6. KEY FACTORS & RECOMMENDATIONS
