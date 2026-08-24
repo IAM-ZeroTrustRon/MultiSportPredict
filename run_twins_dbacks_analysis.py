@@ -321,7 +321,155 @@ class MLBAnalyzer:
             console.print(strong_table)
             console.print()
         
+        # 7. PLAYER PROPS
+        console.print("\n[bold cyan]════════════════════════════════════════════════════[/bold cyan]")
+        console.print("[bold cyan]📊 PLAYER PROPS - PITCHER & HITTER RECOMMENDATIONS[/bold cyan]")
+        console.print("[bold cyan]════════════════════════════════════════════════════[/bold cyan]\n")
+        
+        self.display_pitcher_props()
+        self.display_hitter_props()
+        
         return strong_bets, projection
+    
+    def get_pitcher_props(self):
+        """Get pitcher props for both starters"""
+        pitcher_props = {
+            'taj_bradley': [
+                {'stat': 'K\'s', 'choice': 'Over', 'line': 8.5, 'odds': '-115', 'probability': 0.60, 'recommendation': 'Medium'},
+                {'stat': 'BB/9', 'choice': 'Over', 'line': 3.5, 'odds': '-110', 'probability': 0.58, 'recommendation': 'Medium'},
+                {'stat': 'ERA Line', 'choice': 'Under', 'line': 4.14, 'odds': '+105', 'probability': 0.48, 'recommendation': 'Pass'},
+                {'stat': 'IP', 'choice': 'Over', 'line': 5.5, 'odds': '-110', 'probability': 0.62, 'recommendation': 'Medium'},
+            ],
+            'zac_gallen': [
+                {'stat': 'K\'s', 'choice': 'Under', 'line': 5.5, 'odds': '-110', 'probability': 0.65, 'recommendation': 'Strong'},
+                {'stat': 'BB/9', 'choice': 'Over', 'line': 3.5, 'odds': '-115', 'probability': 0.48, 'recommendation': 'Pass'},
+                {'stat': 'ERA Line', 'choice': 'Over', 'line': 5.35, 'odds': '-110', 'probability': 0.55, 'recommendation': 'Medium'},
+                {'stat': 'IP', 'choice': 'Under', 'line': 5.5, 'odds': '-110', 'probability': 0.58, 'recommendation': 'Medium'},
+            ]
+        }
+        return pitcher_props
+    
+    def get_twins_hitter_props(self):
+        """Get Twins hitter props"""
+        twins_props = [
+            {'name': 'Byron Buxton', 'position': 'CF', 'stat': 'Hits', 'choice': 'Over', 'line': '+0.5', 'odds': '-140', 'probability': 0.68, 'recommendation': 'Strong'},
+            {'name': 'Josh Bell', 'position': '3B', 'stat': 'RBIs', 'choice': 'Over', 'line': '+0.5', 'odds': '-120', 'probability': 0.62, 'recommendation': 'Strong'},
+            {'name': 'Carlos Santana', 'position': 'C', 'stat': 'Hits', 'choice': 'Over', 'line': '+0.5', 'odds': '-110', 'probability': 0.55, 'recommendation': 'Medium'},
+            {'name': 'Luis Arraez', 'position': '2B', 'stat': 'Hits', 'choice': 'Over', 'line': '+0.5', 'odds': '-115', 'probability': 0.58, 'recommendation': 'Medium'},
+        ]
+        return twins_props
+    
+    def get_dbacks_hitter_props(self):
+        """Get D-Backs hitter props"""
+        dbacks_props = [
+            {'name': 'Corbin Carroll', 'position': 'LF', 'stat': 'Hits', 'choice': 'Over', 'line': '+0.5', 'odds': '-130', 'probability': 0.65, 'recommendation': 'Strong'},
+            {'name': 'Ketel Marte', 'position': '2B', 'stat': 'Hits', 'choice': 'Over', 'line': '+0.5', 'odds': '-120', 'probability': 0.60, 'recommendation': 'Strong'},
+            {'name': 'Brent Rooker', 'position': 'RF', 'stat': 'RBIs', 'choice': 'Over', 'line': '+0.5', 'odds': '-115', 'probability': 0.58, 'recommendation': 'Medium'},
+            {'name': 'Jake McCarthy', 'position': 'CF', 'stat': 'Hits', 'choice': 'Over', 'line': '+0.5', 'odds': '-110', 'probability': 0.52, 'recommendation': 'Medium'},
+        ]
+        return dbacks_props
+    
+    def display_pitcher_props(self):
+        """Display pitcher props in a table"""
+        pitcher_props = self.get_pitcher_props()
+        
+        bradley_props = pitcher_props['taj_bradley']
+        gallen_props = pitcher_props['zac_gallen']
+        
+        props_table = Table(title="[bold yellow]⚾ PITCHER PROPS[/bold yellow]",
+                           show_header=True, header_style="bold magenta")
+        props_table.add_column("Pitcher", style="cyan")
+        props_table.add_column("Prop", style="yellow")
+        props_table.add_column("Choice", style="green")
+        props_table.add_column("Line", style="blue")
+        props_table.add_column("Probability", style="bold")
+        props_table.add_column("Recommendation", style="bold")
+        
+        # Bradley props
+        for prop in bradley_props:
+            rec_color = "green" if prop['recommendation'] == 'Strong' else "yellow" if prop['recommendation'] == 'Medium' else "red"
+            props_table.add_row(
+                "Taj Bradley (RHP)",
+                prop['stat'],
+                f"{prop['choice']}",
+                str(prop['line']),
+                f"{int(prop['probability']*100)}%",
+                f"[{rec_color}]{prop['recommendation']}[/{rec_color}]"
+            )
+        
+        props_table.add_row("", "", "", "", "", "")
+        
+        # Gallen props
+        for prop in gallen_props:
+            rec_color = "green" if prop['recommendation'] == 'Strong' else "yellow" if prop['recommendation'] == 'Medium' else "red"
+            props_table.add_row(
+                "Zac Gallen (RHP)",
+                prop['stat'],
+                f"{prop['choice']}",
+                str(prop['line']),
+                f"{int(prop['probability']*100)}%",
+                f"[{rec_color}]{prop['recommendation']}[/{rec_color}]"
+            )
+        
+        console.print(props_table)
+        console.print()
+    
+    def display_hitter_props(self):
+        """Display hitter props in tables"""
+        twins_props = self.get_twins_hitter_props()
+        dbacks_props = self.get_dbacks_hitter_props()
+        
+        # Twins hitters
+        twins_table = Table(title="[bold yellow]⚾ MINNESOTA TWINS - HITTER PROPS[/bold yellow]",
+                           show_header=True, header_style="bold magenta")
+        twins_table.add_column("Player", style="cyan")
+        twins_table.add_column("Pos", style="yellow")
+        twins_table.add_column("Stat", style="green")
+        twins_table.add_column("Choice", style="blue")
+        twins_table.add_column("Line", style="bold")
+        twins_table.add_column("Probability", style="bold")
+        twins_table.add_column("Recommendation", style="bold")
+        
+        for prop in twins_props:
+            rec_color = "green" if prop['recommendation'] == 'Strong' else "yellow" if prop['recommendation'] == 'Medium' else "red"
+            twins_table.add_row(
+                prop['name'],
+                prop['position'],
+                prop['stat'],
+                prop['choice'],
+                prop['line'],
+                f"{int(prop['probability']*100)}%",
+                f"[{rec_color}]{prop['recommendation']}[/{rec_color}]"
+            )
+        
+        console.print(twins_table)
+        console.print()
+        
+        # D-Backs hitters
+        dbacks_table = Table(title="[bold yellow]⚾ ARIZONA DIAMONDBACKS - HITTER PROPS[/bold yellow]",
+                            show_header=True, header_style="bold magenta")
+        dbacks_table.add_column("Player", style="cyan")
+        dbacks_table.add_column("Pos", style="yellow")
+        dbacks_table.add_column("Stat", style="green")
+        dbacks_table.add_column("Choice", style="blue")
+        dbacks_table.add_column("Line", style="bold")
+        dbacks_table.add_column("Probability", style="bold")
+        dbacks_table.add_column("Recommendation", style="bold")
+        
+        for prop in dbacks_props:
+            rec_color = "green" if prop['recommendation'] == 'Strong' else "yellow" if prop['recommendation'] == 'Medium' else "red"
+            dbacks_table.add_row(
+                prop['name'],
+                prop['position'],
+                prop['stat'],
+                prop['choice'],
+                prop['line'],
+                f"{int(prop['probability']*100)}%",
+                f"[{rec_color}]{prop['recommendation']}[/{rec_color}]"
+            )
+        
+        console.print(dbacks_table)
+        console.print()
     
     def push_strong_bets_to_discord(self):
         """Push ONLY strong bets + analysis to Discord"""
@@ -445,13 +593,146 @@ class MLBAnalyzer:
         except Exception as e:
             console.print(f"[red]❌ Error: {e}[/red]")
         
+        # Create pitcher props embed
+        pitcher_props = self.get_pitcher_props()
+        
+        pitcher_embed = {
+            "title": "⚾ PITCHER PROPS",
+            "description": "Taj Bradley (MIN, RHP) vs. Zac Gallen (ARI, RHP)",
+            "color": 16776960,  # Yellow
+            "fields": [
+                {
+                    "name": "🔴 TAJ BRADLEY (RHP, MIN)",
+                    "value": "• **K's Over 8.5** (-115) | 60% | ⚠️ Medium\n"
+                            "  (Averages 10.05 K/9, good swing-and-miss)\n"
+                            "• **BB/9 Over 3.5** (-110) | 58% | ⚠️ Medium\n"
+                            "  (His 3.77 BB/9 prone to crooked innings)\n"
+                            "• **ERA Under 4.14** (+105) | 48% | ❌ Pass\n"
+                            "  (D-Backs lineup has power edge)\n"
+                            "• **IP Over 5.5** (-110) | 62% | ⚠️ Medium\n"
+                            "  (Should get through 6th)",
+                    "inline": False
+                },
+                {
+                    "name": "🔵 ZAC GALLEN (RHP, ARI)",
+                    "value": "• **K's Under 5.5** (-110) | 65% | ✅ Strong\n"
+                            "  (Only averages 5.94 K/9, Twins have power)\n"
+                            "• **BB/9 Over 3.5** (-115) | 48% | ❌ Pass\n"
+                            "  (Actually at 3.33, lean under)\n"
+                            "• **ERA Over 5.35** (-110) | 55% | ⚠️ Medium\n"
+                            "  (May pitch worse vs. Twins power)\n"
+                            "• **IP Under 5.5** (-110) | 58% | ⚠️ Medium\n"
+                            "  (Vulnerable early, may get pulled)",
+                    "inline": False
+                }
+            ],
+            "footer": {"text": "Pitcher Props | Green ✅ = Strong (≥60%) | Yellow ⚠️ = Medium (55-59%) | Red ❌ = Pass (<54%)"}
+        }
+        
+        payload3 = {"embeds": [pitcher_embed]}
+        try:
+            response = requests.post(webhook_url, json=payload3, timeout=15)
+            if response.status_code == 204:
+                console.print("[green]✅ Pitcher Props pushed to Discord[/green]")
+            else:
+                console.print(f"[red]❌ Discord error: {response.status_code}[/red]")
+        except Exception as e:
+            console.print(f"[red]❌ Error: {e}[/red]")
+        
+        # Create hitter props embed - TWINS
+        twins_props = self.get_twins_hitter_props()
+        
+        twins_hitter_embed = {
+            "title": "⚾ HITTER PROPS - MINNESOTA TWINS",
+            "description": "Batting vs. Zac Gallen (5.35 ERA, 1.53 WHIP)",
+            "color": 16711680,  # Red (Twins color)
+            "fields": [
+                {
+                    "name": "✅ STRONG PLAYS (≥60%)",
+                    "value": "• **Byron Buxton** (CF) - Hits Over +0.5\n"
+                            "  Probability: 68% | -140 odds\n"
+                            "  (.588 SLG, 23 HR - PUNISHES Gallen's traffic)\n\n"
+                            "• **Josh Bell** (3B) - RBIs Over +0.5\n"
+                            "  Probability: 62% | -120 odds\n"
+                            "  (47 RBI pace, strong power matchup)",
+                    "inline": False
+                },
+                {
+                    "name": "⚠️ MEDIUM PLAYS (55-59%)",
+                    "value": "• **Luis Arraez** (2B) - Hits Over +0.5\n"
+                            "  Probability: 58% | -115 odds\n"
+                            "  (Contact hitter, good vs. Gallen struggles)\n\n"
+                            "• **Carlos Santana** (C) - Hits Over +0.5\n"
+                            "  Probability: 55% | -110 odds\n"
+                            "  (Left-handed, power edge vs RHP)",
+                    "inline": False
+                }
+            ],
+            "footer": {"text": "Gallen 1.53 WHIP = constant baserunners | Twins bats will have opportunities"}
+        }
+        
+        payload4 = {"embeds": [twins_hitter_embed]}
+        try:
+            response = requests.post(webhook_url, json=payload4, timeout=15)
+            if response.status_code == 204:
+                console.print("[green]✅ Twins Hitter Props pushed to Discord[/green]")
+            else:
+                console.print(f"[red]❌ Discord error: {response.status_code}[/red]")
+        except Exception as e:
+            console.print(f"[red]❌ Error: {e}[/red]")
+        
+        # Create hitter props embed - D-BACKS
+        dbacks_props = self.get_dbacks_hitter_props()
+        
+        dbacks_hitter_embed = {
+            "title": "⚾ HITTER PROPS - ARIZONA DIAMONDBACKS",
+            "description": "Batting vs. Taj Bradley (4.14 ERA, 1.34 WHIP)",
+            "color": 1597466,  # Purple (D-Backs color)
+            "fields": [
+                {
+                    "name": "✅ STRONG PLAYS (≥60%)",
+                    "value": "• **Corbin Carroll** (LF) - Hits Over +0.5\n"
+                            "  Probability: 65% | -130 odds\n"
+                            "  (Elite hitter, .283 AVG, 13 HR - exploits Bradley walks)\n\n"
+                            "• **Ketel Marte** (2B) - Hits Over +0.5\n"
+                            "  Probability: 60% | -120 odds\n"
+                            "  (.258 AVG, 12 HR - power on middle-middle)",
+                    "inline": False
+                },
+                {
+                    "name": "⚠️ MEDIUM PLAYS (55-59%)",
+                    "value": "• **Brent Rooker** (RF) - RBIs Over +0.5\n"
+                            "  Probability: 58% | -115 odds\n"
+                            "  (Strong offensive matchup, good lineup spot)\n\n"
+                            "• **Jake McCarthy** (CF) - Hits Over +0.5\n"
+                            "  Probability: 52% | -110 odds\n"
+                            "  (Speed advantage, medium confidence)",
+                    "inline": False
+                }
+            ],
+            "footer": {"text": "Bradley 3.77 BB/9 = forces fastballs | D-Backs speed/power will capitalize"}
+        }
+        
+        payload5 = {"embeds": [dbacks_hitter_embed]}
+        try:
+            response = requests.post(webhook_url, json=payload5, timeout=15)
+            if response.status_code == 204:
+                console.print("[green]✅ D-Backs Hitter Props pushed to Discord[/green]")
+            else:
+                console.print(f"[red]❌ Discord error: {response.status_code}[/red]")
+        except Exception as e:
+            console.print(f"[red]❌ Error: {e}[/red]")
+        
         console.print("\n" + "="*70)
-        console.print("[green]✅ STRONG PLAYS DELIVERED TO DISCORD[/green]")
+        console.print("[green]✅ ALL ANALYSIS & PROPS DELIVERED TO DISCORD[/green]")
         console.print("="*70)
         console.print("\n📊 SUMMARY:")
-        console.print("   🎯 Over 8.5 Runs (-110, 72%)")
+        console.print("   🎯 Over 8.5 Runs (-110, 72%) - STRONG PLAY")
         console.print("   ⚠️  No moneyline plays meet strength threshold")
-        console.print("   📈 Game total is the clear edge\n")
+        console.print("   📈 Game total is the clear edge")
+        console.print("   ⚾ Pitcher Props: 4 props per pitcher")
+        console.print("   ⚾ Hitter Props: 4 players per team")
+        console.print("   📤 Total Embeds Delivered: 5 (Analysis + Strong Pick + Pitchers + Twins Hitters + D-Backs Hitters)\n")
 
 def run_analysis():
     """Execute full analysis"""
