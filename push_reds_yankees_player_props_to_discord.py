@@ -17,32 +17,36 @@ def get_reds_hitter_props():
     return [
         {
             'name': 'Blake Dunn (CF)',
-            'stat': 'Hits Over/Under',
-            'line': 0.5,
+            'stat': 'Hits',
+            'choice': 'Over',
+            'line': '+0.5',
             'odds': '-150',
             'probability': 55,
             'recommendation': 'Medium'
         },
         {
             'name': 'JJ Bleday (LF)',
-            'stat': 'Hits Over/Under',
-            'line': 0.5,
+            'stat': 'Hits',
+            'choice': 'Over',
+            'line': '+0.5',
             'odds': '-120',
             'probability': 52,
             'recommendation': 'Medium'
         },
         {
             'name': 'Nathaniel Lowe (DH)',
-            'stat': 'Hits Over/Under',
-            'line': 0.5,
+            'stat': 'Hits',
+            'choice': 'Over',
+            'line': '+0.5',
             'odds': '-140',
             'probability': 58,
             'recommendation': 'Medium'
         },
         {
             'name': 'Spencer Steer (1B)',
-            'stat': 'RBIs Over/Under',
-            'line': 0.5,
+            'stat': 'RBIs',
+            'choice': 'Over',
+            'line': '+0.5',
             'odds': '-120',
             'probability': 48,
             'recommendation': 'Pass'
@@ -54,32 +58,36 @@ def get_yankees_hitter_props():
     return [
         {
             'name': 'Ben Rice (1B)',
-            'stat': 'Hits Over/Under',
-            'line': 0.5,
+            'stat': 'Hits',
+            'choice': 'Over',
+            'line': '+0.5',
             'odds': '-140',
             'probability': 60,
             'recommendation': 'Medium'
         },
         {
             'name': 'Paul Goldschmidt (DH)',
-            'stat': 'Hits Over/Under',
-            'line': 1.5,
+            'stat': 'Hits',
+            'choice': 'Over',
+            'line': '+1.5',
             'odds': '-110',
             'probability': 62,
             'recommendation': 'Strong'
         },
         {
             'name': 'Cody Bellinger (CF)',
-            'stat': 'RBIs Over/Under',
-            'line': 0.5,
+            'stat': 'RBIs',
+            'choice': 'Over',
+            'line': '+0.5',
             'odds': '-120',
             'probability': 55,
             'recommendation': 'Medium'
         },
         {
             'name': 'Jasson Domínguez (RF)',
-            'stat': 'Hits Over/Under',
-            'line': 0.5,
+            'stat': 'Hits',
+            'choice': 'Over',
+            'line': '+0.5',
             'odds': '-130',
             'probability': 57,
             'recommendation': 'Medium'
@@ -93,8 +101,8 @@ def create_player_props_embed(team_name, team_color, props):
     field_text = ""
     for i, prop in enumerate(props, 1):
         rec_emoji = "✅" if prop['recommendation'] == 'Strong' else ("⚠️" if prop['recommendation'] == 'Medium' else "❌")
-        field_text += f"{i}. **{prop['name']}** - {prop['stat']}\n"
-        field_text += f"   Line: {prop['line']} | Odds: {prop['odds']} | Prob: {prop['probability']}%\n"
+        field_text += f"{i}. **{prop['name']}** - {prop['stat']} {prop['choice']} {prop['line']}\n"
+        field_text += f"   Odds: {prop['odds']} | Prob: {prop['probability']}%\n"
         field_text += f"   {rec_emoji} {prop['recommendation']}\n\n"
     
     embed = {
@@ -124,22 +132,22 @@ def create_summary_embed():
         "fields": [
             {
                 "name": "🟢 STRONG RECOMMENDATION",
-                "value": "**Paul Goldschmidt (DH) - Hits Over 1.5**\n"
+                "value": "**Paul Goldschmidt (DH) - Hits Over +1.5**\n"
                         "• Odds: -110 | Probability: 62%\n"
                         "• Rationale: Star DH in strong position vs. overperforming pitcher",
                 "inline": False
             },
             {
                 "name": "🟡 SOLID OPPORTUNITIES (Medium)",
-                "value": "**Blake Dunn (CF)** - Hits Over/Under 0.5 (55%)\n"
-                        "**Nathaniel Lowe (DH)** - Hits Over/Under 0.5 (58%)\n"
-                        "**Ben Rice (1B)** - Hits Over/Under 0.5 (60%)\n"
-                        "**Jasson Domínguez (RF)** - Hits Over/Under 0.5 (57%)",
+                "value": "**Blake Dunn (CF)** - Hits Over +0.5 (55%)\n"
+                        "**Nathaniel Lowe (DH)** - Hits Over +0.5 (58%)\n"
+                        "**Ben Rice (1B)** - Hits Over +0.5 (60%)\n"
+                        "**Jasson Domínguez (RF)** - Hits Over +0.5 (57%)",
                 "inline": False
             },
             {
                 "name": "🔴 AVOID",
-                "value": "**Spencer Steer (1B)** - RBIs Over/Under 0.5 (48%)\n"
+                "value": "**Spencer Steer (1B)** - RBIs Over +0.5 (48%)\n"
                         "• Probability below 50% - Unfavorable odds",
                 "inline": False
             }
