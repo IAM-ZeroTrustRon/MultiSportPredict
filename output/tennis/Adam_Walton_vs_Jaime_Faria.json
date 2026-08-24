@@ -1,0 +1,75 @@
+{
+  "match": "Adam Walton vs Jaime Faria",
+  "tournament": "ATP Cincinnati Open",
+  "round": "Round 3",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Adam Walton",
+    "away": "Jaime Faria",
+    "home_win_prob": 0.5,
+    "away_win_prob": 0.5,
+    "home_fair_odds": "-100",
+    "away_fair_odds": "-100",
+    "lean": "coin_flip",
+    "confidence": 50.0,
+    "recommendation": "Model Prob: 50.0%",
+    "edge_pct": 0.0
+  },
+  "sets": {
+    "over_35_prob": 0.5,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=50%",
+    "fav_spread_prob": 0.25,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=25% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.5,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.25,
+    "2-1": 0.25,
+    "0-2": 0.25,
+    "1-2": 0.25
+  },
+  "dominance_ratio": {
+    "Adam Walton": 1.0,
+    "Jaime Faria": 1.0
+  },
+  "elo_ratings": {
+    "Adam Walton": 1500.0,
+    "Jaime Faria": 1500.0
+  },
+  "match_counts": {
+    "Adam Walton": 0,
+    "Jaime Faria": 0
+  },
+  "recommendation": "Model Prob: 50.0%",
+  "confidence": 50.0,
+  "edge_pct": 0.0,
+  "notes": [
+    "Elo Ratings \u2014 Adam Walton: 1500 (0 matches) | Jaime Faria: 1500 (0 matches) on hard",
+    "DR: Adam Walton 1.000 | Jaime Faria 1.000",
+    "Surface: Hard | Format: Best of 3"
+  ],
+  "confidence_score": 25.9,
+  "confidence_tier": "PASS",
+  "surface": "hard",
+  "tournament_name": "ATP Cincinnati Open",
+  "home_player": "Adam Walton",
+  "away_player": "Jaime Faria",
+  "value_plays": {
+    "original_lean": "Dry-run.",
+    "plays": {},
+    "deep_dive": {
+      "Target": "Model edge from Elo",
+      "Angle": "Elo surface rating dry-run",
+      "Rationale": "No market odds available; model dry-run."
+    },
+    "model_view": {
+      "favorite": "coin_flip",
+      "notes": "Model computed from Elo surface data.",
+      "favorite_win_prob": 0.5
+    }
+  }
+}

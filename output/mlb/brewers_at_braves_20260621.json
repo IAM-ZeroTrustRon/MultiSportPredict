@@ -1,0 +1,340 @@
+{
+  "game_info": {
+    "home_team": "Atlanta Braves",
+    "away_team": "Milwaukee Brewers",
+    "date": "2026-06-21",
+    "time": "1:35 PM ET",
+    "venue": "Truist Park, 755 Battery Ave SE, Atlanta, GA",
+    "weather": {
+      "temp_f": 81,
+      "feels_like": 85,
+      "humidity_pct": 70,
+      "wind_mph": 4,
+      "wind_direction": "SW",
+      "conditions": "Mostly sunny",
+      "precip_pct": 0,
+      "forecast_high": 87,
+      "forecast_wind": 7,
+      "forecast_precip_pct": 25,
+      "wind_park_factor": 1.01
+    }
+  },
+  "projections": {
+    "home_runs": 5.67,
+    "away_runs": 3.86,
+    "projected_total": 9.53,
+    "run_differential": 1.81,
+    "home_win_probability": 0.72,
+    "away_win_probability": 0.28
+  },
+  "markets": {
+    "moneyline": {
+      "home_ml": -133,
+      "away_ml": 116,
+      "home_implied": 0.571,
+      "away_implied": 0.463,
+      "model_home": 0.72,
+      "home_edge": 0.149,
+      "away_edge": -0.183,
+      "recommendation": "ATL ML -133",
+      "confidence": 79.4
+    },
+    "run_line": {
+      "line": -1.5,
+      "home_odds": 155,
+      "away_odds": -188,
+      "atl_cover_prob": 0.44,
+      "mil_cover_prob": 0.56,
+      "rl_edge_home": 0.048,
+      "rl_edge_away": -0.093,
+      "recommendation": "NO STRONG RL LEAN"
+    },
+    "total": {
+      "line": 8.75,
+      "over_odds": -105,
+      "under_odds": -115,
+      "projected": 9.53,
+      "edge": 0.78,
+      "confidence": 76.4,
+      "recommendation": "STRONG BET",
+      "lean": "OVER 8.75"
+    }
+  },
+  "nrfi_yrfi": {
+    "nrfi_probability": 0.52,
+    "lean": "YRFI",
+    "confidence": 55.8,
+    "recommendation": "PASS"
+  },
+  "f5_analysis": {
+    "projected_home_f5": 3.18,
+    "projected_away_f5": 2.24,
+    "projected_total_f5": 5.42,
+    "lean": "OVER"
+  },
+  "pitcher_props": {
+    "home": {
+      "name": "Bryce Elder",
+      "hand": "RHP",
+      "era": 3.15,
+      "k_per_9": 6.2,
+      "prop": {
+        "projection": 0.68,
+        "edge": -3.82,
+        "lean": "Under",
+        "line": 4.5
+      },
+      "note": "Elite contact suppression; forces weak contact; Braves 7-3 in Elder starts"
+    },
+    "away": {
+      "name": "Robert Gasser",
+      "hand": "LHP",
+      "era": 4.88,
+      "k_per_9": 7.4,
+      "prop": {
+        "projection": 0.67,
+        "edge": -3.83,
+        "lean": "Under",
+        "line": 4.5
+      },
+      "note": "ERA inflated; .237 BAA, recent scoreless outing suggest positive regression"
+    }
+  },
+  "player_props": [
+    {
+      "name": "Michael Harris II",
+      "team": "ATL",
+      "note": "vs LHP boost, .306 AVG, 14 HR",
+      "hits": {
+        "projection": 1.32,
+        "line": 0.5,
+        "over_probability": 0.733,
+        "confidence": 79.4,
+        "recommendation": "STRONG BET",
+        "lean": "Over 0.5"
+      },
+      "total_bases": {
+        "projection": 2.19,
+        "line": 1.5,
+        "over_probability": 0.643,
+        "confidence": 78.7,
+        "recommendation": "STRONG BET",
+        "lean": "Over 1.5"
+      },
+      "home_run": {
+        "probability": 0.142,
+        "confidence": 8.1,
+        "recommendation": "PASS"
+      }
+    },
+    {
+      "name": "Ozzie Albies",
+      "team": "ATL",
+      "note": "Walk-off hero, 82 hits",
+      "hits": {
+        "projection": 1.3,
+        "line": 0.5,
+        "over_probability": 0.727,
+        "confidence": 79.4,
+        "recommendation": "STRONG BET",
+        "lean": "Over 0.5"
+      },
+      "total_bases": {
+        "projection": 2.11,
+        "line": 1.5,
+        "over_probability": 0.623,
+        "confidence": 78.6,
+        "recommendation": "STRONG BET",
+        "lean": "Over 1.5"
+      },
+      "home_run": {
+        "probability": 0.132,
+        "confidence": 0.0,
+        "recommendation": "PASS"
+      }
+    },
+    {
+      "name": "Matt Olson",
+      "team": "ATL",
+      "note": "Power bat, lefty killer",
+      "hits": {
+        "projection": 1.2,
+        "line": 0.5,
+        "over_probability": 0.699,
+        "confidence": 79.4,
+        "recommendation": "STRONG BET",
+        "lean": "Over 0.5"
+      },
+      "total_bases": {
+        "projection": 2.24,
+        "line": 1.5,
+        "over_probability": 0.655,
+        "confidence": 78.7,
+        "recommendation": "STRONG BET",
+        "lean": "Over 1.5"
+      },
+      "home_run": {
+        "probability": 0.177,
+        "confidence": 61.8,
+        "recommendation": "BET"
+      }
+    },
+    {
+      "name": "Austin Riley",
+      "team": "ATL",
+      "note": "Middle-of-order pop",
+      "hits": {
+        "projection": 1.2,
+        "line": 0.5,
+        "over_probability": 0.699,
+        "confidence": 79.4,
+        "recommendation": "STRONG BET",
+        "lean": "Over 0.5"
+      },
+      "total_bases": {
+        "projection": 2.09,
+        "line": 1.5,
+        "over_probability": 0.618,
+        "confidence": 78.6,
+        "recommendation": "STRONG BET",
+        "lean": "Over 1.5"
+      },
+      "home_run": {
+        "probability": 0.152,
+        "confidence": 26.1,
+        "recommendation": "PASS"
+      }
+    },
+    {
+      "name": "Brice Turang",
+      "team": "MIL",
+      "note": "MIL runs leader (55)",
+      "hits": {
+        "projection": 1.14,
+        "line": 0.5,
+        "over_probability": 0.68,
+        "confidence": 79.4,
+        "recommendation": "STRONG BET",
+        "lean": "Over 0.5"
+      },
+      "total_bases": {
+        "projection": 1.68,
+        "line": 1.5,
+        "over_probability": 0.501,
+        "confidence": 0.0,
+        "recommendation": "PASS",
+        "lean": "Under 1.5"
+      },
+      "home_run": {
+        "probability": 0.053,
+        "confidence": 0.0,
+        "recommendation": "PASS"
+      }
+    },
+    {
+      "name": "William Contreras",
+      "team": "MIL",
+      "note": "MIL hits leader (79)",
+      "hits": {
+        "projection": 1.18,
+        "line": 0.5,
+        "over_probability": 0.693,
+        "confidence": 79.4,
+        "recommendation": "STRONG BET",
+        "lean": "Over 0.5"
+      },
+      "total_bases": {
+        "projection": 1.78,
+        "line": 1.5,
+        "over_probability": 0.531,
+        "confidence": 43.3,
+        "recommendation": "PASS",
+        "lean": "Over 1.5"
+      },
+      "home_run": {
+        "probability": 0.095,
+        "confidence": 0.0,
+        "recommendation": "PASS"
+      }
+    },
+    {
+      "name": "Jackson Chourio",
+      "team": "MIL",
+      "note": "Leadoff, speed & contact",
+      "hits": {
+        "projection": 1.21,
+        "line": 0.5,
+        "over_probability": 0.702,
+        "confidence": 79.4,
+        "recommendation": "STRONG BET",
+        "lean": "Over 0.5"
+      },
+      "total_bases": {
+        "projection": 1.91,
+        "line": 1.5,
+        "over_probability": 0.569,
+        "confidence": 74.7,
+        "recommendation": "BET",
+        "lean": "Over 1.5"
+      },
+      "home_run": {
+        "probability": 0.106,
+        "confidence": 0.0,
+        "recommendation": "PASS"
+      }
+    },
+    {
+      "name": "Jake Bauers",
+      "team": "MIL",
+      "note": "MIL HR leader (13)",
+      "hits": {
+        "projection": 0.94,
+        "line": 0.5,
+        "over_probability": 0.609,
+        "confidence": 79.1,
+        "recommendation": "STRONG BET",
+        "lean": "Over 0.5"
+      },
+      "total_bases": {
+        "projection": 1.73,
+        "line": 1.5,
+        "over_probability": 0.516,
+        "confidence": 16.5,
+        "recommendation": "PASS",
+        "lean": "Under 1.5"
+      },
+      "home_run": {
+        "probability": 0.144,
+        "confidence": 11.6,
+        "recommendation": "PASS"
+      }
+    }
+  ],
+  "key_edges": [
+    {
+      "market": "ATL ML -133",
+      "edge": "+14.9%",
+      "confidence": 79.4,
+      "recommendation": "STRONG BET"
+    },
+    {
+      "market": "OVER 8.75",
+      "edge": "+0.78 runs",
+      "confidence": 76.4,
+      "recommendation": "STRONG BET"
+    },
+    {
+      "market": "YRFI",
+      "edge": "52.0% probability",
+      "confidence": 55.8,
+      "recommendation": "PASS"
+    },
+    {
+      "market": "UNDER 8.75 (SHARP CONSENSUS)",
+      "edge": "Sharp money targeting Under; both H2H games under 8 runs",
+      "confidence": 63.0,
+      "recommendation": "BET"
+    }
+  ],
+  "timestamp": "2026-06-21T11:44:24.051494"
+}

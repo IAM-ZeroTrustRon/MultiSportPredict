@@ -1,0 +1,90 @@
+{
+  "sport": "soccer",
+  "league": "Eliteserien",
+  "home_team": "Rosenborg",
+  "away_team": "Viking",
+  "timestamp": "2026-08-14T12:45:04.794364",
+  "game": {
+    "projected_home_goals": 2.35,
+    "projected_away_goals": 2.34,
+    "projected_total_goals": 4.7,
+    "home_win_prob": 0.4,
+    "draw_prob": 0.202,
+    "away_win_prob": 0.397
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.01,
+      "market_line": 0.0,
+      "edge": 0.01,
+      "confidence": 25.3,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 4.7,
+      "market_total": 2.5,
+      "edge": 2.2,
+      "confidence": 58.8,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.799,
+      "confidence": 67.2,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.948,
+    "over_25_prob": 0.848,
+    "over_35_prob": 0.69
+  },
+  "corners_analysis": {
+    "projection": 12.1,
+    "over_85_prob": 0.853,
+    "over_95_prob": 0.769,
+    "over_105_prob": 0.666
+  },
+  "btts_probability": 0.799,
+  "corner_projection": 12.1,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.8,
+      "xg_against": 1.2,
+      "shots": 13.5,
+      "sot": 4.8,
+      "goals_for": 1.9,
+      "goals_against": 1.0,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.6,
+      "width_crossing": 0.6,
+      "final_third_pressure": 0.6
+    },
+    "away": {
+      "xg_for": 2.1,
+      "xg_against": 1.35,
+      "shots": 14.0,
+      "sot": 5.2,
+      "goals_for": 2.25,
+      "goals_against": 1.45,
+      "clean_sheets": 2,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.5,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.65
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics"
+}

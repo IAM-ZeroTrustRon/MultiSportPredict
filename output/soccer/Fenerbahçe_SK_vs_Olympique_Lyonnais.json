@@ -1,0 +1,90 @@
+{
+  "sport": "soccer",
+  "league": "UEFA Champions League",
+  "home_team": "Fenerbah\u00e7e SK",
+  "away_team": "Olympique Lyonnais",
+  "timestamp": "2026-08-18T11:47:13.728798",
+  "game": {
+    "projected_home_goals": 2.42,
+    "projected_away_goals": 1.8,
+    "projected_total_goals": 4.21,
+    "home_win_prob": 0.506,
+    "draw_prob": 0.203,
+    "away_win_prob": 0.292
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.619,
+      "market_line": -0.5,
+      "edge": 1.119,
+      "confidence": 44.8,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 4.214,
+      "market_total": 2.5,
+      "edge": 1.714,
+      "confidence": 52.8,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.722,
+      "confidence": 60.1,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.923,
+    "over_25_prob": 0.792,
+    "over_35_prob": 0.607
+  },
+  "corners_analysis": {
+    "projection": 11.9,
+    "over_85_prob": 0.84,
+    "over_95_prob": 0.751,
+    "over_105_prob": 0.645
+  },
+  "btts_probability": 0.722,
+  "corner_projection": 11.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.85,
+      "xg_against": 1.05,
+      "shots": 14.5,
+      "sot": 5.0,
+      "goals_for": 1.8,
+      "goals_against": 0.9,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.62,
+      "width_crossing": 0.78,
+      "final_third_pressure": 0.68
+    },
+    "away": {
+      "xg_for": 1.45,
+      "xg_against": 1.35,
+      "shots": 12.0,
+      "sot": 4.2,
+      "goals_for": 1.5,
+      "goals_against": 1.2,
+      "clean_sheets": 2,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.55,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.58
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics"
+}

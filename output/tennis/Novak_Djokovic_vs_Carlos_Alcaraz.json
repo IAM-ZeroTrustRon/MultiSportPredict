@@ -1,0 +1,61 @@
+{
+  "match": "Novak Djokovic vs Carlos Alcaraz",
+  "tournament": "Wimbledon",
+  "round": "Wimbledon",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Novak Djokovic",
+    "away": "Carlos Alcaraz",
+    "home_win_prob": 0.5162,
+    "away_win_prob": 0.4838,
+    "home_fair_odds": "-107",
+    "away_fair_odds": "+107",
+    "lean": "coin_flip",
+    "confidence": 52.4,
+    "recommendation": "Model Prob: 51.6%",
+    "edge_pct": 1.6
+  },
+  "sets": {
+    "over_35_prob": 0.749,
+    "recommendation_sets_ou": "OVER 3.5 Sets -- P(over)=75%",
+    "fav_spread_prob": 0.334,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=33% only"
+  },
+  "total_games": {
+    "line": 40.5,
+    "over_prob": 0.749,
+    "recommendation": "OVER"
+  },
+  "set_distribution": {
+    "3-0": 0.136,
+    "3-1": 0.198,
+    "3-2": 0.192,
+    "0-3": 0.115,
+    "1-3": 0.177,
+    "2-3": 0.182
+  },
+  "dominance_ratio": {
+    "Novak Djokovic": 1.1289,
+    "Carlos Alcaraz": 1.1167
+  },
+  "elo_ratings": {
+    "Novak Djokovic": 1591.0,
+    "Carlos Alcaraz": 1583.0
+  },
+  "match_counts": {
+    "Novak Djokovic": 8,
+    "Carlos Alcaraz": 8
+  },
+  "recommendation": "Model Prob: 51.6%",
+  "confidence": 52.4,
+  "edge_pct": 1.6,
+  "notes": [
+    "Elo Ratings \u2014 Novak Djokovic: 1591 (8 matches) | Carlos Alcaraz: 1583 (8 matches) on grass",
+    "DR: Novak Djokovic 1.129 | Carlos Alcaraz 1.117",
+    "Surface: Grass | Format: Best of 5"
+  ],
+  "confidence_score": 53.1,
+  "confidence_tier": "PASS",
+  "surface": "grass",
+  "tournament_name": "Wimbledon"
+}

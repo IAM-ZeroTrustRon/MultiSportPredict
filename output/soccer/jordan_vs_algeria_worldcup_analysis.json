@@ -1,0 +1,95 @@
+{
+  "sport": "soccer",
+  "league": "FIFA World Cup 2026",
+  "matchup": "Jordan vs Algeria",
+  "venue": "World Cup 2026 - Neutral Venue",
+  "date": "2026-06-16",
+  "generated_at": "2026-06-27 21:24",
+  "home_team": {
+    "name": "Jordan",
+    "stats": {
+      "abbreviation": "JOR",
+      "xg_for": 1.35,
+      "xg_against": 1.3,
+      "shots_per_game": 12.5,
+      "sot_per_game": 4.0,
+      "goals_for_per_game": 1.25,
+      "goals_against_per_game": 1.2,
+      "clean_sheets_last10": 2,
+      "home_record": 0.52,
+      "away_record": 0.48,
+      "recent_form": 0.5,
+      "tempo": 0.55,
+      "width_crossing": 0.52,
+      "final_third_pressure": 0.58,
+      "missing_attacker": 0,
+      "missing_creator": 1,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "fifa_ranking": 86,
+      "star_power": 0.6,
+      "notes": "Technically improving side with decent structure. Missing a key creator reduces chance quality; relies on compact defending and set-piece moments."
+    }
+  },
+  "away_team": {
+    "name": "Algeria",
+    "stats": {
+      "abbreviation": "ALG",
+      "xg_for": 1.45,
+      "xg_against": 1.25,
+      "shots_per_game": 13.0,
+      "sot_per_game": 4.3,
+      "goals_for_per_game": 1.3,
+      "goals_against_per_game": 1.15,
+      "clean_sheets_last10": 3,
+      "home_record": 0.55,
+      "away_record": 0.5,
+      "recent_form": 0.52,
+      "tempo": 0.58,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.6,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 1,
+      "missing_gk": 0,
+      "fifa_ranking": 38,
+      "star_power": 0.65,
+      "notes": "Mid-tier talent with better shot volume than expected. One defensive absence can open transitions, but overall chance creation remains more stable than Jordan."
+    }
+  },
+  "projections": {
+    "home_xg": 1.28,
+    "away_xg": 1.34,
+    "total_xg": 2.61,
+    "home_projected_goals": 1.3,
+    "away_projected_goals": 1.3
+  },
+  "match_outcome": {
+    "home_win_prob": 0.3516,
+    "draw_prob": 0.2675,
+    "away_win_prob": 0.3809,
+    "ml_rec": "Pass (consider Double Chance)",
+    "ml_confidence": 51.1
+  },
+  "totals_analysis": {
+    "model_total": 2.61,
+    "market_total": 2.5,
+    "edge": 0.11,
+    "over_probability": 0.4845,
+    "confidence": 27.2,
+    "recommendation": "Pass",
+    "lean": "Over"
+  },
+  "btts_analysis": {
+    "probability": 0.5835,
+    "edge": 0.0835,
+    "confidence": 40.4,
+    "recommendation": "Yes BTTS"
+  },
+  "sharp_consensus": {
+    "sharp_lean": "Algeria +0.00 (Preview) \u2014 Slight edge via more stable chance creation",
+    "venue": "World Cup 2026 - Neutral Venue",
+    "keyMatchup": "Jordan chance-quality dip vs Algeria shot volume; neutral venue increases draw likelihood.",
+    "rankGap": "Jordan vs Algeria (heuristic FIFA ranks used: 86 vs 38)"
+  }
+}

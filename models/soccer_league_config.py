@@ -1,3 +1,11 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# DEPRECATED / ORPHANED — DO NOT EXTEND OR RELY ON THIS FILE
+# ───────────────────────────────────────────────────────────────────────────
+# Confirmed via repo-wide import grep (see ARCHITECTURE.md §2/§3): this file
+# is NOT reachable from predict_match.py (the live entry point). It has zero
+# effect on real predictions. Keep it only as reference until it is deleted.
+# ═══════════════════════════════════════════════════════════════════════════
+
 """
 Soccer League Configuration System
 ===================================
@@ -73,6 +81,20 @@ class LeagueConfig:
 # ──────────────────────────────────────────────
 
 LEAGUE_CONFIGS: Dict[str, LeagueConfig] = {
+    # Norway Division 1
+    "soccer_norway_div1": LeagueConfig(
+        name="Norway Division 1",
+        key="soccer_norway_div1",
+        region="Norway",
+        model_n_estimators=300,
+        model_max_depth=10,
+        avg_goals_per_match=2.55,
+        high_scoring=False,
+        defensive_focus=False,
+        btts_xg_threshold=0.80,
+        goals_line_default=2.5,
+    ),
+
     # Premier League (England)
     "soccer_epl": LeagueConfig(
         name="English Premier League",

@@ -1,0 +1,34 @@
+[
+  {
+    "ts": "2026-06-28T17:50:38.279098Z",
+    "league": "World Cup",
+    "date": "2026-06-16",
+    "home_team": "South Africa",
+    "away_team": "Canada",
+    "predictions": {
+      "total_goals": 3.85,
+      "over_25_prob": 0.739,
+      "btts_probability": 0.546
+    },
+    "files": {
+      "match_json": "output\\soccer\\South_Africa_vs_Canada.json"
+    },
+    "source": "run_worldcup_sa_vs_can_2026_06_16.py"
+  },
+  {
+    "ts": "2026-06-28T17:51:12.689243Z",
+    "league": "World Cup",
+    "date": "2026-06-16",
+    "home_team": "South Africa",
+    "away_team": "Canada",
+    "predictions": {
+      "total_goals": 3.85,
+      "over_25_prob": 0.739,
+      "btts_probability": 0.546
+    },
+    "files": {
+      "match_json": "output\\soccer\\South_Africa_vs_Canada.json"
+    },
+    "source": "run_worldcup_sa_vs_can_2026_06_16.py"
+  }
+]

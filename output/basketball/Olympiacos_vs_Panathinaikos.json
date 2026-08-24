@@ -1,0 +1,78 @@
+{
+  "sport": "basketball",
+  "league": "EuroLeague",
+  "home_team": "Olympiacos",
+  "away_team": "Panathinaikos",
+  "timestamp": "2026-08-23T12:40:28.408490",
+  "full_game": {
+    "record_type": "full_game",
+    "current_gap": 16.6,
+    "baseline_gap": 4.0,
+    "recent_gap": 4.0,
+    "historical_gap": 7.56,
+    "rest_gap": 6.0,
+    "split_gap": 1.5,
+    "context_gap": 2.0,
+    "model_edge": 14.6,
+    "market_score": -1.0,
+    "probability": 0.9798,
+    "lean": "Pass",
+    "projected_home_score": 119.6,
+    "projected_away_score": 81.1,
+    "projected_total": 200.7
+  },
+  "q1": {
+    "record_type": "q1",
+    "q1_model": 8.3,
+    "probability": 0.8481,
+    "lean": "Strong lean",
+    "projected_q1_home": 21.0,
+    "projected_q1_away": 17.6,
+    "projected_q1_total": 38.0
+  },
+  "market_info": {
+    "spread": 1.5,
+    "current_line": 1.5,
+    "open_line": 1.5
+  },
+  "team_metrics": {
+    "home": {
+      "ortg_per_100": 118.4,
+      "drtg_per_100": 110.2,
+      "baseline_net_per_100": 5.0,
+      "recent_net_per_100": 6.0,
+      "pace_per_40": 99.5,
+      "rest_days": 2,
+      "travel_km": 500.0,
+      "back_to_back": false,
+      "three_in_six": false,
+      "split_edge": 1.0,
+      "rotation_depth": 9,
+      "injury_status": "green",
+      "coach_stability": "green",
+      "motivation": "green",
+      "three_pt_pct": 0.38,
+      "orb_pct": 0.3
+    },
+    "away": {
+      "ortg_per_100": 108.1,
+      "drtg_per_100": 116.5,
+      "baseline_net_per_100": 1.0,
+      "recent_net_per_100": 2.0,
+      "pace_per_40": 102.1,
+      "rest_days": 1,
+      "travel_km": 1200.0,
+      "back_to_back": true,
+      "three_in_six": true,
+      "split_edge": -0.5,
+      "rotation_depth": 8,
+      "injury_status": "yellow",
+      "coach_stability": "yellow",
+      "motivation": "yellow",
+      "three_pt_pct": 0.35,
+      "orb_pct": 0.25
+    }
+  },
+  "notes": "FIBA/European rules applied: 40-minute game, per-100 possession metrics, tournament fatigue tracking, 3PT/ORB weighting",
+  "_stats_source": "placeholder_fallback"
+}

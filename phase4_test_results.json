@@ -1,0 +1,19 @@
+{
+  "no_stats_identical": true,
+  "with_stats_identical": false,
+  "no_vs_with_differs": true,
+  "no_stats_sources": [
+    "placeholder_fallback",
+    "placeholder_fallback"
+  ],
+  "with_stats_sources": [
+    "real",
+    "real"
+  ],
+  "no_game1_total": 4.76,
+  "no_game2_total": 4.76,
+  "with_game1_total": 5.48,
+  "with_game2_total": 4.95,
+  "with_game1_home_xg_used": 2.2,
+  "with_game2_home_xg_used": 1.5
+}

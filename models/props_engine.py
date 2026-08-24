@@ -329,18 +329,48 @@ class PropsEngine:
         # Pitch/venue factor
         pitch_factor = kwargs.get('pitch_factor', 1.0)
         
+        # Check if ML model is available for enhanced predictions
+        use_ml_model = kwargs.get('use_ml_model', True)
+        ml_model = None
+        if use_ml_model:
+            try:
+                from models.soccer_shots_prop_model import SoccerShotsPropModel
+                ml_model = SoccerShotsPropModel()
+                if ml_model.model is None:
+                    ml_model = None
+            except ImportError:
+                ml_model = None
+        
+        # Tactical context for ML features
+        home_tactics = kwargs.get('home_tactics', {})
+        away_tactics = kwargs.get('away_tactics', {})
+        is_low_block = away_tactics.get('is_low_block', 0)
+        
         props = {
             "sport": "soccer",
             "matchup": f"{home_team} vs {away_team}",
             "pitch_factor": pitch_factor,
             "player_props": [],
-            "top_recommendations": []
+            "top_recommendations": [],
+            "ml_model_used": ml_model is not None,
         }
         
         # Generate props for key players
         for player in home_roster + away_roster:
-            # Shots on Target prop
-            sot_prop = self._project_soccer_shots_on_target(player, pitch_factor)
+            # Determine if player faces low block
+            player_is_low_block = is_low_block if player.team == home_team else 0
+            is_home = 1 if player.team == home_team else 0
+            
+            # Shots on Target prop - use ML model if available
+            if ml_model and player.stats:
+                sot_prop = self._project_soccer_shots_on_target_ml(
+                    player, pitch_factor, ml_model, 
+                    is_low_block=player_is_low_block,
+                    is_home_game=is_home
+                )
+            else:
+                sot_prop = self._project_soccer_shots_on_target(player, pitch_factor)
+            
             if sot_prop:
                 props["player_props"].append(sot_prop)
             
@@ -357,7 +387,7 @@ class PropsEngine:
                     props["player_props"].append(assists_prop)
         
         # Find top recommendations
-        top_props = sorted(props["player_props"], key=lambda x: abs(x.get('edge', 0)), reverse=True)
+        top_props = sorted(props["player_props"], key=lambda x: abs(x.get('edge_rating', x.get('edge', 0))), reverse=True)
         props["top_recommendations"] = top_props[:5]
         
         return props
@@ -528,7 +558,7 @@ class PropsEngine:
         }
     
     def _project_soccer_shots_on_target(self, player: Player, pitch_factor: float) -> Optional[Dict]:
-        """Project soccer shots on target prop"""
+        """Project soccer shots on target prop (baseline heuristic)"""
         if not player:
             return None
         
@@ -541,6 +571,7 @@ class PropsEngine:
         edge = projection - line
         confidence = min(100, max(0, 50 + edge * 30))
         recommendation = "Over" if edge > 0.3 else "Under" if edge < -0.3 else "Pass"
+        edge_rating = min(10, max(0, 5 + edge * 3))
         
         return {
             "player_name": player.name,
@@ -549,9 +580,80 @@ class PropsEngine:
             "line": line,
             "projection": round(projection, 2),
             "edge": round(edge, 2),
+            "edge_rating": round(edge_rating, 1),
             "confidence": round(confidence, 1),
             "recommendation": recommendation,
             "lean": recommendation if recommendation != "Pass" else "No Lean",
+            "method": "heuristic",
+        }
+    
+    def _project_soccer_shots_on_target_ml(self, player: Player, pitch_factor: float, 
+                                           ml_model, is_low_block: int = 0, 
+                                           is_home_game: int = 0) -> Optional[Dict]:
+        """Project soccer shots on target prop using ML model"""
+        if not player or not player.stats:
+            return None
+        
+        # Build feature vector for ML model
+        features = {
+            'player_sot_per_90': player.stats.get('sot_per_90', 1.0),
+            'shot_accuracy_pct': player.stats.get('shot_accuracy', 0.35),
+            'opp_sot_allowed': 4.5,  # Would need opponent data in production
+            'touches_in_box': player.stats.get('touches_in_box', 3.0),
+            'is_low_block': is_low_block,
+            'is_home_game': is_home_game,
+            'possession_against': 0.50,  # Would need opponent possession data
+            'defensive_width': 0.55,  # Would need opponent tactical data
+            'xg_for': player.stats.get('xg_per_90', 0.3),
+            'recent_form': 0.50,  # Would need recent match data
+        }
+        
+        # Run ML prediction
+        import pandas as pd
+        df = pd.DataFrame([features])
+        result = ml_model.predict(df)
+        
+        if result.empty:
+            return None
+        
+        row = result.iloc[0]
+        over_prob = row['over_probability']
+        line = player.stats.get('sot_line', 1.5)
+        
+        # Edge is probability vs break-even
+        edge = over_prob - 0.50
+        edge_rating = row['edge_rating']
+        classification = row['classification']
+        
+        # Confidence from edge rating
+        confidence = min(95, max(35, 50 + edge_rating * 5))
+        
+        # Recommendation
+        if classification == 'Elite':
+            recommendation = f"OVER 1.5 SoT"
+        elif classification == 'Strong':
+            recommendation = f"Consider OVER 1.5 SoT"
+        elif classification == 'Moderate':
+            recommendation = "Fade"
+        else:
+            recommendation = "Avoid"
+        
+        return {
+            "player_name": player.name,
+            "team": player.team,
+            "prop_type": "Shots on Target (ML)",
+            "line": line,
+            "projection": round(over_prob * 2.5, 2),  # Scale to expected SoT
+            "over_probability": round(over_prob, 3),
+            "true_odds": round(row.get('true_odds', 0), 0),
+            "edge": round(edge, 3),
+            "edge_rating": edge_rating,
+            "classification": classification,
+            "confidence": round(confidence, 1),
+            "recommendation": recommendation,
+            "lean": recommendation if recommendation not in ["Pass", "Fade", "Avoid"] else "No Lean",
+            "method": "xgboost_ml",
+            "features_used": features,
         }
     
     def _project_soccer_goals(self, player: Player, pitch_factor: float) -> Optional[Dict]:

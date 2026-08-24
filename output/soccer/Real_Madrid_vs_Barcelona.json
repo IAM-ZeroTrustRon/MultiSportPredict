@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "La Liga",
+  "home_team": "Real Madrid",
+  "away_team": "Barcelona",
+  "timestamp": "2026-08-23T12:40:52.691227",
+  "game": {
+    "projected_home_goals": 2.31,
+    "projected_away_goals": 1.86,
+    "projected_total_goals": 4.17,
+    "home_win_prob": 0.477,
+    "draw_prob": 0.207,
+    "away_win_prob": 0.317
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.456,
+      "market_line": 0.0,
+      "edge": 0.456,
+      "confidence": 33.5,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 4.168,
+      "market_total": 3.0,
+      "edge": 1.168,
+      "confidence": 44.8,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.705,
+      "confidence": 58.1,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.92,
+    "over_25_prob": 0.786,
+    "over_35_prob": 0.599
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.705,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.65,
+      "xg_against": 1.2,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.7,
+      "goals_against": 1.1,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.45,
+      "xg_against": 1.35,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 1.4,
+      "goals_against": 1.3,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.05,
+    "avg_goals_per_game": 2.65,
+    "home_advantage": 0.4,
+    "draw_rate": 0.27,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "placeholder_fallback"
+}

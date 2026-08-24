@@ -1,0 +1,26 @@
+{
+  "sport": "baseball",
+  "league": "KBO",
+  "home_team": "LG Twins",
+  "away_team": "Samsung Lions",
+  "timestamp": "2026-06-24T22:43:49.511222",
+  "game": {
+    "projected_home_runs": 6.28,
+    "projected_away_runs": 5.22,
+    "projected_total_runs": 11.5,
+    "projected_run_differential": 1.06,
+    "home_win_probability": 0.6525,
+    "away_win_probability": 0.3475,
+    "confidence": {
+      "total": {
+        "score": 64.9,
+        "recommendation": "BET"
+      },
+      "side": {
+        "score": 43.1,
+        "recommendation": "PASS"
+      }
+    }
+  },
+  "notes": "League-specific run environment and pitcher matchup considered. KBO foreign player impact: 0.0"
+}

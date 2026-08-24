@@ -1,0 +1,41 @@
+{
+  "soccer_row_count": 40,
+  "latest_rows": [
+    {
+      "sport": "soccer",
+      "home_team": "Ajax",
+      "away_team": "PSV",
+      "market_type": "total",
+      "model_value": 4.76,
+      "market_value": 3.0,
+      "edge": 1.764,
+      "confidence": 53.5,
+      "recommendation": "PASS",
+      "timestamp": "2026-08-23T12:20:42.305626"
+    },
+    {
+      "sport": "soccer",
+      "home_team": "South Africa",
+      "away_team": "Canada",
+      "market_type": "btts",
+      "model_value": 0.5459442420710751,
+      "market_value": 0.5,
+      "edge": 0.04594424207107506,
+      "confidence": 75.6,
+      "recommendation": "STRONG BET",
+      "timestamp": "2026-06-28T13:51:12.675141"
+    },
+    {
+      "sport": "soccer",
+      "home_team": "South Africa",
+      "away_team": "Canada",
+      "market_type": "total",
+      "model_value": 3.8470000000000004,
+      "market_value": 2.5,
+      "edge": 1.3470000000000004,
+      "confidence": 47.6,
+      "recommendation": "PASS",
+      "timestamp": "2026-06-28T13:51:12.660764"
+    }
+  ]
+}

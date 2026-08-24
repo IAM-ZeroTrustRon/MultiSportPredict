@@ -1,3 +1,11 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# DEPRECATED / ORPHANED — DO NOT EXTEND OR RELY ON THIS FILE
+# ───────────────────────────────────────────────────────────────────────────
+# Confirmed via repo-wide import grep (see ARCHITECTURE.md §2/§3): this file
+# is NOT reachable from predict_match.py (the live entry point). It has zero
+# effect on real predictions. Keep it only as reference until it is deleted.
+# ═══════════════════════════════════════════════════════════════════════════
+
 """
 Basketball Model
 ================

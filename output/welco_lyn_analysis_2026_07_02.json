@@ -1,0 +1,184 @@
+[
+  {
+    "match": "MATCH 1: Estonian Esiliiga",
+    "home_team": "JK Welco Elekter",
+    "away_team": "Vimsi JK",
+    "league": "Estonian Esiliiga",
+    "date": "2026-07-02",
+    "generated": "2026-07-02 12:12",
+    "liquidity": "LOW",
+    "projection": {
+      "home_goals": 1.73,
+      "away_goals": 1.855,
+      "total_goals": 3.585,
+      "projected_score": "JK Welco Elekter 1.7 - 1.9 Vimsi JK",
+      "home_win_prob": 0.3624,
+      "draw_prob": 0.2244,
+      "away_win_prob": 0.4132
+    },
+    "totals_market": {
+      "market_line": 2.5,
+      "projected_total": 3.585,
+      "over_prob": 0.6946,
+      "under_prob": 0.3054,
+      "edge": 1.085,
+      "confidence": 44.2,
+      "recommendation": "PASS",
+      "verdict": "STRONG",
+      "goal_line_probs": {
+        "over_1_5": 0.8728,
+        "over_2_5": 0.6946,
+        "over_3_5": 0.4816,
+        "over_4_5": 0.2907
+      },
+      "sharp_consensus": {
+        "estimated_sharp_money_pct": 79.2,
+        "estimated_public_money_pct": 20.8,
+        "sharp_alignment": "SHARP ALIGNMENT",
+        "model_edge": 19.5,
+        "note": "Sharps estimated at 79% on this outcome (SHARP ALIGNMENT)"
+      }
+    },
+    "btts_market": {
+      "market": "BTTS Yes/No",
+      "yes_prob": 0.5616,
+      "no_prob": 0.4384,
+      "edge": 0.0616,
+      "confidence": 78.7,
+      "recommendation": "STRONG BET",
+      "verdict": "SLIGHT",
+      "sharp_consensus": {
+        "estimated_sharp_money_pct": 52.3,
+        "estimated_public_money_pct": 47.7,
+        "sharp_alignment": "LEANING SHARP",
+        "model_edge": 6.2,
+        "note": "Sharps estimated at 52% on this outcome (LEANING SHARP)"
+      }
+    },
+    "corners_market": {
+      "market_line": 9.5,
+      "model_total": 9.558,
+      "recalibrated_total": 10.15,
+      "blended_projection": 11.014,
+      "over_prob": 0.661,
+      "under_prob": 0.339,
+      "edge": 1.514,
+      "confidence": 49.3,
+      "recommendation": "PASS",
+      "verdict": "STRONG",
+      "corner_line_probs": {
+        "over_8_5": 0.7693,
+        "over_9_5": 0.661,
+        "over_10_5": 0.5418,
+        "over_11_5": 0.4224
+      },
+      "corner_source": {
+        "home_corners_for": 4.5,
+        "home_corners_against": 5.8,
+        "home_corner_style": "possession",
+        "away_corners_for": 4.8,
+        "away_corners_against": 5.2,
+        "away_corner_style": "counter",
+        "league_avg": 10.5
+      },
+      "sharp_consensus": {
+        "estimated_sharp_money_pct": 74.2,
+        "estimated_public_money_pct": 25.8,
+        "sharp_alignment": "SHARP ALIGNMENT",
+        "model_edge": 16.1,
+        "note": "Sharps estimated at 74% on this outcome (SHARP ALIGNMENT)"
+      }
+    }
+  },
+  {
+    "match": "MATCH 2: Norwegian OBOS-ligaen",
+    "home_team": "Lyn",
+    "away_team": "Asane",
+    "league": "Norwegian OBOS-ligaen",
+    "date": "2026-07-02",
+    "generated": "2026-07-02 12:12",
+    "liquidity": "MODERATE",
+    "projection": {
+      "home_goals": 2.16,
+      "away_goals": 1.737,
+      "total_goals": 3.896,
+      "projected_score": "Lyn 2.2 - 1.7 Asane",
+      "home_win_prob": 0.4746,
+      "draw_prob": 0.2102,
+      "away_win_prob": 0.3152
+    },
+    "totals_market": {
+      "market_line": 2.5,
+      "projected_total": 3.896,
+      "over_prob": 0.7463,
+      "under_prob": 0.2537,
+      "edge": 1.396,
+      "confidence": 49.1,
+      "recommendation": "PASS",
+      "verdict": "STRONG",
+      "goal_line_probs": {
+        "over_1_5": 0.9005,
+        "over_2_5": 0.7463,
+        "over_3_5": 0.546,
+        "over_4_5": 0.3509
+      },
+      "sharp_consensus": {
+        "estimated_sharp_money_pct": 85.0,
+        "estimated_public_money_pct": 15.0,
+        "sharp_alignment": "SHARP ALIGNMENT",
+        "model_edge": 24.6,
+        "note": "Sharps estimated at 85% on this outcome (SHARP ALIGNMENT)"
+      }
+    },
+    "btts_market": {
+      "market": "BTTS Yes/No",
+      "yes_prob": 0.5721,
+      "no_prob": 0.4279,
+      "edge": 0.0721,
+      "confidence": 79.6,
+      "recommendation": "STRONG BET",
+      "verdict": "VALUE",
+      "sharp_consensus": {
+        "estimated_sharp_money_pct": 54.4,
+        "estimated_public_money_pct": 45.6,
+        "sharp_alignment": "LEANING SHARP",
+        "model_edge": 7.2,
+        "note": "Sharps estimated at 54% on this outcome (LEANING SHARP)"
+      }
+    },
+    "corners_market": {
+      "market_line": 10.5,
+      "model_total": 10.92,
+      "recalibrated_total": 10.0,
+      "blended_projection": 11.048,
+      "over_prob": 0.5458,
+      "under_prob": 0.4542,
+      "edge": 0.548,
+      "confidence": 33.7,
+      "recommendation": "PASS",
+      "verdict": "SLIGHT",
+      "corner_line_probs": {
+        "over_8_5": 0.7723,
+        "over_9_5": 0.6647,
+        "over_10_5": 0.5458,
+        "over_11_5": 0.4265
+      },
+      "corner_source": {
+        "home_corners_for": 5.8,
+        "home_corners_against": 4.2,
+        "home_corner_style": "possession",
+        "away_corners_for": 4.5,
+        "away_corners_against": 5.5,
+        "away_corner_style": "counter",
+        "league_avg": 11.0
+      },
+      "sharp_consensus": {
+        "estimated_sharp_money_pct": 50.0,
+        "estimated_public_money_pct": 50.0,
+        "sharp_alignment": "NO CLEAR PATTERN",
+        "model_edge": 4.6,
+        "note": "Sharps estimated at 50% on this outcome (NO CLEAR PATTERN)"
+      }
+    }
+  }
+]

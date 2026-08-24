@@ -636,10 +636,10 @@ class BaseballPredictor(SportPredictorBase):
         projected_run_differential = home_runs - away_runs
         
         # Calculate confidence scores
+        total_edge = projected_total_runs - 8.5  # vs average MLB total
         try:
             from core import confidence_score, bet_recommendation
             
-            total_edge = projected_total_runs - 8.5  # vs average MLB total
             total_confidence = confidence_score(total_edge, volatility=0.65)
             total_rec = bet_recommendation(total_confidence, "mlb_totals")
             
@@ -684,7 +684,7 @@ class BaseballPredictor(SportPredictorBase):
         }
         
         # Add KBO-specific info if available
-        if league.upper() == "KBO" and "kbo_game_info" in features:
+        if league and league.upper() == "KBO" and "kbo_game_info" in features:
             result["kbo_game_info"] = features["kbo_game_info"]
         
         return result

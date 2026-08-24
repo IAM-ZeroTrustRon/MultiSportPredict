@@ -1,0 +1,32 @@
+{
+  "match": "Rafael Jodar vs Pablo Carreno Busta",
+  "tournament": "Wimbledon",
+  "round": "Second Round",
+  "time_local": "12:15 PM EDT",
+  "model_type": "heuristic_narrative",
+  "moneyline": {
+    "home": "Rafael Jodar",
+    "away": "Pablo Carreno Busta",
+    "home_win_prob": 0.73,
+    "away_win_prob": 0.27,
+    "lean": "Rafael Jodar",
+    "confidence": 96.0
+  },
+  "sets": {
+    "carreno_busta_to_win_first_set_prob": 0.36,
+    "recommendation": "Carreno Busta to win the first set",
+    "alt": "Carreno Busta set/coverage angles (match-management value)"
+  },
+  "total_games": {
+    "total_games_line": 24.5,
+    "over_games_prob": 0.577,
+    "recommendation": "OVER 24.5 games (grind risk)",
+    "edge": 0.0
+  },
+  "notes": [
+    "Jodar priced as heavy favorite, but veteran disruption matters",
+    "Historical pattern: Carreno Busta can jump early via defense/pace absorption",
+    "If umpire is strict, longer match drags may hurt the veteran (serve clock pressure)",
+    "If umpire is lenient, veteran recovery and energy management improves"
+  ]
+}

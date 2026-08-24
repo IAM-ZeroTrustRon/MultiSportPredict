@@ -1,44 +1,50 @@
 {
   "sport": "soccer",
-  "league": "Premier",
+  "league": "Premier League",
   "home_team": "Liverpool",
   "away_team": "Aston Villa",
-  "timestamp": "2026-06-07T16:11:52.663867",
+  "timestamp": "2026-06-24T11:57:11.753907",
   "game": {
-    "projected_home_goals": 2.19,
-    "projected_away_goals": 1.77,
-    "projected_total_goals": 3.96,
-    "home_win_prob": 0.471,
-    "draw_prob": 0.211,
-    "away_win_prob": 0.318
+    "projected_home_goals": 2.41,
+    "projected_away_goals": 1.94,
+    "projected_total_goals": 4.36,
+    "home_win_prob": 0.477,
+    "draw_prob": 0.203,
+    "away_win_prob": 0.319
   },
   "predictions": {
     "side": {
-      "model_xg_diff": 0.424,
+      "model_xg_diff": 0.467,
       "market_line": 0.0,
-      "edge": 0.424,
-      "confidence": 32.9,
+      "edge": 0.467,
+      "confidence": 33.6,
       "recommendation": "PASS"
     },
     "total": {
-      "model_total_xg": 3.959,
+      "model_total_xg": 4.355,
       "market_total": 2.5,
-      "edge": 1.459,
-      "confidence": 49.2,
+      "edge": 1.855,
+      "confidence": 54.7,
       "recommendation": "PASS"
     },
     "btts": {
-      "probability": 0.692,
-      "confidence": 80.5,
-      "recommendation": "STRONG BET"
+      "probability": 0.716,
+      "confidence": 59.4,
+      "recommendation": "PASS"
     }
   },
   "goals_analysis": {
-    "over_15_prob": 0.905,
-    "over_25_prob": 0.756,
-    "over_35_prob": 0.559
+    "over_15_prob": 0.931,
+    "over_25_prob": 0.809,
+    "over_35_prob": 0.633
   },
-  "btts_probability": 0.692,
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.716,
   "corner_projection": 10.9,
   "team_metrics": {
     "home": {
@@ -75,10 +81,10 @@
     }
   },
   "league_config": {
-    "goal_variance": 1.0,
-    "avg_goals_per_game": 2.7,
+    "goal_variance": 1.1,
+    "avg_goals_per_game": 2.85,
     "home_advantage": 0.35,
-    "draw_rate": 0.26
+    "draw_rate": 0.25
   },
   "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics"
 }

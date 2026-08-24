@@ -1,0 +1,22 @@
+{
+  "home_team": "Portugal",
+  "away_team": "Croatia",
+  "projected_score": "0.5-0.3",
+  "total_goals": 0.79,
+  "over_25_prob": 0.046,
+  "btts_prob": 0.252,
+  "home_win_prob": 0.657,
+  "draw_prob": 0.276,
+  "away_win_prob": 0.067,
+  "corners": {
+    "projected_total": 7.5,
+    "over_95_prob": 0.225,
+    "confidence": 0.0,
+    "recommendation": "PASS"
+  },
+  "recommendations": {
+    "corners": "PASS",
+    "double_chance": "STRONG BET",
+    "btts": "PASS"
+  }
+}

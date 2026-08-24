@@ -1,0 +1,79 @@
+{
+  "fg": {
+    "projected_home": 87.7,
+    "projected_away": 74.2,
+    "projected_total": 161.8,
+    "projected_spread": 13.5,
+    "home_win_prob": 0.484,
+    "away_win_prob": 0.516,
+    "model_edge": 4.74,
+    "lean": "Pass"
+  },
+  "q1": {
+    "projected_home": 18.8,
+    "projected_away": 18.2,
+    "projected_total": 37.1,
+    "projected_spread": 0.6,
+    "home_win_prob": 0.535,
+    "away_win_prob": 0.46499999999999997
+  },
+  "h1": {
+    "projected_home": 36.6,
+    "projected_away": 35.7,
+    "projected_total": 72.4,
+    "projected_spread": 0.9,
+    "home_win_prob": 0.534,
+    "away_win_prob": 0.46599999999999997
+  },
+  "bets": {
+    "fg_spread": {
+      "decision": "LEAN",
+      "edge": 31.0,
+      "projected": 13.5,
+      "market": -17.5
+    },
+    "fg_total": {
+      "decision": "BET",
+      "edge": 13.8,
+      "projected": 161.8,
+      "market": 148.0
+    },
+    "h1_spread": {
+      "decision": "LEAN",
+      "edge": 9.65,
+      "projected": 0.9,
+      "market": -8.75
+    },
+    "h1_total": {
+      "decision": "PASS",
+      "edge": 1.6,
+      "projected": 72.4,
+      "market": 74.0
+    },
+    "q1_spread": {
+      "decision": "LEAN",
+      "edge": 4.97,
+      "projected": 0.6,
+      "market": -4.375
+    },
+    "q1_total": {
+      "decision": "PASS",
+      "edge": 1.38,
+      "projected": 37.1,
+      "market": 38.480000000000004
+    }
+  },
+  "meta": {
+    "home_team": "Panama",
+    "away_team": "Cuba",
+    "league": "FIBA Americas",
+    "date": "2026-07-02",
+    "venue": "Arena Roberto Duran Panama City",
+    "market_data": {
+      "spread": -17.5,
+      "open_line": -17.5,
+      "current_line": -17.5,
+      "total": 148.0
+    }
+  }
+}

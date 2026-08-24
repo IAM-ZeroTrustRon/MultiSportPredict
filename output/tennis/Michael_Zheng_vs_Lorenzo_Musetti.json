@@ -1,0 +1,56 @@
+{
+  "match": "Michael Zheng vs Lorenzo Musetti",
+  "tournament": "ATP Masters 1000 Cincinnati",
+  "round": "Round of 32",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Michael Zheng",
+    "away": "Lorenzo Musetti",
+    "home_win_prob": 0.5,
+    "away_win_prob": 0.5,
+    "home_fair_odds": "-100",
+    "away_fair_odds": "-100",
+    "lean": "coin_flip",
+    "confidence": 50.0,
+    "recommendation": "SLIGHT LEAN Home ML (edge: +31.8%)",
+    "edge_pct": 31.8
+  },
+  "sets": {
+    "over_35_prob": 0.5,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=50%",
+    "fav_spread_prob": 0.25,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=25% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.5,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.25,
+    "2-1": 0.25,
+    "0-2": 0.25,
+    "1-2": 0.25
+  },
+  "dominance_ratio": {
+    "Michael Zheng": 1.0,
+    "Lorenzo Musetti": 1.0
+  },
+  "elo_ratings": {
+    "Michael Zheng": 1500.0,
+    "Lorenzo Musetti": 1500.0
+  },
+  "match_counts": {
+    "Michael Zheng": 0,
+    "Lorenzo Musetti": 0
+  },
+  "recommendation": "SLIGHT LEAN Home ML (edge: +31.8%)",
+  "confidence": 50.0,
+  "edge_pct": 31.8,
+  "notes": [
+    "Elo Ratings \u2014 Michael Zheng: 1500 (0 matches) | Lorenzo Musetti: 1500 (0 matches) on hard",
+    "DR: Michael Zheng 1.000 | Lorenzo Musetti 1.000",
+    "Surface: Hard | Format: Best of 3",
+    "Market prices Michael Zheng at 18.2% (+450/-600). Model edge vs market: +31.8%"
+  ]
+}

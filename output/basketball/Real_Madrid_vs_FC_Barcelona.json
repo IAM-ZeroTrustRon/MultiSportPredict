@@ -3,23 +3,23 @@
   "league": "EuroLeague",
   "home_team": "Real Madrid",
   "away_team": "FC Barcelona",
-  "timestamp": "2026-06-07T16:11:44.497724",
+  "timestamp": "2026-08-24T10:14:58.218831",
   "full_game": {
     "record_type": "full_game",
-    "current_gap": 4.0,
-    "baseline_gap": 4.0,
-    "recent_gap": 4.0,
-    "historical_gap": 0.0,
+    "current_gap": 11.5,
+    "baseline_gap": 7.0,
+    "recent_gap": 7.5,
+    "historical_gap": 2.9,
     "rest_gap": 6.0,
-    "split_gap": 1.5,
-    "context_gap": 2.0,
-    "model_edge": 8.55,
+    "split_gap": 2.5,
+    "context_gap": 3.0,
+    "model_edge": 12.42,
     "market_score": -1.0,
-    "probability": 0.8115,
+    "probability": 0.9529,
     "lean": "Pass",
-    "projected_home_score": 103.2,
-    "projected_away_score": 80.1,
-    "projected_total": 183.3
+    "projected_home_score": 110.5,
+    "projected_away_score": 76.6,
+    "projected_total": 187.1
   },
   "q1": {
     "record_type": "q1",
@@ -31,28 +31,28 @@
     "projected_q1_total": 38.0
   },
   "market_info": {
-    "spread": 0.0,
-    "current_line": 0.0,
-    "open_line": 0.0
+    "spread": -3.5,
+    "current_line": -3.5,
+    "open_line": -3.5
   },
   "team_metrics": {
     "home": {
-      "ortg_per_100": 110.0,
-      "drtg_per_100": 105.0,
-      "baseline_net_per_100": 5.0,
-      "recent_net_per_100": 6.0,
-      "pace_per_40": 72.0,
+      "ortg_per_100": 116.5,
+      "drtg_per_100": 104.0,
+      "baseline_net_per_100": 8.0,
+      "recent_net_per_100": 9.5,
+      "pace_per_40": 74.0,
       "rest_days": 2,
-      "travel_km": 500.0,
+      "travel_km": 300.0,
       "back_to_back": false,
       "three_in_six": false,
-      "split_edge": 1.0,
-      "rotation_depth": 9,
+      "split_edge": 2.0,
+      "rotation_depth": 10,
       "injury_status": "green",
       "coach_stability": "green",
       "motivation": "green",
-      "three_pt_pct": 0.38,
-      "orb_pct": 0.3
+      "three_pt_pct": 0.39,
+      "orb_pct": 0.31
     },
     "away": {
       "ortg_per_100": 108.0,
@@ -73,5 +73,6 @@
       "orb_pct": 0.25
     }
   },
-  "notes": "FIBA/European rules applied: 40-minute game, per-100 possession metrics, tournament fatigue tracking, 3PT/ORB weighting"
+  "notes": "FIBA/European rules applied: 40-minute game, per-100 possession metrics, tournament fatigue tracking, 3PT/ORB weighting",
+  "_stats_source": "partial_real"
 }

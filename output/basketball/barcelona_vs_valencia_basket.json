@@ -1,0 +1,86 @@
+{
+  "sport": "basketball",
+  "league": "ACB Liga Endesa",
+  "season": "2025-2026",
+  "home_team": "FC Barcelona",
+  "away_team": "Valencia Basket",
+  "timestamp": "2026-06-24T12:07:36.029964",
+  "advanced_metrics": {
+    "barcelona": {
+      "poss": 74.37,
+      "ortg": 121.98,
+      "drtg": 111.22,
+      "net_rtg": 10.76,
+      "efg_off": 0.6012,
+      "efg_def": 0.5429,
+      "tov_rate_off": 15.68,
+      "tov_rate_def": 16.65,
+      "ft_rate_off": 0.3107,
+      "ft_rate_def": 0.3204,
+      "orb_pct": 0.2968
+    },
+    "valencia": {
+      "poss": 78.68,
+      "ortg": 120.61,
+      "drtg": 108.01,
+      "net_rtg": 12.6,
+      "efg_off": 0.5575,
+      "efg_def": 0.5175,
+      "tov_rate_off": 15.16,
+      "tov_rate_def": 17.12,
+      "ft_rate_off": 0.2985,
+      "ft_rate_def": 0.2638,
+      "orb_pct": 0.3721
+    }
+  },
+  "four_factors": {
+    "efg_edge": 3.348,
+    "tov_edge": -0.26,
+    "orb_edge": -1.506,
+    "ftr_edge": 0.061,
+    "total": 1.643
+  },
+  "projection": {
+    "home_score": 89.1,
+    "away_score": 87.6,
+    "model_spread": 1.43,
+    "model_total": 176.7,
+    "win_prob_home": 0.5576,
+    "win_prob_away": 0.4424,
+    "lean": "FC Barcelona"
+  },
+  "splits": {
+    "q1": {
+      "home": 22.0,
+      "away": 21.6,
+      "total": 43.6,
+      "spread": 0.68
+    },
+    "h1": {
+      "home": 46.2,
+      "away": 45.4,
+      "total": 91.6,
+      "spread": 0.78
+    },
+    "fg": {
+      "home": 89.1,
+      "away": 87.6,
+      "total": 176.7,
+      "spread": 1.5
+    }
+  },
+  "h2h": {
+    "barca_wins": 27,
+    "valencia_wins": 55,
+    "total_games": 82,
+    "valencia_win_pct": 0.6707
+  },
+  "key_flags": [
+    "  [+] Barca 3P% edge: 39.9% vs 35.5%",
+    "  [+] Barca FG% edge: 52.2% vs 47.6%",
+    "  [!] Valencia dominates offensive glass: 14.0 vs 9.1 ORB",
+    "  [+] Barca defense: allows 82.8 vs Valencia's 84.0",
+    "  [!] Valencia scores more: 94.9 vs 90.7 PPG",
+    "  [!] Valencia ball movement advantage: 20.6 vs 16.1 APG"
+  ]
+}

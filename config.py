@@ -23,13 +23,16 @@ OUTPUT_DIR = PROJECT_ROOT / "output"
 SHARP_OUTPUT_DIR = OUTPUT_DIR / "sharp"
 BASKETBALL_OUTPUT_DIR = OUTPUT_DIR / "basketball"
 SOCCER_OUTPUT_DIR = OUTPUT_DIR / "soccer"
+LIVE_TRACKER_OUTPUT_DIR = OUTPUT_DIR / "live_tracker"
 KBO_OUTPUT_DIR = OUTPUT_DIR / "kbo"
+TENNIS_OUTPUT_DIR = OUTPUT_DIR / "tennis"
 
 # Ensure all directories exist
 for _dir in [
     RAW_DIR, PROCESSED_DIR, CACHE_DIR,
     OUTPUT_DIR, SHARP_OUTPUT_DIR,
     BASKETBALL_OUTPUT_DIR, SOCCER_OUTPUT_DIR, KBO_OUTPUT_DIR,
+    TENNIS_OUTPUT_DIR, LIVE_TRACKER_OUTPUT_DIR,
 ]:
     _dir.mkdir(parents=True, exist_ok=True)
 
@@ -143,6 +146,13 @@ SPORT_LEAGUE_MAP: Dict[str, Dict[str, str]] = {
 }
 
 # ──────────────────────────────────────────────
+# API-FOOTBALL LIVE TRACKER SETTINGS
+# ──────────────────────────────────────────────
+API_FOOTBALL_BASE_URL = "https://v3.football.api-sports.io"
+API_FOOTBALL_DEFAULT_POLL_INTERVAL_SECS = 60
+API_FOOTBALL_DEFAULT_ROLLING_WINDOW_MINS = 15
+
+# ──────────────────────────────────────────────
 # CACHE / RETRY SETTINGS
 # ──────────────────────────────────────────────
 HTTP_TOTAL_RETRIES = 5
@@ -158,5 +168,6 @@ def ensure_dirs():
         RAW_DIR, PROCESSED_DIR, CACHE_DIR,
         OUTPUT_DIR, SHARP_OUTPUT_DIR,
         BASKETBALL_OUTPUT_DIR, SOCCER_OUTPUT_DIR, KBO_OUTPUT_DIR,
+        TENNIS_OUTPUT_DIR, LIVE_TRACKER_OUTPUT_DIR,
     ]:
         _dir.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-06-30T11:17:20.718367",
+  "results": [
+    {
+      "event": "Wimbledon 2026 \u2014 Men's Singles 1st Round",
+      "start_time": "11:10 AM EDT",
+      "player_a": "Arthur Fils",
+      "player_b": "Raphael Collignon",
+      "player_a_rank": "#20 (Seeded)",
+      "player_b_rank": "Unseeded",
+      "a_win_prob": 0.9192,
+      "b_win_prob": 0.0808,
+      "a_fair_odds": "-1138",
+      "b_fair_odds": "+1138",
+      "model_favorite": "Arthur Fils",
+      "model_edge_vs_market_pct": 13.92,
+      "dominance_ratio_a": 1.8186,
+      "dominance_ratio_b": 1.266,
+      "recommendation_ml": "BET Arthur Fils ML",
+      "confidence_ml": 98,
+      "analysis_summary": "**Probability:** Arthur Fils 91.9% | Raphael Collignon 8.1%\n**Fair ML:** Arthur Fils -1138 | Raphael Collignon +1138\n**DR:** Arthur Fils holds DR edge (1.819 vs 1.266)\n**Edge vs Market:** +13.9%\nFils' 20th seed + grass CPI multiplier heavily favors serve-dominant profile. Collignon's missing 2026 grass metrics create model uncertainty, but the surface and seeding gap suggest a lopsided DR environment."
+    },
+    {
+      "event": "Wimbledon 2026 \u2014 Women's Singles R128",
+      "start_time": "11:00 AM EDT",
+      "player_a": "Elena-Gabriela Ruse",
+      "player_b": "Caty McNally",
+      "player_a_rank": "#71",
+      "player_b_rank": "#50",
+      "a_win_prob": 0.6718,
+      "b_win_prob": 0.3282,
+      "a_fair_odds": "-205",
+      "b_fair_odds": "+205",
+      "model_favorite": "Elena-Gabriela Ruse",
+      "model_edge_vs_market_pct": 7.98,
+      "dominance_ratio_a": 1.7899,
+      "dominance_ratio_b": 1.5196,
+      "recommendation_ml": "BET Elena-Gabriela Ruse ML",
+      "confidence_ml": 70.6,
+      "analysis_summary": "**Probability:** Elena-Gabriela Ruse 67.2% | Caty McNally 32.8%\n**Fair ML:** Elena-Gabriela Ruse -205 | Caty McNally +205\n**DR:** Elena-Gabriela Ruse holds DR edge (1.790 vs 1.520)\n**Edge vs Market:** +8.0%\nRuse's serve advantage (3.7 aces vs 1.3) is amplified on grass. Low bounce neutralizes McNally's return strength. McNally's +146 BPs won provides clutch upside, but Ruse's DR advantage via serve dominance is decisive."
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "file_checklist": [
+    {
+      "file": "predict_match.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "universal_runner.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "team_stats_provider.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "core/historical_storage.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "core/confidence_engine.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "core/schemas.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "core/utils.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/soccer_predictor.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/basketball_predictor.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/baseball_predictor.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/tennis_predictor.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/tennis_elo.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/dispatcher.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/soccer_model.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/basketball_model.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/kbo_model.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/soccer_league_config.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/soccer_shots_prop_model.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/referee_features.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "models/sharp_predict.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "discord_integration.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": ".env",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "prediction_store.py",
+      "status": "MISSING",
+      "expected": "MISSING",
+      "match": true
+    },
+    {
+      "file": "backtest_report.py",
+      "status": "OK",
+      "expected": "OK",
+      "match": true
+    },
+    {
+      "file": "tennis_elo.py",
+      "status": "MISSING",
+      "expected": "MISSING",
+      "match": true
+    },
+    {
+      "file": "run_kostyuk_keys_toronto.py",
+      "status": "MISSING",
+      "expected": "MISSING",
+      "match": true
+    }
+  ],
+  "command_results": {
+    "soccer": {
+      "exit_code": 0,
+      "stdout_tail": " values \u2014 do not trust these numbers.\n[WARNING] Supply real stats via team_stats_provider.py going forward.\n[WARNING] ==============================================\n\n[SoccerPredictor_Eredivisie] Predicting: Ajax vs PSV\nProjected: Ajax 2.64 - PSV 2.12\nCorner Projection: 10.9\n  Over 8.5: 76.2% | Over 9.5: 65.3% | Over 10.5: 53.3%\n\nMatch Outcome:\n  Ajax Win: 48.4%\n  Draw: 19.7%\n  PSV Win: 31.9%\n\nResults saved to: output\\soccer\\Ajax_vs_PSV.json\n[OK] Soccer prediction stored to multisport_history.db\n",
+      "stderr_tail": ""
+    },
+    "basketball": {
+      "exit_code": 0,
+      "stdout_tail": ").\n[WARNING] Prediction will use PLACEHOLDER values \u2014 do not trust these numbers.\n[WARNING] Supply real stats via team_stats_provider.py going forward.\n[WARNING] ==============================================\n\n[BasketballPredictor_EuroLeague] Predicting: Real Madrid vs FC Barcelona\nProjected: Real Madrid 119.6 - FC Barcelona 81.1\nWin Prob: Real Madrid 98.0%\nLean: Pass\n\nResults saved to: output\\basketball\\Real_Madrid_vs_FC_Barcelona.json\n[OK] Basketball prediction stored to multisport_history.db\n",
+      "stderr_tail": ""
+    },
+    "baseball": {
+      "exit_code": 0,
+      "stdout_tail": "=========\nBASEBALL (NRFI) MATCHUP: NYY vs BOS\n============================================================\n\n\n=== NRFI PROP MARKETS: NYY vs BOS ===\n\n    Home Stats Source: internal_baseline\n    Away Stats Source: internal_baseline\n    Home SP override applied: ERA=3.20, K-rate=0.944\n    Away SP override applied: ERA=4.10, K-rate=0.778\n    Consensus Note: ALIGNED WITH SHARPS\n    Projected Total: 8.89 | Edge vs 8.5: +0.39 | Confidence: 71.5%\n[OK] Baseball prediction stored to multisport_history.db\n",
+      "stderr_tail": ""
+    },
+    "tennis": {
+      "exit_code": 0,
+      "stdout_tail": "[OK] Tennis prediction stored to multisport_history.db\n",
+      "stderr_tail": ""
+    }
+  },
+  "row_counts_before_after": {
+    "soccer": 41,
+    "basketball": 4,
+    "baseball": 1,
+    "tennis": 1
+  }
+}

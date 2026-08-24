@@ -1,0 +1,80 @@
+{
+  "match": "Daniel Merida Aguilar vs Alex Michelsen",
+  "tournament": "National Bank Open \u2014 Montreal",
+  "round": "Round of 32",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Daniel Merida Aguilar",
+    "away": "Alex Michelsen",
+    "home_win_prob": 0.4,
+    "away_win_prob": 0.6,
+    "home_fair_odds": "+150",
+    "away_fair_odds": "-150",
+    "lean": "Alex Michelsen",
+    "confidence": 65.0,
+    "recommendation": "BET Home ML (edge: +11.0%)",
+    "edge_pct": 11.0
+  },
+  "sets": {
+    "over_35_prob": 0.486,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=49%",
+    "fav_spread_prob": 0.342,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=34% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.486,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.172,
+    "2-1": 0.202,
+    "0-2": 0.342,
+    "1-2": 0.284
+  },
+  "dominance_ratio": {
+    "Daniel Merida Aguilar": 1.0133,
+    "Alex Michelsen": 1.1344
+  },
+  "elo_ratings": {
+    "Daniel Merida Aguilar": 1510.0,
+    "Alex Michelsen": 1595.0
+  },
+  "match_counts": {
+    "Daniel Merida Aguilar": 9,
+    "Alex Michelsen": 10
+  },
+  "recommendation": "BET Home ML (edge: +11.0%)",
+  "confidence": 65.0,
+  "edge_pct": 11.0,
+  "notes": [
+    "Elo Ratings \u2014 Daniel Merida Aguilar: 1510 (9 matches) | Alex Michelsen: 1595 (10 matches) on hard",
+    "DR: Daniel Merida Aguilar 1.013 | Alex Michelsen 1.134",
+    "Surface: Hard | Format: Best of 3",
+    "Market prices Alex Michelsen at 29.0% (+250/-270). Model edge vs market: +31.0%"
+  ],
+  "confidence_score": 80.9,
+  "confidence_tier": "STRONG BET",
+  "surface": "hard",
+  "tournament_name": "National Bank Open \u2014 Montreal",
+  "home_player": "Daniel Merida Aguilar",
+  "away_player": "Alex Michelsen",
+  "value_plays": {
+    "original_lean": "Merida's return edge + hot form can keep this live; over the total in a tight baseline battle",
+    "plays": {
+      "Spread (Michelsen -1.5 Sets)": "-120 ballpark",
+      "Total (Over 22.5 games)": "-110",
+      "Dog (Merida ML +270)": "small positive-EV if return shows up"
+    },
+    "deep_dive": {
+      "Target": "Alex Michelsen -1.5 Sets (straight sets 2-0)",
+      "Angle": "Serve dominance + strength-of-schedule + prior H2H control",
+      "Rationale": "Michelsen won 6-3 6-4 at Indian Wells on hard; 1st-serve win +22 pts; Merida's wins are vs weaker opposition (avg opp rank ~174)."
+    },
+    "model_view": {
+      "favorite": "Alex Michelsen",
+      "notes": "Serve-dominant favorite; Merida return edge supports Over 22.5",
+      "favorite_win_prob": 0.6
+    }
+  }
+}

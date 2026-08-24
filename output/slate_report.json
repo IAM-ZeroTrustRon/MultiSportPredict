@@ -1,0 +1,251 @@
+[
+  {
+    "sport": "mlb",
+    "home_team": "NYY",
+    "away_team": "BOS",
+    "league": "MLB",
+    "confidence": 68.2,
+    "recommendation": "BET",
+    "edge": 0.0,
+    "data_source": "baseline",
+    "market_line": 0.0,
+    "market_total": 8.5,
+    "full_result": {
+      "sport": "baseball",
+      "league": "MLB",
+      "game": {
+        "projected_home_runs": 4.75,
+        "projected_away_runs": 3.95,
+        "projected_total_runs": 8.7,
+        "home_win_probability": 0.6225,
+        "confidence": {
+          "total": {
+            "score": 53.8,
+            "recommendation": "LEAN"
+          },
+          "side": {
+            "score": 68.2,
+            "recommendation": "BET"
+          }
+        }
+      },
+      "data_source": "baseline",
+      "metadata": {
+        "predictor": "BaseballPredictor",
+        "timestamp": "2026-06-19T02:44:32.664256"
+      }
+    }
+  },
+  {
+    "sport": "mlb",
+    "home_team": "LAD",
+    "away_team": "SF",
+    "league": "MLB",
+    "confidence": 68.2,
+    "recommendation": "BET",
+    "edge": 0.0,
+    "data_source": "baseline",
+    "market_line": 0.0,
+    "market_total": 8.0,
+    "full_result": {
+      "sport": "baseball",
+      "league": "MLB",
+      "game": {
+        "projected_home_runs": 4.75,
+        "projected_away_runs": 3.95,
+        "projected_total_runs": 8.7,
+        "home_win_probability": 0.6225,
+        "confidence": {
+          "total": {
+            "score": 53.8,
+            "recommendation": "LEAN"
+          },
+          "side": {
+            "score": 68.2,
+            "recommendation": "BET"
+          }
+        }
+      },
+      "data_source": "baseline",
+      "metadata": {
+        "predictor": "BaseballPredictor",
+        "timestamp": "2026-06-19T02:44:33.208713"
+      }
+    }
+  },
+  {
+    "sport": "soccer",
+    "home_team": "Bayern Munich",
+    "away_team": "Dortmund",
+    "league": "Bundesliga",
+    "confidence": 62.6,
+    "recommendation": "BET",
+    "edge": -0.502,
+    "data_source": "baseline",
+    "market_line": 0.5,
+    "market_total": 3.0,
+    "full_result": {
+      "sport": "soccer",
+      "game": {
+        "projected_home_goals": 1.72,
+        "projected_away_goals": 1.72,
+        "projected_total_goals": 3.44,
+        "home_win_prob": 0.525,
+        "draw_prob": 0.4,
+        "away_win_prob": 0.075
+      },
+      "predictions": {
+        "side": {
+          "edge": -0.502,
+          "confidence": 62.6,
+          "recommendation": "BET"
+        },
+        "total": {
+          "edge": 0.438,
+          "confidence": 59.9,
+          "recommendation": "LEAN"
+        },
+        "btts": {
+          "probability": 0.37
+        }
+      },
+      "goals_analysis": {
+        "over_15_prob": 0.857,
+        "over_25_prob": 0.667,
+        "over_35_prob": 0.45
+      },
+      "data_source": "baseline",
+      "metadata": {
+        "predictor": "SoccerPredictor",
+        "timestamp": "2026-06-19T02:44:31.082240"
+      }
+    }
+  },
+  {
+    "sport": "soccer",
+    "home_team": "Liverpool",
+    "away_team": "Aston Villa",
+    "league": "EPL",
+    "confidence": 56.3,
+    "recommendation": "LEAN",
+    "edge": -0.252,
+    "data_source": "baseline",
+    "market_line": 0.25,
+    "market_total": 2.5,
+    "full_result": {
+      "sport": "soccer",
+      "game": {
+        "projected_home_goals": 1.72,
+        "projected_away_goals": 1.72,
+        "projected_total_goals": 3.44,
+        "home_win_prob": 0.525,
+        "draw_prob": 0.4,
+        "away_win_prob": 0.075
+      },
+      "predictions": {
+        "side": {
+          "edge": -0.252,
+          "confidence": 56.3,
+          "recommendation": "LEAN"
+        },
+        "total": {
+          "edge": 0.938,
+          "confidence": 71.3,
+          "recommendation": "BET"
+        },
+        "btts": {
+          "probability": 0.37
+        }
+      },
+      "goals_analysis": {
+        "over_15_prob": 0.857,
+        "over_25_prob": 0.667,
+        "over_35_prob": 0.45
+      },
+      "data_source": "baseline",
+      "metadata": {
+        "predictor": "SoccerPredictor",
+        "timestamp": "2026-06-19T02:44:31.081751"
+      }
+    }
+  },
+  {
+    "sport": "basketball",
+    "home_team": "Real Madrid",
+    "away_team": "FC Barcelona",
+    "league": "EuroLeague",
+    "confidence": 50.0,
+    "recommendation": "Pass",
+    "edge": 4.0,
+    "data_source": "baseline",
+    "market_line": 0.0,
+    "market_total": 0.0,
+    "full_result": {
+      "sport": "basketball",
+      "league": "EuroLeague",
+      "full_game": {
+        "model_edge": 4.0,
+        "probability": 0.5,
+        "lean": "Pass",
+        "projected_home_score": 89.3,
+        "projected_away_score": 76.5,
+        "projected_total": 165.8
+      },
+      "metadata": {
+        "predictor": "BasketballPredictor",
+        "timestamp": "2026-06-19T02:44:33.208771"
+      }
+    }
+  },
+  {
+    "sport": "basketball",
+    "home_team": "Anadolu Efes",
+    "away_team": "Fenerbahce",
+    "league": "EuroLeague",
+    "confidence": 50.0,
+    "recommendation": "Pass",
+    "edge": 4.0,
+    "data_source": "baseline",
+    "market_line": 0.0,
+    "market_total": 0.0,
+    "full_result": {
+      "sport": "basketball",
+      "league": "EuroLeague",
+      "full_game": {
+        "model_edge": 4.0,
+        "probability": 0.5,
+        "lean": "Pass",
+        "projected_home_score": 89.3,
+        "projected_away_score": 76.5,
+        "projected_total": 165.8
+      },
+      "metadata": {
+        "predictor": "BasketballPredictor",
+        "timestamp": "2026-06-19T02:44:33.208809"
+      }
+    }
+  },
+  {
+    "sport": "tennis",
+    "home_team": "Djokovic",
+    "away_team": "Alcaraz",
+    "league": "Grass",
+    "confidence": 47.35507246376813,
+    "recommendation": "LEAN",
+    "edge": 0.47355072463768133,
+    "data_source": "baseline",
+    "market_line": 0.0,
+    "market_total": 0.0,
+    "full_result": {
+      "sport": "tennis",
+      "pre_match_edge": "DANGER: Djokovic fatigued (+80m)",
+      "pA_dr": 1.2985507246376813,
+      "pB_dr": 0.825,
+      "net_fatigue_minutes": 80,
+      "metadata": {
+        "predictor": "TennisPredictor",
+        "timestamp": "2026-06-19T02:44:33.213923"
+      }
+    }
+  }
+]

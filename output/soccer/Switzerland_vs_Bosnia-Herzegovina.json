@@ -34,10 +34,10 @@
     },
     "total": {
       "model_total_xg": 3.847,
-      "market_total": 2.5,
-      "edge": 1.347,
-      "confidence": 47.6,
-      "recommendation": "PASS"
+      "market_total": 0.0,
+      "edge": 3.847,
+      "confidence": 71.6,
+      "recommendation": "BET"
     },
     "btts": {
       "yes_probability": 0.546,

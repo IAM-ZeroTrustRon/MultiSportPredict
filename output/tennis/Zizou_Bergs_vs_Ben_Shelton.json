@@ -1,0 +1,80 @@
+{
+  "match": "Zizou Bergs vs Ben Shelton",
+  "tournament": "National Bank Open \u2014 Montreal",
+  "round": "Round of 32",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Zizou Bergs",
+    "away": "Ben Shelton",
+    "home_win_prob": 0.302,
+    "away_win_prob": 0.698,
+    "home_fair_odds": "+231",
+    "away_fair_odds": "-231",
+    "lean": "Ben Shelton",
+    "confidence": 79.7,
+    "recommendation": "PASS - Market efficient",
+    "edge_pct": 0.2
+  },
+  "sets": {
+    "over_35_prob": 0.443,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=44%",
+    "fav_spread_prob": 0.447,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=45% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.443,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.11,
+    "2-1": 0.147,
+    "0-2": 0.447,
+    "1-2": 0.296
+  },
+  "dominance_ratio": {
+    "Zizou Bergs": 0.9598,
+    "Ben Shelton": 1.2127
+  },
+  "elo_ratings": {
+    "Zizou Bergs": 1469.0,
+    "Ben Shelton": 1643.0
+  },
+  "match_counts": {
+    "Zizou Bergs": 9,
+    "Ben Shelton": 9
+  },
+  "recommendation": "PASS - Market efficient",
+  "confidence": 79.7,
+  "edge_pct": 0.2,
+  "notes": [
+    "Elo Ratings \u2014 Zizou Bergs: 1469 (9 matches) | Ben Shelton: 1643 (9 matches) on hard",
+    "DR: Zizou Bergs 0.960 | Ben Shelton 1.213",
+    "Surface: Hard | Format: Best of 3",
+    "Market prices Ben Shelton at 30.0% (+225/-275). Model edge vs market: +39.8%"
+  ],
+  "confidence_score": 29.6,
+  "confidence_tier": "PASS",
+  "surface": "hard",
+  "tournament_name": "National Bank Open \u2014 Montreal",
+  "home_player": "Zizou Bergs",
+  "away_player": "Ben Shelton",
+  "value_plays": {
+    "original_lean": "Shelton's serve monster + Bergs' live return -> one tight set likely; lean Over 22.5 and Shelton -3.5 games plus money",
+    "plays": {
+      "Spread (Shelton -3.5 games)": "+122",
+      "Total (Over 22.5 games)": "-108",
+      "Favorite (Shelton -1.5 Sets)": "-130 ballpark"
+    },
+    "deep_dive": {
+      "Target": "Ben Shelton -3.5 games / -1.5 sets",
+      "Angle": "Strongest serve of all three favorites (career 1st-win 76%)",
+      "Rationale": "Shelton YTD 14-5 on hard vs avg opp rank ~198; Bergs returns well (career 39%) but his wins are built vs avg opp rank ~453."
+    },
+    "model_view": {
+      "favorite": "Ben Shelton",
+      "notes": "Serve-dominant favorite; Over 22.5 has structural support",
+      "favorite_win_prob": 0.698
+    }
+  }
+}

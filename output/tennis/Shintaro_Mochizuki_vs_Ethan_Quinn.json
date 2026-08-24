@@ -1,0 +1,32 @@
+{
+  "match": "Shintaro Mochizuki vs Ethan Quinn",
+  "tournament": "Wimbledon",
+  "round": "Second Round",
+  "time_local": "10:20 AM EDT",
+  "model_type": "heuristic_narrative",
+  "moneyline": {
+    "home": "Shintaro Mochizuki",
+    "away": "Ethan Quinn",
+    "home_win_prob": 0.515,
+    "away_win_prob": 0.485,
+    "lean": "coin_flip",
+    "confidence": 53.0
+  },
+  "sets": {
+    "quinn_to_win_at_least_one_set_prob": 0.655,
+    "recommendation": "Quinn to win at least one set",
+    "alt": "Over sets (match to be competitive)"
+  },
+  "total_games": {
+    "total_games_line": 22.5,
+    "over_games_prob": 0.693,
+    "recommendation": "OVER 22.5",
+    "edge": 0.193
+  },
+  "notes": [
+    "Markets priced near coin-flip",
+    "Mochizuki slight baseline/rally edge on grass",
+    "Quinn\u2019s serve and time/tempo variance keeps him in sets",
+    "Expect longer, drawn-out match rather than a straight-sets breeze"
+  ]
+}

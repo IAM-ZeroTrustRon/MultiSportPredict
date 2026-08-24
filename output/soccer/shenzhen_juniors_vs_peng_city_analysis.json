@@ -1,0 +1,153 @@
+{
+  "game_info": {
+    "home_team": "Shenzhen Peng City",
+    "away_team": "Shenzhen Juniors",
+    "league": "Chinese Super League",
+    "date": "2026-06-19",
+    "venue": "Shenzhen Universiade Sports Centre",
+    "kickoff": "18:30 KST"
+  },
+  "tactical_analysis": {
+    "home_style": "High Possession / Overload (Wide Attack)",
+    "away_style": "Low Block / Counter",
+    "home_possession": 0.68,
+    "away_possession": 0.32
+  },
+  "team_stats": {
+    "home": {
+      "team_name": "Shenzhen Peng City",
+      "abbreviation": "SPC",
+      "possession_pct": 0.68,
+      "xg_for": 1.85,
+      "xg_against": 1.15,
+      "goals_for": 1.72,
+      "goals_against": 1.08,
+      "shots_per_game": 14.5,
+      "sot_per_game": 5.8,
+      "corners_per_game": 7.2,
+      "corners_conceded_per_game": 4.5,
+      "clean_sheets": 3,
+      "tempo": 0.15,
+      "width_crossing": 0.9,
+      "final_third_pressure": 0.85,
+      "recent_form": 0.65,
+      "home_record": 0.7,
+      "form_string": "W,W,W,L,W"
+    },
+    "away": {
+      "team_name": "Shenzhen Juniors",
+      "abbreviation": "SJ",
+      "possession_pct": 0.32,
+      "xg_for": 1.25,
+      "xg_against": 1.45,
+      "goals_for": 1.15,
+      "goals_against": 1.38,
+      "shots_per_game": 9.5,
+      "sot_per_game": 3.2,
+      "corners_per_game": 4.8,
+      "corners_conceded_per_game": 6.5,
+      "clean_sheets": 2,
+      "tempo": -0.2,
+      "width_crossing": 0.35,
+      "final_third_pressure": 0.45,
+      "recent_form": 0.45,
+      "away_record": 0.35,
+      "form_string": "L,D,L,W,D"
+    }
+  },
+  "projections": {
+    "home_goals": 3.52,
+    "away_goals": 2.53,
+    "total_goals": 6.05,
+    "home_corners": 9.2,
+    "away_corners": 3.6,
+    "total_corners": 12.8
+  },
+  "corners_analysis": {
+    "projected_total_corners": 12.8,
+    "projected_home_team_corners": 9.2,
+    "projected_away_team_corners": 3.6,
+    "market_total_line": 10.5,
+    "market_home_corners_line": 6.5,
+    "total_corners_edge": 2.3,
+    "home_corners_edge": 2.73,
+    "total_corners_recommendation": "Over 10.5",
+    "total_corners_confidence": 58.5,
+    "home_corners_recommendation": "Over 6.5",
+    "home_corners_confidence": 64.0,
+    "sharp_play": "Shenzhen Peng City - OVER 6.5 Team Corners",
+    "tactical_reasoning": "Peng City's extreme width (90%) and 68% possession vs. Juniors' low block forces crosses that are deflected/headed out (30% rate). Model projects 9.2 Peng City corners."
+  },
+  "goals_analysis": {
+    "market_total": 2.5,
+    "model_total": 6.05,
+    "edge": 3.55,
+    "over_25_prob": 0.94,
+    "over_35_prob": 0.854,
+    "confidence": 71.5,
+    "recommendation": "Over 2.5"
+  },
+  "moneyline_analysis": {
+    "home_win_prob": 0.669,
+    "draw_prob": 0.0,
+    "away_win_prob": 0.356,
+    "recommendation": "Moneyline Shenzhen Peng City"
+  },
+  "btts_analysis": {
+    "btts_probability": 0.75,
+    "recommendation": "Yes BTTS"
+  },
+  "player_props": [
+    {
+      "player_name": "Wesley",
+      "team": "Shenzhen Peng City",
+      "position": "FW",
+      "base_shots_90": 3.2,
+      "base_sot_90": 1.65,
+      "low_block_modifier_shots": 0.2,
+      "low_block_modifier_sot": -0.2,
+      "proj_total_shots": 3.84,
+      "proj_sot": 1.32,
+      "edge_rating": 9.4,
+      "classification": "Elite",
+      "recommendation": "OVER 1.5 SoT or Anytime Goalscorer - Wesley"
+    },
+    {
+      "player_name": "Albion Ademi",
+      "team": "Shenzhen Peng City",
+      "position": "AM",
+      "base_shots_90": 2.45,
+      "base_sot_90": 1.1,
+      "low_block_modifier_shots": 0.2,
+      "low_block_modifier_sot": -0.2,
+      "proj_total_shots": 2.94,
+      "proj_sot": 0.84,
+      "edge_rating": 7.3,
+      "classification": "Elite",
+      "recommendation": "OVER 1.5 SoT or Anytime Goalscorer - Albion Ademi"
+    },
+    {
+      "player_name": "D. Owusu-Sekyere",
+      "team": "Shenzhen Peng City",
+      "position": "RW",
+      "base_shots_90": 2.1,
+      "base_sot_90": 0.85,
+      "low_block_modifier_shots": 0.2,
+      "low_block_modifier_sot": -0.3,
+      "proj_total_shots": 2.52,
+      "proj_sot": 0.45,
+      "edge_rating": 5.9,
+      "classification": "Strong",
+      "recommendation": "Consider D. Owusu-Sekyere SoT Over"
+    }
+  ],
+  "recommendations": {
+    "match_result": "Moneyline Shenzhen Peng City",
+    "total_goals": "Over 2.5",
+    "btts": "Yes BTTS",
+    "total_corners": "Over 10.5",
+    "home_team_corners": "Over 6.5",
+    "sharp_play": "Shenzhen Peng City - OVER 6.5 Team Corners"
+  },
+  "timestamp": "2026-06-18T23:04:51.725317"
+}

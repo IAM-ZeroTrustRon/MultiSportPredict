@@ -1,0 +1,410 @@
+[
+  {
+    "ts": "2026-06-28T16:20:14.225227Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T16:20:41.684171Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T16:21:00.390200Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T16:22:11.755609Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T16:22:21.182222Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T16:22:42.151628Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T16:23:03.228934Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T17:47:47.513353Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T17:48:04.611629Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T17:48:24.194374Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T17:51:40.276708Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  },
+  {
+    "ts": "2026-06-28T17:51:57.270059Z",
+    "league": "Baloncesto Superior Nacional",
+    "date": "2026-06-12",
+    "home_team": "Osos de Manat\u00ed",
+    "away_team": "Vaqueros de Bayam\u00f3n",
+    "moneyline_home_prob": 0.535,
+    "total_over_prob": 0.612,
+    "projected_total": 187.4,
+    "projected_home": 100.3,
+    "projected_away": 87.1,
+    "details": {
+      "baseline": "Osos de Manat\u00ed 98-93 Vaqueros de Bayam\u00f3n",
+      "three_point": {
+        "Manat\u00ed": "50% (12/24)",
+        "Bayam\u00f3n": "37% (10/27)"
+      },
+      "rebounds": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "turnovers": {
+        "Bayam\u00f3n_turnovers": 15,
+        "Manat\u00ed_turnovers": 11
+      }
+    },
+    "source": "provided_market_inputs",
+    "files_written": [
+      "output\\basketball\\Osos_de_Manat\u00ed_vs_Vaqueros_de_Bayam\u00f3n_2026-06-12.json"
+    ]
+  }
+]

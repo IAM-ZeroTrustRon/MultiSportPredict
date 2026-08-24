@@ -1,0 +1,56 @@
+{
+  "match": "Andrey Rublev vs Nuno Borges",
+  "tournament": "ATP Masters 1000 Cincinnati",
+  "round": "Round of 32",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Andrey Rublev",
+    "away": "Nuno Borges",
+    "home_win_prob": 0.4144,
+    "away_win_prob": 0.5856,
+    "home_fair_odds": "+141",
+    "away_fair_odds": "-141",
+    "lean": "Nuno Borges",
+    "confidence": 62.8,
+    "recommendation": "PASS - Market efficient",
+    "edge_pct": -36.3
+  },
+  "sets": {
+    "over_35_prob": 0.489,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=49%",
+    "fav_spread_prob": 0.328,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=33% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.489,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.183,
+    "2-1": 0.209,
+    "0-2": 0.328,
+    "1-2": 0.28
+  },
+  "dominance_ratio": {
+    "Andrey Rublev": 0.9175,
+    "Nuno Borges": 1.0
+  },
+  "elo_ratings": {
+    "Andrey Rublev": 1434.0,
+    "Nuno Borges": 1500.0
+  },
+  "match_counts": {
+    "Andrey Rublev": 10,
+    "Nuno Borges": 0
+  },
+  "recommendation": "PASS - Market efficient",
+  "confidence": 62.8,
+  "edge_pct": -36.3,
+  "notes": [
+    "Elo Ratings \u2014 Andrey Rublev: 1434 (10 matches) | Nuno Borges: 1500 (0 matches) on hard",
+    "DR: Andrey Rublev 0.917 | Nuno Borges 1.000",
+    "Surface: Hard | Format: Best of 3",
+    "Market prices Nuno Borges at 77.8% (-350/+280). Model edge vs market: -19.2%"
+  ]
+}

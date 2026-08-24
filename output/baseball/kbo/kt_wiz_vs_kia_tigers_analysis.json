@@ -1,0 +1,139 @@
+{
+  "game_info": {
+    "home_team": "KT Wiz",
+    "away_team": "Kia Tigers",
+    "league": "KBO",
+    "date": "2026-06-19",
+    "venue": "Suwon KT Wiz Park"
+  },
+  "team_stats": {
+    "home": {
+      "team_name": "KT Wiz",
+      "abbreviation": "KTW",
+      "runs_per_game": 5.2,
+      "runs_allowed_per_game": 4.4,
+      "batting_avg": 0.275,
+      "on_base_pct": 0.345,
+      "slugging_pct": 0.43,
+      "ops": 0.775,
+      "home_runs_per_game": 1.2,
+      "strikeouts_per_game": 7.5,
+      "walks_per_game": 3.8,
+      "hits_per_game": 9.5,
+      "era": 3.95,
+      "whip": 1.28,
+      "quality_start_pct": 0.52,
+      "bullpen_era": 3.8,
+      "recent_form": 0.55,
+      "home_record": 0.6,
+      "vs_opponent_record": 0.52,
+      "first_inning_runs_scored": 0.45,
+      "first_inning_runs_allowed": 0.35,
+      "starting_pitcher_era": 3.8,
+      "starting_pitcher_first_inning_era": 4.5
+    },
+    "away": {
+      "team_name": "Kia Tigers",
+      "abbreviation": "KIA",
+      "runs_per_game": 5.0,
+      "runs_allowed_per_game": 4.6,
+      "batting_avg": 0.27,
+      "on_base_pct": 0.338,
+      "slugging_pct": 0.42,
+      "ops": 0.758,
+      "home_runs_per_game": 1.0,
+      "strikeouts_per_game": 8.0,
+      "walks_per_game": 3.5,
+      "hits_per_game": 9.3,
+      "era": 4.3,
+      "whip": 1.35,
+      "quality_start_pct": 0.48,
+      "bullpen_era": 4.1,
+      "recent_form": 0.5,
+      "away_record": 0.45,
+      "vs_opponent_record": 0.48,
+      "first_inning_runs_scored": 0.4,
+      "first_inning_runs_allowed": 0.5,
+      "starting_pitcher_era": 4.2,
+      "starting_pitcher_first_inning_era": 5.1
+    }
+  },
+  "projections": {
+    "home_runs": 4.37,
+    "away_runs": 3.24,
+    "total_runs": 7.61,
+    "home_win_prob": 0.608,
+    "away_win_prob": 0.392
+  },
+  "totals_analysis": {
+    "over_75_prob": 0.491,
+    "over_85_prob": 0.353,
+    "over_95_prob": 0.236,
+    "over_105_prob": 0.147,
+    "market_total": 9.5,
+    "model_total": 7.61,
+    "edge": -1.89,
+    "over_probability": 0.236,
+    "confidence": 0.0,
+    "recommendation": "Under 9.5"
+  },
+  "run_line_analysis": {
+    "model_spread": 1.13,
+    "market_line": -1.5,
+    "edge": 2.63,
+    "cover_probability": 0.755,
+    "confidence": 65.5,
+    "recommendation": "BET"
+  },
+  "moneyline_analysis": {
+    "home_win_prob": 0.608,
+    "away_win_prob": 0.392,
+    "recommendation": "Moneyline KT Wiz"
+  },
+  "yrfi_nrfi_analysis": {
+    "yrfi_probability": 0.726,
+    "nrfi_probability": 0.274,
+    "recommendation": "YRFI",
+    "confidence": 72.6,
+    "home_yrfi_prob": 0.639,
+    "away_yrfi_prob": 0.489,
+    "combined_expected_runs_1st": 1.13
+  },
+  "player_props": {
+    "home_top_hitter": {
+      "total_bases": {
+        "projection": 1.72,
+        "line": 1.5,
+        "edge": 0.22,
+        "lean": "Over"
+      },
+      "hits": {
+        "projection": 1.1,
+        "line": 0.5,
+        "edge": 0.6,
+        "lean": "Over"
+      }
+    },
+    "away_top_hitter": {
+      "total_bases": {
+        "projection": 1.6,
+        "line": 1.5,
+        "edge": 0.1,
+        "lean": "Over"
+      },
+      "hits": {
+        "projection": 1.03,
+        "line": 0.5,
+        "edge": 0.53,
+        "lean": "Over"
+      }
+    }
+  },
+  "recommendations": {
+    "run_line": "BET",
+    "total": "Under 9.5",
+    "moneyline": "Moneyline KT Wiz",
+    "yrfi_nrfi": "YRFI"
+  },
+  "timestamp": "2026-06-18T23:00:40.328301"
+}

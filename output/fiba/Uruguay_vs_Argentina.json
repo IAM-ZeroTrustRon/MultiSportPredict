@@ -1,0 +1,79 @@
+{
+  "fg": {
+    "projected_home": 86.9,
+    "projected_away": 74.5,
+    "projected_total": 161.5,
+    "projected_spread": 12.400000000000006,
+    "home_win_prob": 0.4462,
+    "away_win_prob": 0.5538000000000001,
+    "model_edge": 4.36,
+    "lean": "Pass"
+  },
+  "q1": {
+    "projected_home": 20.4,
+    "projected_away": 20.2,
+    "projected_total": 40.6,
+    "projected_spread": 0.3,
+    "home_win_prob": 0.515,
+    "away_win_prob": 0.485
+  },
+  "h1": {
+    "projected_home": 39.7,
+    "projected_away": 39.6,
+    "projected_total": 79.3,
+    "projected_spread": 0.1,
+    "home_win_prob": 0.504,
+    "away_win_prob": 0.496
+  },
+  "bets": {
+    "fg_spread": {
+      "decision": "LEAN",
+      "edge": 22.9,
+      "projected": 12.4,
+      "market": -10.5
+    },
+    "fg_total": {
+      "decision": "BET",
+      "edge": 6.5,
+      "projected": 161.5,
+      "market": 155.0
+    },
+    "h1_spread": {
+      "decision": "LEAN",
+      "edge": 5.35,
+      "projected": 0.1,
+      "market": -5.25
+    },
+    "h1_total": {
+      "decision": "PASS",
+      "edge": 1.8,
+      "projected": 79.3,
+      "market": 77.5
+    },
+    "q1_spread": {
+      "decision": "LEAN",
+      "edge": 2.92,
+      "projected": 0.3,
+      "market": -2.625
+    },
+    "q1_total": {
+      "decision": "PASS",
+      "edge": 0.3,
+      "projected": 40.6,
+      "market": 40.300000000000004
+    }
+  },
+  "meta": {
+    "home_team": "Uruguay",
+    "away_team": "Argentina",
+    "league": "FIBA Americas",
+    "date": "2026-07-02",
+    "venue": "Estadio Antel Montevideo",
+    "market_data": {
+      "spread": -10.5,
+      "open_line": -10.5,
+      "current_line": -10.5,
+      "total": 155.0
+    }
+  }
+}

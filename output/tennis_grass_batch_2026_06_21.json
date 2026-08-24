@@ -1,0 +1,130 @@
+{
+  "timestamp": "2026-06-21T22:06:06.020004",
+  "results": [
+    {
+      "event": "Wimbledon Men's Singles Qualification",
+      "player_a": "Anton Matusevich",
+      "player_b": "Rei Sakamoto",
+      "a_win_prob": 0.5118,
+      "b_win_prob": 0.4882,
+      "model_favorite": "Anton Matusevich",
+      "model_edge_vs_market_pct": -4.82,
+      "recommendation_ml": "PASS ML",
+      "confidence_ml": 51.4,
+      "over_games_prob": null,
+      "over_games_line": null,
+      "recommendation_total": null,
+      "confidence_total": null,
+      "strong_bets": []
+    },
+    {
+      "event": "Lexus Eastbourne Open (R32)",
+      "player_a": "Brandon Nakashima",
+      "player_b": "Jack Draper",
+      "a_win_prob": 0.2722,
+      "b_win_prob": 0.7278,
+      "model_favorite": "Jack Draper",
+      "model_edge_vs_market_pct": 11.78,
+      "recommendation_ml": "BET Jack Draper ML",
+      "confidence_ml": 77.3,
+      "over_games_prob": 0.7835,
+      "over_games_line": 22.5,
+      "recommendation_total": "BET OVER 22.5 games",
+      "confidence_total": 84.0,
+      "strong_bets": [
+        {
+          "market": "Moneyline",
+          "pick": "Jack Draper",
+          "prob": 72.8,
+          "confidence": 77.3,
+          "edge_vs_market": 11.8
+        },
+        {
+          "market": "Total Games O22.5",
+          "pick": "Over 22.5",
+          "prob": 78.4,
+          "confidence": 84.0,
+          "edge_vs_market": null
+        }
+      ]
+    },
+    {
+      "event": "Grass Court Swing",
+      "player_a": "Jan Choinski",
+      "player_b": "Alexei Popyrin",
+      "a_win_prob": 0.2491,
+      "b_win_prob": 0.7509,
+      "model_favorite": "Alexei Popyrin",
+      "model_edge_vs_market_pct": 15.09,
+      "recommendation_ml": "BET Alexei Popyrin ML",
+      "confidence_ml": 80.1,
+      "over_games_prob": null,
+      "over_games_line": null,
+      "recommendation_total": null,
+      "confidence_total": null,
+      "strong_bets": [
+        {
+          "market": "Moneyline",
+          "pick": "Alexei Popyrin",
+          "prob": 75.1,
+          "confidence": 80.1,
+          "edge_vs_market": 15.1
+        }
+      ]
+    },
+    {
+      "event": "Mallorca Championships",
+      "player_a": "Corentin Moutet",
+      "player_b": "Marton Fucsovics",
+      "a_win_prob": 0.2821,
+      "b_win_prob": 0.7179,
+      "model_favorite": "Marton Fucsovics",
+      "model_edge_vs_market_pct": 13.79,
+      "recommendation_ml": "BET Marton Fucsovics ML",
+      "confidence_ml": 76.1,
+      "over_games_prob": null,
+      "over_games_line": null,
+      "recommendation_total": null,
+      "confidence_total": null,
+      "strong_bets": [
+        {
+          "market": "Moneyline",
+          "pick": "Marton Fucsovics",
+          "prob": 71.8,
+          "confidence": 76.1,
+          "edge_vs_market": 13.8
+        }
+      ]
+    }
+  ],
+  "strong_bets": [
+    {
+      "market": "Moneyline",
+      "pick": "Jack Draper",
+      "prob": 72.8,
+      "confidence": 77.3,
+      "edge_vs_market": 11.8
+    },
+    {
+      "market": "Total Games O22.5",
+      "pick": "Over 22.5",
+      "prob": 78.4,
+      "confidence": 84.0,
+      "edge_vs_market": null
+    },
+    {
+      "market": "Moneyline",
+      "pick": "Alexei Popyrin",
+      "prob": 75.1,
+      "confidence": 80.1,
+      "edge_vs_market": 15.1
+    },
+    {
+      "market": "Moneyline",
+      "pick": "Marton Fucsovics",
+      "prob": 71.8,
+      "confidence": 76.1,
+      "edge_vs_market": 13.8
+    }
+  ]
+}

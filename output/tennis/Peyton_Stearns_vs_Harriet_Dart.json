@@ -1,0 +1,78 @@
+{
+  "match": "Peyton Stearns vs Harriet Dart",
+  "tournament": "Cincinnati Open (WTA)",
+  "round": "Round of 128",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Peyton Stearns",
+    "away": "Harriet Dart",
+    "home_win_prob": 0.4144,
+    "away_win_prob": 0.5856,
+    "home_fair_odds": "+141",
+    "away_fair_odds": "-141",
+    "lean": "Harriet Dart",
+    "confidence": 62.8,
+    "recommendation": "Model Prob: 41.4%",
+    "edge_pct": -8.6
+  },
+  "sets": {
+    "over_35_prob": 0.489,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=49%",
+    "fav_spread_prob": 0.328,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=33% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.489,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.183,
+    "2-1": 0.209,
+    "0-2": 0.328,
+    "1-2": 0.28
+  },
+  "dominance_ratio": {
+    "Peyton Stearns": 0.9958,
+    "Harriet Dart": 1.0958
+  },
+  "elo_ratings": {
+    "Peyton Stearns": 1497.0,
+    "Harriet Dart": 1569.0
+  },
+  "match_counts": {
+    "Peyton Stearns": 9,
+    "Harriet Dart": 8
+  },
+  "recommendation": "Model Prob: 41.4%",
+  "confidence": 62.8,
+  "edge_pct": -8.6,
+  "notes": [
+    "Elo Ratings \u2014 Peyton Stearns: 1497 (9 matches) | Harriet Dart: 1569 (8 matches) on hard",
+    "DR: Peyton Stearns 0.996 | Harriet Dart 1.096",
+    "Surface: Hard | Format: Best of 3"
+  ],
+  "confidence_score": 80.6,
+  "confidence_tier": "STRONG BET",
+  "surface": "hard",
+  "tournament_name": "Cincinnati Open (WTA)",
+  "home_player": "Peyton Stearns",
+  "away_player": "Harriet Dart",
+  "value_plays": {
+    "original_lean": "Dart's defensive baseline frustrates Stearns' power; expect a tight, multi-set battle.",
+    "plays": {
+      "Total Sets (Over 2.5)": "STRONG \u2014 previous 3-set H2H, contrasting styles",
+      "Set Spread (Dart +1.5 Sets)": "Secondary \u2014 Dart's return edge"
+    },
+    "deep_dive": {
+      "Target": "Over 2.5 Sets (3-set match)",
+      "Angle": "Dart +1.5 Sets as secondary",
+      "Rationale": "2021 US Open Qualifier went 3 sets (6-3, 4-6, 6-3). Dart saved 9/13 break points (69%) and converted 6/11 break points vs Stearns' 4/13. Stearns is a heavier hitter now but Dart's counter-punching can frustrate aggressive players. Straight-sets for either holds lower probability value."
+    },
+    "model_view": {
+      "favorite": "Harriet Dart",
+      "favorite_win_prob": 0.5856,
+      "notes": "Elo model slightly favors Dart on hard courts given H2H and return metrics; total sets model leans OVER 2.5."
+    }
+  }
+}

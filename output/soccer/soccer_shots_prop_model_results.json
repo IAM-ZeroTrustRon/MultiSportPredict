@@ -1,0 +1,88 @@
+{
+  "training_results": {
+    "accuracy": 0.83,
+    "precision": 0.879746835443038,
+    "feature_importance": {
+      "player_sot_per_90": 0.28671249747276306,
+      "shot_accuracy_pct": 0.0579521618783474,
+      "opp_sot_allowed": 0.06605789065361023,
+      "touches_in_box": 0.11171072721481323,
+      "is_low_block": 0.10725156217813492,
+      "is_home_game": 0.08183305710554123,
+      "possession_against": 0.08179444819688797,
+      "defensive_width": 0.07714679837226868,
+      "xg_for": 0.06236644461750984,
+      "recent_form": 0.06717447936534882
+    },
+    "classification_report": {
+      "0": {
+        "precision": 0.6428571428571429,
+        "recall": 0.5869565217391305,
+        "f1-score": 0.6136363636363636,
+        "support": 46.0
+      },
+      "1": {
+        "precision": 0.879746835443038,
+        "recall": 0.9025974025974026,
+        "f1-score": 0.8910256410256411,
+        "support": 154.0
+      },
+      "accuracy": 0.83,
+      "macro avg": {
+        "precision": 0.7613019891500905,
+        "recall": 0.7447769621682665,
+        "f1-score": 0.7523310023310024,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.8252622061482822,
+        "recall": 0.83,
+        "f1-score": 0.8272261072261072,
+        "support": 200.0
+      }
+    }
+  },
+  "metadata": {
+    "trained_at": "2026-06-19T01:09:26.157957",
+    "n_samples": 1000,
+    "accuracy": 0.83,
+    "precision": 0.8797,
+    "features": [
+      "player_sot_per_90",
+      "shot_accuracy_pct",
+      "opp_sot_allowed",
+      "touches_in_box",
+      "is_low_block",
+      "is_home_game",
+      "possession_against",
+      "defensive_width",
+      "xg_for",
+      "recent_form"
+    ],
+    "feature_importance": {
+      "player_sot_per_90": 0.28671249747276306,
+      "shot_accuracy_pct": 0.0579521618783474,
+      "opp_sot_allowed": 0.06605789065361023,
+      "touches_in_box": 0.11171072721481323,
+      "is_low_block": 0.10725156217813492,
+      "is_home_game": 0.08183305710554123,
+      "possession_against": 0.08179444819688797,
+      "defensive_width": 0.07714679837226868,
+      "xg_for": 0.06236644461750984,
+      "recent_form": 0.06717447936534882
+    }
+  },
+  "feature_importance": {
+    "player_sot_per_90": 0.28671249747276306,
+    "shot_accuracy_pct": 0.0579521618783474,
+    "opp_sot_allowed": 0.06605789065361023,
+    "touches_in_box": 0.11171072721481323,
+    "is_low_block": 0.10725156217813492,
+    "is_home_game": 0.08183305710554123,
+    "possession_against": 0.08179444819688797,
+    "defensive_width": 0.07714679837226868,
+    "xg_for": 0.06236644461750984,
+    "recent_form": 0.06717447936534882
+  },
+  "timestamp": "2026-06-19T01:09:26.184968"
+}

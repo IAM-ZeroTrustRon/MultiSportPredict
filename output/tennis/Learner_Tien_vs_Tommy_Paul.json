@@ -1,0 +1,80 @@
+{
+  "match": "Learner Tien vs Tommy Paul",
+  "tournament": "National Bank Open \u2014 Montreal",
+  "round": "Round of 32",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Learner Tien",
+    "away": "Tommy Paul",
+    "home_win_prob": 0.4445,
+    "away_win_prob": 0.5555,
+    "home_fair_odds": "+125",
+    "away_fair_odds": "-125",
+    "lean": "Tommy Paul",
+    "confidence": 58.3,
+    "recommendation": "LEAN Home ML (edge: +2.4%)",
+    "edge_pct": 2.4
+  },
+  "sets": {
+    "over_35_prob": 0.496,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=50%",
+    "fav_spread_prob": 0.299,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=30% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.496,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.205,
+    "2-1": 0.224,
+    "0-2": 0.299,
+    "1-2": 0.271
+  },
+  "dominance_ratio": {
+    "Learner Tien": 1.0151,
+    "Tommy Paul": 1.0797
+  },
+  "elo_ratings": {
+    "Learner Tien": 1511.0,
+    "Tommy Paul": 1558.0
+  },
+  "match_counts": {
+    "Learner Tien": 9,
+    "Tommy Paul": 9
+  },
+  "recommendation": "LEAN Home ML (edge: +2.4%)",
+  "confidence": 58.3,
+  "edge_pct": 2.4,
+  "notes": [
+    "Elo Ratings \u2014 Learner Tien: 1511 (9 matches) | Tommy Paul: 1558 (9 matches) on hard",
+    "DR: Learner Tien 1.015 | Tommy Paul 1.080",
+    "Surface: Hard | Format: Best of 3",
+    "Market prices Tommy Paul at 42.0% (+140/-165). Model edge vs market: +13.6%"
+  ],
+  "confidence_score": 63.0,
+  "confidence_tier": "BET",
+  "surface": "hard",
+  "tournament_name": "National Bank Open \u2014 Montreal",
+  "home_player": "Learner Tien",
+  "away_player": "Tommy Paul",
+  "value_plays": {
+    "original_lean": "Closest of the three \u2014 Tien's elite return + pressure profile (TB 66%, deciding sets 75%) makes him the most dangerous dog; lean Over 22.5 and TB Yes",
+    "plays": {
+      "Total (Over 22.5 games)": "-110",
+      "Tiebreak (Yes, any set)": "value play",
+      "Dog (Tien ML +140)": "small positive-EV if pressure model weighted"
+    },
+    "deep_dive": {
+      "Target": "Over 22.5 games / Tien +1.5 sets live dog",
+      "Angle": "Tien is the elite returner + best pressure player across all three",
+      "Rationale": "Prior H2H at Delray was extremely close (4-6 6-4 6-3); Tien won Washington coming in; Paul has the serve and schedule edge but Tien neutralizes with return quality."
+    },
+    "model_view": {
+      "favorite": "Tommy Paul",
+      "notes": "Most balanced match; Tien is the most dangerous dog of the trio",
+      "favorite_win_prob": 0.5555
+    }
+  }
+}

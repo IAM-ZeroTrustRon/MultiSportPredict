@@ -1,0 +1,75 @@
+{
+  "match": "Daniil Medvedev vs Brandon Nakashima",
+  "tournament": "ATP Cincinnati Open",
+  "round": "Round 3",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Daniil Medvedev",
+    "away": "Brandon Nakashima",
+    "home_win_prob": 0.5464,
+    "away_win_prob": 0.4536,
+    "home_fair_odds": "-120",
+    "away_fair_odds": "+120",
+    "lean": "Daniil Medvedev",
+    "confidence": 57.0,
+    "recommendation": "Model Prob: 54.6%",
+    "edge_pct": 4.6
+  },
+  "sets": {
+    "over_35_prob": 0.497,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=50%",
+    "fav_spread_prob": 0.291,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=29% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.497,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.291,
+    "2-1": 0.268,
+    "0-2": 0.212,
+    "1-2": 0.229
+  },
+  "dominance_ratio": {
+    "Daniil Medvedev": 0.9983,
+    "Brandon Nakashima": 0.9411
+  },
+  "elo_ratings": {
+    "Daniil Medvedev": 1499.0,
+    "Brandon Nakashima": 1454.0
+  },
+  "match_counts": {
+    "Daniil Medvedev": 13,
+    "Brandon Nakashima": 2
+  },
+  "recommendation": "Model Prob: 54.6%",
+  "confidence": 57.0,
+  "edge_pct": 4.6,
+  "notes": [
+    "Elo Ratings \u2014 Daniil Medvedev: 1499 (13 matches) | Brandon Nakashima: 1454 (2 matches) on hard",
+    "DR: Daniil Medvedev 0.998 | Brandon Nakashima 0.941",
+    "Surface: Hard | Format: Best of 3"
+  ],
+  "confidence_score": 76.2,
+  "confidence_tier": "STRONG BET",
+  "surface": "hard",
+  "tournament_name": "ATP Cincinnati Open",
+  "home_player": "Daniil Medvedev",
+  "away_player": "Brandon Nakashima",
+  "value_plays": {
+    "original_lean": "Dry-run based on Elo.",
+    "plays": {},
+    "deep_dive": {
+      "Target": "Model edge from Elo",
+      "Angle": "Elo surface rating dry-run",
+      "Rationale": "No market odds available; model dry-run."
+    },
+    "model_view": {
+      "favorite": "Daniil Medvedev",
+      "notes": "Model computed from Elo surface data.",
+      "favorite_win_prob": 0.5464
+    }
+  }
+}

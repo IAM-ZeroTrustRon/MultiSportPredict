@@ -1,0 +1,75 @@
+{
+  "match": "Nuno Borges vs Andrey Rublev",
+  "tournament": "ATP Cincinnati Open",
+  "round": "Round 3",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Nuno Borges",
+    "away": "Andrey Rublev",
+    "home_win_prob": 0.5856,
+    "away_win_prob": 0.4144,
+    "home_fair_odds": "-141",
+    "away_fair_odds": "+141",
+    "lean": "Nuno Borges",
+    "confidence": 62.8,
+    "recommendation": "Model Prob: 58.6%",
+    "edge_pct": 8.6
+  },
+  "sets": {
+    "over_35_prob": 0.489,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=49%",
+    "fav_spread_prob": 0.328,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=33% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.489,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.328,
+    "2-1": 0.28,
+    "0-2": 0.183,
+    "1-2": 0.209
+  },
+  "dominance_ratio": {
+    "Nuno Borges": 1.0,
+    "Andrey Rublev": 0.9175
+  },
+  "elo_ratings": {
+    "Nuno Borges": 1500.0,
+    "Andrey Rublev": 1434.0
+  },
+  "match_counts": {
+    "Nuno Borges": 0,
+    "Andrey Rublev": 10
+  },
+  "recommendation": "Model Prob: 58.6%",
+  "confidence": 62.8,
+  "edge_pct": 8.6,
+  "notes": [
+    "Elo Ratings \u2014 Nuno Borges: 1500 (0 matches) | Andrey Rublev: 1434 (10 matches) on hard",
+    "DR: Nuno Borges 1.000 | Andrey Rublev 0.917",
+    "Surface: Hard | Format: Best of 3"
+  ],
+  "confidence_score": 80.6,
+  "confidence_tier": "STRONG BET",
+  "surface": "hard",
+  "tournament_name": "ATP Cincinnati Open",
+  "home_player": "Nuno Borges",
+  "away_player": "Andrey Rublev",
+  "value_plays": {
+    "original_lean": "Rublev is the higher-ranked seed with more surface form; Borges is a solid hard-court player, but the model sees a dry edge.",
+    "plays": {},
+    "deep_dive": {
+      "Target": "El-Model dry-run recommendation based on surface Elo.",
+      "Angle": "Elo surface gap + seeded form",
+      "Rationale": "No market odds available for automated pipeline in this environment; treating market as efficient."
+    },
+    "model_view": {
+      "favorite": "Nuno Borges",
+      "notes": "Confidence computed from model-vs-market edge (market prob defaults 50%).",
+      "favorite_win_prob": 0.5856
+    }
+  }
+}

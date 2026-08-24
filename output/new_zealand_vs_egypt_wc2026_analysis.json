@@ -1,0 +1,141 @@
+{
+  "match": {
+    "home": "New Zealand",
+    "away": "Egypt",
+    "competition": "FIFA World Cup 2026",
+    "group": "G",
+    "venue": "BC Place, Vancouver",
+    "status": "LIVE — 13th Minute, 0-0",
+    "date": "2026-06-21"
+  },
+  "projections": {
+    "nz_xg": 1.17,
+    "egypt_xg": 1.69,
+    "total_xg": 2.86,
+    "nz_win_prob": 0.248,
+    "draw_prob": 0.215,
+    "egypt_win_prob": 0.537
+  },
+  "goals": {
+    "over_15": 0.779,
+    "over_25": 0.544,
+    "over_35": 0.321,
+    "lean": "Pass",
+    "confidence_pct": 70.1
+  },
+  "btts": {
+    "probability": 0.489,
+    "confidence": 6.7,
+    "lean": "Pass"
+  },
+  "corners": {
+    "projected": 10.1,
+    "over_85": 0.681,
+    "over_95": 0.558,
+    "over_105": 0.433
+  },
+  "player_props": [
+    {
+      "name": "Mohamed Salah",
+      "team": "Egypt",
+      "odds": "+340",
+      "implied": 0.227,
+      "player_xg": 0.591,
+      "anytime_prob": 0.446,
+      "first_goal_prob": 0.195,
+      "edge_pct": -3.2,
+      "rec": "overpriced"
+    },
+    {
+      "name": "Omar Marmoush",
+      "team": "Egypt",
+      "odds": "+500",
+      "implied": 0.167,
+      "player_xg": 0.473,
+      "anytime_prob": 0.377,
+      "first_goal_prob": 0.156,
+      "edge_pct": -1.1,
+      "rec": "fair value"
+    },
+    {
+      "name": "Chris Wood",
+      "team": "New Zealand",
+      "odds": "+800",
+      "implied": 0.111,
+      "player_xg": 0.49,
+      "anytime_prob": 0.388,
+      "first_goal_prob": 0.162,
+      "edge_pct": 5.1,
+      "rec": "VALUE BET"
+    },
+    {
+      "name": "Emam Ashour",
+      "team": "Egypt",
+      "odds": "+1000",
+      "implied": 0.091,
+      "player_xg": 0.304,
+      "anytime_prob": 0.262,
+      "first_goal_prob": 0.1,
+      "edge_pct": 0.9,
+      "rec": "slight value"
+    },
+    {
+      "name": "Elijah Just",
+      "team": "New Zealand",
+      "odds": "+1100",
+      "implied": 0.083,
+      "player_xg": 0.292,
+      "anytime_prob": 0.253,
+      "first_goal_prob": 0.096,
+      "edge_pct": 1.3,
+      "rec": "slight value"
+    }
+  ],
+  "strong_bets": [
+    {
+      "name": "📐 Corners Over 8.5",
+      "prob": 68.1,
+      "edge": "Projected 10.1 corners | Egypt pressing for 1st WC win"
+    },
+    {
+      "name": "👤 Chris Wood First Goal (+800)",
+      "prob": 16.2,
+      "edge": "Model 16.2% vs implied 11.1% (+5.1%)"
+    }
+  ],
+  "medium_bets": [
+    {
+      "name": "⚽ Over 2.5 Goals (+122)",
+      "prob": 54.4,
+      "edge": "Model 54.4% vs implied 45.2%"
+    },
+    {
+      "name": "👤 Emam Ashour First Goal (+1000)",
+      "prob": 10.0,
+      "edge": "Model 10.0% vs implied 9.1% (+0.9%)"
+    },
+    {
+      "name": "👤 Elijah Just First Goal (+1100)",
+      "prob": 9.6,
+      "edge": "Model 9.6% vs implied 8.3% (+1.3%)"
+    }
+  ],
+  "pass_bets": [
+    {
+      "name": "🇪🇬 Egypt ML (-175)",
+      "prob": 53.7,
+      "edge": "Market slightly overprices Egypt; no edge"
+    },
+    {
+      "name": "👤 Mohamed Salah First Goal (+340)",
+      "prob": 19.5,
+      "edge": "overpriced"
+    },
+    {
+      "name": "👤 Omar Marmoush First Goal (+500)",
+      "prob": 15.6,
+      "edge": "fair value"
+    }
+  ],
+  "timestamp": "2026-06-21T21:22:06.126096"
+}

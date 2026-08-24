@@ -1,0 +1,76 @@
+{
+  "match": "Mexico vs England",
+  "competition": "FIFA World Cup 2026",
+  "timestamp": "2026-07-04T14:38:37.559976",
+  "team_metrics": {
+    "mexico": {
+      "xg_for": 1.45,
+      "xg_against": 1.1,
+      "shots": 12.5,
+      "sot": 4.8,
+      "goals_for": 1.5,
+      "goals_against": 1.05,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.4,
+      "width_crossing": 0.65,
+      "final_third_pressure": 0.7,
+      "corners_for": 5.5,
+      "corners_against": 4.2,
+      "possession_pct": 56.5,
+      "corner_gen_style": "possession"
+    },
+    "england": {
+      "xg_for": 2.1,
+      "xg_against": 0.85,
+      "shots": 15.5,
+      "sot": 5.8,
+      "goals_for": 2.2,
+      "goals_against": 0.8,
+      "clean_sheets": 5,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.4,
+      "width_crossing": 0.65,
+      "final_third_pressure": 0.7,
+      "corners_for": 6.5,
+      "corners_against": 3.5,
+      "possession_pct": 60.5,
+      "corner_gen_style": "possession"
+    }
+  },
+  "goal_strength": {
+    "mexico": 0.93,
+    "england": 2.41
+  },
+  "projections": {
+    "mexico_goals": 1.95,
+    "england_goals": 2.4,
+    "total_goals": 4.35,
+    "btts_probability": 0.6659,
+    "corner_total": 10.9
+  },
+  "match_outcome": {
+    "mexico_win": 0.4791,
+    "draw": 0.4133,
+    "england_win": 0.1076
+  },
+  "goal_probabilities": {
+    "over_05": 0.987,
+    "over_15": 0.9307,
+    "over_25": 0.8083,
+    "over_35": 0.631,
+    "over_45": 0.4384
+  },
+  "recommendations": {
+    "best_bet_1": "Mexico or Draw (89%)",
+    "best_bet_2": "Over 2.5 (81%)",
+    "best_bet_3": "Yes (67%)"
+  },
+  "overall_confidence": "HIGH"
+}

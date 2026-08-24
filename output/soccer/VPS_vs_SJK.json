@@ -1,0 +1,27 @@
+{
+  "sport": "soccer",
+  "league": "default",
+  "home": "VPS",
+  "away": "SJK",
+  "projected": {
+    "home_goals": 2.19,
+    "away_goals": 1.77,
+    "total_goals": 3.96
+  },
+  "outcome": {
+    "home_win": 0.471,
+    "draw": 0.211,
+    "away_win": 0.318
+  },
+  "goals_analysis": {
+    "over_15": 0.905,
+    "over_25": 0.756,
+    "over_35": 0.559
+  },
+  "btts_probability": 0.67,
+  "corner_projection": 9.5,
+  "edge": 1.459,
+  "confidence": 76.5,
+  "recommendation": "STRONG BET",
+  "bet_pick": "OVER 2.5 Goals"
+}

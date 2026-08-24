@@ -1,0 +1,90 @@
+{
+  "sport": "soccer",
+  "league": "Liga MX",
+  "home_team": "Pumas UNAM",
+  "away_team": "Quer\u00e9taro FC",
+  "timestamp": "2026-08-16T14:23:08.887651",
+  "game": {
+    "projected_home_goals": 1.72,
+    "projected_away_goals": 1.08,
+    "projected_total_goals": 2.79,
+    "home_win_prob": 0.52,
+    "draw_prob": 0.241,
+    "away_win_prob": 0.239
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.638,
+      "market_line": 0.0,
+      "edge": 0.638,
+      "confidence": 36.7,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 2.793,
+      "market_total": 2.5,
+      "edge": 0.293,
+      "confidence": 29.8,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.495,
+      "confidence": 26.3,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.768,
+    "over_25_prob": 0.529,
+    "over_35_prob": 0.307
+  },
+  "corners_analysis": {
+    "projection": 9.9,
+    "over_85_prob": 0.653,
+    "over_95_prob": 0.527,
+    "over_105_prob": 0.402
+  },
+  "btts_probability": 0.495,
+  "corner_projection": 9.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.35,
+      "xg_against": 1.1,
+      "shots": 12.0,
+      "sot": 3.8,
+      "goals_for": 1.7,
+      "goals_against": 0.95,
+      "clean_sheets": 3,
+      "missing_attacker": 1,
+      "missing_creator": 1,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.6,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.58
+    },
+    "away": {
+      "xg_for": 0.95,
+      "xg_against": 1.45,
+      "shots": 9.5,
+      "sot": 2.9,
+      "goals_for": 1.25,
+      "goals_against": 1.45,
+      "clean_sheets": 2,
+      "missing_attacker": 1,
+      "missing_creator": 1,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.4,
+      "width_crossing": 0.48,
+      "final_third_pressure": 0.44
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics"
+}

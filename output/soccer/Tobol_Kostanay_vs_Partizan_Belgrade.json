@@ -1,0 +1,90 @@
+{
+  "sport": "soccer",
+  "league": "UEFA Conference League - 3rd Qual",
+  "home_team": "Tobol Kostanay",
+  "away_team": "Partizan Belgrade",
+  "timestamp": "2026-08-13T10:27:37.221578",
+  "game": {
+    "projected_home_goals": 1.57,
+    "projected_away_goals": 2.1,
+    "projected_total_goals": 3.67,
+    "home_win_prob": 0.291,
+    "draw_prob": 0.216,
+    "away_win_prob": 0.494
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.535,
+      "market_line": 0.0,
+      "edge": -0.535,
+      "confidence": 34.9,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.665,
+      "market_total": 2.5,
+      "edge": 1.165,
+      "confidence": 44.8,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.642,
+      "confidence": 49.7,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.881,
+    "over_25_prob": 0.709,
+    "over_35_prob": 0.499
+  },
+  "corners_analysis": {
+    "projection": 10.7,
+    "over_85_prob": 0.737,
+    "over_95_prob": 0.622,
+    "over_105_prob": 0.499
+  },
+  "btts_probability": 0.642,
+  "corner_projection": 10.7,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.05,
+      "xg_against": 1.5,
+      "shots": 10.0,
+      "sot": 3.5,
+      "goals_for": 0.95,
+      "goals_against": 1.55,
+      "clean_sheets": 2,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.4,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.5
+    },
+    "away": {
+      "xg_for": 1.7,
+      "xg_against": 0.9,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.8,
+      "goals_against": 0.9,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.4,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics"
+}

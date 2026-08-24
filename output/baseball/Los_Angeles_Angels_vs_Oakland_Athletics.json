@@ -1,0 +1,26 @@
+{
+  "sport": "baseball",
+  "league": "MLB",
+  "home_team": "Los Angeles Angels",
+  "away_team": "Oakland Athletics",
+  "timestamp": "2026-06-19T21:09:19.499445",
+  "game": {
+    "projected_home_runs": 4.88,
+    "projected_away_runs": 3.62,
+    "projected_total_runs": 8.5,
+    "projected_run_differential": 1.26,
+    "home_win_probability": 0.6748,
+    "away_win_probability": 0.3252,
+    "confidence": {
+      "total": {
+        "score": 23.1,
+        "recommendation": "PASS"
+      },
+      "side": {
+        "score": 46.3,
+        "recommendation": "PASS"
+      }
+    }
+  },
+  "notes": "League-specific run environment and pitcher matchup considered. KBO foreign player impact: 0.0"
+}

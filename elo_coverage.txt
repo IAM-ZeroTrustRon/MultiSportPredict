@@ -1,0 +1,12 @@
+Nuno Borges: rating=1500, matches=0
+Andrey Rublev: rating=1434, matches=10
+Lorenzo Musetti: rating=1500, matches=0
+Michael Zheng: rating=1500, matches=0
+Daniel Merida: rating=1500, matches=0
+Taylor Fritz: rating=1536, matches=5
+Daniil Medvedev: rating=1499, matches=13
+Brandon Nakashima: rating=1454, matches=2
+Adam Walton: rating=1500, matches=0
+Jaime Faria: rating=1500, matches=0
+Felix Auger-Aliassime: rating=1500, matches=0
+Juan Manuel Cerundolo: rating=1479, matches=1

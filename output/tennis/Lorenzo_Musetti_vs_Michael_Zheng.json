@@ -1,0 +1,75 @@
+{
+  "match": "Lorenzo Musetti vs Michael Zheng",
+  "tournament": "ATP Cincinnati Open",
+  "round": "Round 3",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Lorenzo Musetti",
+    "away": "Michael Zheng",
+    "home_win_prob": 0.5,
+    "away_win_prob": 0.5,
+    "home_fair_odds": "-100",
+    "away_fair_odds": "-100",
+    "lean": "coin_flip",
+    "confidence": 50.0,
+    "recommendation": "Model Prob: 50.0%",
+    "edge_pct": 0.0
+  },
+  "sets": {
+    "over_35_prob": 0.5,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=50%",
+    "fav_spread_prob": 0.25,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=25% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.5,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.25,
+    "2-1": 0.25,
+    "0-2": 0.25,
+    "1-2": 0.25
+  },
+  "dominance_ratio": {
+    "Lorenzo Musetti": 1.0,
+    "Michael Zheng": 1.0
+  },
+  "elo_ratings": {
+    "Lorenzo Musetti": 1500.0,
+    "Michael Zheng": 1500.0
+  },
+  "match_counts": {
+    "Lorenzo Musetti": 0,
+    "Michael Zheng": 0
+  },
+  "recommendation": "Model Prob: 50.0%",
+  "confidence": 50.0,
+  "edge_pct": 0.0,
+  "notes": [
+    "Elo Ratings \u2014 Lorenzo Musetti: 1500 (0 matches) | Michael Zheng: 1500 (0 matches) on hard",
+    "DR: Lorenzo Musetti 1.000 | Michael Zheng 1.000",
+    "Surface: Hard | Format: Best of 3"
+  ],
+  "confidence_score": 25.9,
+  "confidence_tier": "PASS",
+  "surface": "hard",
+  "tournament_name": "ATP Cincinnati Open",
+  "home_player": "Lorenzo Musetti",
+  "away_player": "Michael Zheng",
+  "value_plays": {
+    "original_lean": "Musetti has the higher profile, but Zheng is in-form.",
+    "plays": {},
+    "deep_dive": {
+      "Target": "Model edge from Elo",
+      "Angle": "Elo surface-gap dry-run",
+      "Rationale": "No market odds available; model runs off Elo ratings."
+    },
+    "model_view": {
+      "favorite": "coin_flip",
+      "notes": "Model computed from Elo surface data.",
+      "favorite_win_prob": 0.5
+    }
+  }
+}

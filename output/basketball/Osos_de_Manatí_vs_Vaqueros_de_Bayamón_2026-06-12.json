@@ -1,0 +1,71 @@
+{
+  "sport": "basketball",
+  "league": "Baloncesto Superior Nacional",
+  "game": {
+    "date": "2026-06-12",
+    "home_team": "Osos de Manatí",
+    "away_team": "Vaqueros de Bayamón"
+  },
+  "inputs": {
+    "historical_baseline": {
+      "date": "2026-06-12",
+      "final_score": "Osos de Manatí 98-93 Vaqueros de Bayamón",
+      "field_goal_efficiency": {
+        "Manatí": 0.53,
+        "Bayamón": 0.51
+      },
+      "three_point": {
+        "Manatí": "50% (12/24)",
+        "Bayamón": "37% (10/27)"
+      },
+      "rebounding": {
+        "total_rebounds": 29,
+        "off_def_split_each": {
+          "off": 7,
+          "def": 22
+        }
+      },
+      "free_throws": {
+        "Bayamón_ft_pct": 0.864,
+        "Manatí_ft_attempts": 31,
+        "Manatí_ft_made": 22,
+        "Bayamón_ft_attempts": 22
+      },
+      "discipline": {
+        "Bayamón_turnovers": 15,
+        "Manatí_turnovers": 11
+      }
+    },
+    "market_probabilities": {
+      "moneyline_implied_prob": {
+        "away": 0.465,
+        "home": 0.535
+      },
+      "totals": {
+        "ou_line": 182.5,
+        "over_prob": 0.612,
+        "under_prob": 0.388,
+        "projected_total": 187.4
+      }
+    }
+  },
+  "projections": {
+    "projected_home_score": 100.3,
+    "projected_away_score": 87.1,
+    "projected_total": 187.4,
+    "moneyline": {
+      "home_win_probability": 0.535,
+      "away_win_probability": 0.465
+    },
+    "total_market": {
+      "over_prob": 0.612,
+      "under_prob": 0.388,
+      "over_label": "Over 182.5",
+      "under_label": "Under 182.5"
+    }
+  },
+  "meta": {
+    "generated_at": "2026-06-28T17:51:57.268706Z",
+    "record_id": "Baloncesto_Superior_Nacional-Osos_de_Manatí-Vaqueros_de_Bayamón-2026-06-12"
+  }
+}

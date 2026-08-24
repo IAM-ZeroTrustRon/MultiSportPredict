@@ -3,7 +3,7 @@
   "league": "Premier League",
   "home_team": "Test Home",
   "away_team": "Test Away",
-  "timestamp": "2026-06-07T16:11:33.972670",
+  "timestamp": "2026-06-24T11:57:11.872248",
   "game": {
     "projected_home_goals": 2.41,
     "projected_away_goals": 1.94,
@@ -29,14 +29,20 @@
     },
     "btts": {
       "probability": 0.716,
-      "confidence": 80.5,
-      "recommendation": "STRONG BET"
+      "confidence": 59.4,
+      "recommendation": "PASS"
     }
   },
   "goals_analysis": {
     "over_15_prob": 0.931,
     "over_25_prob": 0.809,
     "over_35_prob": 0.633
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
   },
   "btts_probability": 0.716,
   "corner_projection": 10.9,

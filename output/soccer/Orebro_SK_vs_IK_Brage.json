@@ -1,0 +1,90 @@
+{
+  "sport": "soccer",
+  "league": "Superettan",
+  "home_team": "Orebro SK",
+  "away_team": "IK Brage",
+  "timestamp": "2026-08-14T12:45:01.024460",
+  "game": {
+    "projected_home_goals": 1.68,
+    "projected_away_goals": 2.06,
+    "projected_total_goals": 3.74,
+    "home_win_prob": 0.319,
+    "draw_prob": 0.217,
+    "away_win_prob": 0.464
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.386,
+      "market_line": 0.0,
+      "edge": -0.386,
+      "confidence": 32.2,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.739,
+      "market_total": 2.5,
+      "edge": 1.239,
+      "confidence": 45.9,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.69,
+      "confidence": 56.3,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.887,
+    "over_25_prob": 0.721,
+    "over_35_prob": 0.514
+  },
+  "corners_analysis": {
+    "projection": 10.1,
+    "over_85_prob": 0.68,
+    "over_95_prob": 0.556,
+    "over_105_prob": 0.431
+  },
+  "btts_probability": 0.69,
+  "corner_projection": 10.1,
+  "team_metrics": {
+    "home": {
+      "xg_for": 0.9,
+      "xg_against": 1.6,
+      "shots": 9.5,
+      "sot": 3.0,
+      "goals_for": 0.83,
+      "goals_against": 1.56,
+      "clean_sheets": 2,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.35,
+      "width_crossing": 0.45,
+      "final_third_pressure": 0.35
+    },
+    "away": {
+      "xg_for": 1.65,
+      "xg_against": 1.8,
+      "shots": 12.0,
+      "sot": 4.2,
+      "goals_for": 1.67,
+      "goals_against": 1.83,
+      "clean_sheets": 1,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.45,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics"
+}

@@ -1,0 +1,51 @@
+c:\MultiSportPredict\run_den_bosch_vs_al_fayha.py:309: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "timestamp": datetime.utcnow().isoformat() + "Z",
+============================================================
+  DEN BOSCH vs AL FAYHA - Match Analysis
+============================================================
+
+📊 Running prediction model...
+[SoccerPredictor_default] Predicting: Den Bosch vs Al Fayha
+
+============================================================
+  MATCH: Den Bosch vs Al Fayha
+============================================================
+
+  📍 Projected Score: Den Bosch 2.05 - 1.71 Al Fayha
+  🎯 Total Goals: 3.76
+
+  📊 Match Outcome:
+     Den Bosch Win: 45.4%
+     Draw:          21.7%
+     Al Fayha Win: 32.9%
+
+  🥅 Goal Probabilities:
+     Over 1.5: 88.9%
+     Over 2.5: 72.5%
+     Over 3.5: 51.9%
+
+  🤝 BTTS: 66.2%
+
+  🔲 Corners:
+     Projected: 10.6
+     Over 8.5: 73.1%
+     Over 9.5: 61.5%
+
+  💰 Betting Recommendations:
+     Side (AH): PASS (Conf: 31.2%, Edge: +0.332)
+     Total:     PASS (Conf: 46.3%, Edge: +1.262)
+     BTTS:      PASS (Conf: 52.6%)
+
+
+📤 Building rich Discord embed...
+
+📤 Embed payload prepared (6 fields)
+   Color: #95a5a6
+   Title: ⚽ DEN BOSCH vs AL FAYHA
+
+📤 Pushing to Discord...
+
+✅ SUCCESS: Rich prediction pushed to Discord!
+   Match: Den Bosch vs Al Fayha
+   Projected: 2.05 - 1.71
+   Best Bet: PASS / PASS

@@ -1,0 +1,75 @@
+{
+  "match": "Daniel Merida vs Taylor Fritz",
+  "tournament": "ATP Cincinnati Open",
+  "round": "Round 3",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Daniel Merida",
+    "away": "Taylor Fritz",
+    "home_win_prob": 0.4568,
+    "away_win_prob": 0.5432,
+    "home_fair_odds": "+119",
+    "away_fair_odds": "-119",
+    "lean": "Taylor Fritz",
+    "confidence": 56.5,
+    "recommendation": "Model Prob: 45.7%",
+    "edge_pct": -4.3
+  },
+  "sets": {
+    "over_35_prob": 0.497,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=50%",
+    "fav_spread_prob": 0.288,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=29% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.497,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.215,
+    "2-1": 0.23,
+    "0-2": 0.288,
+    "1-2": 0.267
+  },
+  "dominance_ratio": {
+    "Daniel Merida": 1.0,
+    "Taylor Fritz": 1.0489
+  },
+  "elo_ratings": {
+    "Daniel Merida": 1500.0,
+    "Taylor Fritz": 1536.0
+  },
+  "match_counts": {
+    "Daniel Merida": 0,
+    "Taylor Fritz": 5
+  },
+  "recommendation": "Model Prob: 45.7%",
+  "confidence": 56.5,
+  "edge_pct": -4.3,
+  "notes": [
+    "Elo Ratings \u2014 Daniel Merida: 1500 (0 matches) | Taylor Fritz: 1536 (5 matches) on hard",
+    "DR: Daniel Merida 1.000 | Taylor Fritz 1.049",
+    "Surface: Hard | Format: Best of 3"
+  ],
+  "confidence_score": 75.1,
+  "confidence_tier": "STRONG BET",
+  "surface": "hard",
+  "tournament_name": "ATP Cincinnati Open",
+  "home_player": "Daniel Merida",
+  "away_player": "Taylor Fritz",
+  "value_plays": {
+    "original_lean": "Merida has been solid on hard courts this summer, but Fritz has the higher ceiling and more overall surface experience in big Masters matches.",
+    "plays": {},
+    "deep_dive": {
+      "Target": "Model edge from Elo",
+      "Angle": "Elo surface rating dry-run",
+      "Rationale": "No market odds available; model dry-run."
+    },
+    "model_view": {
+      "favorite": "Taylor Fritz",
+      "notes": "Model computed from Elo surface data.",
+      "favorite_win_prob": 0.5432
+    }
+  }
+}

@@ -1,0 +1,52 @@
+c:\MultiSportPredict\run_nomme_united_vs_narva_trans.py:351: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "timestamp": datetime.utcnow().isoformat() + "Z",
+============================================================
+  FC NÕMME UNITED vs JK NARVA TRANS
+  Meistriliiga - July 31, 2026 - 12:00 PM EDT
+============================================================
+
+[DATA] Running prediction model with provided metrics...
+       Nõmme United xG For: 1.70
+       Narva Trans xG Against: 1.80
+       Market: ML 1.80 (-125) | O2.5 1.41 | BTTS 1.42
+[SoccerPredictor_default] Predicting: Nõmme United vs Narva Trans
+
+============================================================
+  MATCH: Nõmme United vs Narva Trans
+============================================================
+
+  [PROJECTED SCORE] Nõmme United 2.37 - 1.48 Narva Trans
+  [TOTAL GOALS] 3.85
+
+  [MATCH OUTCOME]
+     Nõmme United Win: 56.1%
+     Draw:          20.1%
+     Narva Trans Win: 23.8%
+
+  [GOAL PROBABILITIES]
+     Over 1.5: 89.7%
+     Over 2.5: 73.9%
+     Over 3.5: 53.7%
+
+  [BTTS] 68.2%
+
+  [CORNERS]
+     Projected: 10.4
+     Over 8.5: 71.3%
+     Over 9.5: 59.4%
+
+  [BETTING RECOMMENDATIONS]
+     Side (AH -0.75): PASS (Conf: 52.6%, Edge: +1.640)
+     Total (O/U 3.0): PASS (Conf: 39.6%, Edge: +0.850)
+     BTTS:            PASS (Conf: 55.3%)
+
+
+[DISCORD] Building rich embed...
+   Embed: 8 fields, color=#95a5a6
+
+[DISCORD] Pushing to Discord...
+
+[SUCCESS] Rich prediction pushed to Discord!
+   Match: Nõmme United vs Narva Trans
+   Projected: 2.37 - 1.48
+   Best Bet: PASS / PASS / PASS

@@ -1,0 +1,79 @@
+{
+  "match": "Daniel Milavsky vs Rei Sakamoto",
+  "tournament": "Brownsburg Challenger (ATP)",
+  "round": "Quarterfinals",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Daniel Milavsky",
+    "away": "Rei Sakamoto",
+    "home_win_prob": 0.4088,
+    "away_win_prob": 0.5912,
+    "home_fair_odds": "+145",
+    "away_fair_odds": "-145",
+    "lean": "Rei Sakamoto",
+    "confidence": 63.7,
+    "recommendation": "Model Prob: 40.9%",
+    "edge_pct": -9.1
+  },
+  "sets": {
+    "over_35_prob": 0.487,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=49%",
+    "fav_spread_prob": 0.334,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=33% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.487,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.179,
+    "2-1": 0.206,
+    "0-2": 0.334,
+    "1-2": 0.282
+  },
+  "dominance_ratio": {
+    "Daniel Milavsky": 0.9978,
+    "Rei Sakamoto": 1.1052
+  },
+  "elo_ratings": {
+    "Daniel Milavsky": 1498.0,
+    "Rei Sakamoto": 1575.0
+  },
+  "match_counts": {
+    "Daniel Milavsky": 9,
+    "Rei Sakamoto": 8
+  },
+  "recommendation": "Model Prob: 40.9%",
+  "confidence": 63.7,
+  "edge_pct": -9.1,
+  "notes": [
+    "Elo Ratings \u2014 Daniel Milavsky: 1498 (9 matches) | Rei Sakamoto: 1575 (8 matches) on hard",
+    "DR: Daniel Milavsky 0.998 | Rei Sakamoto 1.105",
+    "Surface: Hard | Format: Best of 3"
+  ],
+  "confidence_score": 80.7,
+  "confidence_tier": "STRONG BET",
+  "surface": "hard",
+  "tournament_name": "Brownsburg Challenger (ATP)",
+  "home_player": "Daniel Milavsky",
+  "away_player": "Rei Sakamoto",
+  "value_plays": {
+    "original_lean": "Serve-dominant matchup with extreme fatigue \u2014 sets routinely go deep, tiebreaks are likely.",
+    "plays": {
+      "First Set (Over 9.5 Games)": "STRONG \u2014 both rely on serve, sets go 5-5+",
+      "First Set Tiebreak (Yes)": "STRONG \u2014 5 tiebreaks in last 4 combined matches",
+      "Total Games (Over 22.5)": "STRONG \u2014 current tournament run rates"
+    },
+    "deep_dive": {
+      "Target": "First Set Over 9.5 Games / Tiebreak Yes",
+      "Angle": "Total Games Over 22.5",
+      "Rationale": "Both players survived wars in R32: Milavsky won 7-6 in the third; Sakamoto played all-3-sets tiebreaks. 5 tiebreaks in their last 4 combined matches. Neither breaks serve frequently, so sets go deep. Outright winner is volatile due to fatigue \u2014 value is in the game totals."
+    },
+    "model_view": {
+      "favorite": "Rei Sakamoto",
+      "favorite_win_prob": 0.5912,
+      "notes": "Elo model slightly favors Sakamoto (Seed #3); total games model leans OVER 22.5 given serve dominance and fatigue."
+    }
+  }
+}

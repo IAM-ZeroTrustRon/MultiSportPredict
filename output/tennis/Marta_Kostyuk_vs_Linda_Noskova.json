@@ -1,0 +1,27 @@
+{
+  "match": "Marta Kostyuk vs Linda Noskova",
+  "tournament": "Wimbledon",
+  "round": "Second Round",
+  "time_local": "",
+  "model_type": "heuristic_generic",
+  "moneyline": {
+    "home": "Marta Kostyuk",
+    "away": "Linda Noskova",
+    "home_win_prob": 0.5,
+    "away_win_prob": 0.5,
+    "lean": "coin_flip",
+    "confidence": 50.0
+  },
+  "sets": {
+    "recommendation": "Avoid straight ML; consider set/total games markets due to closeness"
+  },
+  "total_games": {
+    "total_games_line": 22.5,
+    "over_games_prob": 0.7,
+    "recommendation": "OVER 22.5",
+    "edge": 0.2
+  },
+  "notes": [
+    "No specific heuristic mapping found; returning generic close-match profile."
+  ]
+}

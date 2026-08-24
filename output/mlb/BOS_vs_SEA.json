@@ -1,0 +1,214 @@
+{
+  "game": {
+    "home_team": "BOS",
+    "away_team": "SEA",
+    "projected_total_runs": 7.0,
+    "projected_run_diff_home_minus_away": 0.0,
+    "win_prob_home": 0.5,
+    "win_prob_away": 0.5,
+    "confidence": {
+      "total": {
+        "score": 23.1,
+        "recommendation": "PASS",
+        "volatility": 0.65
+      },
+      "side": {
+        "score": 24.4,
+        "recommendation": "PASS",
+        "volatility": 0.55
+      }
+    },
+    "moneyline": {
+      "home": null,
+      "away": null,
+      "implied_probs": {
+        "home": 0.5,
+        "away": 0.5
+      }
+    },
+    "runline": {
+      "home": null,
+      "away": null,
+      "note": "Runline odds not available without sportsbook inputs; run differential used for probabilistic lean."
+    }
+  },
+  "k_props": {
+    "home": {
+      "projection": 0.8,
+      "edge": -4.7,
+      "lean": "Under",
+      "line": 5.5
+    },
+    "away": {
+      "projection": 0.8,
+      "edge": -4.7,
+      "lean": "Under",
+      "line": 5.5
+    }
+  },
+  "hr_props": {
+    "home": {
+      "hr_probability": 0.095,
+      "lean": "No HR"
+    },
+    "away": {
+      "hr_probability": 0.095,
+      "lean": "No HR"
+    }
+  },
+  "player_props": {
+    "home": [
+      {
+        "player_name": "BOS Slugger",
+        "team": "BOS",
+        "prop_type": "Total Bases",
+        "projection": 1.8,
+        "edge": 0.3,
+        "lean": "Over",
+        "line": 1.5
+      },
+      {
+        "player_name": "BOS Hitter",
+        "team": "BOS",
+        "prop_type": "Hits",
+        "projection": 1.08,
+        "edge": 0.58,
+        "lean": "Over",
+        "line": 0.5
+      }
+    ],
+    "away": [
+      {
+        "player_name": "SEA Slugger",
+        "team": "SEA",
+        "prop_type": "Total Bases",
+        "projection": 1.68,
+        "edge": 0.18,
+        "lean": "Over",
+        "line": 1.5
+      },
+      {
+        "player_name": "SEA Hitter",
+        "team": "SEA",
+        "prop_type": "Hits",
+        "projection": 1.08,
+        "edge": 0.58,
+        "lean": "Over",
+        "line": 0.5
+      }
+    ]
+  },
+  "advanced_markets": {
+    "MLB_PROPS_K": {
+      "home_pitcher": {
+        "team": "BOS",
+        "swstr_pct": 11.0,
+        "csw_pct": 28.0,
+        "opp_k_pct": 22.5,
+        "lean": "Over",
+        "model_prob": 100
+      },
+      "away_pitcher": {
+        "team": "SEA",
+        "swstr_pct": 11.0,
+        "csw_pct": 28.0,
+        "opp_k_pct": 22.5,
+        "lean": "Over",
+        "model_prob": 100
+      },
+      "lean": "Over",
+      "model_prob": 100,
+      "summary_home": "BET: SwStr=11.0% | CSW=28.0% | OppK=22.5%",
+      "summary_away": "BET: SwStr=11.0% | CSW=28.0% | OppK=22.5%"
+    },
+    "MLB_PROPS_HR": {
+      "top_batters": [
+        {
+          "team": "BOS",
+          "barrel_pct": 6.0,
+          "iso": 0.15,
+          "lean": "PASS",
+          "model_prob": 52.9,
+          "summary_factors": "Barrel=6.0% | ISO=0.150 | HR/9=1.20 | Park=1.08"
+        },
+        {
+          "team": "BOS",
+          "barrel_pct": 6.0,
+          "iso": 0.15,
+          "lean": "PASS",
+          "model_prob": 52.9,
+          "summary_factors": "Barrel=6.0% | ISO=0.150 | HR/9=1.20 | Park=1.08"
+        },
+        {
+          "team": "BOS",
+          "barrel_pct": 6.0,
+          "iso": 0.15,
+          "lean": "PASS",
+          "model_prob": 52.9,
+          "summary_factors": "Barrel=6.0% | ISO=0.150 | HR/9=1.20 | Park=1.08"
+        },
+        {
+          "team": "SEA",
+          "barrel_pct": 6.0,
+          "iso": 0.15,
+          "lean": "PASS",
+          "model_prob": 52.9,
+          "summary_factors": "Barrel=6.0% | ISO=0.150 | HR/9=1.20 | Park=1.08"
+        },
+        {
+          "team": "SEA",
+          "barrel_pct": 6.0,
+          "iso": 0.15,
+          "lean": "PASS",
+          "model_prob": 52.9,
+          "summary_factors": "Barrel=6.0% | ISO=0.150 | HR/9=1.20 | Park=1.08"
+        },
+        {
+          "team": "SEA",
+          "barrel_pct": 6.0,
+          "iso": 0.15,
+          "lean": "PASS",
+          "model_prob": 52.9,
+          "summary_factors": "Barrel=6.0% | ISO=0.150 | HR/9=1.20 | Park=1.08"
+        }
+      ],
+      "lean": "PASS",
+      "model_prob": 52.9
+    },
+    "MLB_NRFI_YRFI": {
+      "home_pitcher": {
+        "team": "BOS",
+        "xfip_1st": 4.2,
+        "bb_pct_1st": 9.0
+      },
+      "away_pitcher": {
+        "team": "SEA",
+        "xfip_1st": 4.2,
+        "bb_pct_1st": 9.0
+      },
+      "top_3_batters": {
+        "home_wrc_plus": [
+          100,
+          100,
+          100
+        ],
+        "away_wrc_plus": [
+          100,
+          100,
+          100
+        ]
+      },
+      "lean": "NRFI",
+      "model_prob": 91.9,
+      "summary": "H-xFIP1=4.20 | A-xFIP1=4.20 | H-BB1=9.0% | A-BB1=9.0% | Top3wRC=100/100"
+    },
+    "meta": {
+      "year": 2025,
+      "home_team": "BOS",
+      "away_team": "SEA",
+      "park_hr_factor": 1.08,
+      "pybaseball_available": true,
+      "note": "Player names are placeholder-based. For best results, pass actual starting pitcher and lineup data."
+    }
+  }
+}

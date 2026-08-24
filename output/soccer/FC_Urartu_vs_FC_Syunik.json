@@ -1,0 +1,90 @@
+{
+  "sport": "soccer",
+  "league": "Armenian Premier League",
+  "home_team": "FC Urartu",
+  "away_team": "FC Syunik",
+  "timestamp": "2026-08-13T10:27:37.172769",
+  "game": {
+    "projected_home_goals": 2.55,
+    "projected_away_goals": 0.87,
+    "projected_total_goals": 3.42,
+    "home_win_prob": 0.725,
+    "draw_prob": 0.164,
+    "away_win_prob": 0.111
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 1.681,
+      "market_line": 0.0,
+      "edge": 1.681,
+      "confidence": 53.1,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.416,
+      "market_total": 2.5,
+      "edge": 0.916,
+      "confidence": 40.7,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.532,
+      "confidence": 31.3,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.855,
+    "over_25_prob": 0.663,
+    "over_35_prob": 0.445
+  },
+  "corners_analysis": {
+    "projection": 10.2,
+    "over_85_prob": 0.688,
+    "over_95_prob": 0.565,
+    "over_105_prob": 0.441
+  },
+  "btts_probability": 0.532,
+  "corner_projection": 10.2,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.85,
+      "xg_against": 0.75,
+      "shots": 14.5,
+      "sot": 5.0,
+      "goals_for": 1.8,
+      "goals_against": 0.8,
+      "clean_sheets": 5,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.55,
+      "width_crossing": 0.6,
+      "final_third_pressure": 0.6
+    },
+    "away": {
+      "xg_for": 0.55,
+      "xg_against": 1.8,
+      "shots": 7.5,
+      "sot": 2.2,
+      "goals_for": 0.55,
+      "goals_against": 1.75,
+      "clean_sheets": 1,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.4,
+      "final_third_pressure": 0.3
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics"
+}

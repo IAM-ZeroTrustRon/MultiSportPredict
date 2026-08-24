@@ -1,0 +1,75 @@
+{
+  "match": "Felix Auger-Aliassime vs Juan Manuel Cerundolo",
+  "tournament": "ATP Cincinnati Open",
+  "round": "Round 3",
+  "model_type": "elo_surface",
+  "moneyline": {
+    "home": "Felix Auger-Aliassime",
+    "away": "Juan Manuel Cerundolo",
+    "home_win_prob": 0.5255,
+    "away_win_prob": 0.4745,
+    "home_fair_odds": "-111",
+    "away_fair_odds": "+111",
+    "lean": "Felix Auger-Aliassime",
+    "confidence": 53.8,
+    "recommendation": "Model Prob: 52.5%",
+    "edge_pct": 2.5
+  },
+  "sets": {
+    "over_35_prob": 0.499,
+    "recommendation_sets_ou": "LEAN OVER 3.5 Sets -- P(over)=50%",
+    "fav_spread_prob": 0.272,
+    "recommendation_spread": "TAKE Underdog +1.5 Sets -- P(fav covers)=27% only"
+  },
+  "total_games": {
+    "line": 22.5,
+    "over_prob": 0.499,
+    "recommendation": "UNDER"
+  },
+  "set_distribution": {
+    "2-0": 0.272,
+    "2-1": 0.26,
+    "0-2": 0.229,
+    "1-2": 0.239
+  },
+  "dominance_ratio": {
+    "Felix Auger-Aliassime": 1.0,
+    "Juan Manuel Cerundolo": 0.9725
+  },
+  "elo_ratings": {
+    "Felix Auger-Aliassime": 1500.0,
+    "Juan Manuel Cerundolo": 1479.0
+  },
+  "match_counts": {
+    "Felix Auger-Aliassime": 0,
+    "Juan Manuel Cerundolo": 1
+  },
+  "recommendation": "Model Prob: 52.5%",
+  "confidence": 53.8,
+  "edge_pct": 2.5,
+  "notes": [
+    "Elo Ratings \u2014 Felix Auger-Aliassime: 1500 (0 matches) | Juan Manuel Cerundolo: 1479 (1 matches) on hard",
+    "DR: Felix Auger-Aliassime 1.000 | Juan Manuel Cerundolo 0.973",
+    "Surface: Hard | Format: Best of 3"
+  ],
+  "confidence_score": 63.9,
+  "confidence_tier": "BET",
+  "surface": "hard",
+  "tournament_name": "ATP Cincinnati Open",
+  "home_player": "Felix Auger-Aliassime",
+  "away_player": "Juan Manuel Cerundolo",
+  "value_plays": {
+    "original_lean": "Dry-run.",
+    "plays": {},
+    "deep_dive": {
+      "Target": "Model edge from Elo",
+      "Angle": "Elo surface rating dry-run",
+      "Rationale": "No market odds available; model dry-run."
+    },
+    "model_view": {
+      "favorite": "Felix Auger-Aliassime",
+      "notes": "Model computed from Elo surface data.",
+      "favorite_win_prob": 0.5255
+    }
+  }
+}

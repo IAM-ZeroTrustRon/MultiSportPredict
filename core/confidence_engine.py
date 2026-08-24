@@ -40,6 +40,12 @@ VOLATILITY_COEFFICIENTS = {
     "mlb_tb": 0.55,
     "mlb_walks": 0.60,
     "mlb_rbis": 0.62,
+    "mlb_nrfi": 0.48,
+
+    # Tennis
+    "tennis_moneyline": 0.45,
+    "tennis_totals": 0.50,
+    "tennis_sets": 0.52,
 }
 
 # Bet thresholds by sport/market type
@@ -67,6 +73,12 @@ BET_THRESHOLDS = {
     "mlb_tb": {"bet": 60, "strong": 75},
     "mlb_walks": {"bet": 62, "strong": 78},
     "mlb_rbis": {"bet": 62, "strong": 78},
+    "mlb_nrfi": {"bet": 60, "strong": 76},
+
+    # Tennis
+    "tennis_moneyline": {"bet": 58, "strong": 72},
+    "tennis_totals": {"bet": 60, "strong": 74},
+    "tennis_sets": {"bet": 60, "strong": 74},
 }
 
 # Default thresholds for unknown market types
@@ -91,8 +103,11 @@ def confidence_score(
         Confidence score from 0-100
     """
     # Normalize edge using tanh for smooth scaling
-    # tanh compresses large edges while preserving small differences
-    edge_component = np.tanh(model_edge / 3.0)
+    # tanh compresses large edges while preserving small differences.
+    # Use the magnitude of the edge: confidence scales with how far the
+    # model projection is from the market line, regardless of direction
+    # (a large Under edge is just as confident as a large Over edge).
+    edge_component = np.tanh(abs(model_edge) / 3.0)
     
     # Volatility penalty using exponential decay
     # Lower volatility = higher score

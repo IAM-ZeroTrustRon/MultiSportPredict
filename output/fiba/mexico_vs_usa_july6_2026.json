@@ -1,0 +1,79 @@
+{
+  "fg": {
+    "projected_home": 102.0,
+    "projected_away": 67.0,
+    "projected_total": 169.0,
+    "projected_spread": 35.0,
+    "home_win_prob": 0.9431,
+    "away_win_prob": 0.05689999999999995,
+    "model_edge": 11.92,
+    "lean": "Pass"
+  },
+  "q1": {
+    "projected_home": 22.2,
+    "projected_away": 20.6,
+    "projected_total": 42.8,
+    "projected_spread": 1.6,
+    "home_win_prob": 0.592,
+    "away_win_prob": 0.40800000000000003
+  },
+  "h1": {
+    "projected_home": 43.0,
+    "projected_away": 40.5,
+    "projected_total": 83.4,
+    "projected_spread": 2.5,
+    "home_win_prob": 0.593,
+    "away_win_prob": 0.40700000000000003
+  },
+  "bets": {
+    "fg_spread": {
+      "decision": "BET",
+      "edge": 57.0,
+      "projected": 35.0,
+      "market": -22.0
+    },
+    "fg_total": {
+      "decision": "BET",
+      "edge": 22.0,
+      "projected": 169.0,
+      "market": 147.0
+    },
+    "h1_spread": {
+      "decision": "BET",
+      "edge": 13.5,
+      "projected": 2.5,
+      "market": -11.0
+    },
+    "h1_total": {
+      "decision": "BET",
+      "edge": 9.9,
+      "projected": 83.4,
+      "market": 73.5
+    },
+    "q1_spread": {
+      "decision": "BET",
+      "edge": 7.1,
+      "projected": 1.6,
+      "market": -5.5
+    },
+    "q1_total": {
+      "decision": "BET",
+      "edge": 4.58,
+      "projected": 42.8,
+      "market": 38.22
+    }
+  },
+  "meta": {
+    "home_team": "Mexico",
+    "away_team": "USA",
+    "league": "FIBA World Cup 2027 Americas Qualifier",
+    "date": "2026-07-06",
+    "venue": "Gimnasio Marcelino Gonzalez, Zacatecas City (8,010 ft / 2,440m)",
+    "market_data": {
+      "spread": -22.0,
+      "open_line": -20.0,
+      "current_line": -22.0,
+      "total": 147.0
+    }
+  }
+}
