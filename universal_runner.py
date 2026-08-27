@@ -42,6 +42,9 @@ except ImportError:
     requests = None
 
 from dotenv import load_dotenv
+from team_stats_provider import get_soccer_team_stats
+from extra_markets import enrich_result, print_extra_markets
+
 
 load_dotenv()
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
@@ -133,7 +136,7 @@ def get_team_stats(sport: str, home: str, away: str,
         hs = get_soccer_team_stats(home, league)
         aws = get_soccer_team_stats(away, league)
         return hs, aws
-    if sport in ("basketball", "kbl", "euroleague", "eurocup", "liga acb"):
+    if sport in ("basketball", "kbl", "nznbl", "euroleague", "eurocup", "liga acb"):
         hs = get_basketball_team_stats(home, league)
         aws = get_basketball_team_stats(away, league)
         return hs, aws
@@ -327,10 +330,58 @@ def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
                push_discord: bool, live_odds: bool = False) -> Dict[str, Any]:
     from predict_match import run_soccer_game
 
-    hs, aws = get_team_stats("soccer", home, away, league)
+    hs = get_soccer_team_stats(home, league)
+    aws = get_soccer_team_stats(away, league)
+    if hs is None or aws is None:
+        raise ValueError(f"Stats missing for '{home}' or '{away}'. Seed stats in team_stats_provider.py before running.")
     result = run_soccer_game(home, away, league=league or "Premier League",
                              market_line=market_line, market_total=market_total,
                              home_stats=hs, away_stats=aws)
+
+    # Wire extra_markets — halftime, team corners, BTTS enrichment
+    try:
+        from extra_markets import enrich_result
+        result = enrich_result(
+            result,
+            home_team=home,
+            away_team=away,
+            home_stats=hs,
+            away_stats=aws,
+        )
+        em = result.get("extra_markets", {})
+        # Halftime
+        fh = em.get("first_half_goals", {})
+        result["halftime"] = {
+            "recommendation_1h_total": f"Over 0.5: {fh.get('over_05', 0)*100:.1f}% | Over 1.5: {fh.get('over_15', 0)*100:.1f}%",
+            "predicted_1h_result": f"Proj: {fh.get('projection', 'N/A')}",
+        }
+        # Team corners
+        tc = em.get("team_corners", {})
+        if tc and "_warning" not in tc:
+            result["team_corners"] = {
+                "home_proj": tc.get("home", {}).get("projection", "N/A"),
+                "away_proj": tc.get("away", {}).get("projection", "N/A"),
+            }
+    except Exception as e:
+        print(f"[WARNING] extra_markets enrichment failed: {e}")
+
+    # Wire confidence engine into result before Discord push
+    try:
+        from core.confidence_engine import analyze_bet, bet_recommendation, confidence_score
+        game = result.get("game", {})
+        proj_total = float(game.get("projected_total_goals", 0))
+        if proj_total > 0:
+            edge = round(proj_total - market_total, 3)
+            vol = 0.55
+            conf = confidence_score(edge, volatility=vol)
+            rec = bet_recommendation(conf, market_type="soccer_totals")
+            result["confidence_engine"] = {
+                "edge": edge,
+                "confidence": conf,
+                "recommendation": rec,
+            }
+    except Exception as e:
+        print(f"[WARNING] Confidence engine error: {e}")
     if live_odds:
         result["live_market"] = _fetch_live_soccer_market(home, away, league)
         output_path = Path("output/soccer") / f"{home.replace(' ', '_')}_vs_{away.replace(' ', '_')}.json"
@@ -367,9 +418,57 @@ def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
 
 def run_basketball(home: str, away: str, league: Optional[str], market_line: float,
                    store_to_db: bool, push_discord: bool) -> Dict[str, Any]:
-    from predict_match import run_basketball_game
+    normalized_league = (league or "EuroLeague").strip().lower()
+    if normalized_league in {"euroleague", "kbl", "nznbl"}:
+        from euroleague_engine import EuroleaguePredictor
+        from team_stats_provider import get_basketball_team_stats, get_euroleague_league_baseline, get_euroleague_team_stats
 
-    hs, aws = get_team_stats("basketball", home, away, league)
+        if normalized_league == "euroleague":
+            hs = get_euroleague_team_stats(home)
+            aws = get_euroleague_team_stats(away)
+            baseline = get_euroleague_league_baseline()
+        else:
+            hs = get_basketball_team_stats(home, normalized_league)
+            aws = get_basketball_team_stats(away, normalized_league)
+            baseline = {"pace": 72.0, "ortg": 112.0, "drtg": 112.0}
+        if hs is None or aws is None:
+            raise ValueError(f"Missing seeded stats for '{home}' or '{away}'. Please seed data.")
+        result = EuroleaguePredictor(
+            home_team=home,
+            away_team=away,
+            home_stats=hs,
+            away_stats=aws,
+            league_baseline=baseline,
+            market_lines={"full_game": market_line},
+        ).predict()
+        _display_full_result(result)
+        full_game = result["full_game"]
+        if store_to_db:
+            _store_prediction(
+                sport="basketball",
+                home=home,
+                away=away,
+                market_type="spread",
+                model_value=float(full_game["probability"]),
+                market_value=market_line,
+                edge=float(full_game["model_edge"] or 0.0),
+                confidence=float(full_game["probability"]) * 100.0,
+                recommendation=str(full_game["lean"]),
+                raw_json=result,
+            )
+            print("[OK] EuroLeague prediction stored to multisport_history.db")
+        if push_discord:
+            status = _push_full_result("basketball", home, away, result)
+            print(f"[{ 'OK' if status else 'FAILED' }] Full basketball result pushed to Discord")
+        return result
+
+    from predict_match import run_basketball_game
+    from team_stats_provider import get_basketball_team_stats
+
+    hs = get_basketball_team_stats(home, league)
+    aws = get_basketball_team_stats(away, league)
+    if hs is None or aws is None:
+        raise ValueError(f"Missing seeded stats for '{home}' or '{away}'. Please seed data.")
     result = run_basketball_game(home, away, league=league or "EuroLeague",
                                  market_line=market_line, home_stats=hs, away_stats=aws)
     _display_full_result(result)
@@ -405,8 +504,34 @@ def run_basketball(home: str, away: str, league: Optional[str], market_line: flo
 def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[List[str]], market_total: float,
                  home_sp_era: Optional[float], home_sp_k: Optional[float],
                  away_sp_era: Optional[float], away_sp_k: Optional[float],
-                 store_to_db: bool, push_discord: bool) -> Dict[str, Any]:
+                 store_to_db: bool, push_discord: bool,
+                 home_pitcher: Optional[str] = None, away_pitcher: Optional[str] = None,
+                 home_hitters: Optional[List[str]] = None, away_hitters: Optional[List[str]] = None) -> Dict[str, Any]:
     from predict_match import run_baseball_game
+
+    advanced_args = (home_pitcher, away_pitcher, home_hitters, away_hitters)
+    if any(value is not None for value in advanced_args):
+        if not all(advanced_args):
+            raise ValueError("Advanced MLB mode requires both pitchers and non-empty hitter lists.")
+        from predict_mlb_advanced import MLBAdvancedPredictor
+
+        seed_path = Path("data/mlb_stats.json")
+        if not seed_path.exists():
+            raise ValueError("Missing data/mlb_stats.json. Run ingest_mlb_props.py first.")
+        result = MLBAdvancedPredictor(seed_path).predict(
+            home_team=home,
+            away_team=away,
+            home_pitcher=home_pitcher,
+            away_pitcher=away_pitcher,
+            home_hitters=home_hitters,
+            away_hitters=away_hitters,
+            market_lines={"f5": market_total, "full_game": market_total},
+        )
+        _display_full_result(result)
+        if push_discord:
+            status = _push_full_result("baseball", home, away, result)
+            print(f"[{ 'OK' if status else 'FAILED' }] Full baseball result pushed to Discord")
+        return result
 
     batters_faced_est = max(5.5 * 4.3, 1.0)
     home_sp_overrides = None
@@ -560,6 +685,10 @@ def main() -> None:
     parser.add_argument("--home-sp-k", type=float, default=None)
     parser.add_argument("--away-sp-era", type=float, default=None)
     parser.add_argument("--away-sp-k", type=float, default=None)
+    parser.add_argument("--home-pitcher", default=None)
+    parser.add_argument("--away-pitcher", default=None)
+    parser.add_argument("--home-hitters", nargs="+", default=None)
+    parser.add_argument("--away-hitters", nargs="+", default=None)
     # Tennis
     parser.add_argument("--surface", default=None,
                         help="Tennis surface: grass, clay, hard.")
@@ -586,14 +715,16 @@ def main() -> None:
     if sport in ("soccer", "football"):
         run_soccer(home, away, args.league, args.market_line, args.market_total,
                    args.store_to_db, args.push_discord, args.live_odds)
-    elif sport in ("basketball", "kbl", "euroleague", "eurocup", "liga acb", "acb"):
+    elif sport in ("basketball", "kbl", "nznbl", "euroleague", "eurocup", "liga acb", "acb"):
         run_basketball(home, away, args.league, args.market_line,
                        args.store_to_db, args.push_discord)
     elif sport in ("baseball", "mlb", "kbo"):
         run_baseball(home, away, args.league, args.markets, args.market_total,
                      args.home_sp_era, args.home_sp_k,
                      args.away_sp_era, args.away_sp_k,
-                     args.store_to_db, args.push_discord)
+                     args.store_to_db, args.push_discord,
+                     args.home_pitcher, args.away_pitcher,
+                     args.home_hitters, args.away_hitters)
     elif sport == "tennis":
         run_tennis(home, away, args.surface, args.tournament, args.round_name,
                    best_of_5, args.store_to_db, args.push_discord)

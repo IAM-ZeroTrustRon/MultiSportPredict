@@ -3,7 +3,7 @@
   "league": "EPL",
   "home_team": "Fulham",
   "away_team": "Chelsea",
-  "timestamp": "2026-08-24T11:27:47.806916",
+  "timestamp": "2026-08-24T13:52:38.011087",
   "game": {
     "projected_home_goals": 2.19,
     "projected_away_goals": 1.77,
@@ -88,5 +88,10 @@
     "data_tier": 2
   },
   "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
-  "_stats_source": "placeholder_fallback"
+  "_stats_source": "placeholder_fallback",
+  "live_market": {
+    "source": "odds_api",
+    "status": "event_not_found",
+    "league_key": "soccer_epl"
+  }
 }

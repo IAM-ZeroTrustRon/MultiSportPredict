@@ -47,6 +47,9 @@ from typing import Any, Dict, Optional
 DATA_DIR = Path("data/team_stats")
 SOCCER_STATS_PATH = DATA_DIR / "soccer_stats.json"
 BASKETBALL_STATS_PATH = DATA_DIR / "basketball_stats.json"
+EUROLEAGUE_STATS_PATH = Path("data/euroleague_stats.json")
+GLOBAL_SOCCER_STATS_PATH = Path("data/soccer_stats.json")
+INTERNATIONAL_BASKETBALL_STATS_PATH = Path("data/basketball_stats.json")
 
 # Fields SoccerPredictor.predict() actually reads via kwargs (see soccer_predictor.py)
 SOCCER_FIELDS = [
@@ -95,6 +98,14 @@ _BASKETBALL_TEMPLATE = {
     },
 }
 
+_EUROLEAGUE_TEMPLATE = {
+    "_comment": "Seed EuroLeague metrics with seed_euroleague_stats.py.",
+    "_league_baseline": {
+        "pace": 72.0, "ortg": 112.0, "drtg": 112.0,
+        "q1_ratio": 0.245, "ht_ratio": 0.495,
+    },
+}
+
 
 def _load_store(path: Path, template: Dict[str, Any]) -> Dict[str, Any]:
     if not path.exists():
@@ -127,14 +138,40 @@ def get_soccer_team_stats(team: str, league: Optional[str] = None) -> Optional[D
     Callers MUST treat None as "no real data available" and warn accordingly —
     do not silently substitute a default; that's the exact bug this replaces.
     """
-    store = _load_store(SOCCER_STATS_PATH, _SOCCER_TEMPLATE)
-    return _lookup(store, team)
+    path = GLOBAL_SOCCER_STATS_PATH if GLOBAL_SOCCER_STATS_PATH.exists() else SOCCER_STATS_PATH
+    store = _load_store(path, _SOCCER_TEMPLATE)
+    stats = _lookup(store, team)
+
+    # Auto-map goals to xG if xG is missing to prevent silent model fallbacks
+    if stats and "xg_for" not in stats:
+        stats["xg_for"] = stats.get("goals_for", 1.5)
+    if stats and "xg_against" not in stats:
+        stats["xg_against"] = stats.get("goals_against", 1.5)
+
+    return stats
 
 
 def get_basketball_team_stats(team: str, league: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """Returns a dict of real basketball stats for `team`, or None if not found."""
-    store = _load_store(BASKETBALL_STATS_PATH, _BASKETBALL_TEMPLATE)
+    league_name = (league or "").strip().lower()
+    path = (INTERNATIONAL_BASKETBALL_STATS_PATH
+            if league_name in {"kbl", "nznbl"} and INTERNATIONAL_BASKETBALL_STATS_PATH.exists()
+            else BASKETBALL_STATS_PATH)
+    store = _load_store(path, _BASKETBALL_TEMPLATE)
     return _lookup(store, team)
+
+
+def get_euroleague_team_stats(team: str) -> Optional[Dict[str, Any]]:
+    """Return seeded EuroLeague team metrics, or None when not seeded."""
+    store = _load_store(EUROLEAGUE_STATS_PATH, _EUROLEAGUE_TEMPLATE)
+    return _lookup(store, team)
+
+
+def get_euroleague_league_baseline() -> Dict[str, Any]:
+    """Return the seeded EuroLeague baseline or the engine defaults."""
+    store = _load_store(EUROLEAGUE_STATS_PATH, _EUROLEAGUE_TEMPLATE)
+    baseline = store.get("_league_baseline", {})
+    return {**_EUROLEAGUE_TEMPLATE["_league_baseline"], **baseline}
 
 
 def upsert_soccer_team_stats(team: str, stats: Dict[str, Any]) -> None:
@@ -150,6 +187,14 @@ def upsert_basketball_team_stats(team: str, stats: Dict[str, Any]) -> None:
     store = _load_store(BASKETBALL_STATS_PATH, _BASKETBALL_TEMPLATE)
     store[team] = stats
     with open(BASKETBALL_STATS_PATH, "w", encoding="utf-8") as f:
+        json.dump(store, f, indent=2)
+
+
+def upsert_euroleague_team_stats(team: str, stats: Dict[str, Any]) -> None:
+    """Add or update one team's EuroLeague metrics."""
+    store = _load_store(EUROLEAGUE_STATS_PATH, _EUROLEAGUE_TEMPLATE)
+    store[team] = stats
+    with open(EUROLEAGUE_STATS_PATH, "w", encoding="utf-8") as f:
         json.dump(store, f, indent=2)
 
 

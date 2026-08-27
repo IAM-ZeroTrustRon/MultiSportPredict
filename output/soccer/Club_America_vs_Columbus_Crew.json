@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "MLS",
+  "home_team": "Club America",
+  "away_team": "Columbus Crew",
+  "timestamp": "2026-08-27T00:32:21.145034",
+  "game": {
+    "projected_home_goals": 3.09,
+    "projected_away_goals": 1.45,
+    "projected_total_goals": 4.54,
+    "home_win_prob": 0.675,
+    "draw_prob": 0.163,
+    "away_win_prob": 0.162
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 1.642,
+      "market_line": 0.0,
+      "edge": 1.642,
+      "confidence": 52.6,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 4.542,
+      "market_total": 2.75,
+      "edge": 1.792,
+      "confidence": 53.9,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.815,
+      "confidence": 68.5,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.941,
+    "over_25_prob": 0.831,
+    "over_35_prob": 0.665
+  },
+  "corners_analysis": {
+    "projection": 11.6,
+    "over_85_prob": 0.817,
+    "over_95_prob": 0.721,
+    "over_105_prob": 0.609
+  },
+  "btts_probability": 0.815,
+  "corner_projection": 11.6,
+  "team_metrics": {
+    "home": {
+      "xg_for": 2.55,
+      "xg_against": 0.85,
+      "shots": 16.0,
+      "sot": 6.0,
+      "goals_for": 12,
+      "goals_against": 4,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.2,
+      "xg_against": 1.85,
+      "shots": 11.0,
+      "sot": 3.5,
+      "goals_for": 7,
+      "goals_against": 10,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

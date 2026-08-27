@@ -9,8 +9,8 @@ Features:
 - Confidence-based color coding
 - Error handling and logging
 - Support for various sports and markets
-- **Deduplication** — prevents sending duplicate content within 6 hours
-- **Rich table formatting** — renders predictions in organized table layout
+- **Deduplication**  prevents sending duplicate content within 6 hours
+- **Rich table formatting**  renders predictions in organized table layout
 """
 
 import hashlib
@@ -42,14 +42,14 @@ COLORS = {
 }
 
 SPORT_EMOJIS = {
-    "soccer": "⚽",
-    "football": "🏈",
-    "basketball": "🏀",
-    "baseball": "⚾",
-    "mlb": "⚾",
-    "kbo": "⚾",
-    "tennis": "🎾",
-    "hockey": "🏒",
+    "soccer": "",
+    "football": "",
+    "basketball": "",
+    "baseball": "",
+    "mlb": "",
+    "kbo": "",
+    "tennis": "",
+    "hockey": "",
 }
 
 # ---------------------------------------------------------------------------
@@ -186,23 +186,23 @@ def create_prediction_embed(
         Dictionary formatted as Discord embed
     """
 
-    emoji = SPORT_EMOJIS.get(sport.lower(), "🎲")
+    emoji = SPORT_EMOJIS.get(sport.lower(), "")
     color = get_color_for_recommendation(recommendation)
 
     # Build fields list
     fields = [
         {
-            "name": "📊 Market Probabilities",
+            "name": " Market Probabilities",
             "value": f"**{recommendation}**",
             "inline": True
         },
         {
-            "name": "📈 Confidence",
+            "name": " Confidence",
             "value": f"{confidence:.1f}%",
             "inline": True
         },
         {
-            "name": "💰 Edge",
+            "name": " Edge",
             "value": edge,
             "inline": True
         },
@@ -211,14 +211,14 @@ def create_prediction_embed(
     # Add market information if provided
     if market_line is not None:
         fields.append({
-            "name": "📍 Market Line",
+            "name": " Market Line",
             "value": str(market_line),
             "inline": True
         })
 
     if market_total is not None:
         fields.append({
-            "name": "📊 Market Total",
+            "name": " Market Total",
             "value": str(market_total),
             "inline": True
         })
@@ -274,7 +274,7 @@ def create_organized_prediction_embed(
         Formatted Discord embed dict
     """
 
-    emoji = SPORT_EMOJIS.get(sport.lower(), "🎲")
+    emoji = SPORT_EMOJIS.get(sport.lower(), "")
 
     # Determine overall color based on strongest bet
     if strong_bets and strong_bets[0].get("prob", 0) >= 75:
@@ -288,12 +288,12 @@ def create_organized_prediction_embed(
 
     # STRONG BETS section
     if strong_bets:
-        strong_section = "🔥 **STRONG BETS** 🔥\n"
+        strong_section = " **STRONG BETS** \n"
         for bet in strong_bets:
-            strong_section += f"• {bet['name']}: {bet['prob']:.0f}% ({bet.get('edge', 'N/A')})\n"
+            strong_section += f" {bet['name']}: {bet['prob']:.0f}% ({bet.get('edge', 'N/A')})\n"
 
         fields.append({
-            "name": "💪 STRONG BET (≥65% Confidence)",
+            "name": " STRONG BET (65% Confidence)",
             "value": strong_section.strip(),
             "inline": False
         })
@@ -302,10 +302,10 @@ def create_organized_prediction_embed(
     if medium_bets:
         medium_section = ""
         for bet in medium_bets:
-            medium_section += f"• {bet['name']}: {bet['prob']:.0f}% ({bet.get('edge', 'N/A')})\n"
+            medium_section += f" {bet['name']}: {bet['prob']:.0f}% ({bet.get('edge', 'N/A')})\n"
 
         fields.append({
-            "name": "⚠️  MEDIUM BET (55-65% Confidence)",
+            "name": "  MEDIUM BET (55-65% Confidence)",
             "value": medium_section.strip(),
             "inline": False
         })
@@ -314,10 +314,10 @@ def create_organized_prediction_embed(
     if pass_bets:
         pass_section = ""
         for bet in pass_bets:
-            pass_section += f"• {bet['name']}: {bet['prob']:.0f}% (Skip)\n"
+            pass_section += f" {bet['name']}: {bet['prob']:.0f}% (Skip)\n"
 
         fields.append({
-            "name": "❌ PASS (<55% Confidence)",
+            "name": " PASS (<55% Confidence)",
             "value": pass_section.strip(),
             "inline": False
         })
@@ -326,10 +326,10 @@ def create_organized_prediction_embed(
     if projected_stats:
         stats_section = ""
         for stat_name, stat_value in projected_stats.items():
-            stats_section += f"• {stat_name}: {stat_value}\n"
+            stats_section += f" {stat_name}: {stat_value}\n"
 
         fields.append({
-            "name": "📊 Match Stats",
+            "name": " Match Stats",
             "value": stats_section.strip(),
             "inline": False
         })
@@ -342,7 +342,7 @@ def create_organized_prediction_embed(
         "fields": fields,
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "footer": {
-            "text": "MultiSportPredict • Organized Betting Guide"
+            "text": "MultiSportPredict  Organized Betting Guide"
         }
     }
 
@@ -417,24 +417,24 @@ def push_to_discord(
             payload = {"embeds": [embed]}
         else:
             # Plain text format
-            emoji = SPORT_EMOJIS.get(sport.lower(), "🎲")
+            emoji = SPORT_EMOJIS.get(sport.lower(), "")
             message = (
                 f"{emoji} **{sport.upper()}** Prediction\n"
                 f"**{home}** vs **{away}**\n"
-                f"├─ Recommendation: {recommendation}\n"
-                f"├─ Confidence: {confidence:.1f}%\n"
-                f"├─ Edge: {edge}\n"
+                f" Recommendation: {recommendation}\n"
+                f" Confidence: {confidence:.1f}%\n"
+                f" Edge: {edge}\n"
             )
 
             if market_line is not None:
-                message += f"├─ Market Line: {market_line}\n"
+                message += f" Market Line: {market_line}\n"
             if market_total is not None:
-                message += f"├─ Market Total: {market_total}\n"
+                message += f" Market Total: {market_total}\n"
             if additional_fields:
                 for field_name, field_value in additional_fields.items():
-                    message += f"├─ {field_name}: {field_value}\n"
+                    message += f" {field_name}: {field_value}\n"
 
-            message += "└─ MultiSportPredict"
+            message += " MultiSportPredict"
             payload = {"content": message}
 
         # ---- DEDUPLICATION: skip if this exact payload was sent recently ----
@@ -444,7 +444,7 @@ def push_to_discord(
                 "Discord push skipped (duplicate content within %ds window): %s vs %s [%s]",
                 DEDUP_WINDOW_SECONDS, home, away, sport
             )
-            return True  # Pretend success — we don't want to spam
+            return True  # Pretend success  we don't want to spam
         # --------------------------------------------------------------------
 
         response = requests.post(
@@ -455,7 +455,7 @@ def push_to_discord(
         )
 
         if response.status_code in (200, 204):
-            logger.info("✓ Discord prediction pushed successfully: %s vs %s [%s]", home, away, sport)
+            logger.info(" Discord prediction pushed successfully: %s vs %s [%s]", home, away, sport)
             return True
         else:
             logger.error(
@@ -470,6 +470,108 @@ def push_to_discord(
         return False
 
 
+
+def push_baseball_prediction_to_discord(
+    prediction,
+    *,
+    home,
+    away,
+    sport="baseball",
+    webhook_url=None,
+):
+    import os, json, requests
+    from datetime import datetime
+
+    target_url = webhook_url or os.getenv("DISCORD_WEBHOOK_URL")
+    if not target_url:
+        return False
+
+    # Real data structure: game -> confidence -> total/side
+    ml  = prediction.get("moneyline_and_side", {})
+    game = prediction.get("game", ml)
+    proj = prediction.get("game_projection", {})
+    props = prediction.get("props", {})
+
+    home_prob = game.get("home_win_probability", ml.get("home_win_probability", 0))
+    away_prob = game.get("away_win_probability", ml.get("away_win_probability", 0))
+    proj_total = game.get("projected_total_runs", proj.get("total", "N/A"))
+
+    summary = game
+
+    # 1. Format Confidence & Recommendations with Emojis
+    def format_rec(recommendation, conf):
+        rec_str = str(recommendation).strip().upper()
+        emoji = "🟢" if rec_str == "BET" else ("🔴" if rec_str == "PASS" else "🟡")
+        return f"{emoji} **{rec_str}**\n*(Conf: {conf})*"
+
+    # 2. Extract Total and Run Line Data
+    confidence_sources = (game.get("confidence"), ml.get("confidence"))
+    conf_block = next(
+        (block for block in confidence_sources if isinstance(block, dict)),
+        {},
+    )
+    
+    total_block = conf_block.get("total", {})
+    rec = total_block.get("recommendation", summary.get("recommendation", "PASS"))
+    conf_score = total_block.get("score", summary.get("confidence", "N/A"))
+    total_display = format_rec(rec, conf_score)
+
+    rl_block = conf_block.get("run_line", conf_block.get("side", {}))
+    rl_rec = rl_block.get("recommendation", "PASS")
+    rl_conf = rl_block.get("score", "N/A")
+    run_line_display = format_rec(rl_rec, rl_conf)
+
+    # 3. Clean up NRFI Formatting
+    nrfi_data = props.get("nrfi", {})
+    nrfi_prob = nrfi_data.get("probability", nrfi_data.get("prob", None))
+    nrfi_rec = nrfi_data.get("recommendation", nrfi_data.get("lean", "N/A"))
+    if nrfi_prob is not None:
+        nrfi_display = f"**Prob:** {float(nrfi_prob)*100:.1f}%\n**Rec:** {nrfi_rec}"
+    else:
+        nrfi_display = "N/A"
+
+    # 4. Clean up Strikeout Props Formatting
+    ks_data = props.get("strikeouts", {})
+    home_ks = ks_data.get("home_team_projected_ks", "N/A")
+    away_ks = ks_data.get("away_team_projected_ks", "N/A")
+    ks_lean = ks_data.get("lean", "N/A")
+    ks_display = f"**{home}:** {home_ks} Ks\n**{away}:** {away_ks} Ks\n**Lean:** {ks_lean}"
+
+    # 5. Build the Final Beautiful Embed
+    fields = [
+        {"name": "💰 MONEYLINE", "value": f"**{home}:** {float(home_prob)*100:.1f}%\n**{away}:** {float(away_prob)*100:.1f}%\n{format_rec(conf_block.get('side', {}).get('recommendation', 'N/A'), conf_block.get('side', {}).get('score', 'N/A'))}", "inline": True},
+        {"name": "📈 PROJ TOTAL", "value": f"**{proj_total}** runs", "inline": True},
+        {"name": "🎯 TOTAL", "value": total_display, "inline": True},
+        {"name": "🏃 RUN LINE", "value": run_line_display, "inline": True},
+        {"name": "🔥 NRFI / YRFI", "value": nrfi_display, "inline": True},
+        {"name": "⚾ STRIKEOUT PROPS", "value": ks_display, "inline": False}
+    ]
+
+    color_map = {"STRONG BET": 3066993, "BET": 10181046, "PASS": 9807270}
+    color = color_map.get(str(rec).upper(), 9807270)
+
+    embed = {
+        "title": f"[{sport.upper()}] {home.upper()} vs {away.upper()}",
+        "description": f"{sport.upper()} Prediction Report",
+        "color": color,
+        "fields": fields,
+        "footer": {"text": "MultiSportPredict | Baseball"},
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
+
+    try:
+        payload = json.dumps({"embeds": [embed]}, ensure_ascii=False).encode("utf-8")
+        resp = requests.post(
+            target_url,
+            data=payload,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+            timeout=10,
+        )
+        return resp.status_code in (200, 204)
+    except Exception as e:
+        print(f"[ERROR] Baseball Discord push failed: {e}")
+        return False
+
 def push_full_prediction_to_discord(
     *,
     sport: str,
@@ -478,6 +580,19 @@ def push_full_prediction_to_discord(
     prediction: Dict[str, Any],
     webhook_url: Optional[str] = None,
 ) -> bool:
+    if sport.lower() in {"soccer", "football"}:
+        return push_soccer_prediction_to_discord(
+            f"{home} vs {away}", prediction, webhook_url=webhook_url
+        )
+    if sport.lower() == "tennis":
+        return push_tennis_prediction_to_discord(
+            prediction, home=home, away=away, webhook_url=webhook_url
+        )
+    if sport.lower() in {"baseball", "mlb", "kbo"}:
+        return push_baseball_prediction_to_discord(
+            prediction, home=home, away=away, sport=sport, webhook_url=webhook_url
+        )
+
     """Push every section of a model result as bounded Discord embeds.
 
     Discord limits embed fields and field values. Flattening each top-level
@@ -524,7 +639,7 @@ def push_full_prediction_to_discord(
     for embed_index in range(0, len(fields), 8):
         embed_fields = fields[embed_index:embed_index + 8]
         embeds.append({
-            "title": f"{SPORT_EMOJIS.get(sport.lower(), '🎲')} {home} vs {away}",
+            "title": f"{SPORT_EMOJIS.get(sport.lower(), '')} {home} vs {away}",
             "description": f"{sport.title()} full model results",
             "color": COLORS["neutral"],
             "fields": embed_fields,
@@ -534,7 +649,7 @@ def push_full_prediction_to_discord(
 
     if not embeds:
         embeds = [{
-            "title": f"{SPORT_EMOJIS.get(sport.lower(), '🎲')} {home} vs {away}",
+            "title": f"{SPORT_EMOJIS.get(sport.lower(), '')} {home} vs {away}",
             "description": "No model result sections were returned.",
             "color": COLORS["pass"],
         }]
@@ -615,7 +730,7 @@ def push_slate_to_discord(
     Push a consolidated slate of predictions to Discord as a single rich embed
     with organized table formatting.
 
-    This is the SINGLE canonical entry point for slate pushes — prevents
+    This is the SINGLE canonical entry point for slate pushes  prevents
     duplicate slate messages from multiple scripts.
 
     Args:
@@ -634,20 +749,20 @@ def push_slate_to_discord(
         logger.error("Slate push aborted: DISCORD_WEBHOOK_URL not set.")
         return 0
 
-    emoji = SPORT_EMOJIS.get(sport.lower(), "🎲")
+    emoji = SPORT_EMOJIS.get(sport.lower(), "")
 
     # Build a single consolidated message
-    lines = [f"{emoji} **{sport.title()} SLATE — {len(slate)} Matches**", ""]
+    lines = [f"{emoji} **{sport.title()} SLATE  {len(slate)} Matches**", ""]
 
     for i, match in enumerate(slate, 1):
         lines.append(f"**{i}. {match['home']} vs {match['away']}**")
-        lines.append(f"   ├─ Market: {match.get('market', 'N/A')}")
-        lines.append(f"   ├─ Projected: {match.get('projected', 'N/A')}")
-        lines.append(f"   ├─ Edge: {match.get('edge', 'N/A')}")
-        lines.append(f"   └─ Recommendation: **{match.get('rec', 'PASS')}**")
+        lines.append(f"    Market: {match.get('market', 'N/A')}")
+        lines.append(f"    Projected: {match.get('projected', 'N/A')}")
+        lines.append(f"    Edge: {match.get('edge', 'N/A')}")
+        lines.append(f"    Recommendation: **{match.get('rec', 'PASS')}**")
         lines.append("")
 
-    lines.append("└─ MultiSportPredict • Smart Betting Guide")
+    lines.append(" MultiSportPredict  Smart Betting Guide")
     content = "\n".join(lines)
 
     # Compute hash for dedup
@@ -666,7 +781,7 @@ def push_slate_to_discord(
             timeout=15,
         )
         if response.status_code in (200, 204):
-            logger.info("✓ Slate pushed to Discord successfully (%d matches).", len(slate))
+            logger.info(" Slate pushed to Discord successfully (%d matches).", len(slate))
             return 1
         else:
             logger.error("Slate push failed: status=%s", response.status_code)
@@ -701,131 +816,155 @@ def push_soccer_prediction_to_discord(
     """
     game = prediction_data.get("game", {})
     preds = prediction_data.get("predictions", {})
-    goals_analysis = prediction_data.get("goals_analysis", {})
-    btts_prob = prediction_data.get("btts_probability", 0)
-    corner_proj = prediction_data.get("corner_projection", 0)
-
+    goals = prediction_data.get("goals_analysis", {})
+    corners = prediction_data.get("corners_analysis", {})
+    btts = preds.get("btts", {})
     home = prediction_data.get("home_team", "Home")
     away = prediction_data.get("away_team", "Away")
+    live_market = prediction_data.get("live_market", {}).get("market", {})
 
-    home_win_pct = game.get("home_win_prob", 0) * 100
-    away_win_pct = game.get("away_win_prob", 0) * 100
-
-    # Format values for embed fields
-    winner_value = (
-        f"{home}: {home_win_pct:.1f}%"
-        if home_win_pct >= away_win_pct
-        else f"{away}: {away_win_pct:.1f}%"
-    )
-    btts_value = "Yes" if btts_prob > 0.5 else "No"
-    totals_value = (
-        f"Over {preds.get('total', {}).get('market_total', 2.5)} "
-        f"({goals_analysis.get('over_25_prob', 0)*100:.1f}%)"
-    )
-    corners_value = str(round(corner_proj, 1))
-
-    side = preds.get("side", {})
-    total = preds.get("total", {})
-    btts = preds.get("btts", {})
-    corners = prediction_data.get("corners_analysis", {})
-    home_metrics = prediction_data.get("team_metrics", {}).get("home", {})
-    away_metrics = prediction_data.get("team_metrics", {}).get("away", {})
-
-    def pct(value: Any) -> str:
+    def percent(value: Any) -> str:
         return f"{float(value) * 100:.1f}%"
 
-    def metric_line(label: str, value: Any) -> str:
-        return f"{label}: {value}"
+    def recommendation(section: str) -> str:
+        return preds.get(section, {}).get("recommendation", "PASS")
 
-    # Keep every market returned by the model visible in Discord. The compact
-    # summary above is useful for scanning, while these fields are the full
-    # market table for auditability and later comparison with the source JSON.
-    additional_fields = {
-        "1X2 Market": "\n".join([
-            f"{home}: {pct(game.get('home_win_prob', 0))}",
-            f"Draw: {pct(game.get('draw_prob', 0))}",
-            f"{away}: {pct(game.get('away_win_prob', 0))}",
-        ]),
-        "Side / Asian Handicap": "\n".join([
-            f"Line: {side.get('market_line', 'N/A')}",
-            f"Model xG diff: {side.get('model_xg_diff', 0):+.3f}",
-            f"Edge: {side.get('edge', 0):+.3f}",
-            f"Confidence: {side.get('confidence', 0):.1f}%",
-            f"Recommendation: {side.get('recommendation', 'PASS')}",
-        ]),
-        "Goal Totals Market": "\n".join([
-            f"Line: {total.get('market_total', 2.5)}",
-            f"Model total xG: {total.get('model_total_xg', 0):.3f}",
-            f"Edge: {total.get('edge', 0):+.3f}",
-            f"Confidence: {total.get('confidence', 0):.1f}%",
-            f"Recommendation: {total.get('recommendation', 'PASS')}",
-        ]),
-        "Goal Probabilities": "\n".join([
-            f"Over 1.5: {pct(goals_analysis.get('over_15_prob', 0))}",
-            f"Over 2.5: {pct(goals_analysis.get('over_25_prob', 0))}",
-            f"Over 3.5: {pct(goals_analysis.get('over_35_prob', 0))}",
-        ]),
-        "BTTS Market": "\n".join([
-            f"Yes probability: {pct(btts.get('probability', btts_prob))}",
-            f"Confidence: {btts.get('confidence', 0):.1f}%",
-            f"Recommendation: {btts.get('recommendation', 'PASS')}",
-        ]),
-        "Corner Totals Market": "\n".join([
-            f"Projection: {corners.get('projection', corner_proj):.1f}",
-            f"Over 8.5: {pct(corners.get('over_85_prob', 0))}",
-            f"Over 9.5: {pct(corners.get('over_95_prob', 0))}",
-            f"Over 10.5: {pct(corners.get('over_105_prob', 0))}",
-        ]),
-        "Projected Score": "\n".join([
-            f"{home}: {game.get('projected_home_goals', 0):.2f} goals",
-            f"{away}: {game.get('projected_away_goals', 0):.2f} goals",
-            f"Total: {game.get('projected_total_goals', 0):.2f} goals",
-        ]),
-        f"{home} Team Metrics": "\n".join([
-            metric_line("xG for", home_metrics.get("xg_for", "N/A")),
-            metric_line("xG against", home_metrics.get("xg_against", "N/A")),
-            metric_line("Shots", home_metrics.get("shots", "N/A")),
-            metric_line("Shots on target", home_metrics.get("sot", "N/A")),
-            metric_line("Goals for / against", f"{home_metrics.get('goals_for', 'N/A')} / {home_metrics.get('goals_against', 'N/A')}"),
-        ]),
-        f"{away} Team Metrics": "\n".join([
-            metric_line("xG for", away_metrics.get("xg_for", "N/A")),
-            metric_line("xG against", away_metrics.get("xg_against", "N/A")),
-            metric_line("Shots", away_metrics.get("shots", "N/A")),
-            metric_line("Shots on target", away_metrics.get("sot", "N/A")),
-            metric_line("Goals for / against", f"{away_metrics.get('goals_for', 'N/A')} / {away_metrics.get('goals_against', 'N/A')}"),
-        ]),
-        "Data Source": prediction_data.get("_stats_source", "unknown"),
+    market_lines = [
+        f"League: {prediction_data.get('league', 'N/A')}",
+        f"{home}: {live_market.get('moneyline_home', 'N/A')} | Draw: {live_market.get('moneyline_draw', 'N/A')} | {away}: {live_market.get('moneyline_away', 'N/A')}",
+        f"Moneyline model: {home} {percent(game.get('home_win_prob', 0))} | Draw {percent(game.get('draw_prob', 0))} | {away} {percent(game.get('away_win_prob', 0))}",
+        f"Moneyline recommendation: {recommendation('side')}",
+    ]
+    goals_lines = [
+        f"Match total {preds.get('total', {}).get('market_total', 2.5)}: {recommendation('total')}",
+        f"Over 1.5: {percent(goals.get('over_15_prob', 0))} | Over 2.5: {percent(goals.get('over_25_prob', 0))} | Over 3.5: {percent(goals.get('over_35_prob', 0))}",
+        f"Projected goals: {game.get('projected_home_goals', 0):.2f} - {game.get('projected_away_goals', 0):.2f} (total {game.get('projected_total_goals', 0):.2f})",
+        f"Team totals: {home} {game.get('projected_home_goals', 'N/A')} | {away} {game.get('projected_away_goals', 'N/A')}",
+        f"Edge: {preds.get('total', {}).get('edge', 'N/A')} | Confidence: {preds.get('total', {}).get('confidence', 'N/A')}",
+    ]
+    corner_lines = [
+        f"Game total: {corners.get('projection', prediction_data.get('corner_projection', 'N/A'))}",
+        f"Over 8.5: {percent(corners.get('over_85_prob', 0))} | Over 9.5: {percent(corners.get('over_95_prob', 0))} | Over 10.5: {percent(corners.get('over_105_prob', 0))}",
+        f"Expected corners: {home} {prediction_data.get('team_corners', {}).get('home_proj', 'N/A')} | {away} {prediction_data.get('team_corners', {}).get('away_proj', 'N/A')}",
+    ]
+    halftime = prediction_data.get("halftime", {})
+    btts_lines = [
+        f"BTTS: {btts.get('recommendation', 'PASS')} | Yes {percent(btts.get('probability', prediction_data.get('btts_probability', 0)))}",
+        f"Confidence: {btts.get('confidence', 0):.1f}%",
+        f"Halftime total: {halftime.get('recommendation_1h_total', 'N/A')} | Result: {halftime.get('predicted_1h_result', 'N/A')}",
+    ]
+    side_rec = recommendation("side")
+    total_rec = recommendation("total")
+    btts_rec = btts.get("recommendation", "PASS")
+    best_rec = "STRONG BET" if "STRONG BET" in [side_rec, total_rec, btts_rec] else "BET" if "BET" in [side_rec, total_rec, btts_rec] else "PASS"
+    color_map = {"STRONG BET": 3066993, "BET": 10181046, "PASS": 9807270}
+    embed_color = color_map.get(best_rec, 9807270)
+    league_name = prediction_data.get("league", "Soccer")
+    embed = {
+        "title": f"{home} vs {away}",
+        "description": f"**{league_name}** | {datetime.utcnow().strftime('%B %d, %Y')} | Best Signal: **{best_rec}**",
+        "color": embed_color,
+        "fields": [
+            {"name": "MARKET LINES", "value": "\n".join(market_lines), "inline": False},
+            {"name": "GOALS & TOTALS", "value": "\n".join(goals_lines), "inline": False},
+            {"name": "CORNER FORECASTS", "value": "\n".join(corner_lines), "inline": False},
+            {"name": "BTTS & HALFTIME", "value": "\n".join(btts_lines), "inline": False},
+        ],
+        "footer": {"text": "MultiSportPredict | Real data only"},
+        "timestamp": datetime.utcnow().isoformat() + "Z",
     }
 
     if dry_run:
-        embed = create_prediction_embed(
-            sport="soccer",
-            home=home,
-            away=away,
-            recommendation=preds.get("total", {}).get("recommendation", "PASS"),
-            confidence=preds.get("total", {}).get("confidence", 0),
-            edge=f"{preds.get('total', {}).get('edge', 0):+.3f}",
-            market_total=preds.get("total", {}).get("market_total", 2.5),
-            additional_fields=additional_fields,
-        )
         payload = {"embeds": [embed]}
         print(f"[DRY RUN] Soccer Prediction Payload for {match_name}:")
         print(json.dumps(payload, indent=2, default=str))
         return True
 
-    return push_to_discord(
-        sport="soccer",
-        home=home,
-        away=away,
-        recommendation=preds.get("total", {}).get("recommendation", "PASS"),
-        confidence=preds.get("total", {}).get("confidence", 0),
-        edge=f"{preds.get('total', {}).get('edge', 0):+.3f}",
-        market_total=preds.get("total", {}).get("market_total", 2.5),
-        use_embed=True,
-        webhook_url=webhook_url,
-        additional_fields=additional_fields,
-    )
+    target_url = webhook_url or os.getenv("DISCORD_WEBHOOK_URL")
+    if not target_url or target_url == "None" or requests is None:
+        logger.error("Soccer Discord push aborted: webhook or requests unavailable.")
+        return False
+    payload = {"embeds": [embed]}
+    if _is_duplicate(_content_hash(payload)):
+        return True
+    try:
+        response = requests.post(target_url, json=payload, headers={"Content-Type": "application/json"}, timeout=15)
+        return response.status_code in (200, 204)
+    except requests.exceptions.RequestException as exc:
+        logger.error("Soccer Discord webhook request failed: %s", exc)
+        return False
+
+
+# ---------------------------------------------------------------------------
+# TENNIS PREDICTION PUSH (single concise embed)
+# ---------------------------------------------------------------------------
+
+def push_tennis_prediction_to_discord(
+    prediction: Dict[str, Any],
+    *,
+    home: Optional[str] = None,
+    away: Optional[str] = None,
+    dry_run: bool = False,
+    webhook_url: Optional[str] = None,
+) -> bool:
+    """Push a tennis result as one readable four-field embed."""
+    moneyline = prediction.get("moneyline", {})
+    home_player = home or prediction.get("home_player") or prediction.get("home", "Player 1")
+    away_player = away or prediction.get("away_player") or prediction.get("away", "Player 2")
+
+    def percent(value: Any) -> str:
+        return f"{float(value) * 100:.1f}%"
+
+    overview = "\n".join([
+        f"Tournament: {prediction.get('tournament_name', prediction.get('tournament', 'N/A'))}",
+        f"Surface: {str(prediction.get('surface', 'N/A')).title()}",
+        f"Round: {prediction.get('round_name', prediction.get('round', 'N/A'))}",
+    ])
+    projections = "\n".join([
+        f"{home_player}: {percent(moneyline.get('home_win_prob', 0))}",
+        f"{away_player}: {percent(moneyline.get('away_win_prob', 0))}",
+    ])
+    fair_odds = "\n".join([
+        f"Model fair odds: {home_player} {moneyline.get('home_fair_odds', 'N/A')} | {away_player} {moneyline.get('away_fair_odds', 'N/A')}",
+        f"Market odds: {prediction.get('market_home_odds', 'N/A')} | {prediction.get('market_away_odds', 'N/A')}",
+    ])
+    recommendation = "\n".join([
+        f"Lean: {moneyline.get('lean', prediction.get('recommendation', 'N/A'))}",
+        f"Recommendation: {moneyline.get('recommendation', 'N/A')}",
+        f"Confidence: {moneyline.get('confidence', prediction.get('confidence', 0)):.1f}%",
+        f"Edge: {moneyline.get('edge_pct', prediction.get('edge_pct', 0)):+.1f}%",
+    ])
+    embed = {
+        "title": f" {home_player} vs {away_player}",
+        "description": "Tennis match forecast",
+        "color": COLORS["neutral"],
+        "fields": [
+            {"name": " Match Overview", "value": overview, "inline": False},
+            {"name": " Model Projections", "value": projections, "inline": False},
+            {"name": " Fair Odds & Market", "value": fair_odds, "inline": False},
+            {"name": " Recommendation", "value": recommendation, "inline": False},
+        ],
+        "footer": {"text": "MultiSportPredict"},
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
+    payload = {"embeds": [embed]}
+    if dry_run:
+        print("[DRY RUN] Tennis Prediction Payload:")
+        print(json.dumps(payload, indent=2, default=str))
+        return True
+
+    target_url = webhook_url or os.getenv("DISCORD_WEBHOOK_URL")
+    if not target_url or target_url == "None" or requests is None:
+        logger.error("Tennis Discord push aborted: webhook or requests unavailable.")
+        return False
+    if _is_duplicate(_content_hash(payload)):
+        return True
+    try:
+        response = requests.post(target_url, json=payload, headers={"Content-Type": "application/json"}, timeout=15)
+        return response.status_code in (200, 204)
+    except requests.exceptions.RequestException as exc:
+        logger.error("Tennis Discord webhook request failed: %s", exc)
+        return False
 
 
 # ---------------------------------------------------------------------------
@@ -915,17 +1054,17 @@ def push_recommendation_to_discord(
         plays = value_plays.get("plays", {})
         if plays:
             lines = [
-                f"`{name}` — {odds}" for name, odds in plays.items()
+                f"`{name}`  {odds}" for name, odds in plays.items()
             ]
             fields.append({
-                "name": "🎯 Original Value Plays",
+                "name": " Original Value Plays",
                 "value": "\n".join(lines),
                 "inline": False,
             })
         original_lean = value_plays.get("original_lean")
         if original_lean:
             fields.append({
-                "name": "📝 Original Lean",
+                "name": " Original Lean",
                 "value": original_lean,
                 "inline": False,
             })
@@ -935,13 +1074,13 @@ def push_recommendation_to_discord(
         if deep_dive:
             lines = []
             if deep_dive.get("Target"):
-                lines.append(f"• **Target:** {deep_dive['Target']}")
+                lines.append(f" **Target:** {deep_dive['Target']}")
             if deep_dive.get("Angle"):
-                lines.append(f"• **Angle:** {deep_dive['Angle']}")
+                lines.append(f" **Angle:** {deep_dive['Angle']}")
             if deep_dive.get("Rationale"):
-                lines.append(f"• **Rationale:** {deep_dive['Rationale']}")
+                lines.append(f" **Rationale:** {deep_dive['Rationale']}")
             fields.append({
-                "name": "🔍 Deep-Dive Analysis",
+                "name": " Deep-Dive Analysis",
                 "value": "\n".join(lines),
                 "inline": False,
             })
@@ -952,17 +1091,17 @@ def push_recommendation_to_discord(
             fave = model_view.get("favorite", "coin_flip")
             fave_prob = model_view.get("favorite_win_prob", 0.5)
             fave_text = "coin-flip" if fave == "coin_flip" else f"{fave}"
-            lines = [f"• **Model favorite:** {fave_text} — {fave_prob:.1%}"]
+            lines = [f" **Model favorite:** {fave_text}  {fave_prob:.1%}"]
             if model_view.get("notes"):
-                lines.append(f"• **Note:** {model_view['notes']}")
+                lines.append(f" **Note:** {model_view['notes']}")
             fields.append({
-                "name": "🤖 Model View",
+                "name": " Model View",
                 "value": "\n".join(lines),
                 "inline": False,
             })
 
     embed = {
-        "title": f"🎾 Tennis Value Pick: {home_player} vs {away_player}",
+        "title": f" Tennis Value Pick: {home_player} vs {away_player}",
         "color": color,
         "fields": fields,
         "footer": {
@@ -1037,7 +1176,7 @@ def test_webhook(webhook_url: Optional[str] = None) -> bool:
     try:
         payload = {
             "embeds": [{
-                "title": "🧪 Webhook Test",
+                "title": " Webhook Test",
                 "description": "If you see this message, your Discord webhook is working!",
                 "color": 3066993,
             }]
@@ -1051,7 +1190,7 @@ def test_webhook(webhook_url: Optional[str] = None) -> bool:
         )
 
         if response.status_code in (200, 204):
-            logger.info("✓ Webhook test successful!")
+            logger.info(" Webhook test successful!")
             return True
         else:
             logger.error(f"Webhook test failed: status={response.status_code}")
@@ -1065,7 +1204,7 @@ def test_webhook(webhook_url: Optional[str] = None) -> bool:
 if __name__ == "__main__":
     # Test the webhook
     if test_webhook():
-        print("✓ Your Discord webhook is properly configured!")
+        print(" Your Discord webhook is properly configured!")
 
         # Test rich table rendering
         sample_rows = [
@@ -1089,4 +1228,9 @@ if __name__ == "__main__":
             use_embed=True,
         )
     else:
-        print("✗ Discord webhook is not configured. Check your .env file.")
+        print(" Discord webhook is not configured. Check your .env file.")
+
+
+
+
+
