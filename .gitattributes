@@ -1,0 +1,28 @@
+# Line-ending rules. Without these, a fresh clone on Windows converts .sh files
+# to CRLF and bash fails with "$'\r': command not found" -- which is exactly
+# what the warnings on the first commit were predicting.
+
+* text=auto
+
+# Shell scripts MUST stay LF, even on Windows. bash cannot read CRLF.
+*.sh    text eol=lf
+
+# Batch files MUST be CRLF. cmd.exe is unreliable with LF.
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Python is happy either way; pin LF so diffs stay clean across machines.
+*.py    text eol=lf
+
+*.md    text
+*.json  text
+*.csv   text
+
+# Never line-ending-mangle these.
+*.db      binary
+*.sqlite  binary
+*.parquet binary
+*.png     binary
+*.jpg     binary
+*.gz      binary
+*.zip     binary
