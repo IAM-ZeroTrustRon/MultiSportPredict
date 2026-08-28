@@ -132,3 +132,11 @@ multisport_history.db
 models/*.joblib
 data/
 external_data/
+
+# Session artefacts added 2026-08-28
+logs/
+diagnostic_report.txt
+pending_results.csv
+*.bak-*
+i-want-to-run-the-soccer-match-between/
+data/cache/

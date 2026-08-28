@@ -1,0 +1,48 @@
+Add unified daily ingestion, results grading, and fix silent placeholder bugs
+
+INGESTION
+Add ingest_all_sports.py: one adapter per league, isolated failures, atomic
+merged writes, on-disk response cache, --check dry-run and --debug modes.
+  MLB team metrics + home/away splits + last-ten form  (statsapi.mlb.com)
+  MLB probable starters with season ERA/K9            (statsapi.mlb.com)
+  KBO team metrics                                     (mykbostats.com)
+  EuroLeague ORTG/DRTG/pace                            (euroleague-api)
+  KBL and NZ NBL                                       (basketball.realgm.com)
+  ATP main tour + Challenger match history             (JeffSackmann/tennis_atp)
+  Soccer and MLB player props delegate to the existing ingestors.
+
+BUG FIXES
+Baseball ran on league averages for both teams. BaseballPredictor.load_data()
+defaults home_runs/home_era/whip/obp/slg to constants and universal_runner
+never passed real values, so every MLB matchup used 4.5/4.0 runs and every KBO
+matchup 5.2/4.8 regardless of opponent - the same class of bug already fixed in
+soccer. run_baseball_game() now accepts team_overrides, run_baseball() looks the
+teams up, and team_stats_provider gained get_baseball_team_stats(). A miss warns
+loudly instead of silently becoming a league-average clone.
+
+Tennis Elo was frozen. tennis_predictor called load_match_history() with no CSV
+path, so TennisElo only ever applied its hardcoded SEED_MATCHES list. It now
+loads data/tennis/atp_matches.csv and reports the match count.
+
+EuroLeague ingestion deleted its own baseline. ingest_hoops.py overwrote
+euroleague_stats.json, erasing the _league_baseline block that
+get_euroleague_league_baseline() reads. All stores now merge and preserve
+underscore-prefixed keys. Also fixes the get_team_stats() call, which took the
+season where the library expects a statistic type - it had never returned data.
+
+RESULTS TRACKING
+Add grade_predictions.py. The predictions table had result_outcome and
+profit_loss columns and historical_storage had update_prediction_outcome(), but
+nothing called it: 104 predictions logged, 0 graded. Adds game_date/league/pick/
+score/grade_note columns, grades totals, moneylines and BTTS against real final
+scores, and reports win rate and units by sport, market, confidence bucket and
+recommendation tier. MLB results are fetched automatically; other sports grade
+from a CSV until their result feeds are reachable. Spread markets are left
+ungraded on purpose - the stored columns do not record which side the number
+belongs to, so grading them would be guesswork.
+
+TOOLING
+diagnose_sources.py plus run_diagnostic.bat to identify why several sources are
+being refused (RealGM 403, FanGraphs 403, GitHub 404 from four hosts).
+refresh_all.bat / install_daily_task.bat schedule the daily run without needing
+the command line.

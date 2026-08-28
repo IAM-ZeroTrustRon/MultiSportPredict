@@ -832,7 +832,8 @@ def run_soccer_game(home_team: str, away_team: str, league: str = "Premier Leagu
 def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
                       markets: List[str] = None, market_total: float = 8.5,
                       home_sp_overrides: Optional[Dict[str, float]] = None,
-                      away_sp_overrides: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
+                      away_sp_overrides: Optional[Dict[str, float]] = None,
+                      team_overrides: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
     """Run moneyline/run-line and prop-market baseball predictions together."""
     print(f"\n{'='*60}")
     print(f"BASEBALL ({league.upper()}) MATCHUP: {home_team} vs {away_team}")
@@ -855,6 +856,12 @@ def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
                 pitcher_kwargs["away_pitcher_era"] = away_sp_overrides["era"]
             if "k_rate" in away_sp_overrides:
                 pitcher_kwargs["away_k9"] = away_sp_overrides["k_rate"] * 9.0
+
+        # Real per-team run scoring/prevention from data/baseball_stats.json.
+        # load_data() defaults each of these to a league average, so without
+        # them both teams arrive identical and the matchup carries no signal.
+        if team_overrides:
+            pitcher_kwargs.update(team_overrides)
 
         data = predictor.load_data(
             league=league, home_team=home_team, away_team=away_team, **pitcher_kwargs

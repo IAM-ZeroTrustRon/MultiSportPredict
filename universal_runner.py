@@ -554,12 +554,34 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
                 0.0, min(0.60, float(away_sp_k) / batters_faced_est)
             )
 
+    # Real team metrics, written daily by ingest_all_sports.py. Missing data is
+    # reported rather than silently replaced with a league average.
+    from team_stats_provider import get_baseball_team_stats
+
+    team_overrides: Dict[str, float] = {}
+    seeded = {}
+    for side, team_name in (("home", home), ("away", away)):
+        stats = get_baseball_team_stats(team_name, league)
+        seeded[side] = bool(stats)
+        if not stats:
+            adapter = "kbo" if (league or "").strip().upper() == "KBO" else "mlb"
+            print(f"[WARNING] No real team stats for '{team_name}'. This matchup will fall "
+                  f"back to league averages. Fix: python ingest_all_sports.py --only {adapter}")
+            continue
+        for field in ("runs", "runs_allowed", "era", "whip", "obp", "slg"):
+            value = stats.get(field)
+            if value is not None:
+                team_overrides[f"{side}_{field}"] = float(value)
+    if all(seeded.values()):
+        print(f"[OK] Loaded real team metrics for {home} and {away}")
+
     result = run_baseball_game(
         home, away, league=league or "MLB",
         markets=markets or ["nrfi", "strikeouts", "home_runs"],
         market_total=market_total,
         home_sp_overrides=home_sp_overrides,
         away_sp_overrides=away_sp_overrides,
+        team_overrides=team_overrides or None,
     )
     _display_full_result(result)
 

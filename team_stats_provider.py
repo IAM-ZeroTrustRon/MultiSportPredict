@@ -50,6 +50,7 @@ BASKETBALL_STATS_PATH = DATA_DIR / "basketball_stats.json"
 EUROLEAGUE_STATS_PATH = Path("data/euroleague_stats.json")
 GLOBAL_SOCCER_STATS_PATH = Path("data/soccer_stats.json")
 INTERNATIONAL_BASKETBALL_STATS_PATH = Path("data/basketball_stats.json")
+BASEBALL_STATS_PATH = Path("data/baseball_stats.json")
 
 # Fields SoccerPredictor.predict() actually reads via kwargs (see soccer_predictor.py)
 SOCCER_FIELDS = [
@@ -137,10 +138,26 @@ def get_soccer_team_stats(team: str, league: Optional[str] = None) -> Optional[D
     Returns a dict of real soccer stats for `team`, or None if not found.
     Callers MUST treat None as "no real data available" and warn accordingly —
     do not silently substitute a default; that's the exact bug this replaces.
+
+    FIXED: this used to read ONLY data/soccer_stats.json (the auto-scraped
+    global file) once that file existed, completely ignoring
+    data/team_stats/soccer_stats.json -- the file upsert_soccer_team_stats()/
+    seed_todays_matches.py actually write to. The moment any auto-ingest
+    script created the global file for the first time, every manually-seeded
+    team (lower-tier leagues with no FBref coverage, injury-adjusted
+    one-offs, ...) would silently stop being found. Now checks the global
+    file first, then falls back to the manual file for anything not found
+    there -- both sources are live, not just whichever one happens to exist.
     """
-    path = GLOBAL_SOCCER_STATS_PATH if GLOBAL_SOCCER_STATS_PATH.exists() else SOCCER_STATS_PATH
-    store = _load_store(path, _SOCCER_TEMPLATE)
-    stats = _lookup(store, team)
+    stats: Optional[Dict[str, Any]] = None
+
+    if GLOBAL_SOCCER_STATS_PATH.exists():
+        global_store = _load_store(GLOBAL_SOCCER_STATS_PATH, _SOCCER_TEMPLATE)
+        stats = _lookup(global_store, team)
+
+    if stats is None:
+        manual_store = _load_store(SOCCER_STATS_PATH, _SOCCER_TEMPLATE)
+        stats = _lookup(manual_store, team)
 
     # Auto-map goals to xG if xG is missing to prevent silent model fallbacks
     if stats and "xg_for" not in stats:
@@ -195,6 +212,53 @@ def upsert_euroleague_team_stats(team: str, stats: Dict[str, Any]) -> None:
     store = _load_store(EUROLEAGUE_STATS_PATH, _EUROLEAGUE_TEMPLATE)
     store[team] = stats
     with open(EUROLEAGUE_STATS_PATH, "w", encoding="utf-8") as f:
+        json.dump(store, f, indent=2)
+
+
+
+BASEBALL_FIELDS = ["runs", "runs_allowed", "era", "whip", "obp", "slg", "k9", "bb9"]
+
+_BASEBALL_TEMPLATE = {
+    "_comment": (
+        "Team-level baseball metrics, per game. Written automatically by "
+        "ingest_all_sports.py (MLB from statsapi.mlb.com, KBO from mykbostats). "
+        "Fields absent from a source are absent here rather than filled with a "
+        "league average -- callers must warn on a miss, not substitute."
+    ),
+}
+
+
+def get_baseball_team_stats(team: str, league: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """Real MLB/KBO team metrics, or None when the team has not been ingested.
+
+    Returning None is deliberate: BaseballPredictor.load_data() defaults every
+    unspecified team metric to a league average, so a silent miss made both
+    teams in a matchup carry identical numbers. Callers must treat None as
+    "no data" and say so loudly.
+    """
+    store = _load_store(BASEBALL_STATS_PATH, _BASEBALL_TEMPLATE)
+    stats = _lookup(store, team)
+    if stats is None:
+        # Tolerate punctuation/spacing differences ("St. Louis" vs "St Louis").
+        squashed = "".join(ch for ch in team.lower() if ch.isalnum())
+        for key, value in store.items():
+            if key.startswith("_"):
+                continue
+            if "".join(ch for ch in key.lower() if ch.isalnum()) == squashed:
+                stats = {k: v for k, v in value.items() if not k.startswith("_")}
+                break
+    if stats is not None and league:
+        recorded = str(stats.get("league", "")).upper()
+        if recorded and recorded != league.strip().upper():
+            return None
+    return stats
+
+
+def upsert_baseball_team_stats(team: str, stats: Dict[str, Any]) -> None:
+    """Add or update one team's entry in the baseball stats file."""
+    store = _load_store(BASEBALL_STATS_PATH, _BASEBALL_TEMPLATE)
+    store[team] = stats
+    with open(BASEBALL_STATS_PATH, "w", encoding="utf-8") as f:
         json.dump(store, f, indent=2)
 
 

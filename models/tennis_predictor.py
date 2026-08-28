@@ -25,8 +25,19 @@ from typing import Any, Dict, Optional
 
 try:
     from models.tennis_elo import TennisElo
+
+    # ingest_all_sports.py writes this from the ATP main-tour and Challenger
+    # result feeds. Without it TennisElo only applies its small hardcoded
+    # SEED_MATCHES list, so every rating is frozen at whenever that was written.
+    _ELO_CSV = Path(__file__).resolve().parent.parent / "data" / "tennis" / "atp_matches.csv"
     _ELO_ENGINE = TennisElo()
-    _ELO_ENGINE.load_match_history()
+    if _ELO_CSV.exists():
+        _ELO_MATCHES = _ELO_ENGINE.load_match_history(str(_ELO_CSV))
+        print(f"[tennis_predictor] Elo built from {_ELO_MATCHES} real matches.")
+    else:
+        _ELO_MATCHES = _ELO_ENGINE.load_match_history()
+        print("[tennis_predictor] WARNING: data/tennis/atp_matches.csv is missing, so Elo is "
+              "running on built-in seed matches only. Fix: python ingest_all_sports.py --only tennis")
     HAS_ELO = True
 except ImportError:
     HAS_ELO = False
