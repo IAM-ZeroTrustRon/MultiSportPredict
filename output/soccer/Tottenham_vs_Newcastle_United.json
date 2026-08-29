@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "Premier League",
+  "home_team": "Tottenham",
+  "away_team": "Newcastle United",
+  "timestamp": "2026-08-29T00:50:20.255789",
+  "game": {
+    "projected_home_goals": 1.39,
+    "projected_away_goals": 2.5,
+    "projected_total_goals": 3.89,
+    "home_win_prob": 0.208,
+    "draw_prob": 0.192,
+    "away_win_prob": 0.601
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -1.102,
+      "market_line": 0.0,
+      "edge": -1.102,
+      "confidence": 44.5,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.892,
+      "market_total": 2.5,
+      "edge": 1.392,
+      "confidence": 48.3,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.672,
+      "confidence": 54.0,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.9,
+    "over_25_prob": 0.746,
+    "over_35_prob": 0.545
+  },
+  "corners_analysis": {
+    "projection": 11.3,
+    "over_85_prob": 0.79,
+    "over_95_prob": 0.687,
+    "over_105_prob": 0.57
+  },
+  "btts_probability": 0.672,
+  "corner_projection": 11.3,
+  "team_metrics": {
+    "home": {
+      "xg_for": 0.0,
+      "xg_against": 3.0,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 0.0,
+      "goals_against": 3.0,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.6,
+      "xg_against": 1.4,
+      "shots": 13.0,
+      "sot": 4.0,
+      "goals_for": 2,
+      "goals_against": 2,
+      "clean_sheets": 0,
+      "missing_attacker": 1,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.4,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.1,
+    "avg_goals_per_game": 2.85,
+    "home_advantage": 0.35,
+    "draw_rate": 0.25,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

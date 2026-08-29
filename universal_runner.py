@@ -158,6 +158,7 @@ def _store_prediction(
     confidence: float,
     recommendation: str,
     raw_json: Dict[str, Any],
+    league: Optional[str] = None,
 ) -> None:
     """Log a prediction to core.historical_storage (canonical store)."""
     try:
@@ -175,6 +176,7 @@ def _store_prediction(
             confidence=confidence,
             recommendation=recommendation,
             raw_json=raw_json,
+            league=league,
         )
     except Exception as exc:  # noqa: BLE001
         print(f"[WARN] Failed to store prediction to historical_storage: {exc}")
@@ -603,6 +605,7 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
             confidence=conf,
             recommendation=rec,
             raw_json=result,
+            league=league or "MLB",
         )
         print(f"[OK] Baseball prediction stored to multisport_history.db")
 

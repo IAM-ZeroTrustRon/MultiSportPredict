@@ -47,7 +47,12 @@ def init_db(db_path: Optional[Path] = None) -> None:
             profit_loss REAL DEFAULT 0.0
         )
     """)
-    
+
+    # league wasn't part of the original table; add it if this db predates it.
+    existing_columns = {row[1] for row in cur.execute("PRAGMA table_info(predictions)")}
+    if "league" not in existing_columns:
+        cur.execute("ALTER TABLE predictions ADD COLUMN league TEXT")
+
     # Index for faster queries
     cur.execute("""
         CREATE INDEX IF NOT EXISTS idx_predictions_sport 
@@ -74,11 +79,19 @@ def store_prediction(
     confidence: float,
     recommendation: str,
     raw_json: Dict[str, Any],
-    db_path: Optional[Path] = None
+    db_path: Optional[Path] = None,
+    league: Optional[str] = None,
 ) -> int:
     """
     Store a prediction in the database.
-    
+
+    If an identical (sport, home_team, away_team, market_type) prediction was
+    already logged today and hasn't been graded yet, this overwrites that row
+    instead of inserting a new one -- re-running the same matchup (a common
+    thing to do while testing, or to refresh with a new line) used to log a
+    duplicate every time, which inflates the game count and skews the win rate
+    once grading runs.
+
     Args:
         sport: Sport type (basketball, soccer, mlb)
         home_team: Home team name
@@ -91,32 +104,53 @@ def store_prediction(
         recommendation: Bet recommendation (STRONG BET, BET, PASS)
         raw_json: Full prediction result dictionary
         db_path: Optional custom database path
-        
+        league: Optional league/competition (e.g. "MLB", "KBO", "EPL")
+
     Returns:
-        ID of the inserted row
+        ID of the inserted (or overwritten) row
     """
     path = db_path or DB_PATH
     conn = sqlite3.connect(path)
     cur = conn.cursor()
-    
-    cur.execute("""
-        INSERT INTO predictions (
+
+    today = datetime.now().date().isoformat()
+    existing = cur.execute("""
+        SELECT id FROM predictions
+        WHERE sport = ? AND home_team = ? AND away_team = ? AND market_type = ?
+          AND date(timestamp) = ? AND result_outcome IS NULL
+        ORDER BY id DESC LIMIT 1
+    """, (sport, home_team, away_team, market_type, today)).fetchone()
+
+    if existing:
+        row_id = existing[0]
+        cur.execute("""
+            UPDATE predictions
+            SET model_value = ?, market_value = ?, edge = ?, confidence = ?,
+                recommendation = ?, timestamp = ?, raw_json = ?, league = ?
+            WHERE id = ?
+        """, (
+            model_value, market_value, edge, confidence, recommendation,
+            datetime.now().isoformat(), json.dumps(raw_json), league, row_id
+        ))
+    else:
+        cur.execute("""
+            INSERT INTO predictions (
+                sport, home_team, away_team, market_type,
+                model_value, market_value, edge,
+                confidence, recommendation, timestamp, raw_json, league
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
             sport, home_team, away_team, market_type,
             model_value, market_value, edge,
-            confidence, recommendation, timestamp, raw_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        sport, home_team, away_team, market_type,
-        model_value, market_value, edge,
-        confidence, recommendation,
-        datetime.now().isoformat(),
-        json.dumps(raw_json)
-    ))
-    
-    row_id = cur.lastrowid
+            confidence, recommendation,
+            datetime.now().isoformat(),
+            json.dumps(raw_json), league
+        ))
+        row_id = cur.lastrowid
+
     conn.commit()
     conn.close()
-    
+
     return row_id
 
 

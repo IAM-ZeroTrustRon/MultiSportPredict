@@ -67,16 +67,28 @@ except ImportError:
 # carries several). "new"-format files hold every league for a country in one
 # CSV with Country/League columns; the classic files are one league per file.
 COUNTRIES: Dict[str, Dict[str, Any]] = {
-    "mexico":    {"page": "mexico.php",      "league": "Liga MX"},
-    "argentina": {"page": "argentina.php",   "league": "Liga Profesional"},
-    "brazil":    {"page": "brazil.php",      "league": "Serie A (BRA)"},
-    "usa":       {"page": "usa.php",         "league": "MLS"},
-    "england":   {"page": "englandm.php",    "league": "Premier League"},
-    "spain":     {"page": "spainm.php",      "league": "La Liga"},
-    "germany":   {"page": "germanym.php",    "league": "Bundesliga"},
-    "italy":     {"page": "italym.php",      "league": "Serie A"},
-    "france":    {"page": "francem.php",     "league": "Ligue 1"},
-    "netherlands": {"page": "netherlandsm.php", "league": "Eredivisie"},
+    # "new"-format countries: one CSV holding every league, with Country/League
+    # columns and a Season column.
+    "mexico":    {"page": "mexico.php",    "league": "Liga MX"},
+    "argentina": {"page": "argentina.php", "league": "Liga Profesional"},
+    "brazil":    {"page": "brazil.php",    "league": "Serie A (BRA)"},
+    "usa":       {"page": "usa.php",       "league": "MLS"},
+
+    # Classic-format countries: one CSV per division per season, named by a
+    # division code. The code decides the league -- E0 and E1 are different
+    # competitions and must not be merged into one bucket.
+    "england":     {"page": "englandm.php", "league": "Premier League",
+                    "divisions": {"E0": "Premier League", "E1": "Championship"}},
+    "netherlands": {"page": "netherlandsm.php", "league": "Eredivisie",
+                    "divisions": {"N1": "Eredivisie"}},
+    "spain":     {"page": "spainm.php",   "league": "La Liga",
+                  "divisions": {"SP1": "La Liga", "SP2": "Segunda Division"}},
+    "germany":   {"page": "germanym.php", "league": "Bundesliga",
+                  "divisions": {"D1": "Bundesliga", "D2": "2. Bundesliga"}},
+    "italy":     {"page": "italym.php",   "league": "Serie A",
+                  "divisions": {"I1": "Serie A", "I2": "Serie B"}},
+    "france":    {"page": "francem.php",  "league": "Ligue 1",
+                  "divisions": {"F1": "Ligue 1", "F2": "Ligue 2"}},
 }
 
 DEBUG = False
@@ -129,20 +141,47 @@ def find_csv_links(html: str, page_url: str) -> List[str]:
     return links
 
 
-def choose_csv(links: List[str], country: str) -> List[str]:
-    """Prefer the consolidated 'new/' file, else the most recent season file."""
+def season_start_year(code: str) -> int:
+    """'2627' -> 2026, '9900' -> 1999.
+
+    These four-digit folder names are two 2-digit years glued together, so
+    sorting them as strings puts the 1990s at the top: '9900' > '2627'. That is
+    exactly how a run meant to fetch 2026/27 quietly returned the 1999/2000
+    season instead -- with Wimbledon and Bradford in the Premier League.
+    """
+    two = int(code[:2])
+    return (1900 + two) if two >= 90 else (2000 + two)
+
+
+def choose_csv(links: List[str], country: str) -> List[Tuple[str, Optional[str]]]:
+    """Return [(url, division_code)] for the most recent season available."""
     new_format = [u for u in links if "/new/" in u.lower()]
     if new_format:
-        debug(f"using new-format file(s): {new_format}")
-        return new_format[:1]
-    # Classic layout: /mmz4281/2526/E0.csv -- the season folder is 4 digits.
-    seasonal = sorted(
-        (u for u in links if re.search(r"/\d{4}/", u)),
-        key=lambda u: re.search(r"/(\d{4})/", u).group(1),
-        reverse=True,
-    )
-    debug(f"using seasonal file(s): {seasonal[:2]}")
-    return seasonal[:2]
+        debug(f"new-format file: {new_format[0]}")
+        return [(new_format[0], None)]
+
+    config = COUNTRIES[country]
+    divisions = config.get("divisions") or {}
+
+    seasoned: List[Tuple[int, str, str]] = []
+    for url in links:
+        match = re.search(r"/(\d{4})/([A-Za-z0-9]+)\.csv$", url)
+        if not match:
+            continue
+        code, division = match.group(1), match.group(2).upper()
+        if divisions and division not in divisions:
+            continue
+        seasoned.append((season_start_year(code), division, url))
+
+    if not seasoned:
+        return []
+
+    latest = max(year for year, _, _ in seasoned)
+    chosen = [(url, division) for year, division, url in seasoned if year == latest]
+    log(f"    latest season on the page: {latest}/{str(latest + 1)[2:]}")
+    for url, division in chosen:
+        log(f"      {division} -> {divisions.get(division, division)}")
+    return chosen
 
 
 # ==========================================================================
@@ -179,9 +218,22 @@ def latest_season(rows: List[Dict[str, Any]]) -> Optional[str]:
     return seasons[-1] if seasons else None
 
 
+# Games needed before a team's own rate is trusted on its own. Below this the
+# rate is blended toward the league average -- one 3-0 win must not make a club
+# a 3.0 goals-per-game side.
+REGRESSION_K = 6
+
+
 def aggregate(rows: List[Dict[str, Any]], league_name: str,
               season: Optional[str]) -> Dict[str, Dict[str, Any]]:
-    """Per-team per-game goals, with home/away splits and last-5 form."""
+    """Per-team per-game goals, with home/away splits and last-5 form.
+
+    Small samples are regressed toward the league average. Two games into a
+    season a club that has scored twice is not a 1.0-goals-per-game team, it is
+    a team we know almost nothing about. Reporting the raw rate produced 5-6
+    goal projections and edges above 50%, which are not opinions, they are
+    arithmetic on noise.
+    """
     totals: Dict[str, Dict[str, float]] = defaultdict(lambda: defaultdict(float))
     recent: Dict[str, List[float]] = defaultdict(list)
 
@@ -207,19 +259,32 @@ def aggregate(rows: List[Dict[str, Any]], league_name: str,
                 bucket["losses"] += 1
                 recent[team].append(0.0)
 
+    # League average goals per team per game, from every match in the sample.
+    league_games = sum(b["games"] for b in totals.values())
+    league_goals = sum(b["gf"] for b in totals.values())
+    league_avg = (league_goals / league_games) if league_games else 1.35
+
     records: Dict[str, Dict[str, Any]] = {}
     for team, bucket in totals.items():
         games = bucket["games"]
         if games < 1:
             continue
-        goals_for = round(bucket["gf"] / games, 3)
-        goals_against = round(bucket["ga"] / games, 3)
+        raw_for = bucket["gf"] / games
+        raw_against = bucket["ga"] / games
+
+        weight = games / (games + REGRESSION_K)
+        goals_for = round(weight * raw_for + (1 - weight) * league_avg, 3)
+        goals_against = round(weight * raw_against + (1 - weight) * league_avg, 3)
         record: Dict[str, Any] = {
             "league": league_name,
             "season": season or "",
             "games": int(games),
             "goals_for": goals_for,
             "goals_against": goals_against,
+            "goals_for_raw": round(raw_for, 3),
+            "goals_against_raw": round(raw_against, 3),
+            "regression_weight": round(weight, 3),
+            "league_avg_goals": round(league_avg, 3),
             # No xG in this feed. Goals stand in, tagged so nothing downstream
             # treats it as a real expected-goals figure.
             "xg_for": goals_for,
@@ -286,41 +351,55 @@ def ingest_country(key: str, check: bool) -> int:
 
     chosen = choose_csv(links, key)
     if not chosen:
-        raise RuntimeError(f"Could not pick a CSV from: {links[:5]}")
-
-    rows: List[Dict[str, Any]] = []
-    for index, url in enumerate(chosen):
-        log(f"    downloading {url}")
-        text = fetch(url, save_as=f"fd_{key}_{index}.csv")
-        rows.extend(parse_matches(text, config.get("league_code")))
-
-    if not rows:
         raise RuntimeError(
-            f"No usable match rows parsed. Saved to data/cache/probe/fd_{key}_0.csv"
-        )
+            f"No usable CSV found for {key}. Page saved to "
+            f"data/cache/probe/fd_{key}.html")
 
-    season = latest_season(rows)
-    if season:
-        rows = [r for r in rows if r["season"] == season]
-        log(f"    season {season}: {len(rows)} match(es)")
-    else:
-        log(f"    {len(rows)} match(es) (no season column)")
+    divisions = config.get("divisions") or {}
+    total_teams = 0
+    folder_season = ""
+    for index, (url, division) in enumerate(chosen):
+        this_league = divisions.get(division, league_name) if division else league_name
+        folder_match = re.search(r"/(\d{4})/", url)
+        if folder_match:
+            start = season_start_year(folder_match.group(1))
+            folder_season = f"{start}/{start + 1}"
+        log(f"    downloading {url}")
+        text = fetch(url, save_as=f"fd_{key}_{division or index}.csv")
+        rows = parse_matches(text, None)
+        if not rows:
+            log(f"    [warn] no usable rows in {url}")
+            continue
 
-    records = aggregate(rows, league_name, season)
-    log(f"    {len(records)} team(s)")
-    for team in list(records)[:5]:
-        row = records[team]
-        home = row.get("home_goals_for", "-")
-        away = row.get("away_goals_for", "-")
-        log(f"      {team:<26} GF/g {row['goals_for']:<6} GA/g {row['goals_against']:<6} "
-            f"(home {home} / away {away})")
+        season = latest_season(rows)
+        if season:
+            rows = [r for r in rows if r["season"] == season]
+            log(f"    {this_league}: season {season}, {len(rows)} match(es)")
+        else:
+            # Classic per-division files carry no Season column. Take it from
+            # the folder code instead -- an unlabelled record cannot be age
+            # checked, which is exactly how 1999 data went unnoticed.
+            season = folder_season
+            log(f"    {this_league}: season {season} (from folder), "
+                f"{len(rows)} match(es)")
 
-    if check:
-        log("    (check mode -- nothing written)")
-    else:
-        merge_store(records, OUTPUT)
+        division_records = aggregate(rows, this_league, season)
+        log(f"    {this_league}: {len(division_records)} team(s)")
+        for team in list(division_records)[:4]:
+            row = division_records[team]
+            log(f"      {team:<24} GF/g {row['goals_for']:<6} GA/g {row['goals_against']}")
+
+        if check:
+            log("    (check mode -- nothing written)")
+        else:
+            merge_store(division_records, OUTPUT)
+        total_teams += len(division_records)
+
+    if not total_teams:
+        raise RuntimeError(f"{key}: downloaded but produced no teams")
+    if not check:
         log(f"    merged into {OUTPUT.relative_to(ROOT)}")
-    return len(records)
+    return total_teams
 
 
 def main() -> None:

@@ -16,10 +16,10 @@ cd /c/MultiSportPredict
 Every command below assumes you did that first.
 
 If you'd rather use **Command Prompt**, use `cd C:\MultiSportPredict` and swap
-the slashes: `venv\Scripts\python.exe` instead of `venv/Scripts/python.exe`.
+the slashes: `.venv\Scripts\python.exe` instead of `.venv/Scripts/python.exe`.
 
-> **Why `venv/Scripts/python.exe` and not just `python`?**
-> Your project's libraries are installed inside `venv`. Plain `python` is a
+> **Why `.venv/Scripts/python.exe` and not just `python`?**
+> Your project's libraries are installed inside `.venv`. Plain `python` is a
 > different Python that can't see them. Always use the long version.
 
 ---
@@ -28,26 +28,26 @@ the slashes: `venv\Scripts\python.exe` instead of `venv/Scripts/python.exe`.
 
 ```bash
 # Everything — this is the daily job
-venv/Scripts/python.exe ingest_all_sports.py
+.venv/Scripts/python.exe ingest_all_sports.py
 
 # Test every source WITHOUT saving anything
-venv/Scripts/python.exe ingest_all_sports.py --check
+.venv/Scripts/python.exe ingest_all_sports.py --check
 
 # Just one or two leagues
-venv/Scripts/python.exe ingest_all_sports.py --only mlb
-venv/Scripts/python.exe ingest_all_sports.py --only kbo euroleague
+.venv/Scripts/python.exe ingest_all_sports.py --only mlb
+.venv/Scripts/python.exe ingest_all_sports.py --only kbo euroleague
 
 # Everything except one
-venv/Scripts/python.exe ingest_all_sports.py --skip soccer
+.venv/Scripts/python.exe ingest_all_sports.py --skip soccer
 
 # Show me the adapter names
-venv/Scripts/python.exe ingest_all_sports.py --list
+.venv/Scripts/python.exe ingest_all_sports.py --list
 
 # Show every URL tried and every column found (use when something breaks)
-venv/Scripts/python.exe ingest_all_sports.py --only kbo --debug
+.venv/Scripts/python.exe ingest_all_sports.py --only kbo --debug
 
 # Ignore saved copies and download everything fresh
-venv/Scripts/python.exe ingest_all_sports.py --no-cache
+.venv/Scripts/python.exe ingest_all_sports.py --no-cache
 ```
 
 **Adapter names:** `mlb`, `mlb-probables`, `mlb-players`, `kbo`, `euroleague`,
@@ -62,22 +62,22 @@ rest still saved. `2` = everything failed (usually means no internet).
 
 ```bash
 # Soccer
-venv/Scripts/python.exe universal_runner.py --sport soccer \
+.venv/Scripts/python.exe universal_runner.py --sport soccer \
   --home "Bayern Munich" --away "VfB Stuttgart" \
   --league Bundesliga --market-total 3.0 --store-to-db
 
 # Baseball (MLB or KBO)
-venv/Scripts/python.exe universal_runner.py --sport baseball \
+.venv/Scripts/python.exe universal_runner.py --sport baseball \
   --home "KT Wiz" --away "LG Twins" --league KBO \
   --market-total 9.5 --markets nrfi strikeouts --store-to-db
 
 # Basketball
-venv/Scripts/python.exe universal_runner.py --sport basketball \
+.venv/Scripts/python.exe universal_runner.py --sport basketball \
   --home "Real Madrid" --away "FC Barcelona" \
   --league EuroLeague --market-line -4.5 --store-to-db
 
 # Tennis
-venv/Scripts/python.exe universal_runner.py --sport tennis \
+.venv/Scripts/python.exe universal_runner.py --sport tennis \
   --home "Jannik Sinner" --away "Carlos Alcaraz" --store-to-db
 ```
 
@@ -86,7 +86,7 @@ Add `--push-discord` to any of them to send it to Discord.
 **Not sure what flags exist?**
 
 ```bash
-venv/Scripts/python.exe universal_runner.py --help
+.venv/Scripts/python.exe universal_runner.py --help
 ```
 
 **Important:** always use `--store-to-db`. If it isn't stored, it can't be
@@ -98,35 +98,35 @@ graded later, and your win-rate record won't include it.
 
 ```bash
 # What's waiting for a result? (also writes pending_results.csv)
-venv/Scripts/python.exe grade_predictions.py --pending
+.venv/Scripts/python.exe grade_predictions.py --pending
 
 # Fetch final scores and grade them (MLB works automatically today)
-venv/Scripts/python.exe grade_predictions.py --auto
+.venv/Scripts/python.exe grade_predictions.py --auto
 
 # Grade from a spreadsheet you filled in yourself
-venv/Scripts/python.exe grade_predictions.py --manual pending_results.csv
+.venv/Scripts/python.exe grade_predictions.py --manual pending_results.csv
 
 # Show the win-rate record
-venv/Scripts/python.exe grade_predictions.py --report
+.venv/Scripts/python.exe grade_predictions.py --report
 
 # The normal daily one — grade, then show the record
-venv/Scripts/python.exe grade_predictions.py --auto --report
+.venv/Scripts/python.exe grade_predictions.py --auto --report
 
 # Post the record to Discord
-venv/Scripts/python.exe grade_predictions.py --report --push-discord
+.venv/Scripts/python.exe grade_predictions.py --report --push-discord
 
 # Narrow it down
-venv/Scripts/python.exe grade_predictions.py --report --sport soccer
-venv/Scripts/python.exe grade_predictions.py --report --days 30
+.venv/Scripts/python.exe grade_predictions.py --report --sport soccer
+.venv/Scripts/python.exe grade_predictions.py --report --days 30
 ```
 
 ### Grading a sport that has no automatic score feed
 
-1. `venv/Scripts/python.exe grade_predictions.py --pending`
+1. `.venv/Scripts/python.exe grade_predictions.py --pending`
 2. Open `pending_results.csv` in Excel
 3. Type the final scores into the `home_score` and `away_score` columns
 4. Save it
-5. `venv/Scripts/python.exe grade_predictions.py --manual pending_results.csv --report`
+5. `.venv/Scripts/python.exe grade_predictions.py --manual pending_results.csv --report`
 
 ---
 
@@ -134,10 +134,10 @@ venv/Scripts/python.exe grade_predictions.py --report --days 30
 
 ```bash
 # Why are sources being refused? Saves diagnostic_report.txt
-venv/Scripts/python.exe diagnose_sources.py
+.venv/Scripts/python.exe diagnose_sources.py
 
 # Download candidate pages so they can be inspected
-venv/Scripts/python.exe probe_sources.py
+.venv/Scripts/python.exe probe_sources.py
 
 # Read today's log (Git Bash)
 cat logs/ingest_20260828.log

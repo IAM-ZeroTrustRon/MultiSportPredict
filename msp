@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# msp - short commands for MultiSportPredict, built for typing on a phone
+#
+#   ./msp            menu
+#   ./msp data       refresh every league
+#   ./msp mlb        refresh MLB only
+#   ./msp mx         refresh Liga MX only
+#   ./msp today      today's soccer + MLB schedule
+#   ./msp slate      run tonight's slate -> Discord
+#   ./msp liga       run Liga MX matches -> Discord
+#   ./msp grade      grade finished games and show the record
+#   ./msp record     show the record without grading
+#   ./msp pending    what still needs a result
+#   ./msp nfl        refresh NFL (2025 prior season)
+#   ./msp log        tail today's ingestion log
+#   ./msp status     what data is on disk, how fresh
+#   ./msp pull       git pull
+#   ./msp save       git add/commit/push
+# ---------------------------------------------------------------------------
+
+cd "$(dirname "$0")" || exit 1
+PY=".venv/Scripts/python.exe"
+[ -x "$PY" ] || PY="$(command -v python3 || command -v python)"
+
+case "${1:-menu}" in
+  data)    "$PY" ingest_all_sports.py ;;
+  mlb)     "$PY" ingest_all_sports.py --only mlb mlb-probables ;;
+  mx)      "$PY" ingest_soccer_fd.py --countries mexico ;;
+  nfl)     "$PY" ingest_nfl.py --season 2025 ;;
+  today)   "$PY" ingest_schedules.py ;;
+  slate)   "$PY" run_tonight.py ;;
+  liga)    shift; "$PY" run_liga_mx.py "$@" ;;
+  grade)   "$PY" grade_predictions.py --auto --report ;;
+  record)  "$PY" grade_predictions.py --report ;;
+  pending) "$PY" grade_predictions.py --pending ;;
+
+  log)
+    f="logs/ingest_$(date +%Y%m%d).log"
+    [ -f "$f" ] && tail -40 "$f" || echo "No log for today ($f)"
+    ;;
+
+  status)
+    echo "== data on disk =="
+    for f in data/baseball_stats.json data/soccer_stats.json data/nfl_stats.json \
+             data/euroleague_stats.json data/basketball_stats.json \
+             data/mlb_probables.json data/schedule_today.json; do
+      if [ -f "$f" ]; then
+        n=$("$PY" -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8-sig'));print(len([k for k in d if not str(k).startswith('_')]) if isinstance(d,dict) else len(d))" "$f" 2>/dev/null || echo "?")
+        printf "  %-34s %5s entries   %s\n" "$(basename "$f")" "$n" "$(date -r "$f" '+%m-%d %H:%M' 2>/dev/null)"
+      else
+        printf "  %-34s missing\n" "$(basename "$f")"
+      fi
+    done
+    echo
+    echo "== predictions =="
+    "$PY" -c "
+import sqlite3
+c=sqlite3.connect('multisport_history.db')
+t,g=c.execute('SELECT COUNT(*), SUM(result_outcome IS NOT NULL) FROM predictions').fetchone()
+print(f'  {t} logged, {g or 0} graded, {t-(g or 0)} awaiting a result')" 2>/dev/null || echo "  (no database)"
+    ;;
+
+  pull)  git pull --rebase origin main ;;
+  save)
+    git add -A && git status --short
+    echo; read -r -p "commit message: " msg
+    [ -n "$msg" ] && git commit -m "$msg" && git push origin main
+    ;;
+
+  menu|*)
+    cat <<'MENU'
+MultiSportPredict
+
+  DATA        data | mlb | mx | nfl | today
+  PREDICT     slate | liga
+  RESULTS     grade | record | pending
+  INFO        status | log
+  GIT         pull | save
+
+  usage:  ./msp grade
+          ./msp liga --match "Toluca vs Pachuca"
+MENU
+    ;;
+esac

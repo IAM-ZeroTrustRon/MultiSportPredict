@@ -199,15 +199,30 @@ def grade_row(row: sqlite3.Row, home_score: float, away_score: float) -> Tuple[s
             f"model_value does not say which side the number belongs to"
         )
 
+    # Settle at the price that was actually on the board when it can be found.
+    # DEFAULT_ODDS is only a stand-in, and a unit record built on a stand-in
+    # drifts from what the bets were really worth.
     odds = DEFAULT_ODDS
     try:
         raw = json.loads(row["raw_json"]) if row["raw_json"] else {}
+    except (json.JSONDecodeError, TypeError):
+        raw = {}
+    if isinstance(raw, dict):
+        recorded = raw.get("market_odds")
+        if isinstance(recorded, dict):
+            if market == "moneyline":
+                side = "home_ml" if pick == "HOME" else "away_ml"
+                value = recorded.get(side)
+                if isinstance(value, (int, float)):
+                    odds = float(value)
+            else:
+                value = recorded.get("total_price")
+                if isinstance(value, (int, float)):
+                    odds = float(value)
         for key in ("odds", "american_odds", "price"):
-            if isinstance(raw, dict) and isinstance(raw.get(key), (int, float)):
+            if isinstance(raw.get(key), (int, float)):
                 odds = float(raw[key])
                 break
-    except (json.JSONDecodeError, TypeError):
-        pass
 
     profit = {"win": american_to_profit(odds), "loss": -1.0, "push": 0.0}[outcome]
     return outcome, pick, round(profit, 4)
@@ -558,6 +573,17 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
             f"You are {verdict} it on {overall['wins'] + overall['losses']} decided bets.")
         if overall["wins"] + overall["losses"] < 30:
             log("  Sample is small -- under about 30 settled bets this number moves a lot.")
+    priced = 0
+    for row in rows:
+        try:
+            blob = json.loads(row["raw_json"]) if row["raw_json"] else {}
+            if isinstance(blob, dict) and isinstance(blob.get("market_odds"), dict):
+                priced += 1
+        except (json.JSONDecodeError, TypeError):
+            pass
+    if priced:
+        log(f"  {priced} of {len(rows)} graded row(s) settled at recorded prices; "
+            f"the rest assumed {DEFAULT_ODDS:.0f}.")
     log("=" * 78)
 
     if push_discord:

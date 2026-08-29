@@ -15,10 +15,10 @@
 cd "$(dirname "$0")" || exit 1
 
 # Windows venv first, then anything on PATH.
-PY="venv/Scripts/python.exe"
+PY=".venv/Scripts/python.exe"
 [ -x "$PY" ] || PY="$(command -v python3 || command -v python)"
 if [ -z "$PY" ]; then
-  echo "No Python found. Expected venv/Scripts/python.exe in $(pwd)"
+  echo "No Python found. Expected .venv/Scripts/python.exe in $(pwd)"
   exit 1
 fi
 

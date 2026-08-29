@@ -4,7 +4,7 @@
 set -uo pipefail
 cd "$(dirname "$0")"
 
-PY="venv/Scripts/python.exe"
+PY=".venv/Scripts/python.exe"
 [ -x "$PY" ] || PY="python"
 
 echo "=== STARTING DAILY REAL-DATA INGESTION ==="

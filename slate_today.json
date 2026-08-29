@@ -1,0 +1,96 @@
+{
+  "_comment": "Edit freely. 'home' is the first club on the fixture card. Odds are American, from the book. Set push:true after review to mark a match for pushing to Discord.",
+  "_generated": "2026-08-29",
+  "matches": [
+    {
+      "league": "Eredivisie",
+      "home": "Excelsior",
+      "away": "Sparta Rotterdam",
+      "home_ml": 140,
+      "draw_ml": 280,
+      "away_ml": 162,
+      "total": 2.5,
+      "push": false
+    },
+    {
+      "league": "Eredivisie",
+      "home": "AZ Alkmaar",
+      "away": "Go Ahead Eagles",
+      "home_ml": -250,
+      "draw_ml": 350,
+      "away_ml": 550,
+      "total": 2.5,
+      "push": false
+    },
+    {
+      "league": "Eredivisie",
+      "home": "PEC Zwolle",
+      "away": "NEC Nijmegen",
+      "home_ml": 350,
+      "draw_ml": 333,
+      "away_ml": -151,
+      "total": 2.5,
+      "push": false
+    },
+    {
+      "league": "Premier League",
+      "home": "Liverpool",
+      "away": "Nottingham Forest",
+      "home_ml": -227,
+      "draw_ml": 375,
+      "away_ml": 550,
+      "total": 2.5,
+      "push": false
+    },
+    {
+      "league": "Championship",
+      "home": "Coventry City",
+      "away": "Hull City",
+      "home_ml": -125,
+      "draw_ml": 250,
+      "away_ml": 375,
+      "total": 2.5,
+      "push": false
+    },
+    {
+      "league": "Premier League",
+      "home": "Bournemouth",
+      "away": "Everton",
+      "home_ml": 105,
+      "draw_ml": 250,
+      "away_ml": 260,
+      "total": 2.5,
+      "push": false
+    },
+    {
+      "league": "Premier League",
+      "home": "Tottenham Hotspur",
+      "away": "Newcastle United",
+      "home_ml": 120,
+      "draw_ml": 275,
+      "away_ml": 200,
+      "total": 2.5,
+      "push": false
+    },
+    {
+      "league": "Meistriliiga",
+      "home": "FC Nomme United",
+      "away": "Harju JK Laagri",
+      "home_ml": 130,
+      "draw_ml": 270,
+      "away_ml": 345,
+      "total": 2.5,
+      "push": false
+    },
+    {
+      "league": "Meistriliiga",
+      "home": "FC Kuressaare",
+      "away": "Parnu JK Vaprus",
+      "home_ml": 110,
+      "draw_ml": 240,
+      "away_ml": 187,
+      "total": 2.5,
+      "push": false
+    }
+  ]
+}

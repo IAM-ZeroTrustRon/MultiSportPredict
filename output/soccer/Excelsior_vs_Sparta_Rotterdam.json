@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "Eredivisie",
+  "home_team": "Excelsior",
+  "away_team": "Sparta Rotterdam",
+  "timestamp": "2026-08-29T00:50:19.881190",
+  "game": {
+    "projected_home_goals": 3.34,
+    "projected_away_goals": 2.41,
+    "projected_total_goals": 5.76,
+    "home_win_prob": 0.531,
+    "draw_prob": 0.186,
+    "away_win_prob": 0.283
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.933,
+      "market_line": 0.0,
+      "edge": 0.933,
+      "confidence": 41.7,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 5.757,
+      "market_total": 2.5,
+      "edge": 3.257,
+      "confidence": 68.2,
+      "recommendation": "BET"
+    },
+    "btts": {
+      "probability": 0.847,
+      "confidence": 70.6,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.979,
+    "over_25_prob": 0.926,
+    "over_35_prob": 0.826
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.847,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 2.5,
+      "xg_against": 1.0,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 2.5,
+      "goals_against": 1.0,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.0,
+      "xg_against": 1.667,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.0,
+      "goals_against": 1.667,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.2,
+    "avg_goals_per_game": 3.25,
+    "home_advantage": 0.4,
+    "draw_rate": 0.24,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

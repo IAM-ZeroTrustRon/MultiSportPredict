@@ -244,6 +244,24 @@ def main() -> None:
         f"Discord: {'ON' if push_discord else 'OFF'}")
     rule()
 
+    try:
+        from data_guard import guard_teams
+        involved = [name for pair in resolved for name in pair]
+        safe, note = guard_teams(teams, "soccer", involved)
+        if not safe:
+            rule()
+            log("STALE DATA -- nothing was run")
+            rule()
+            for line in note.splitlines():
+                log(f"  {line}")
+            log("\n  Refresh before predicting:")
+            log("      venv/Scripts/python.exe ingest_soccer_fd.py --countries mexico")
+            sys.exit(1)
+        if note != "data age OK":
+            log(f"[age] {note.splitlines()[0]}")
+    except ImportError:
+        pass
+
     outcomes: List[Dict[str, Any]] = []
     for home, away in resolved:
         try:

@@ -341,7 +341,7 @@ def main() -> None:
     if skipped:
         log("\nTO RUN THE SKIPPED SOCCER MATCH")
         log("Pull the league, then re-run this script:")
-        log("    venv/Scripts/python.exe ingest_soccer_fd.py --countries mexico")
+        log("    .venv/Scripts/python.exe ingest_soccer_fd.py --countries mexico")
         log("")
         log("If a club is still missing after that, check the exact spelling in")
         log("data/soccer_stats.json -- the lookup matches on name, so 'Leon' will")
@@ -351,7 +351,7 @@ def main() -> None:
     if ran and not args.dry_run:
         log(f"\n{len(ran)} prediction(s) stored to multisport_history.db.")
         log("Grade them tomorrow once the games are final:")
-        log("  venv/Scripts/python.exe grade_predictions.py --auto --report")
+        log("  .venv/Scripts/python.exe grade_predictions.py --auto --report")
 
 
 if __name__ == "__main__":

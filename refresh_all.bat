@@ -10,7 +10,7 @@ setlocal
 cd /d "%~dp0"
 if not exist "logs" mkdir "logs"
 
-set "PY=%~dp0venv\Scripts\python.exe"
+set "PY=%~dp0.venv\Scripts\python.exe"
 if not exist "%PY%" set "PY=python"
 
 set "STAMP=manual"

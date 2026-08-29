@@ -5,7 +5,7 @@ REM  Saves the result to diagnostic_report.txt in this same folder.
 REM ===================================================================
 cd /d "%~dp0" 2>nul
 
-set "PY=venv\Scripts\python.exe"
+set "PY=.venv\Scripts\python.exe"
 if not exist "%PY%" set "PY=python"
 
 echo Running network diagnostic, please wait (about 60 seconds)...
