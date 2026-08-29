@@ -1,16 +1,108 @@
 # MultiSportPredict
 
-A comprehensive machine learning platform for predicting outcomes across multiple sports worldwide. Features live web scraping hooks, SQLite backtesting, and a daily slate runner for batch processing.
+A multi-sport prediction engine that ingests live sports data, models match outcomes, and
+grades every forecast against real results. Built in Python with a hard rule: **the system
+refuses to produce a number it cannot justify.**
 
-## Overview
+Sports covered: soccer (Premier League, Championship, Eredivisie, Liga MX), baseball
+(MLB, KBO), basketball (EuroLeague), tennis, with an NFL engine in progress.
 
-MultiSportPredict provides multi-sport prediction capabilities with sabermetric data, Poisson modeling, sharp consensus integration, and park factor adjustments:
+---
 
-- **⚾ KBO (Korean Baseball Organization)**: Game predictions (totals, moneyline, run line), player props, sharp consensus
-- **🏀 Basketball**: EuroLeague/NBA/Taiwan P. League+ - full game, spread, totals, moneyline, Q1 projections, player props
-- **⚽ Soccer**: Match outcome (1X2), goals over/under, BTTS, corner totals, xG-based Poisson modeling
-- **🇺🇸 MLB**: NRFI/YRFI, strikeout props, home run props, full game predictions with Statcast data
-- **🎾 Tennis**: Dominance Ratio analysis, fatigue delta tracking, live betting triggers
+## Security & Reliability Engineering
+
+This project is as much an exercise in defensive engineering as in modelling. A prediction
+system that silently degrades is worse than one that stops — a confident number built on
+missing data is indistinguishable from a correct one until money is on it.
+
+### Fail-closed data validation
+
+`data_guard.py` blocks a run rather than degrading. It validates every record before use:
+
+- **Staleness** — season and last-updated fields are checked against an expected window
+- **Sample size** — teams below a per-sport minimum are refused, not averaged
+- **Severity separation** — wrong-season data is an *error* (blocks); merely old data is a
+  *warning* (informs). A guard that cries wolf gets ignored, which is worse than no guard.
+
+Built after a season-sorting bug silently loaded 1999/2000 league data into a 2026 slate.
+The ingest succeeded, the parse succeeded, the run reported success. The only symptom was a
+defunct club appearing in a team list — caught by eye, not by code. That gap is now closed.
+
+### Eliminating silent failure paths
+
+Three separate bugs were found where a failed lookup fell through to a hardcoded default,
+producing confident output from no data at all:
+
+| Component | Failure | Fix |
+|---|---|---|
+| `SoccerPredictor` | missing stats → default xG for both teams | raise on lookup miss |
+| `BaseballPredictor` | missing stats → league-average runs/ERA | pass real values, warn loudly on miss |
+| `TennisElo` | no data file → frozen seed ratings | load real match history, report count |
+
+Each produced *identical predictions across different matchups* — a failure mode that looks
+like working software. The pattern is now treated as a class of bug, not three incidents.
+
+### Secrets management
+
+- API credentials live in `.env`, excluded via `.gitignore` and verified untracked
+- No key, token, or webhook URL appears in source or in commit history
+- Credentials are read at runtime, never logged or written to output files
+
+### Least privilege access
+
+Remote access is configured with a **dedicated non-administrator account**, not the primary
+user. Filesystem permissions are scoped to the project directory only (`icacls`), so a
+compromised remote credential cannot reach the rest of the host. SSH is bound to the local
+network; no port is exposed to the internet.
+
+### Data integrity
+
+- **Atomic writes** — every store is written to a temp file and `os.replace`d, so an
+  interrupted write cannot corrupt it
+- **Corruption handling** — malformed JSON is quarantined with a timestamped copy rather
+  than overwritten
+- **Backups before mutation** — any script that edits existing source files writes a dated
+  backup first
+- **Merge, never clobber** — stores merge on write, so one league's ingest cannot delete
+  another's data
+
+### Network forensics
+
+`diagnose_sources.py` distinguishes *legitimate site-side blocking* from *traffic
+interception* — a distinction that matters before you conclude a source is unavailable:
+
+- Proxy environment variables and system proxy configuration
+- DNS resolution (detecting redirection to local or private addresses)
+- **TLS certificate issuer inspection** — a non-public CA on a public host indicates
+  interception by inspection middleware
+- Multi-method fetch comparison (proxied vs. direct, varying client fingerprints)
+
+Used to prove that four failing data sources were genuine CDN bot-protection (Cloudflare,
+Akamai) rather than a compromised local environment.
+
+### Respecting access controls
+
+- `koreabaseball.com` is deliberately **not** scraped — its `robots.txt` disallows automated
+  access, so an alternative source is used
+- Rate limiting and on-disk response caching on every scraped host
+- Data licence terms tracked in-source where they constrain use
+
+### Provenance and auditability
+
+Every stored record carries its `source`, `updated` timestamp, and a `data_tier` marking
+whether a value is measured or derived. Every prediction is logged to SQLite and graded
+against real outcomes, with wins settled at recorded market prices rather than assumed ones.
+
+The system distinguishes what it *knows* from what it *inferred* — and says so in the output.
+
+### Supply chain scepticism
+
+AI-generated contributions to this codebase are reviewed before use. One submission was
+rejected after inspection revealed hardcoded fabricated statistics labelled as live
+"Tier 1" data from a named source. Verified against the real feed, its numbers were wrong
+by up to a full run per game. **Provenance labels are checked, not trusted.**
+
+---
 
 ## Quick Start
 
