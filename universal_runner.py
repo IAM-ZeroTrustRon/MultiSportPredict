@@ -283,11 +283,9 @@ def _display_full_result(result: Dict[str, Any]) -> None:
 def _push_full_result(sport: str, home: str, away: str, result: Dict[str, Any]) -> bool:
     """Send the complete result through the shared Discord formatter."""
     try:
-        from discord_integration import push_full_prediction_to_discord
-        return push_full_prediction_to_discord(
-            sport=sport, home=home, away=away, prediction=result,
-            webhook_url=DISCORD_WEBHOOK_URL,
-        )
+        from discord_integration import push_prediction_to_all
+        count = push_prediction_to_all(sport, result, dry_run=False)
+        return count > 0
     except ImportError as exc:
         print(f"[WARN] Full Discord formatter unavailable: {exc}")
         return False
@@ -638,8 +636,16 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
 
 def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
                round_name: Optional[str], best_of_5: bool,
-               store_to_db: bool, push_discord: bool) -> Dict[str, Any]:
-    """Tennis branch: call the real predictor directly (bypass predict_match.py)."""
+               store_to_db: bool, push_discord: bool,
+               market_prob: Optional[float] = None) -> Dict[str, Any]:
+    """Tennis branch: call the real predictor directly (bypass predict_match.py).
+
+    market_prob is the de-vigged probability the book gives `home`. Without it
+    the predictor measures its number against 0.5, so "edge" means distance
+    from a coin flip rather than disagreement with a price -- a number that
+    looks like an edge and is not one. Passing it makes the edge real; leaving
+    it None is honest about there being no market to compare against.
+    """
     from models.tennis_predictor import predict_tennis_match
 
     result = predict_tennis_match(
@@ -649,6 +655,7 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
         best_of_5=best_of_5,
         tournament=tournament,
         round_name=round_name,
+        market_prob=market_prob,
     )
     _display_full_result(result)
 
@@ -665,7 +672,7 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
             away=away,
             market_type="moneyline",
             model_value=home_win_prob,
-            market_value=0.5,
+            market_value=market_prob if market_prob is not None else 0.5,
             edge=edge,
             confidence=conf,
             recommendation=rec,

@@ -50,6 +50,11 @@ TODAY = _dt.date.today().isoformat()
 DEFAULT_TOTAL = 8.5          # placeholder; see the note printed after a run
 MARKETS = ["nrfi", "strikeouts", "home_runs"]
 
+# Which league the store lookup and the runner use. KBO rows live in the
+# same baseball_stats.json as MLB and are told apart by this field, so a
+# KBO slate is the same code with one flag rather than a second script.
+LEAGUE = "MLB"
+
 
 def log(message: str = "") -> None:
     print(message, flush=True)
@@ -74,7 +79,7 @@ def load_mlb_teams() -> Dict[str, Dict[str, Any]]:
     return {
         name: record for name, record in store.items()
         if not name.startswith("_") and isinstance(record, dict)
-        and str(record.get("league", "")).upper() == "MLB"
+        and str(record.get("league", "")).upper() == LEAGUE.upper()
     }
 
 
@@ -158,7 +163,7 @@ def pitcher_args(game: Optional[Dict[str, Any]]) -> Dict[str, Optional[float]]:
 # LIVE TOTALS (optional, costs Odds API quota)
 # ==========================================================================
 
-def fetch_live_totals() -> Dict[str, float]:
+def fetch_live_odds() -> Tuple[Dict[str, float], Dict[str, Tuple[float, float]]]:
     key = os.environ.get("ODDS_API_KEY", "").strip()
     if not key:
         env = ROOT / ".env"
@@ -169,40 +174,50 @@ def fetch_live_totals() -> Dict[str, float]:
                     break
     if not key:
         log("[odds] ODDS_API_KEY not found -- keeping the default total.")
-        return {}
+        return {}, {}
     try:
         import requests
         response = requests.get(
             "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds",
-            params={"apiKey": key, "regions": "us", "markets": "totals",
+            params={"apiKey": key, "regions": "us", "markets": "totals,h2h",
                     "oddsFormat": "american"}, timeout=30)
         remaining = response.headers.get("x-requests-remaining")
         if remaining:
             log(f"[odds] quota remaining: {remaining}")
         if response.status_code != 200:
             log(f"[odds] HTTP {response.status_code} -- keeping defaults.")
-            return {}
+            return {}, {}
         totals: Dict[str, float] = {}
+        moneylines: Dict[str, Tuple[float, float]] = {}
         for event in response.json():
             home, away = event.get("home_team"), event.get("away_team")
+            key = f"{home}|{away}"
             for book in event.get("bookmakers", []):
-                found = False
                 for market in book.get("markets", []):
-                    if market.get("key") != "totals":
-                        continue
-                    for outcome in market.get("outcomes", []):
-                        if outcome.get("point") is not None:
-                            totals[f"{home}|{away}"] = float(outcome["point"])
-                            found = True
-                            break
+                    kind = market.get("key")
+                    if kind == "totals" and key not in totals:
+                        for outcome in market.get("outcomes", []):
+                            if outcome.get("point") is not None:
+                                totals[key] = float(outcome["point"])
+                                break
+                    elif kind == "h2h" and key not in moneylines:
+                        # The side price. Without it the model has nothing to
+                        # measure its win probability against, so every game
+                        # comes back PASS at about 50 confidence -- which reads
+                        # as "the model has no opinion" when in fact it has one
+                        # and no price to compare it to.
+                        prices = {o.get("name"): o.get("price")
+                                  for o in market.get("outcomes", [])}
+                        if prices.get(home) is not None and prices.get(away) is not None:
+                            moneylines[key] = (float(prices[home]), float(prices[away]))
+                if key in totals and key in moneylines:
                     break
-                if found:
-                    break
-        log(f"[odds] totals for {len(totals)} game(s)")
-        return totals
+        log(f"[odds] totals for {len(totals)} game(s), "
+            f"moneylines for {len(moneylines)} game(s)")
+        return totals, moneylines
     except Exception as exc:  # noqa: BLE001
         log(f"[odds] failed ({type(exc).__name__}) -- keeping defaults.")
-        return {}
+        return {}, {}
 
 
 
@@ -289,6 +304,13 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
         log("  [warn] Not found on today's schedule. Home/away is the order you")
         log("         typed, and no starter data is available -- the model will")
         log("         use its defaults for the pitchers.")
+        # Verify the fixture exists on today's schedule
+        from fixture_guard import verify_fixture
+        is_valid, msg, _ = verify_fixture(LEAGUE.lower(), home, away, TODAY)
+        if not is_valid:
+            log(f"  [ERROR] {msg}")
+            return {"status": "fixture_not_found", "home": home, "away": away}
+
     log(f"  Total      {total}  [{total_source}]")
     if home_ml is not None or away_ml is not None:
         def fmt(value: Optional[int]) -> str:
@@ -299,7 +321,7 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
         return {"status": "dry-run", "home": home, "away": away}
 
     from universal_runner import run_baseball
-    result = run_baseball(home, away, league="MLB", markets=MARKETS,
+    result = run_baseball(home, away, league=LEAGUE, markets=MARKETS,
                           market_total=total, store_to_db=True,
                           push_discord=push_discord, **arguments)
 
@@ -325,10 +347,15 @@ def main() -> None:
                         help="Away moneyline, e.g. +105.")
     parser.add_argument("--odds", action="store_true",
                         help="Fetch live totals from The Odds API (uses quota).")
+    parser.add_argument("--league", default="MLB",
+                        help="Which league in baseball_stats.json (MLB or KBO).")
     parser.add_argument("--no-discord", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--list-teams", action="store_true")
     args = parser.parse_args()
+
+    global LEAGUE
+    LEAGUE = args.league.strip().upper()
 
     teams = load_mlb_teams()
     if not teams:
@@ -340,7 +367,7 @@ def main() -> None:
         sys.exit(1)
 
     if args.list_teams:
-        log(f"{len(teams)} MLB team(s) in the store:\n")
+        log(f"{len(teams)} {LEAGUE} team(s) in the store:\n")
         for name in sorted(teams):
             record = teams[name]
             log(f"  {name:<24} {record.get('runs')} R/g  "
@@ -424,7 +451,7 @@ def main() -> None:
     if push_discord and not os.environ.get("DISCORD_WEBHOOK_URL"):
         log("[warn] DISCORD_WEBHOOK_URL not set -- will predict but not push.")
 
-    live_totals = fetch_live_totals() if args.odds else {}
+    live_totals, live_mls = fetch_live_odds() if args.odds else ({}, {})
 
     rule()
     log(f"MLB  -  {len(pairs)} game(s)   Discord: {'ON' if push_discord else 'OFF'}")
@@ -461,10 +488,14 @@ def main() -> None:
             total, source = float(totals[index]), "the line you gave"
         else:
             total, source = DEFAULT_TOTAL, "DEFAULT placeholder"
+        home_ml, away_ml = home_mls[index], away_mls[index]
+        if home_ml is None and away_ml is None and key in live_mls:
+            home_ml, away_ml = live_mls[key]
+            log(f"  [odds] moneyline {home_ml:+g} / {away_ml:+g} (live)")
         try:
             outcomes.append(run_one(home, away, game, total, source,
                                     push_discord, args.dry_run,
-                                    home_ml=home_mls[index], away_ml=away_mls[index]))
+                                    home_ml=home_ml, away_ml=away_ml))
         except Exception as exc:  # noqa: BLE001
             log(f"  [FAILED] {type(exc).__name__}: {exc}")
             outcomes.append({"status": "failed", "home": home, "away": away,

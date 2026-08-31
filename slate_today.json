@@ -91,6 +91,16 @@
       "away_ml": 187,
       "total": 2.5,
       "push": false
+    },
+    {
+      "league": "Premier League",
+      "home": "Chelsea",
+      "away": "Brighton",
+      "home_ml": -110,
+      "draw_ml": 270,
+      "away_ml": 290,
+      "total": 2.5,
+      "push": false
     }
   ]
 }

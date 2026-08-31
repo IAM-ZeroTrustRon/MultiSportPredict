@@ -29,15 +29,23 @@ try:
     # ingest_all_sports.py writes this from the ATP main-tour and Challenger
     # result feeds. Without it TennisElo only applies its small hardcoded
     # SEED_MATCHES list, so every rating is frozen at whenever that was written.
-    _ELO_CSV = Path(__file__).resolve().parent.parent / "data" / "tennis" / "atp_matches.csv"
+    # matches.csv holds ATP and WTA together. That is safe: Elo only moves a
+    # rating through an actual result, and no ATP player has ever played a WTA
+    # player, so the two pools never touch inside one file. atp_matches.csv is
+    # still read as a fallback so an older store keeps working.
+    _TENNIS_DIR = Path(__file__).resolve().parent.parent / "data" / "tennis"
+    _ELO_CSV = next((p for p in (_TENNIS_DIR / "matches.csv",
+                                 _TENNIS_DIR / "atp_matches.csv") if p.exists()), None)
     _ELO_ENGINE = TennisElo()
-    if _ELO_CSV.exists():
+    if _ELO_CSV is not None:
         _ELO_MATCHES = _ELO_ENGINE.load_match_history(str(_ELO_CSV))
-        print(f"[tennis_predictor] Elo built from {_ELO_MATCHES} real matches.")
+        print(f"[tennis_predictor] Elo built from {_ELO_MATCHES} real matches "
+              f"({_ELO_CSV.name}).")
     else:
         _ELO_MATCHES = _ELO_ENGINE.load_match_history()
-        print("[tennis_predictor] WARNING: data/tennis/atp_matches.csv is missing, so Elo is "
-              "running on built-in seed matches only. Fix: python ingest_all_sports.py --only tennis")
+        print("[tennis_predictor] WARNING: data/tennis/matches.csv is missing, so Elo "
+              "is running on built-in seed matches only -- every rating is frozen at "
+              "whenever those were written. Fix: python ingest_tennis.py")
     HAS_ELO = True
 except ImportError:
     HAS_ELO = False

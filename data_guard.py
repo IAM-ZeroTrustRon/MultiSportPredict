@@ -196,7 +196,14 @@ def describe(problems: Iterable[Problem], limit: int = 6) -> str:
         return "data age OK"
     lines: List[str] = []
     if errors:
-        lines.append(f"{len(errors)} record(s) are the wrong season:")
+        # This used to say "wrong season" for every error, including the
+        # too-few-games ones -- which sends you looking for a stale download
+        # when the real answer is that the season is three weeks old.
+        kinds = {("season" if "season" in p.message else
+                  "sample" if "game" in p.message else "other") for p in errors}
+        label = ("the wrong season" if kinds == {"season"} else
+                 "too thin to use" if kinds == {"sample"} else "unusable")
+        lines.append(f"{len(errors)} record(s) are {label}:")
         for problem in errors[:limit]:
             lines.append(f"    {problem.team}: {problem.message}")
         if len(errors) > limit:
@@ -267,7 +274,12 @@ def audit(sport: str) -> Tuple[int, int, int]:
             seasons = sorted({str(records[t].get("season", "?")) for t in members})
             stamps = sorted({str(records[t].get("updated", "?"))[:10] for t in members})
             bad = len([t for t in members if t in errored])
-            flag = f"  <-- {bad} WRONG SEASON" if bad else ""
+            reasons = {("season" if "season" in p.message else "sample")
+                       for p in problems
+                       if p.severity == "error" and p.team in members}
+            flag = (f"  <-- {bad} " + ("WRONG SEASON" if reasons == {"season"}
+                                       else "TOO FEW GAMES" if reasons == {"sample"}
+                                       else "UNUSABLE")) if bad else ""
             print(f"    {league:<24} {len(members):>3} teams   "
                   f"season {','.join(seasons[:3]):<12} updated {stamps[-1]}{flag}")
 

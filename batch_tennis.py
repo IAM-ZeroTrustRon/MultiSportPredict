@@ -35,7 +35,7 @@ load_dotenv('c:/MultiSportPredict/.env')
 
 # MultiSportPredict local imports
 from models.tennis_predictor import predict_tennis_match
-from discord_integration import push_recommendation_to_discord
+from discord_integration import push_prediction_to_all
 
 # ---------------------------------------------------------------------------
 # LOGGING

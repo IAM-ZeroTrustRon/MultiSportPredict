@@ -40,7 +40,7 @@ Not fixable with headers. These need different sources, not retries.
 **1. Grade the games from Aug 28.** Three MLB, one Liga MX. Nothing has ever been graded — 113 logged, 0 scored.
 
 ```
-.venv/Scripts/python.exe grade_predictions.py --auto --report
+venv/Scripts/python.exe grade_predictions.py --auto --report
 ```
 
 **2. Clean the duplicate predictions.** Aug 28 logged each MLB game twice and León–Atlante three times. Duplicates will distort the win rate once grading starts.

@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """
-WTA Toronto 2026 — Nikola Bartunkova vs Amanda Anisimova
-=========================================================
+ATP US Open 2026 — Miomir Kecmanovic vs Denis Shapovalov
+==========================================================
 Runs the real Elo-based tennis model (models/tennis_predictor.py),
 routes confidence through core/confidence_engine.py, and pushes the
 result to Discord via the dedicated recommendations webhook.
 
 Usage:
-    python run_push_bartunkova_anisimova_toronto_to_discord.py          # run + push
-    python run_push_bartunkova_anisimova_toronto_to_discord.py --dry-run # print payload only
+    python run_push_kecmanovic_shapovalov_usopen.py          # run + push
+    python run_push_kecmanovic_shapovalov_usopen.py --dry-run # print payload only
 """
 from __future__ import annotations
 
@@ -16,7 +16,6 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -32,18 +31,18 @@ from models.tennis_predictor import predict_tennis_match
 from core.confidence_engine import confidence_score, bet_recommendation, get_volatility
 from discord_integration import push_prediction_to_all
 
-# Match config — WTA Toronto (National Bank Open), hard court, best-of-3
-HOME_PLAYER = "Nikola Bartunkova"
-AWAY_PLAYER = "Amanda Anisimova"
+# Match config — ATP US Open, hard court, best-of-5 (Grand Slam)
+HOME_PLAYER = "Miomir Kecmanovic"
+AWAY_PLAYER = "Denis Shapovalov"
 SURFACE = "hard"
-TOURNAMENT = "National Bank Open"
-ROUND = "Round of 32"
-BEST_OF_5 = False
+TOURNAMENT = "US Open"
+ROUND = "First Round"
+BEST_OF_5 = True
 
 
 def run_match(dry_run: bool = False) -> dict:
     print("=" * 60)
-    print(f"WTA TORONTO — {HOME_PLAYER} vs {AWAY_PLAYER}")
+    print(f"ATP US OPEN — {HOME_PLAYER} vs {AWAY_PLAYER}")
     print("=" * 60)
 
     # 1) Real model prediction
@@ -77,50 +76,52 @@ def run_match(dry_run: bool = False) -> dict:
     result["home_player"] = HOME_PLAYER
     result["away_player"] = AWAY_PLAYER
 
-    # 3b) Attach both value-play perspectives discussed for this match.
-    #     1) Original value plays (underdog spread + over total + set lean)
-    #     2) Deep-dive plays (favorite straight sets + under total)
-    #     These are presented alongside the raw Elo model output for context.
+    # 3b) Attach value plays from model output
+    sets = result.get("sets", {})
+    total_games = result.get("total_games", {})
+    set_dist = result.get("set_distribution", {})
+    fav_name = ml.get("lean", "coin_flip")
+
     result["value_plays"] = {
-        "original_lean": "Bartunkova +3.5 games keeps it competitive; "
-                        "over the total in a tight baseline battle",
+        "original_lean": (
+            f"Model favors {fav_name} on hard court US Open. "
+            f"Sets expected to go deep — high over probability."
+        ),
         "plays": {
-            "Spread (Bartunkova +3.5 games)": "-120",
-            "Total (Over 21.5 games)": "-105",
-            "Set Lean (Anisimova 2-1 or Bartunkova +1.5 sets)": "+280 ballpark",
-        },
-        "deep_dive": {
-            "Target": "Amanda Anisimova -1.5 Sets (straight sets 2-0)",
-            "Angle": "Under total games (early breaks in both sets)",
-            "Rationale": "Rested top-10 firepower vs a rising unseeded defender",
+            "Spread (Underdog +1.5 Sets)": sets.get("recommendation_spread", ""),
+            "Total Sets (Over 3.5)": f"P(over)={sets.get('over_35_prob', 0):.0%}",
+            "Total Games (Over 40.5)": total_games.get("recommendation", ""),
         },
         "model_view": {
-            "favorite": ml.get("lean", "coin_flip") or "coin_flip",
+            "favorite": fav_name,
             "favorite_win_prob": max(model_prob, 1 - model_prob),
-            "notes": "Elo model favors Anisimova; total model leans UNDER at 22.5",
+            "set_distribution": {
+                "Shapovalov 3-1": f"{set_dist.get('1-3', 0):.0%}",
+                "Shapovalov 3-2": f"{set_dist.get('2-3', 0):.0%}",
+                "Shapovalov 3-0": f"{set_dist.get('0-3', 0):.0%}",
+                "Kecmanovic 3-2": f"{set_dist.get('3-2', 0):.0%}",
+            },
         },
     }
 
     # Console output
-    print(f"Tournament: {TOURNAMENT} | Surface: {SURFACE.capitalize()} | Round: {ROUND}")
+    print(f"\nTournament: {TOURNAMENT} | Surface: {SURFACE.capitalize()} | Round: {ROUND}")
     print(f"Win Prob:   {HOME_PLAYER} {model_prob:.1%} | {AWAY_PLAYER} {1-model_prob:.1%}")
-    print(f"Lean:       {ml.get('lean','')}")
+    print(f"Lean:       {ml.get('lean', '')}")
     print(f"Confidence (core engine): {conf_score:.1f}% — {conf_tier}")
-    sets = result.get("sets", {})
     if sets:
-        print(f"Sets O/U:   {sets.get('recommendation_sets_ou','')}")
-        print(f"Spread:     {sets.get('recommendation_spread','')}")
-    tg = result.get("total_games", {})
-    if isinstance(tg, dict):
-        print(f"Total games:{tg.get('recommendation','')} ({tg.get('line','')})")
-    elo = result.get("elo_ratings", {})
-    if elo:
-        print(f"Elo:        {HOME_PLAYER}={elo.get(HOME_PLAYER,'N/A'):.0f} | "
-              f"{AWAY_PLAYER}={elo.get(AWAY_PLAYER,'N/A'):.0f}")
+        print(f"Sets O/U:   {sets.get('recommendation_sets_ou', '')}")
+        print(f"Spread:     {sets.get('recommendation_spread', '')}")
+    if isinstance(total_games, dict):
+        print(f"Total games:{total_games.get('recommendation', '')} ({total_games.get('line', '')})")
+    elo_ratings = result.get("elo_ratings", {})
+    if elo_ratings:
+        print(f"Elo:        {HOME_PLAYER}={elo_ratings.get(HOME_PLAYER, 'N/A')} | "
+              f"{AWAY_PLAYER}={elo_ratings.get(AWAY_PLAYER, 'N/A')}")
     dr = result.get("dominance_ratio", {})
     if dr:
-        print(f"DR:         {HOME_PLAYER}={dr.get(HOME_PLAYER,'N/A')} | "
-              f"{AWAY_PLAYER}={dr.get(AWAY_PLAYER,'N/A')}")
+        print(f"DR:         {HOME_PLAYER}={dr.get(HOME_PLAYER, 'N/A')} | "
+              f"{AWAY_PLAYER}={dr.get(AWAY_PLAYER, 'N/A')}")
 
     # Save output
     out_dir = Path("output/tennis")
@@ -142,8 +143,11 @@ def run_match(dry_run: bool = False) -> dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="WTA Toronto: Bartunkova vs Anisimova -> Discord")
-    parser.add_argument("--dry-run", action="store_true", help="Print payload without posting")
+    parser = argparse.ArgumentParser(
+        description="ATP US Open: Kecmanovic vs Shapovalov -> Discord"
+    )
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Print payload without posting")
     args = parser.parse_args()
     run_match(dry_run=args.dry_run)
 

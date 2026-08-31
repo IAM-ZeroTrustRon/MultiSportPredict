@@ -431,7 +431,12 @@ def cmd_manual(conn: sqlite3.Connection, path: Path) -> int:
     with open(path, newline="", encoding="utf-8-sig") as handle:
         entries = list(csv.DictReader(handle))
 
-    lookup: Dict[Tuple[str, str], Tuple[float, float]] = {}
+    # Keyed by (game_date, home, away). The date belongs in the key because the
+    # same two clubs meet again and again: Lotte and KIA appear on the 26th, the
+    # 27th and the 29th of one week. Matching on the pair alone settled every
+    # one of those meetings at a single night's score, which is not a grade --
+    # it is a fabricated result wearing the same shape as one.
+    lookup: Dict[Tuple[str, str, str], Tuple[float, float]] = {}
     incomplete = 0
     for entry in entries:
         try:
@@ -440,19 +445,31 @@ def cmd_manual(conn: sqlite3.Connection, path: Path) -> int:
         except (KeyError, TypeError, ValueError):
             incomplete += 1
             continue
-        lookup[(normalise_team(entry.get("home_team", "")),
+        lookup[(str(entry.get("game_date") or "").strip(),
+                normalise_team(entry.get("home_team", "")),
                 normalise_team(entry.get("away_team", "")))] = (home_score, away_score)
 
     if not lookup:
         raise SystemExit(f"{path.name} has no rows with both scores filled in.")
 
+    def find(date, home, away):
+        """Prefer the same-date row; fall back to a dateless one only if the CSV
+        left the date blank. A prediction whose date matches no filled row stays
+        pending rather than borrowing another night's score."""
+        for key_date in (date, ""):
+            hit = lookup.get((key_date, home, away))
+            if hit is not None:
+                return hit
+            flipped = lookup.get((key_date, away, home))
+            if flipped is not None:
+                return (flipped[1], flipped[0])
+        return None
+
     graded = 0
     for row in ungraded(conn):
-        key = (normalise_team(row["home_team"]), normalise_team(row["away_team"]))
-        scores = lookup.get(key)
-        if scores is None:
-            flipped = lookup.get((key[1], key[0]))
-            scores = (flipped[1], flipped[0]) if flipped else None
+        scores = find(str(row["game_date"] or "").strip(),
+                      normalise_team(row["home_team"]),
+                      normalise_team(row["away_team"]))
         if scores is None:
             continue
         outcome = apply_result(conn, row, scores[0], scores[1], f"manual:{path.name}")

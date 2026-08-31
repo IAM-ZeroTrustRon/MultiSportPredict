@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "MLS",
+  "home_team": "Portland Timbers",
+  "away_team": "Austin FC",
+  "timestamp": "2026-08-29T21:50:15.633799",
+  "game": {
+    "projected_home_goals": 2.42,
+    "projected_away_goals": 1.86,
+    "projected_total_goals": 4.28,
+    "home_win_prob": 0.494,
+    "draw_prob": 0.203,
+    "away_win_prob": 0.304
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.555,
+      "market_line": 0.0,
+      "edge": 0.555,
+      "confidence": 35.2,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 4.28,
+      "market_total": 3.5,
+      "edge": 0.78,
+      "confidence": 38.4,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.764,
+      "confidence": 64.4,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.927,
+    "over_25_prob": 0.8,
+    "over_35_prob": 0.619
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.764,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.744,
+      "xg_against": 1.784,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.744,
+      "goals_against": 1.784,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.304,
+      "xg_against": 1.904,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 1.304,
+      "goals_against": 1.904,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

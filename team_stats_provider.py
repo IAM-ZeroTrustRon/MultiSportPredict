@@ -122,15 +122,28 @@ def _load_store(path: Path, template: Dict[str, Any]) -> Dict[str, Any]:
 
 def _lookup(store: Dict[str, Any], team: str) -> Optional[Dict[str, Any]]:
     if team in store:
-        return {k: v for k, v in store[team].items() if not k.startswith("_")}
-    # Case-insensitive fallback
-    team_lower = team.strip().lower()
-    for key, val in store.items():
-        if key.startswith("_"):
-            continue
-        if key.strip().lower() == team_lower:
-            return {k: v for k, v in val.items() if not k.startswith("_")}
-    return None
+        stats = {k: v for k, v in store[team].items() if not k.startswith("_")}
+    else:
+        # Case-insensitive fallback
+        team_lower = team.strip().lower()
+        stats = None
+        for key, val in store.items():
+            if key.startswith("_"):
+                continue
+            if key.strip().lower() == team_lower:
+                stats = {k: v for k, v in val.items() if not k.startswith("_")}
+                break
+
+    if stats is None:
+        return None
+
+    # Normalize field names: map per_game variants to base names for backward compatibility
+    if "goals_for_per_game" in stats and "goals_for" not in stats:
+        stats["goals_for"] = stats["goals_for_per_game"]
+    if "goals_against_per_game" in stats and "goals_against" not in stats:
+        stats["goals_against"] = stats["goals_against_per_game"]
+
+    return stats
 
 
 def get_soccer_team_stats(team: str, league: Optional[str] = None) -> Optional[Dict[str, Any]]:
@@ -158,12 +171,21 @@ def get_soccer_team_stats(team: str, league: Optional[str] = None) -> Optional[D
     if stats is None:
         manual_store = _load_store(SOCCER_STATS_PATH, _SOCCER_TEMPLATE)
         stats = _lookup(manual_store, team)
+        # Fail closed: manual records must have games and season to be trusted
+        if stats and ("games" not in stats or "season" not in stats):
+            return None
 
-    # Auto-map goals to xG if xG is missing to prevent silent model fallbacks
+    # Auto-map goals to xG if xG is missing (use actual goals, not magic numbers)
     if stats and "xg_for" not in stats:
-        stats["xg_for"] = stats.get("goals_for", 1.5)
+        if "goals_for" in stats:
+            stats["xg_for"] = stats["goals_for"]
+        else:
+            return None
     if stats and "xg_against" not in stats:
-        stats["xg_against"] = stats.get("goals_against", 1.5)
+        if "goals_against" in stats:
+            stats["xg_against"] = stats["goals_against"]
+        else:
+            return None
 
     return stats
 

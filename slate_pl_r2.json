@@ -1,0 +1,10 @@
+{
+  "_comment": "Premier League Round 2 - the two matches on the betslip.",
+  "_generated": "2026-08-29",
+  "matches": [
+    {"league": "Premier League", "home": "Bournemouth", "away": "Everton",
+     "home_ml": 105, "draw_ml": 250, "away_ml": 260, "total": 2.5, "push": false},
+    {"league": "Premier League", "home": "Tottenham Hotspur", "away": "Newcastle United",
+     "home_ml": 120, "draw_ml": 275, "away_ml": 200, "total": 2.5, "push": false}
+  ]
+}
