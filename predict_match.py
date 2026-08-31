@@ -415,6 +415,7 @@ def run_baseball_prop_market(
     market_total: float = 8.5,
     home_sp_overrides: Optional[Dict[str, float]] = None,
     away_sp_overrides: Optional[Dict[str, float]] = None,
+    team_overrides: Optional[Dict[str, float]] = None,
 ) -> Dict[str, Any]:
     """
     Generic baseball prop market predictions for MLB + KBO.
@@ -439,11 +440,38 @@ def run_baseball_prop_market(
     league_upper = (league or "").upper().strip()
     print(f"\n=== {league_upper} PROP MARKETS: {home_team} vs {away_team} ===\n")
 
-    # 1) Team stats (internal baseline)
+    # 1) Team stats. The baseline below is the SAME numbers for every club, so
+    # without real per-team figures four different matchups all project 9.13
+    # runs and the output carries no information about who is playing. The
+    # caller reads the real ones out of data/baseball_stats.json and passes
+    # them here; they used to reach only the moneyline model, never the total.
     home_stats = get_mlb_team_stats(home_team)
     away_stats = get_mlb_team_stats(away_team)
-    print(f"    Home Stats Source: {home_stats.get('source', 'unknown')}")
-    print(f"    Away Stats Source: {away_stats.get('source', 'unknown')}")
+
+    _FIELD_MAP = {"runs": "runs_per_game", "runs_allowed": "runs_allowed",
+                  "era": "era", "whip": "whip", "obp": "obp", "slg": "slg"}
+    if team_overrides:
+        for side, stats in (("home", home_stats), ("away", away_stats)):
+            applied = []
+            for key, target in _FIELD_MAP.items():
+                value = team_overrides.get(f"{side}_{key}")
+                if value is not None:
+                    stats[target] = float(value)
+                    applied.append(target)
+            if applied:
+                stats["source"] = "baseball_stats.json"
+                stats["_overridden"] = applied
+
+    print(f"    Home Stats Source: {home_stats.get('source', 'unknown')}"
+          f"  ({home_stats.get('runs_per_game')} R/g, "
+          f"{home_stats.get('runs_allowed')} RA/g)")
+    print(f"    Away Stats Source: {away_stats.get('source', 'unknown')}"
+          f"  ({away_stats.get('runs_per_game')} R/g, "
+          f"{away_stats.get('runs_allowed')} RA/g)")
+    if not team_overrides:
+        print("    [WARNING] No real team stats supplied -- both clubs are using "
+              "the same league baseline, so this projection does not describe "
+              "these two teams. Fix: python ingest_all_sports.py --only mlb")
 
     # 1b) Apply live starting-pitcher overrides, if supplied, so today's
     # actual starter (not the league-average baseline) drives the projection.
@@ -884,6 +912,7 @@ def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
             market_total=market_total,
             home_sp_overrides=home_sp_overrides,
             away_sp_overrides=away_sp_overrides,
+            team_overrides=team_overrides,
         ))
 
     result["_stats_source"] = (
@@ -920,7 +949,7 @@ def _push_soccer_result_to_discord(
 ) -> bool:
     """Push model-based soccer prediction payload to Discord."""
     from dotenv import load_dotenv
-    from discord_integration import push_full_prediction_to_discord
+    from discord_integration import push_prediction_to_all
 
     load_dotenv()
     webhook = os.getenv("DISCORD_WEBHOOK_URL")
@@ -1334,7 +1363,7 @@ def main():
         # Direct Discord push (no subprocess)
         if getattr(args, "push_discord", False) and baseball_result:
             try:
-                from discord_integration import push_full_prediction_to_discord
+                from discord_integration import push_prediction_to_all
                 from dotenv import load_dotenv
 
                 load_dotenv()

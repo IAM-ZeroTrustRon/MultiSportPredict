@@ -347,7 +347,7 @@ def push_selected(numbers: List[int], all_of_them: bool) -> None:
     if not os.environ.get("DISCORD_WEBHOOK_URL"):
         raise SystemExit("DISCORD_WEBHOOK_URL is not set -- nothing pushed.")
 
-    from discord_integration import push_soccer_prediction_to_discord
+    from discord_integration import push_prediction_to_all
 
     chosen = [r for r in rows
               if r.get("status") == "ok" and (all_of_them or r.get("n") in numbers)]

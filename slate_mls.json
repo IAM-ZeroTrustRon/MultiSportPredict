@@ -1,0 +1,8 @@
+{
+  "_comment": "MLS. First club listed is home. Odds from oddspedia 2026-08-30; three-way sums to 103.7% (a believable margin), and the total is the market's 3.5 line, not the 2.5 some sites show for this fixture.",
+  "_generated": "2026-08-30",
+  "matches": [
+    {"league": "MLS", "home": "Portland Timbers", "away": "Austin FC",
+     "home_ml": -167, "draw_ml": 350, "away_ml": 425, "total": 3.5, "push": false}
+  ]
+}

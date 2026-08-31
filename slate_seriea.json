@@ -1,0 +1,14 @@
+{
+  "_comment": "Serie A slate. First club listed on the card is treated as home.",
+  "_generated": "2026-08-29",
+  "matches": [
+    {"league": "Serie A", "home": "Fiorentina", "away": "Frosinone",
+     "home_ml": -150, "draw_ml": 310, "away_ml": 375, "total": 2.5, "push": false},
+    {"league": "Serie A", "home": "Monza", "away": "Udinese",
+     "home_ml": 200, "draw_ml": 210, "away_ml": 155, "total": 2.5, "push": false},
+    {"league": "Serie A", "home": "Sassuolo", "away": "Torino",
+     "home_ml": 125, "draw_ml": 225, "away_ml": 230, "total": 2.5, "push": false},
+    {"league": "Serie A", "home": "Juventus", "away": "Parma",
+     "home_ml": -450, "draw_ml": 550, "away_ml": 1100, "total": 2.5, "push": false}
+  ]
+}

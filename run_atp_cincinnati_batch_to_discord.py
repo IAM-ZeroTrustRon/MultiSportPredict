@@ -37,7 +37,7 @@ from core.confidence_engine import (
     get_volatility,
     get_thresholds,
 )
-from discord_integration import push_recommendation_to_discord
+from discord_integration import push_prediction_to_all
 
 # ---------------------------------------------------------------------------
 # Match context — ATP Cincinnati Open, hard court, best-of-3
@@ -279,7 +279,7 @@ def run_match(cfg: dict, dry_run: bool = False, push: bool = True) -> dict:
         if dry_run:
             print("[DRY RUN] Skipping actual Discord post.")
         elif push:
-            push_recommendation_to_discord(result, dry_run=False)
+            push_prediction_to_all("tennis", result, dry_run=dry_run)
             print("[OK] Discord push attempted (see logs for confirmation).")
         else:
             print("[SKIP] --no-push specified. Not posting to Discord.")

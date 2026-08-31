@@ -61,9 +61,19 @@ _dedup_cache: Dict[str, float] = {}
 DEDUP_WINDOW_SECONDS = 6 * 3600  # 6 hours default
 
 
-def _content_hash(payload: Dict[str, Any]) -> str:
-    """Compute a stable hash of the Discord payload for dedup comparison."""
+def _content_hash(payload: Dict[str, Any], destinations: Any = None) -> str:
+    """Hash the payload AND where it is going.
+
+    Keying on content alone made "send this pick to the other server" look like
+    a duplicate: the same embed to a different destination was suppressed, and
+    the second server got nothing. What the guard is actually for is stopping
+    the SAME pick reaching the SAME place twice -- so the destination belongs
+    in the key. Re-pushing to one server is still caught; fanning one pick out
+    to two servers is not a repeat and now goes through.
+    """
     raw = json.dumps(payload, sort_keys=True, default=str)
+    if destinations:
+        raw += "|" + "|".join(sorted(str(d) for d in destinations))
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
@@ -438,7 +448,8 @@ def push_to_discord(
             payload = {"content": message}
 
         # ---- DEDUPLICATION: skip if this exact payload was sent recently ----
-        content_id = _content_hash(payload)
+        content_id = _content_hash(
+        payload, targets + (["bot-channel"] if bot_wanted else []))
         if _is_duplicate(content_id):
             logger.info(
                 "Discord push skipped (duplicate content within %ds window): %s vs %s [%s]",
@@ -823,8 +834,7 @@ def push_soccer_prediction_to_discord(
     halftime = prediction_data.get("halftime", {}) or {}
     team_corners = prediction_data.get("team_corners", {}) or {}
     live_market = (prediction_data.get("live_market", {}) or {}).get("market", {}) or {}
-    home = prediction_data.get("home_team", "Home")
-    away = prediction_data.get("away_team", "Away")
+    home, away = _tennis_players(prediction_data)
     league_name = prediction_data.get("league", "Soccer")
 
     def num(value, default=None):
@@ -1001,8 +1011,10 @@ def push_tennis_prediction_to_discord(
 ) -> bool:
     """Push a tennis result as one readable four-field embed."""
     moneyline = prediction.get("moneyline", {})
-    home_player = home or prediction.get("home_player") or prediction.get("home", "Player 1")
-    away_player = away or prediction.get("away_player") or prediction.get("away", "Player 2")
+    if home and away:
+        home_player, away_player = home, away
+    else:
+        home_player, away_player = _tennis_players(prediction)
 
     def percent(value: Any) -> str:
         return f"{float(value) * 100:.1f}%"
@@ -1066,183 +1078,461 @@ def push_tennis_prediction_to_discord(
 RECOMMENDATIONS_WEBHOOK_URL = os.getenv("DISCORD_RECOMMENDATIONS_WEBHOOK_URL")
 
 
+# ============================================================================
+# MULTI-WEBHOOK BROADCASTER
+# ============================================================================
+
+def push_mode() -> str:
+    """Where a push is allowed to go: "all", "bot" or "webhooks".
+
+    Set DISCORD_PUSH_TARGET to pick. Default "all" keeps the old behaviour.
+    An unrecognised value falls back to "all" rather than silently sending
+    nowhere -- a typo in an env var should not look like a delivery.
+    """
+    mode = (os.getenv("DISCORD_PUSH_TARGET") or "all").strip().lower()
+    return mode if mode in ("all", "bot", "webhooks") else "all"
+
+
+def _bot_configured() -> bool:
+    token = os.getenv("DISCORD_BOT_TOKEN") or ""
+    channel = os.getenv("DISCORD_BOT_CHANNEL_ID") or ""
+    return bool(token.strip()) and bool(channel.strip()) \
+        and token.strip() != "None" and channel.strip() != "None"
+
+
+def _get_target_webhooks(extra_webhooks=None):
+    """Gather and deduplicate all configured Discord webhook URLs."""
+    if push_mode() == "bot":
+        return []          # bot channel only -- see push_mode()
+    seen = set()
+    urls = []
+    def _add(url):
+        if url and url.strip() and url.strip() not in ("None", ""):
+            cleaned = url.strip()
+            if cleaned not in seen:
+                seen.add(cleaned)
+                urls.append(cleaned)
+    _add(os.getenv("DISCORD_WEBHOOK_URL"))
+    _add(os.getenv("DISCORD_RECOMMENDATIONS_WEBHOOK_URL"))
+    multi = os.getenv("DISCORD_WEBHOOK_URLS")
+    if multi:
+        for part in multi.replace(",", " ").split():
+            _add(part.strip())
+    if extra_webhooks:
+        for u in extra_webhooks:
+            _add(u)
+    return urls
+
+
+def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="prediction"):
+    """Post the same embed dict to every configured webhook URL."""
+    mode = push_mode()
+    targets = _get_target_webhooks(extra_webhooks)
+    bot_wanted = mode != "webhooks" and _bot_configured()
+    if not targets and not bot_wanted:
+        print(f"[_broadcast_embed] Nothing to send to "
+              f"(DISCORD_PUSH_TARGET={mode}). Nothing sent.")
+        return 0
+    if requests is None:
+        print("[_broadcast_embed] requests library not installed. Cannot push.")
+        return 0
+    payload = {"embeds": [embed]}
+    content_id = _content_hash(payload)
+    if _is_duplicate(content_id):
+        # This used to return len(targets) -- a full success for a push that
+        # never happened -- and said so through logger.info, which is invisible
+        # because nothing in this project calls logging.basicConfig. Re-running
+        # a match inside the window printed "[OK] pushed" and sent nothing.
+        # A suppressed duplicate is not a delivery, so it reports zero.
+        print(f"[SKIP] {label}: identical to one sent within the last "
+              f"{DEDUP_WINDOW_SECONDS // 3600}h. NOTHING WAS SENT. "
+              f"Use clear_dedup_cache() to force it.")
+        return 0
+    if dry_run:
+        print(f"[DRY RUN] Broadcast to {len(targets)} webhook(s) — {label}:")
+        import json
+        print(json.dumps(payload, indent=2, default=str))
+        return len(targets)
+    success_count = 0
+    for url in targets:
+        try:
+            resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=15)
+            if resp.status_code in (200, 204):
+                success_count += 1
+            else:
+                logger.error("Webhook post failed [%d] %s ... Body: %.200s", resp.status_code, url[:50], resp.text)
+        except Exception as exc:
+            logger.error("Webhook request error for %s ...: %s", url[:50], exc)
+    # ---- Bot channel push (Discord REST API, not webhook) ----
+    bot_token = os.getenv("DISCORD_BOT_TOKEN")
+    bot_channel = os.getenv("DISCORD_BOT_CHANNEL_ID")
+    bot_ok = True
+    if bot_wanted:
+        if dry_run:
+            print(f"[DRY RUN] Would push to bot channel {bot_channel} via REST API.")
+        elif requests is not None:
+            try:
+                bot_url = f"https://discord.com/api/v10/channels/{bot_channel}/messages"
+                bot_headers = {"Authorization": f"Bot {bot_token}", "Content-Type": "application/json"}
+                bot_resp = requests.post(bot_url, json=payload, headers=bot_headers, timeout=15)
+                if bot_resp.status_code in (200, 201):
+                    pass  # counted via success_count below
+                else:
+                    bot_ok = False
+                    logger.error("Bot channel push failed [%d] %s", bot_resp.status_code, bot_resp.text[:200])
+            except Exception as exc:
+                bot_ok = False
+                logger.error("Bot channel request error: %s", exc)
+    else:
+        bot_ok = True  # not configured is not a failure
+
+    if success_count or (bot_wanted and bot_ok):
+        printed = success_count
+        extra = ""
+        if bot_ok and bot_token and bot_channel:
+            printed += 1
+            extra = " + bot channel"
+        print(f"[OK] Pushed {label} to {printed}/{len(targets)} webhook(s){extra}.")
+    else:
+        print(f"[WARN] {label} — none of {len(targets)} webhook(s) accepted the payload.")
+    return success_count + (1 if bot_ok and bot_token and bot_channel else 0)
+
+
+# ============================================================================
+# SPORT-TO-FORMATTER ROUTER
+# ============================================================================
+
+def format_prediction_embed(sport, prediction_data):
+    """Route prediction_data to the appropriate sport-specific embed formatter."""
+    sport = sport.strip().lower()
+    if sport == "tennis":
+        return format_tennis_embed(prediction_data)
+    home, away = _tennis_players(prediction_data)
+    # Baseball does not put its numbers under "moneyline". It uses
+    # "moneyline_and_side" with "home_win_probability", and its confidence is a
+    # nested {side:{score}}. Reading only the tennis-shaped keys meant `ml` was
+    # empty for every baseball game, home_prob fell to its 0.5 default, and the
+    # embed announced 50.0% / 50.0% for four different matchups while the model
+    # underneath had said 69.6% / 30.4%.
+    ml = (prediction_data.get("moneyline")
+          or prediction_data.get("moneyline_and_side")
+          or {})
+    summary = prediction_data.get("summary") or {}
+
+    home_prob = None
+    for key in ("home_win_prob", "home_win_probability"):
+        if ml.get(key) is not None:
+            home_prob = float(ml[key])
+            break
+
+    conf = ml.get("confidence")
+    if isinstance(conf, dict):                 # baseball: {side:{score}, total:{score}}
+        side = conf.get("side") or conf.get("total") or {}
+        rec = side.get("recommendation")
+        conf = side.get("score")
+    else:
+        rec = None
+    rec = (rec or ml.get("recommendation") or summary.get("recommendation")
+           or prediction_data.get("recommendation") or "PASS")
+    if conf is None:
+        conf = ml.get("confidence") if not isinstance(ml.get("confidence"), dict) else None
+    if conf is None:
+        conf = summary.get("confidence")
+
+    edge = ml.get("edge_pct")
+    if edge is None:
+        edge = summary.get("edge")
+
+    # A missing probability is not a coin flip. Say so rather than printing one.
+    prob_home = f"**{home_prob:.1%}**" if home_prob is not None else "n/a"
+    prob_away = f"**{1 - home_prob:.1%}**" if home_prob is not None else "n/a"
+    edge_text = f"**{float(edge):+.1f}%**" if edge is not None else "no market price"
+    conf_text = f"**{float(conf):.0f}%**" if conf is not None else "n/a"
+    edge = float(edge) if edge is not None else 0.0
+    conf = float(conf) if conf is not None else 50.0
+    tournament = prediction_data.get("tournament") or prediction_data.get("tournament_name", "")
+    league = prediction_data.get("league", "")
+    emoji = SPORT_EMOJIS.get(sport, "")
+    parts = [f"{emoji}{sport.upper()}"]
+    if tournament:
+        parts.append(f" {tournament}")
+    if league:
+        parts.append(f" {league}")
+    parts.append(f" | {home} vs {away}")
+    if edge >= 5.0 and conf >= 65:
+        color = COLORS["strong_bet"]
+    elif edge > 0 or conf >= 70:
+        color = COLORS["bet"]
+    elif "pass" in str(rec).lower():
+        color = COLORS["pass"]
+    else:
+        color = COLORS["neutral"]
+    fields = [
+        {"name": f"{emoji} {home}", "value": prob_home, "inline": True},
+        {"name": f"{emoji} {away}", "value": prob_away, "inline": True},
+        {"name": "🎯 Best Selection", "value": f"**{rec}**", "inline": True},
+        # These two were literal empty strings -- the fields rendered with a
+        # heading and no value, which reads as "zero edge" rather than "never
+        # filled in".
+        {"name": "📊 Model Edge", "value": edge_text, "inline": True},
+        {"name": "⚡ Confidence", "value": conf_text, "inline": True},
+    ]
+    embed = {"title": "".join(parts), "color": color, "fields": fields, "footer": {"text": "MultiSportPredict Sports Engine | Real-Time Model Feeds"}}
+    return embed
+
+
+# ============================================================================
+# MASTER ENTRY POINT
+# ============================================================================
+
+def push_prediction_to_all(sport, prediction_data, dry_run=False, extra_webhooks=None):
+    """Master entry point — format a prediction and broadcast to every Discord webhook."""
+    embed = format_prediction_embed(sport, prediction_data)
+    home, away = _tennis_players(prediction_data)
+    label = f"{sport}: {home} vs {away}"
+    return _broadcast_embed(embed, extra_webhooks=extra_webhooks, dry_run=dry_run, label=label)
+
+
+def _tennis_players(data: dict) -> Tuple[str, str]:
+    """Pull the two player names out of a prediction result.
+
+    This used to be:
+
+        home = data.get("home_player") or data.get("home", "Player 1")
+
+    predict_tennis_match() returns neither of those keys. It puts the names in
+    moneyline.home / moneyline.away and in a "match" string. So every lookup
+    missed, every embed fell through to the default, and subscribers were sent
+    "US Open | Player 1 vs Player 2" with a real edge and a real confidence
+    score attached -- the numbers were right, the players were placeholders,
+    and nothing anywhere reported a problem.
+
+    A default that stands in for a failed lookup is the bug, not the fix. The
+    real keys are checked first, and a miss now raises instead of inventing two
+    people.
+    """
+    moneyline = data.get("moneyline") or {}
+    for source in (moneyline, data):
+        for home_key, away_key in (("home", "away"),
+                                   ("home_player", "away_player"),
+                                   ("home_team", "away_team"),
+                                   ("player1", "player2"),
+                                   ("p1", "p2")):
+            home, away = source.get(home_key), source.get(away_key)
+            if home and away:
+                return str(home), str(away)
+
+    # "Lehecka J. vs Carreno Busta P." -- the shape predict_tennis_match builds.
+    match = str(data.get("match") or "")
+    for separator in (" vs ", " vs. ", " v ", " - "):
+        if separator in match:
+            home, away = match.split(separator, 1)
+            return home.strip(), away.strip()
+
+    raise ValueError(
+        "Cannot find both player names in this prediction. Looked at "
+        "moneyline.home/away, home_player/away_player, player1/player2, p1/p2 "
+        f"and match={match!r}. Refusing to publish a pick with placeholder "
+        f"names. Keys present: {sorted(data)}")
+
+
+def format_tennis_embed(data: dict) -> dict:
+    """
+    Formats tennis prediction data into a clean, scannable Discord Embed payload.
+
+    Accepts the enriched model result dict (the same dict that
+    ``push_recommendation_to_discord`` receives) and maps the raw keys to
+    subscriber-friendly fields with dynamic colour coding and signal badges.
+
+    Args:
+        data: Enriched result dict with keys:
+            - home_player / away_player (or home / away)
+            - tournament / tournament_name
+            - surface
+            - moneyline: dict with home_win_prob, away_win_prob, confidence,
+                         recommendation, edge_pct
+            - sets: dict with recommendation_sets_ou, recommendation_spread
+            - total_games: dict with line, recommendation
+
+    Returns:
+        A Discord embed dict ready to be placed inside ``{"embeds": [ ... ]}``.
+    """
+    home, away = _tennis_players(data)
+    ml = data.get("moneyline", {})
+    home_prob = ml.get("home_win_prob", 0.5)
+    away_prob = ml.get("away_win_prob", round(1.0 - home_prob, 4))
+    edge_pct = ml.get("edge_pct", 0.0)
+    conf = data.get("confidence_score") or ml.get("confidence", 50)
+    rec = ml.get("recommendation", "PASS")
+    surface = (data.get("surface") or "Hard").title()
+    tournament = data.get("tournament_name") or data.get("tournament") or "ATP Tour"
+    sets = data.get("sets", {})
+    total_games = data.get("total_games", {})
+    m_home = data.get("market_home_odds")
+    m_away = data.get("market_away_odds")
+    target_odds = f"{m_home}/{m_away}" if (m_home and m_away) else "N/A"
+
+    if edge_pct >= 5.0 and conf >= 65:
+        color = 3066993
+        signal_badge = "\U0001f7e2 STRONG PLAY"
+    elif edge_pct > 0:
+        color = 3447003
+        signal_badge = "\U0001f535 VALUE PLAY"
+    elif conf >= 70:
+        color = 3447003
+        signal_badge = "\U0001f535 LEAN (Model Conviction)"
+    else:
+        color = 9807270
+        signal_badge = "\u26aa NEUTRAL / PASS"
+
+    fav_star_home = " \u2b50" if home_prob > away_prob else ""
+    fav_star_away = " \u2b50" if away_prob > home_prob else ""
+
+    set_prop = sets.get("recommendation_sets_ou", "Over 3.5 Sets")
+    spread_prop = sets.get("recommendation_spread", "+1.5 Sets")
+    tg_rec = total_games.get("recommendation", "")
+    tg_line = total_games.get("line", "40.5")
+    total_games_str = f"{tg_rec} ({tg_line})" if tg_rec else f"Over/Under {tg_line}"
+
+    set_dist = data.get("set_distribution", {})
+    elo_ratings = data.get("elo_ratings", {})
+    home_elo = elo_ratings.get(home)
+    away_elo = elo_ratings.get(away)
+
+    if set_dist:
+        best_score = max(set_dist, key=set_dist.get)
+        best_pct = set_dist[best_score]
+        parts = best_score.split("-")
+        if home_prob > away_prob:
+            readable_score = f"{home} {parts[0]}-{parts[1]}"
+        else:
+            readable_score = f"{away} {parts[1]}-{parts[0]}"
+        most_likely = f"Most likely score: **{readable_score}** ({best_pct:.0%})"
+    else:
+        most_likely = ""
+
+    fav_name = ml.get("lean", "coin_flip")
+    if fav_name == "coin_flip":
+        tactical_note = "Model projects a coin-flip matchup \u2014 expect tight exchanges."
+    elif edge_pct >= 5.0:
+        tactical_note = (
+            f"Model sees a clear edge for **{fav_name}** on {surface} court. "
+            f"{most_likely}"
+        )
+    else:
+        tactical_note = (
+            f"Model leans **{fav_name}** in a competitive match on {surface}. "
+            f"{most_likely}"
+        )
+
+    if home_elo and away_elo:
+        tactical_note += (
+            f" Elo spread: **{abs(home_elo - away_elo):.0f}** pts "
+            f"({home}: {home_elo:.0f} vs {away}: {away_elo:.0f})."
+        )
+
+    fields = [
+        {"name": f"\U0001f464 {home}",
+         "value": f"**{home_prob:.1%}**{fav_star_home}", "inline": True},
+        {"name": f"\U0001f464 {away}",
+         "value": f"**{away_prob:.1%}**{fav_star_away}", "inline": True},
+        {"name": "\U0001f3af Best Selection",
+         "value": f"**{rec}**", "inline": True},
+        {"name": "\U0001f4ca Model Edge",
+         "value": f"`{edge_pct:+.1f}%`", "inline": True},
+        {"name": "\u26a1 Confidence",
+         "value": f"`{conf:.0f}%`", "inline": True},
+        {"name": "\U0001f4b0 Target Odds",
+         "value": f"`{target_odds}`", "inline": True},
+        {"name": "\U0001f4e6 Set & Game Derivatives",
+         "value": (
+             f"\u2022 **Sets:** `{set_prop}`\n"
+             f"\u2022 **Total Games:** `{total_games_str}`\n"
+             f"\u2022 **Spread:** `{spread_prop}`"
+         ), "inline": False},
+        {"name": "\U0001f4dd Matchup Context",
+         "value": tactical_note, "inline": False},
+    ]
+
+    embed = {
+        "title": f"\U0001f3be {tournament} | {home} vs {away}",
+        "description": f"**Surface:** `{surface}` | **Signal:** `{signal_badge}`",
+        "color": color,
+        "fields": fields,
+        "footer": {"text": "MultiSportPredict Tennis Engine | Real-Time Model Feeds"},
+    }
+
+    # Append any caller-provided value_plays below the core fields
+    value_plays = data.get("value_plays")
+    if value_plays:
+        extra_fields = _build_value_play_fields(value_plays)
+        embed["fields"].extend(extra_fields)
+
+    return embed
+
+
+def _build_value_play_fields(value_plays: dict) -> list:
+    """Build extra Discord embed fields from a value_plays dict."""
+    fields = []
+
+    plays = value_plays.get("plays", {})
+    if plays:
+        lines = [f"`{name}`  {odds}" for name, odds in plays.items()]
+        fields.append({
+            "name": "\U0001f3b2 Original Value Plays",
+            "value": "\n".join(lines),
+            "inline": False,
+        })
+
+    original_lean = value_plays.get("original_lean")
+    if original_lean:
+        fields.append({
+            "name": "\U0001f4a1 Original Lean",
+            "value": original_lean,
+            "inline": False,
+        })
+
+    deep_dive = value_plays.get("deep_dive", {})
+    if deep_dive:
+        lines = []
+        if deep_dive.get("Target"):
+            lines.append(f"**Target:** {deep_dive['Target']}")
+        if deep_dive.get("Angle"):
+            lines.append(f"**Angle:** {deep_dive['Angle']}")
+        if deep_dive.get("Rationale"):
+            lines.append(f"**Rationale:** {deep_dive['Rationale']}")
+        if lines:
+            fields.append({
+                "name": "\U0001f50d Deep-Dive Analysis",
+                "value": "\n".join(lines),
+                "inline": False,
+            })
+
+    model_view = value_plays.get("model_view", {})
+    if model_view:
+        fave = model_view.get("favorite", "coin_flip")
+        fave_prob = model_view.get("favorite_win_prob", 0.5)
+        fave_text = "coin-flip" if fave == "coin_flip" else f"{fave}"
+        lines = [f"**Model favorite:** {fave_text}  {fave_prob:.1%}"]
+        if model_view.get("notes"):
+            lines.append(f"**Note:** {model_view['notes']}")
+        fields.append({
+            "name": "\U0001f916 Model View",
+            "value": "\n".join(lines),
+            "inline": False,
+        })
+
+    return fields
+
+
 def push_recommendation_to_discord(
     prediction_result: dict,
     dry_run: bool = False,
 ) -> None:
-    """
-    Pushes a high-value pick or recommendation embed to the dedicated
-    recommendations Discord channel.
-
-    The embed is tailored for tennis predictions but can be extended to
-    other sports by adjusting the fields.
-
-    Args:
-        prediction_result: Dict with keys:
-            - home_player / away_player  (or home / away)
-            - tournament
-            - surface
-            - market_home_odds / market_away_odds
-            - moneyline: dict with home_win_prob, confidence, recommendation, edge_pct
-        dry_run: If True, prints the payload instead of sending it.
-    """
-    if not RECOMMENDATIONS_WEBHOOK_URL:
-        print("[ERROR] DISCORD_RECOMMENDATIONS_WEBHOOK_URL is not configured in .env")
-        return
-
-    if requests is None:
-        print("[ERROR] requests library not installed. Cannot push to Discord.")
-        return
-
-    ml = prediction_result.get("moneyline", {})
-    home_player = prediction_result.get("home_player") or prediction_result.get("home", "Player 1")
-    away_player = prediction_result.get("away_player") or prediction_result.get("away", "Player 2")
-    recommendation = ml.get("recommendation", "PASS")
-
-    # Choose embed colour based on recommendation value
-    # Green for active picks, Red/Gray for PASS
-    color = 3066993 if recommendation != "PASS" else 15158332
-
-    # Base fields
-    fields = [
-        {
-            "name": "Tournament / Surface",
-            "value": f"{prediction_result.get('tournament', 'N/A')} "
-                     f"({prediction_result.get('surface', 'N/A').title()})",
-            "inline": False,
-        },
-        {
-            "name": "Selection / Rec",
-            "value": f"**{recommendation}**",
-            "inline": True,
-        },
-        {
-            "name": "Model Win Prob",
-            "value": f"{ml.get('home_win_prob', 0):.1%}",
-            "inline": True,
-        },
-        {
-            "name": "Confidence",
-            "value": f"{ml.get('confidence', 0):.0f}%",
-            "inline": True,
-        },
-        {
-            "name": "Calculated Edge",
-            "value": f"{ml.get('edge_pct', 0):+.1f}%",
-            "inline": True,
-        },
-        {
-            "name": "Market Odds",
-            "value": f"{prediction_result.get('market_home_odds', 'N/A')} / "
-                     f"{prediction_result.get('market_away_odds', 'N/A')}",
-            "inline": True,
-        },
-    ]
-
-    # Optional value-play fields (both perspectives) when provided by the caller.
-    value_plays = prediction_result.get("value_plays")
-    if value_plays:
-        # Original value plays
-        plays = value_plays.get("plays", {})
-        if plays:
-            lines = [
-                f"`{name}`  {odds}" for name, odds in plays.items()
-            ]
-            fields.append({
-                "name": " Original Value Plays",
-                "value": "\n".join(lines),
-                "inline": False,
-            })
-        original_lean = value_plays.get("original_lean")
-        if original_lean:
-            fields.append({
-                "name": " Original Lean",
-                "value": original_lean,
-                "inline": False,
-            })
-
-        # Deep-dive plays
-        deep_dive = value_plays.get("deep_dive", {})
-        if deep_dive:
-            lines = []
-            if deep_dive.get("Target"):
-                lines.append(f" **Target:** {deep_dive['Target']}")
-            if deep_dive.get("Angle"):
-                lines.append(f" **Angle:** {deep_dive['Angle']}")
-            if deep_dive.get("Rationale"):
-                lines.append(f" **Rationale:** {deep_dive['Rationale']}")
-            fields.append({
-                "name": " Deep-Dive Analysis",
-                "value": "\n".join(lines),
-                "inline": False,
-            })
-
-        # Model view vs market
-        model_view = value_plays.get("model_view", {})
-        if model_view:
-            fave = model_view.get("favorite", "coin_flip")
-            fave_prob = model_view.get("favorite_win_prob", 0.5)
-            fave_text = "coin-flip" if fave == "coin_flip" else f"{fave}"
-            lines = [f" **Model favorite:** {fave_text}  {fave_prob:.1%}"]
-            if model_view.get("notes"):
-                lines.append(f" **Note:** {model_view['notes']}")
-            fields.append({
-                "name": " Model View",
-                "value": "\n".join(lines),
-                "inline": False,
-            })
-
-    embed = {
-        "title": f" Tennis Value Pick: {home_player} vs {away_player}",
-        "color": color,
-        "fields": fields,
-        "footer": {
-            "text": f"MultiSportPredict Tennis Engine | "
-                    f"{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC"
-        },
-    }
-
-    payload = {"embeds": [embed]}
-
-    # ---- DEDUPLICATION: skip if this exact payload was sent recently ----
-    content_id = _content_hash(payload)
-    if _is_duplicate(content_id):
-        logger.info(
-            "Recommendation push skipped (duplicate within %ds window): %s vs %s",
-            DEDUP_WINDOW_SECONDS, home_player, away_player,
-        )
-        return
-    # --------------------------------------------------------------------
-
-    if dry_run:
-        print("[DRY RUN] Recommendation Webhook Payload:")
-        print(json.dumps(payload, indent=2, default=str))
-        return
-
-    try:
-        response = requests.post(
-            RECOMMENDATIONS_WEBHOOK_URL,
-            json=payload,
-            headers={"Content-Type": "application/json"},
-            timeout=15,
-        )
-        if response.status_code == 204:
-            print(
-                f"[SUCCESS] Recommendation for {home_player} vs {away_player} "
-                f"pushed to Discord."
-            )
-        else:
-            print(
-                f"[ERROR] Discord push failed. Status Code: {response.status_code} "
-                f"Body: {response.text}"
-            )
-    except Exception as e:
-        print(f"[EXCEPTION] Recommendation Webhook error: {e}")
-
-
-# ---------------------------------------------------------------------------
-# WEBHOOK TEST
-# ---------------------------------------------------------------------------
+    """Legacy wrapper — delegates to push_prediction_to_all("tennis", ...)."""
+    home, away = _tennis_players(prediction_result)
+    print(f"[push_recommendation_to_discord] Delegating {home} vs {away} to push_prediction_to_all...")
+    push_prediction_to_all("tennis", prediction_result, dry_run=dry_run)
 
 def test_webhook(webhook_url: Optional[str] = None) -> bool:
     """

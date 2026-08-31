@@ -30,7 +30,7 @@ load_dotenv("c:/MultiSportPredict/.env")
 
 from models.tennis_predictor import predict_tennis_match
 from core.confidence_engine import confidence_score, bet_recommendation, get_volatility
-from discord_integration import push_recommendation_to_discord
+from discord_integration import push_prediction_to_all
 
 # Match config — WTA Toronto (National Bank Open), hard court, best-of-3
 HOME_PLAYER = "Nikola Bartunkova"
@@ -135,7 +135,7 @@ def run_match(dry_run: bool = False) -> dict:
     if dry_run:
         print("[DRY RUN] Skipping actual Discord post.")
         return result
-    push_recommendation_to_discord(result, dry_run=False)
+    push_prediction_to_all("tennis", result, dry_run=dry_run)
     print("[OK] Discord push attempted (see logs for confirmation).")
 
     return result

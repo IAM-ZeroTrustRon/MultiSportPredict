@@ -119,3 +119,61 @@ Uses `DISCORD_RESULTS_WEBHOOK_URL` if set, falling back to `DISCORD_WEBHOOK_URL`
 - **Only MLB grades automatically right now.** Everything else needs the CSV until the blocked-sources problem is fixed.
 - **Team-name matching is exact after normalization** (lowercase, punctuation stripped). "Fenerbache" in your database won't match "Fenerbahçe" from a feed. Mismatches are reported as unmatched rather than guessed at.
 - **Closing-line value isn't tracked.** Hit rate tells you whether picks won; CLV tells you whether they were *good*. That needs the closing line captured at settlement time, which nothing currently records.
+
+---
+
+## 2026-08-30 grading run — and what it exposed
+
+24 predictions from 2026-08-26 to 2026-08-29 were graded from verified final scores. Record after: **51 graded of 145 logged.**
+
+```
+ACTUAL BETS (STRONG BET + BET)      5-0     100.0%    +4.55u
+baseball                           17-12-1   58.6%    +3.45u
+soccer                              8-13     38.1%    -5.73u
+total (only market graded)         25-25-1   50.0%    -2.27u
+```
+
+Five decided bets is not a record. It is five results.
+
+### Nine predictions could not be graded because the fixtures never existed
+
+This is the finding that matters more than the win rate.
+
+**Serie A, 2026-08-29** — the model was run on Atalanta v Fiorentina, Napoli v Lazio, Juventus v Roma, AC Milan v Inter. The actual matchday was Fiorentina 1-3 Frosinone, Monza 2-3 Udinese, Sassuolo 2-1 Torino, Juventus 2-0 Parma, and on the 30th Napoli v Como, Cagliari v Inter, Lazio v Genoa. None of the four predicted pairings were ever scheduled. They were supplied by hand, not read from a schedule feed, and nothing in the pipeline checked them against one.
+
+**KBO, 2026-08-29** — the model was run on Kiwoom v SSG, Doosan v KT, Lotte v KIA, Samsung v Hanwha, NC v LG. The actual card was KT @ Samsung, LG @ Lotte, NC @ Hanwha, SSG @ KIA, Kiwoom @ Doosan. Every team played; not one of the five predicted pairings did. These came from a batch run at 00:32, so a schedule source is producing wrong pairings — worth tracing before the next KBO slate.
+
+A prediction on a fixture that does not exist looks exactly like a real one: it has a confidence score, an edge, and a Discord embed. Nothing downstream can tell the difference. **The fixture list needs the same fail-closed treatment the team data got** — validate every matchup against a schedule feed before predicting, and refuse rather than proceed on a miss.
+
+### Home and away were reversed on three games
+
+NC Dinos v LG Twins and Lotte Giants v KIA Tigers (2026-08-26) and Club Leon v Atlante (2026-08-28) were all logged with the road team as home. The result still grades correctly, but home-field advantage was applied to the wrong side when the number was produced. Same root cause: the matchup was typed rather than read from a feed.
+
+### Duplicates inflate the sample
+
+Club America v Columbus Crew is in the database four times and Toluca v Austin FC twice — one Leagues Cup quarter-final each, logged on both 2026-08-26 and 2026-08-27 because the kickoff crossed UTC midnight. All were graded, so one match now contributes four losses to the record. Dedupe before reading anything into the soccer numbers.
+
+### Fix applied: `--manual` now keys on the date
+
+`cmd_manual()` matched a CSV row to a prediction on the team pair alone. Lotte and KIA appear on the 26th (played), the 27th (rained out) and the 29th (never scheduled) — the old code would have settled all three at the 26th's 16-11. The lookup key is now `(game_date, home, away)`, falling back to a dateless match only when the CSV leaves the date blank. A prediction whose date matches no filled row stays pending instead of borrowing another night's score.
+
+### Do not run the grader through a mounted filesystem
+
+Running `grade_predictions.py --manual` against `multisport_history.db` over a network mount wrote every row and then failed on `conn.commit()` with `disk I/O error`, leaving a hot `multisport_history.db-journal` beside the database. The data was on disk but uncommitted: the next process to open the file would have rolled all of it back, silently. Integrity was verified and the journal cleared by hand.
+
+**Run the grader from Windows, against the local file:**
+
+```
+venv/Scripts/python.exe grade_predictions.py --manual pending_results.csv --report
+```
+
+If a `.db-journal` or `.db-wal` file is ever sitting next to the database when nothing is running, the last write did not commit. Check `PRAGMA integrity_check` before trusting the contents.
+
+### Still pending from this window
+
+| Game | Why |
+|---|---|
+| Brewers v Rangers, A's v Orioles, Angels v Phillies (08-29) | in progress or not started at grading time |
+| Lotte Giants v KIA Tigers (08-27) | rained out |
+| Lumphat SC v Nongrah (08-27) | no reachable source publishes this fixture |
+| 4 Serie A + 5 KBO (08-29) | fixtures never existed — these should be deleted, not graded |
