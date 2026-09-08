@@ -27,6 +27,7 @@ import sys
 import json
 import os
 import argparse
+import math
 import time
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
@@ -618,6 +619,64 @@ def run_baseball_prop_market(
                 "data_tier": 2 if estimated else 3,
             }
 
+        elif market_clean in {"f5", "first5", "first_5"}:
+            import sys; sys.stderr.write("[F5] Running F5 handler\n"); sys.stderr.flush()
+            # First 5 Innings (F5) projection — scales full-game totals to the
+            # innings starters typically cover (~57% of the game), adjusts for
+            # starting pitcher quality, and produces F5 moneyline / run line.
+            _F5_RATIO = 0.57          # 5 innings / 9, slightly elevated by SP
+            sp_home_era = home_sp_overrides.get("era", home_stats.get("era", 4.2)) if home_sp_overrides else home_stats.get("era", 4.2)
+            sp_away_era = away_sp_overrides.get("era", away_stats.get("era", 4.2)) if away_sp_overrides else away_stats.get("era", 4.2)
+
+            f5_home = float(home_stats.get("runs_per_game", 4.5)) * _F5_RATIO + (sp_away_era - 4.0) * 0.15
+            f5_away = float(away_stats.get("runs_per_game", 4.5)) * _F5_RATIO + (sp_home_era - 4.0) * 0.15
+            f5_total = f5_home + f5_away
+
+            # F5 moneyline — logistic on projected F5 run differential
+            f5_run_diff = f5_home - f5_away
+            f5_home_win = 1.0 / (1.0 + math.exp(-f5_run_diff / 1.4))
+            f5_away_win = 1.0 - f5_home_win
+
+            # F5 fair odds in American format
+            def _f5_american(p: float) -> str:
+                p = max(0.001, min(0.999, p))
+                if p >= 0.5:
+                    return str(-round((p / (1 - p)) * 100))
+                return f"+{round(((1 - p) / p) * 100)}"
+
+            # F5 run line: if differential >= 0.5, lean to that side
+            if f5_run_diff >= 0.7:
+                f5_rl = f"{home_team[:10]} -0.5"
+            elif f5_run_diff <= -0.7:
+                f5_rl = f"{away_team[:10]} -0.5"
+            else:
+                f5_rl = "PASS"
+
+            result["props"]["f5"] = {
+                "home_runs": round(f5_home, 2),
+                "away_runs": round(f5_away, 2),
+                "total": round(f5_total, 2),
+                "home_win_prob": round(f5_home_win, 4),
+                "away_win_prob": round(f5_away_win, 4),
+                "home_fair_odds": _f5_american(f5_home_win),
+                "away_fair_odds": _f5_american(f5_away_win),
+                "run_line_rec": f5_rl,
+                "data_source": home_stats.get("source", "baseline"),
+                "recommendation_over": "PASS",
+            }
+            # Total recommendation
+            f5_edge = f5_total - market_total * _F5_RATIO
+            if f5_edge >= 0.4:
+                result["props"]["f5"]["recommendation_over"] = "OVER"
+            elif f5_edge <= -0.4:
+                result["props"]["f5"]["recommendation_over"] = "UNDER"
+            else:
+                result["props"]["f5"]["recommendation_over"] = "PASS"
+
+            print(f"    F5 Projection: {f5_home:.2f} / {f5_away:.2f} (Total: {f5_total:.2f})")
+            print(f"    F5 Moneyline: {home_team[:10]} {_f5_american(f5_home_win)} / {away_team[:10]} {_f5_american(f5_away_win)}")
+            print(f"    F5 Run Line: {f5_rl}")
+
     # 4) Integrate Sharp Consensus into Confidence Scoring (best-effort defaults)
     edge_val = total_proj - market_total
 
@@ -974,18 +1033,31 @@ def _moneyline_edge(model_home_prob: Optional[float], home_name: str, away_name:
     conf = round(min(98.0, max(0.0, 50.0 + abs(model_home_prob - 0.5) * 150.0)), 1)
     side = home_name if edge >= 0 else away_name
     magnitude = abs(edge)
+    # `edge` above is always the HOME side's edge. When it's negative, `side`
+    # correctly flips to the away team (the away side's own edge is +magnitude
+    # in a two-outcome market) -- but the text and the stored edge_pct used to
+    # keep printing the raw home-signed number, so a recommended away pick
+    # read as "LEAN St. Louis Cardinals ML (edge: -9.1%)": a real team picked
+    # for a positive edge, displayed with the wrong side's negative sign. Once
+    # a side is chosen, the edge shown must be THAT side's edge, which is
+    # positive by construction -- that's the only reason it was recommended.
+    display_edge = magnitude
     if magnitude >= 4.5 and conf >= 63:
-        rec = f"BET {side} ML (edge: {edge:+.1f}%)"
+        rec = f"BET {side} ML (edge: {display_edge:+.1f}%)"
     elif magnitude >= 2.0 and conf >= 57:
-        rec = f"LEAN {side} ML (edge: {edge:+.1f}%)"
+        rec = f"LEAN {side} ML (edge: {display_edge:+.1f}%)"
     elif magnitude >= 0.5:
-        rec = f"SLIGHT LEAN {side} ML (edge: {edge:+.1f}%)"
+        rec = f"SLIGHT LEAN {side} ML (edge: {display_edge:+.1f}%)"
     else:
         rec = "PASS - Market efficient"
     return {
         "market_home_prob": round(market_home_prob, 4),
         "market_away_prob": round(market_away_prob, 4),
-        "edge_pct": round(edge, 1),
+        # Signed to the RECOMMENDED side (display_edge), not raw home-side
+        # edge -- see note above. On a PASS there is no side to sign to, so
+        # the home-perspective value is kept as-is (still accurate, just not
+        # attached to a pick).
+        "edge_pct": round(display_edge if magnitude >= 0.5 else edge, 1),
         # NOT "confidence" -- that key already holds the predictor's nested
         # {total: {...}, side: {...}} block; overwriting it with this flat
         # number silently destroyed that structure for every stored row that
