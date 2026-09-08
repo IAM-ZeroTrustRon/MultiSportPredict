@@ -136,6 +136,18 @@ LEAGUE_CONFIGS = {
         'draw_rate': 0.30,
         'data_tier': 2,
     },
+    'Champions League': {
+        # No club-competition-specific figures on file for this project; these
+        # are reasonable generic UCL values (knockout-tournament away form
+        # tends to be stronger than domestic, so home_advantage sits at the
+        # 'default' baseline rather than above it) rather than the silent
+        # 'default' fallback this key would otherwise hit.
+        'goal_variance': 1.05,
+        'avg_goals_per_game': 2.60,
+        'home_advantage': 0.35,
+        'draw_rate': 0.24,
+        'data_tier': 2,
+    },
     'default': {
         'goal_variance': 1.0,
         'avg_goals_per_game': 2.70,
