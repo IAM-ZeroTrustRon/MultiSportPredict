@@ -316,6 +316,12 @@ def predict_tennis_match(
         },
         "market_home_odds": market_home_odds,
         "market_away_odds": market_away_odds,
+        # The actual real-vs-model comparison hinges on this, not the odds
+        # strings above -- run_tennis.py's whole call chain only ever passes
+        # market_prob, never market_home_odds/market_away_odds, so a
+        # consumer checking those two for "was there a real market" would
+        # always see None even when --p1-ml/--p2-ml were given.
+        "market_prob": market_prob,
         "sets": {
             "over_35_prob": p_over_35,
             "recommendation_sets_ou": _set_rec(p_over_35),
