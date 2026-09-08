@@ -323,7 +323,8 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
     from universal_runner import run_baseball
     result = run_baseball(home, away, league=LEAGUE, markets=MARKETS,
                           market_total=total, store_to_db=True,
-                          push_discord=push_discord, **arguments)
+                          push_discord=push_discord,
+                          home_ml=home_ml, away_ml=away_ml, **arguments)
 
     tagged = record_market_odds(home, away, total, home_ml, away_ml)
     if tagged:

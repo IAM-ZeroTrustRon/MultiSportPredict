@@ -129,6 +129,79 @@ def _spread_rec(p_fav_spread: float, fav_name: str) -> str:
 # MAIN PREDICTOR
 # ============================================================================
 
+def _total_games_projection(set_dist: Dict[str, float], home_prob: float,
+                            best_of_5: bool) -> Dict[str, Any]:
+    """Project total games, and the chance of going over the line.
+
+    This used to be:
+
+        "over_prob": round(p_over_35, 3)
+
+    -- the probability of OVER 3.5 SETS, handed straight to the games market.
+    Over 3.5 sets and over 22.5 games are correlated but they are not the same
+    event, and reusing one number for both made them identical to three
+    decimals in every prediction the model has ever produced.
+
+    Games come from two things the set distribution already knows:
+
+      how many SETS get played   -- weighted by the distribution
+      how long each set runs     -- evenly matched players trade breaks and
+                                    reach 6-4, 7-5, 7-6; a mismatch ends 6-2
+
+    So expected games = expected sets x games per set, with games-per-set slid
+    between about 10.4 (a coin flip) and 9.1 (a rout). The over probability is
+    then a normal around that projection, which is an approximation -- the real
+    distribution is lumpy because a set cannot end 6-5 -- but it is an
+    approximation of the right quantity.
+    """
+    SETS_IN = {"3-0": 3, "3-1": 4, "3-2": 5, "0-3": 3, "1-3": 4, "2-3": 5,
+               "2-0": 2, "2-1": 3, "0-2": 2, "1-2": 3}
+    total_weight = sum(p for k, p in set_dist.items() if k in SETS_IN)
+    if not total_weight:
+        return {"line": 40.5 if best_of_5 else 22.5, "over_prob": None,
+                "recommendation": "PASS",
+                "note": "set distribution unreadable -- no games projection"}
+
+    expected_sets = sum(p * SETS_IN[k] for k, p in set_dist.items()
+                        if k in SETS_IN) / total_weight
+
+    mismatch = min(abs(home_prob - 0.5) * 2.0, 1.0)      # 0 even, 1 lopsided
+
+    # GAMES PER SET IS AN ASSUMPTION AND NEEDS FITTING FROM YOUR OWN RESULTS.
+    # Set scores run 6-0 (6 games) to 7-6 (13), clustering on 6-4 and 6-3, so
+    # the tour average sits near 9.5. Best-of-five matches run slightly longer
+    # per set than best-of-three -- deeper into a match, more holds, more
+    # tiebreaks -- which is why the base differs by format. The first pass at
+    # 10.4 projected 26 games for an even best-of-three, against a market line
+    # of 22.5; that was the tell.
+    base = 9.8 if best_of_5 else 9.1
+    games_per_set = base - 1.1 * mismatch
+
+    expected_games = expected_sets * games_per_set
+    line = 40.5 if best_of_5 else 22.5
+    sd = 6.0 if best_of_5 else 4.2
+    over_prob = 1.0 - 0.5 * (1.0 + math.erf((line - expected_games)
+                                            / (sd * math.sqrt(2.0))))
+
+    if over_prob >= 0.56:
+        rec = "OVER"
+    elif over_prob <= 0.44:
+        rec = "UNDER"
+    else:
+        rec = "PASS"
+    return {
+        "line": line,
+        "projected_games": round(expected_games, 1),
+        "expected_sets": round(expected_sets, 2),
+        "games_per_set": round(games_per_set, 2),
+        "over_prob": round(over_prob, 3),
+        "recommendation": rec,
+        "data_tier": 2,
+        "note": ("games-per-set is an unfitted assumption -- grade this market "
+                 "before backing it"),
+    }
+
+
 def predict_tennis_match(
     home_player: str,
     away_player: str,
@@ -241,19 +314,15 @@ def predict_tennis_match(
             "confidence": edge_rec["confidence"],
             **edge_rec,
         },
+        "market_home_odds": market_home_odds,
+        "market_away_odds": market_away_odds,
         "sets": {
             "over_35_prob": p_over_35,
             "recommendation_sets_ou": _set_rec(p_over_35),
             "fav_spread_prob": p_fav_spread,
             "recommendation_spread": _spread_rec(p_fav_spread, fav_name),
         },
-        "total_games": {
-            # Total games estimate based on set distribution
-            # For best-of-5: typical 3-set = ~30 games, 4-set = ~38, 5-set = ~45
-            "line": 40.5 if best_of_5 else 22.5,
-            "over_prob": round(p_over_35, 3),
-            "recommendation": "OVER" if p_over_35 >= 0.53 else "UNDER",
-        },
+        "total_games": _total_games_projection(sd, home_prob, best_of_5),
         "set_distribution": sd,
         "dominance_ratio": {
             home_player: dr_home,
