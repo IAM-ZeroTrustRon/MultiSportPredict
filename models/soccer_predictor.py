@@ -388,18 +388,19 @@ def team_btts_strength(
     Returns:
         BTTS strength score
     """
+    # sot/tempo/final_third_pressure dropped -- same reason as
+    # estimate_team_goals() above: none of the three vary by team (confirmed
+    # identical across unrelated matchups), so they were a fixed bias, not
+    # data. Parameters kept so call sites don't need to change.
     score = 0.0
     score += 1.05 * (xg_for - 1.20)           # Scoring ability
     score += 0.95 * (xg_against - 1.25)       # Conceding tendency
     score += 0.10 * (goals_for - 1.2)         # Actual scoring
     score += 0.10 * (goals_against - 1.1)     # Actual conceding
-    score += 0.12 * (sot - 3.5)               # Shot quality
-    score += 0.18 * tempo                     # Tempo (more goals)
-    score += 0.15 * final_third_pressure      # Attacking pressure
     score += -0.35 * missing_attacker         # Missing attackers
     score += 0.28 * (missing_cb + missing_gk) # Missing defenders
     score += -0.20 * clean_sheets_last10 / 10.0  # Clean sheet tendency
-    
+
     return score
 
 
@@ -452,28 +453,38 @@ def estimate_team_goals(
 ) -> float:
     """
     Estimate team's expected goals.
-    
+
     Combines team attacking metrics with opponent defensive weaknesses.
-    
+
+    team_sot/team_tempo are still accepted (call sites are unchanged) but no
+    longer used: neither ESPN nor football-data.co.uk publish shots or
+    playing tempo for any league in this project, so both were always a
+    fixed home/away constant (shots on target 4.5/4.0, tempo 0.3/0.1),
+    identical for every match regardless of the two teams playing. That
+    added a fixed +0.705 (home) / +0.61 (away) to every lambda -- real
+    signal (xG, real per-team) was never the issue; these two terms were
+    bias dressed up as data. Left as unused parameters rather than changed
+    call sites, so this stays a one-function fix.
+
     Args:
         team_xg_for: Team's expected goals for
-        team_sot: Team's shots on target
-        team_tempo: Team's playing tempo
+        team_sot: unused -- see note above
+        team_tempo: unused -- see note above
         team_home: Home advantage (1=home, 0=away)
         team_missing_attacker: Missing attackers
         team_missing_creator: Missing creators
         opp_xg_against: Opponent's expected goals against
         opp_missing_cb: Opponent's missing center backs
         opp_missing_gk: Opponent's goalkeeper injury
-        
+
     Returns:
         Estimated expected goals (lambda)
     """
-    lam = 0.55 * team_xg_for + 0.30 * opp_xg_against + 0.15 * team_sot
-    lam += 0.10 * team_tempo + 0.10 * team_home
+    lam = 0.55 * team_xg_for + 0.30 * opp_xg_against
+    lam += 0.10 * team_home
     lam += -0.15 * team_missing_attacker - 0.10 * team_missing_creator
     lam += 0.12 * (opp_missing_cb + opp_missing_gk)
-    
+
     return max(0.20, lam)
 
 
