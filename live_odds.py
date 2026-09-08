@@ -88,6 +88,15 @@ SOCCER_LEAGUES: Dict[str, Dict[str, Any]] = {
     "eerste divisie":    {"key": None, "region": None, "covered": False,
                           "reason": ("no Dutch second-tier key exists in The Odds API's "
                                     "sports list -- checked directly, not assumed")},
+    "champions league":  {"key": None, "region": None, "covered": False,
+                          "reason": ("NOT the same kind of 'checked directly' as the row above -- "
+                                    "the live /v4/sports discovery call needed to confirm this was "
+                                    "blocked before it could run. The Odds API's public catalog "
+                                    "generally lists a 'soccer_uefa_champs_league' key, but that is "
+                                    "unverified against this project's actual account/plan. Marked "
+                                    "not-covered on purpose so a UCL fetch fails loud (this reason) "
+                                    "instead of silently returning nothing -- re-run the discovery "
+                                    "check and fill in a real key/region before flipping this to True.")},
 }
 
 
