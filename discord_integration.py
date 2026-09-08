@@ -93,6 +93,65 @@ def clear_dedup_cache() -> None:
 
 
 # ---------------------------------------------------------------------------
+# SUPERSEDE -- one card per real-world game, not one per push
+# ---------------------------------------------------------------------------
+# The content-hash dedup above only catches a byte-identical re-send. It was
+# never meant to, and can't, catch the actual problem: the SAME game run
+# twice with DIFFERENT inputs -- once with no market odds ("PASS, model
+# probability only"), then again after someone typed a price in -- produces
+# two different-content embeds, so the hash guard lets both through. Two
+# cards, contradictory verdicts, no way to tell which one is current. Ron's
+# call: supersede. Keep the updated pick, replace the earlier card.
+#
+# This tracks, per (sport, home, away, push date, destination), the Discord
+# message ID of the last card sent there. A later push for the same game on
+# the same day PATCHes that message instead of posting a new one. Keyed by
+# push date rather than the match's own game_date -- a card pushed today for
+# tomorrow's game and one pushed today with fresh odds for that same game
+# are the same "today's card for this game", which is the actual case this
+# exists for; it does not try to track a card across multiple different days.
+SUPERSEDE_LOG_PATH = os.path.join(os.path.dirname(__file__), "data", "discord_push_log.json")
+
+
+def _game_key(sport: str, home: str, away: str) -> str:
+    from datetime import date
+    squash = lambda s: "".join(ch for ch in str(s or "").lower() if ch.isalnum())
+    return f"{squash(sport)}|{squash(home)}|{squash(away)}|{date.today().isoformat()}"
+
+
+def _load_supersede_log() -> Dict[str, Dict[str, Any]]:
+    try:
+        with open(SUPERSEDE_LOG_PATH, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def _save_supersede_log(log: Dict[str, Dict[str, Any]]) -> None:
+    os.makedirs(os.path.dirname(SUPERSEDE_LOG_PATH), exist_ok=True)
+    tmp = SUPERSEDE_LOG_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(log, fh, indent=2)
+    os.replace(tmp, SUPERSEDE_LOG_PATH)
+
+
+def _superseded_message_id(game_key: str, destination: str) -> Optional[str]:
+    return _load_supersede_log().get(game_key, {}).get(destination)
+
+
+def _record_pushed_message(game_key: str, destination: str, message_id: str) -> None:
+    log = _load_supersede_log()
+    log.setdefault(game_key, {})[destination] = message_id
+    # Keep this from growing forever -- only today's entries are ever looked
+    # up (the key itself is date-scoped), so anything from an earlier day is
+    # dead weight.
+    from datetime import date
+    today = date.today().isoformat()
+    log = {k: v for k, v in log.items() if k.endswith(f"|{today}")}
+    _save_supersede_log(log)
+
+
+# ---------------------------------------------------------------------------
 # RICH TABLE FORMATTING FOR CONSOLE OUTPUT
 # ---------------------------------------------------------------------------
 
@@ -1139,8 +1198,34 @@ def _get_target_webhooks(extra_webhooks=None):
     return urls
 
 
-def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="prediction"):
-    """Post the same embed dict to every configured webhook URL."""
+def _patch_webhook_message(url: str, message_id: str, payload: Dict[str, Any]) -> bool:
+    try:
+        resp = requests.patch(f"{url}/messages/{message_id}", json=payload,
+                              headers={"Content-Type": "application/json"}, timeout=15)
+        return resp.status_code in (200, 204)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Webhook message edit error for %s ...: %s", url[:50], exc)
+        return False
+
+
+def _extract_webhook_message_id(url: str, resp) -> Optional[str]:
+    try:
+        return resp.json().get("id")
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="prediction",
+                     game_key: Optional[str] = None):
+    """Post the same embed dict to every configured webhook URL.
+
+    game_key, when given, supersedes: a second push for the same
+    (sport, home, away, today) edits the message already sent to each
+    destination instead of adding a second, possibly-contradictory card.
+    See the SUPERSEDE section above for why this exists and what it does
+    and doesn't track. Without a game_key (the default), behavior is
+    unchanged from before -- always a fresh post.
+    """
     mode = push_mode()
     targets = _get_target_webhooks(extra_webhooks)
     bot_wanted = mode != "webhooks" and _bot_configured()
@@ -1170,10 +1255,27 @@ def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="predictio
         return len(targets)
     success_count = 0
     for url in targets:
+        dest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:16]
+        existing_id = _superseded_message_id(game_key, dest) if game_key else None
+        if existing_id:
+            edit_payload = {"embeds": [{**embed, "footer": {
+                "text": (embed.get("footer", {}).get("text", "") + " • updated pick").strip(" •")}}]}
+            if _patch_webhook_message(url, existing_id, edit_payload):
+                success_count += 1
+                print(f"[UPDATED] {label}: superseded the earlier card at this webhook "
+                      f"instead of posting a second one.")
+                continue
+            # Edit failed (message deleted, too old, etc.) -- fall through to a
+            # fresh post rather than silently dropping the push.
         try:
-            resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=15)
+            post_url = f"{url}?wait=true" if game_key else url
+            resp = requests.post(post_url, json=payload, headers={"Content-Type": "application/json"}, timeout=15)
             if resp.status_code in (200, 204):
                 success_count += 1
+                if game_key:
+                    message_id = _extract_webhook_message_id(url, resp)
+                    if message_id:
+                        _record_pushed_message(game_key, dest, message_id)
             else:
                 logger.error("Webhook post failed [%d] %s ... Body: %.200s", resp.status_code, url[:50], resp.text)
         except Exception as exc:
@@ -1186,18 +1288,35 @@ def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="predictio
         if dry_run:
             print(f"[DRY RUN] Would push to bot channel {bot_channel} via REST API.")
         elif requests is not None:
-            try:
-                bot_url = f"https://discord.com/api/v10/channels/{bot_channel}/messages"
-                bot_headers = {"Authorization": f"Bot {bot_token}", "Content-Type": "application/json"}
-                bot_resp = requests.post(bot_url, json=payload, headers=bot_headers, timeout=15)
-                if bot_resp.status_code in (200, 201):
-                    pass  # counted via success_count below
-                else:
+            bot_dest = f"botchannel:{bot_channel}"
+            bot_existing_id = _superseded_message_id(game_key, bot_dest) if game_key else None
+            bot_headers = {"Authorization": f"Bot {bot_token}", "Content-Type": "application/json"}
+            edited = False
+            if bot_existing_id:
+                try:
+                    edit_url = f"https://discord.com/api/v10/channels/{bot_channel}/messages/{bot_existing_id}"
+                    edit_resp = requests.patch(edit_url, json=payload, headers=bot_headers, timeout=15)
+                    if edit_resp.status_code in (200, 204):
+                        edited = True
+                        print(f"[UPDATED] {label}: superseded the earlier bot-channel card "
+                              f"instead of posting a second one.")
+                except Exception as exc:  # noqa: BLE001
+                    logger.error("Bot channel message edit error: %s", exc)
+            if not edited:
+                try:
+                    bot_url = f"https://discord.com/api/v10/channels/{bot_channel}/messages"
+                    bot_resp = requests.post(bot_url, json=payload, headers=bot_headers, timeout=15)
+                    if bot_resp.status_code in (200, 201):
+                        if game_key:
+                            new_id = (bot_resp.json() or {}).get("id")
+                            if new_id:
+                                _record_pushed_message(game_key, bot_dest, new_id)
+                    else:
+                        bot_ok = False
+                        logger.error("Bot channel push failed [%d] %s", bot_resp.status_code, bot_resp.text[:200])
+                except Exception as exc:
                     bot_ok = False
-                    logger.error("Bot channel push failed [%d] %s", bot_resp.status_code, bot_resp.text[:200])
-            except Exception as exc:
-                bot_ok = False
-                logger.error("Bot channel request error: %s", exc)
+                    logger.error("Bot channel request error: %s", exc)
     else:
         bot_ok = True  # not configured is not a failure
 
@@ -1432,7 +1551,7 @@ def push_prediction_to_all(sport, prediction_data, dry_run=False, extra_webhooks
     a title and blank fields is worse than an error, because it reads as a pick
     -- which is exactly what happened for weeks.
     """
-    from embed_builder import UnrenderablePrediction
+    from embed_builder import UnrenderablePrediction, names_from
     try:
         embed = format_prediction_embed(sport, prediction_data)
     except UnrenderablePrediction as exc:
@@ -1443,8 +1562,12 @@ def push_prediction_to_all(sport, prediction_data, dry_run=False, extra_webhooks
               f"Nothing was pushed.")
         return 0
     label = f"{sport} {prediction_data.get('match') or ''}".strip()
+    game_key = None
+    home, away = names_from(prediction_data)
+    if home and away:
+        game_key = _game_key(sport, home, away)
     return _broadcast_embed(embed, extra_webhooks=extra_webhooks,
-                            dry_run=dry_run, label=label or sport)
+                            dry_run=dry_run, label=label or sport, game_key=game_key)
 
 
 def _tennis_players(data: dict) -> Tuple[str, str]:
