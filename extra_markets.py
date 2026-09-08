@@ -10,6 +10,19 @@ TEAM_GOAL_LINES = [0.5, 1.5, 2.5]
 TEAM_CORNER_LINES = [3.5, 4.5, 5.5]
 FIRST_HALF_GOAL_LINES = [0.5, 1.5]
 
+# Below this, an attacking number is not a real signal -- it is what a team
+# one game into a season, with xG "estimated from goals" (see
+# soccer_stats.json's own source note), looks like after a scoreless loss.
+# Aston Villa's 2026/27 xg_for is a genuine, present 0.0 -- not missing, not
+# None -- and treating it as a real attacking rate drove the corner split to
+# 100/0. These floors are population minimums: a Premier League team's true
+# per-game xG or shot count essentially never sits below them over any
+# sample that means anything.
+MIN_RELIABLE_XG = 0.3
+MIN_RELIABLE_SHOTS = 3.0
+LEAGUE_AVG_XG = 1.4        # roughly average team xG per match
+LEAGUE_AVG_SHOTS = 12.0    # roughly average team shots per match
+
 
 def _poisson_pmf(k: int, lam: float) -> float:
     return (lam ** k) * math.exp(-lam) / math.factorial(k)
@@ -71,17 +84,76 @@ def _team_goal_market(projected: float, lines: List[float]) -> Dict[str, float]:
     return {f"over_{str(line).replace('.', '')}": round(_over_prob(projected, line), 3) for line in lines}
 
 
-def _team_corner_split(corners_total: float, home_attack: float, away_attack: float) -> Dict[str, Any]:
-    total_attack = (home_attack or 0) + (away_attack or 0)
+def _reliable(value: Optional[float], metric: str) -> bool:
+    """False for None (truly absent) AND for a present-but-degenerate value
+    (Villa's 0.0) -- both mean 'no real signal', and the split math cannot
+    tell them apart unless it checks explicitly."""
+    if value is None:
+        return False
+    floor = MIN_RELIABLE_XG if metric == "xg" else MIN_RELIABLE_SHOTS
+    return value >= floor
+
+
+def _team_corner_split(corners_total: float,
+                       home_attack: Optional[float], away_attack: Optional[float],
+                       home_metric: str = "xg", away_metric: str = "xg") -> Dict[str, Any]:
+    home_ok, away_ok = _reliable(home_attack, home_metric), _reliable(away_attack, away_metric)
+
+    if not home_ok and not away_ok:
+        # No reliable signal on either side. 50/50 is not a fallback
+        # standing in for a real split -- it is the correct statement of
+        # "no information", and is labelled as such below.
+        return {
+            "home_corners_proj": round(corners_total * 0.5, 2),
+            "away_corners_proj": round(corners_total * 0.5, 2),
+            "split_method": "even_split_no_data",
+            "degraded": True,
+            "degraded_reason": "neither side has a reliable attacking number",
+        }
+
+    if home_ok != away_ok:
+        # One side is real, the other is missing or too thin to trust. The
+        # old behavior filled the gap with 0, which forced a 100/0 split
+        # regardless of how strong the known side's number actually was --
+        # a home xG of 0.3 produced the same 100/0 as a home xG of 3.0.
+        # Substituting a league-average baseline keeps the known number
+        # meaningful relative to something, without inventing data for the
+        # side that has none.
+        if home_ok:
+            baseline = LEAGUE_AVG_XG if away_metric == "xg" else LEAGUE_AVG_SHOTS
+            effective_home, effective_away = home_attack, baseline
+            weak_side, weak_value = "away", away_attack
+        else:
+            baseline = LEAGUE_AVG_XG if home_metric == "xg" else LEAGUE_AVG_SHOTS
+            effective_home, effective_away = baseline, away_attack
+            weak_side, weak_value = "home", home_attack
+        total = effective_home + effective_away
+        home_share = effective_home / total if total > 0 else 0.5
+        return {
+            "home_corners_proj": round(corners_total * home_share, 2),
+            "away_corners_proj": round(corners_total * (1.0 - home_share), 2),
+            "split_method": "attacking_share_partial_data",
+            "degraded": True,
+            "degraded_reason": (f"{weak_side} attacking number is missing or unreliable "
+                               f"(value={weak_value}) -- substituted a league-average "
+                               f"baseline ({baseline:g}) instead of collapsing to 0"),
+        }
+
+    total_attack = home_attack + away_attack
     if total_attack <= 0:
-        home_share, away_share = 0.5, 0.5
-    else:
-        home_share = home_attack / total_attack
-        away_share = 1.0 - home_share
+        return {
+            "home_corners_proj": round(corners_total * 0.5, 2),
+            "away_corners_proj": round(corners_total * 0.5, 2),
+            "split_method": "even_split_no_data",
+            "degraded": True,
+            "degraded_reason": "both attacking numbers present but sum to zero",
+        }
+    home_share = home_attack / total_attack
     return {
         "home_corners_proj": round(corners_total * home_share, 2),
-        "away_corners_proj": round(corners_total * away_share, 2),
-        "split_method": "attacking_share" if total_attack > 0 else "even_split_no_data",
+        "away_corners_proj": round(corners_total * (1.0 - home_share), 2),
+        "split_method": "attacking_share",
+        "degraded": False,
     }
 
 
@@ -107,16 +179,22 @@ def compute_extra_markets(
     }
 
     if core["corners_total"] is not None:
-        home_attack = core["home_xg"] if core["home_xg"] is not None else core["home_shots"]
-        away_attack = core["away_xg"] if core["away_xg"] is not None else core["away_shots"]
-        split = _team_corner_split(core["corners_total"], home_attack, away_attack)
+        home_attack, home_metric = ((core["home_xg"], "xg") if core["home_xg"] is not None
+                                    else (core["home_shots"], "shots"))
+        away_attack, away_metric = ((core["away_xg"], "xg") if core["away_xg"] is not None
+                                    else (core["away_shots"], "shots"))
+        split = _team_corner_split(core["corners_total"], home_attack, away_attack,
+                                   home_metric, away_metric)
         out["team_corners"] = {
             "home": {**_team_goal_market(split["home_corners_proj"], TEAM_CORNER_LINES),
                      "projection": split["home_corners_proj"]},
             "away": {**_team_goal_market(split["away_corners_proj"], TEAM_CORNER_LINES),
                      "projection": split["away_corners_proj"]},
             "split_method": split["split_method"],
+            "degraded": split.get("degraded", False),
         }
+        if split.get("degraded_reason"):
+            out["team_corners"]["degraded_reason"] = split["degraded_reason"]
     else:
         out["team_corners"] = {"_warning": "No match corner projection found in result - team corners skipped."}
 
