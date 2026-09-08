@@ -122,17 +122,42 @@ three caveats together, every time, or don't quote the numbers.
    name — checked the full sports list directly. Predictions for this
    league will never carry a real market edge until a different odds
    source is added.
-6. **Pitcher FIP and BB9 are dead constants in the MLB moneyline path**,
+6. **Champions League is currently unpriceable too, but for a different,
+   fixable reason.** Four real UCL matches were run on 2026-09-08 (AEK
+   Athens–LASK, Dortmund–Villarreal, Porto–Man City, Club Brugge–Aston
+   Villa); all four had to run on manually-typed market totals because
+   `live_odds.py`'s `SOCCER_LEAGUES` had no "champions league" entry at
+   all — an unverified gap, not a confirmed one like Eerste Divisie above.
+   The live discovery check needed to confirm whether The Odds API's
+   `soccer_uefa_champs_league` key exists on this account's plan was
+   blocked before it could run. Added an explicit `covered: False` row
+   with that exact caveat in its reason string, so a UCL fetch now fails
+   loud instead of silently returning nothing — but this is a "go run the
+   check" item, not a "no data exists" one. Once verified, wiring it in is
+   probably one line plus a credit-cost report, the same shape as the
+   Saudi/Turkish additions earlier today.
+7. **The CLI's `--live-odds` flag is broken and has been returning nothing
+   for a while.** Separate from everything above: `--live-odds` triggers a
+   *different*, older code path (`_fetch_live_soccer_market`, hits
+   `api.opticodds.com`) than this session's own `live_odds.py` auto-fetch.
+   It 404s on every call — the URL itself is malformed
+   (`/api/v3/v4/sports/...` mixes two API versions in one path). Confirmed
+   on all four UCL matches today; not something built or broken by this
+   session. Whoever runs this pipeline day to day is passing a flag that
+   does nothing and getting a printed `[ERROR]` line instead of odds —
+   worth either fixing the URL or removing the flag so it stops looking
+   like it's supposed to work.
+8. **Pitcher FIP and BB9 are dead constants in the MLB moneyline path**,
    found during a correctness pass but not fixed: `models/baseball_predictor.py`
    reads them via `kwargs.get(..., <constant>)` and nothing in the call
    chain ever passes them — same bug shape as soccer's shots/tempo, smaller
    blast radius (team-level runs/era/whip/obp/slg *are* real and do flow
    through correctly).
-7. **Frauen-Bundesliga: zero coverage, not thin coverage.** Neither ESPN nor
+9. **Frauen-Bundesliga: zero coverage, not thin coverage.** Neither ESPN nor
    football-data.co.uk has ever heard of it. This is a new-provider decision
    for Ron, same category as the quota question — don't build toward it
    without that decision made first.
-8. **The overlap map** (full detail was reported separately, summarized
+10. **The overlap map** (full detail was reported separately, summarized
    here): 8 competing Discord embed builders existed before today (1 now
    canonical, ~150 one-off scripts still use whichever legacy one they were
    written against — those weren't touched, they're not what Ron runs); 4
@@ -144,7 +169,7 @@ three caveats together, every time, or don't quote the numbers.
    mistake for live. Recommended consolidation order, if picked back up:
    embed routing for whatever Ron actually runs next → game-identity dedup
    design conversation → delete or clearly mark the dead files.
-9. **One real, unexplained tennis grading gap.** Keys vs Zheng (Sept 5) is
+11. **One real, unexplained tennis grading gap.** Keys vs Zheng (Sept 5) is
    confirmed completed on ESPN's own scoreboard but did not match during
    grading. Not chased down. Everything else in the 9 unmatched rows has a
    clear, benign explanation (not yet final, duplicate logging, a different
