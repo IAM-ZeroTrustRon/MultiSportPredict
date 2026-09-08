@@ -115,18 +115,34 @@ def ensure_schema(conn: sqlite3.Connection) -> List[str]:
 def tier_of(recommendation: Optional[str]) -> str:
     """Collapse the messy recommendation strings into a decision tier.
 
-    Some rows hold clean values ('BET'), others hold raw model output like
-    'Over: 44.5% | Under: 55.5%'. Only the first kind represents a decision to
-    place a bet; the rest are informational and are reported separately rather
-    than being counted as wagers.
+    Every sport in this project phrases a recommendation differently:
+    soccer's plain "BET"/"PASS", tennis's "BET Home ML (edge: +11.3%)" and
+    "SLIGHT LEAN Home ML (edge: +3.5%)", MLB's "LEAN St. Louis Cardinals ML
+    (edge: +6.9%)", NFL's "BET HOME"/"BET AWAY", and baseball/NFL totals'
+    bare "OVER"/"UNDER". This function used to only recognize soccer's exact
+    strings via `== "BET"` -- every tennis and MLB moneyline recommendation,
+    real bets included, silently fell through to "INFO". Any report built on
+    this helper (win rate by tier, --pending's tier column) was undercounting
+    real bets the whole time it existed. Matches on the BET/LEAN keyword
+    itself now, wherever it sits in the string, so the sport-specific
+    wrapping around it doesn't matter. Raw percentage readouts (the pre-fix
+    baseball total bug -- "Over: 44.5% | Under: 55.5%") still correctly fall
+    through to INFO: they don't contain the word BET or LEAN, which is
+    exactly why they were ungradable-as-a-decision in the first place.
     """
     text = (recommendation or "").strip().upper()
-    if text.startswith("STRONG BET"):
+    if not text:
+        return "INFO"
+    if text.startswith("STRONG BET") or " STRONG BET" in text:
         return "STRONG BET"
-    if text == "BET":
+    if "NO BET" not in text and re.search(r"\bBET\b", text):
         return "BET"
-    if text in {"PASS", "NO BET"}:
+    if re.search(r"\bLEAN\b", text):
+        return "LEAN"
+    if text in {"PASS", "NO BET"} or text.startswith("PASS "):
         return "PASS"
+    if text in {"OVER", "UNDER"}:
+        return "BET"  # a real directional pick; this sport's convention just has no BET/LEAN prefix
     return "INFO"
 
 
@@ -366,11 +382,186 @@ def fetch_nfl_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[
     return out
 
 
+TENNIS_SCOREBOARD = "https://site.web.api.espn.com/apis/site/v2/sports/tennis/{tour}/scoreboard?dates={date}"
+
+
+def fetch_tennis_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[float, float]]:
+    """(date, home, away) -> (1.0, 0.0) if home won, (0.0, 1.0) if away won.
+
+    There is no "score" for a tennis match the way there's a run/goal total,
+    so a straight win/loss is encoded as (1,0)/(0,1) -- grade_row()'s generic
+    moneyline branch only ever compares which side is larger, so this slots
+    into the exact same grading path MLB/NFL/NCAAF use, no tennis-specific
+    code needed there.
+
+    ESPN's stored names are full names ("Roberto Carballes Baena"); this
+    project's tennis store and every stored prediction use the surname/
+    initial key run_tennis.py's own resolver produces ("Carballes Baena R.").
+    Those two spellings don't line up under a plain squash the way two
+    spellings of a team name usually do, so each ESPN competitor name is
+    resolved against the SAME player store and the SAME resolver run_tennis.py
+    uses for typed CLI input -- treating ESPN's name as if a person had typed
+    it. An ambiguous or unresolved name is skipped, not guessed, consistent
+    with every other resolver in this project.
+    """
+    out: Dict[Tuple[str, str, str], Tuple[float, float]] = {}
+
+    from run_tennis import resolve as resolve_player, STORE as PLAYER_STORE_PATH
+    try:
+        player_store = json.loads(PLAYER_STORE_PATH.read_text(encoding="utf-8-sig"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        player_store = {}
+
+    def resolved(name: str) -> Optional[str]:
+        # resolve_player already returns (None, "ambiguous: ...") or
+        # (None, "no match") for anything it won't commit to -- nothing extra
+        # to check here, just pass the key through.
+        key, _how = resolve_player(name, player_store)
+        return key
+
+    try:
+        start_date = _dt.date.fromisoformat(start)
+        end_date = _dt.date.fromisoformat(end)
+    except ValueError:
+        log(f"[tennis] could not parse date range {start}..{end}")
+        return out
+
+    day = start_date
+    while day <= end_date:
+        for tour in ("atp", "wta"):
+            try:
+                payload = _get_json(TENNIS_SCOREBOARD.format(tour=tour, date=day.strftime("%Y%m%d")))
+            except Exception as exc:  # noqa: BLE001
+                log(f"[tennis] {tour} {day.isoformat()} unavailable ({type(exc).__name__})")
+                continue
+            for event in payload.get("events") or []:
+                for grouping in event.get("groupings") or []:
+                    slug = ((grouping.get("grouping") or {}).get("slug") or "")
+                    if "singles" not in slug:
+                        continue
+                    for competition in grouping.get("competitions") or []:
+                        status = ((competition.get("status") or {}).get("type") or {})
+                        if not status.get("completed"):
+                            continue
+                        competitors = competition.get("competitors") or []
+                        if len(competitors) != 2:
+                            continue
+                        sides = {}
+                        for competitor in competitors:
+                            which = str(competitor.get("homeAway", "")).lower()
+                            if which not in ("home", "away"):
+                                continue
+                            full_name = ((competitor.get("athlete") or {}).get("fullName")
+                                        or (competitor.get("athlete") or {}).get("displayName"))
+                            sides[which] = (full_name, bool(competitor.get("winner")))
+                        if "home" not in sides or "away" not in sides:
+                            continue
+                        home_name, home_won = sides["home"]
+                        away_name, away_won = sides["away"]
+                        if not home_name or not away_name or home_won == away_won:
+                            continue  # need a real name on both sides and exactly one winner
+                        home_key = resolved(home_name)
+                        away_key = resolved(away_name)
+                        if not home_key or not away_key:
+                            continue
+                        out[(day.isoformat(), normalise_team(home_key), normalise_team(away_key))] = (
+                            (1.0, 0.0) if home_won else (0.0, 1.0))
+        day += _dt.timedelta(days=1)
+
+    return out
+
+
+NCAAF_SCOREBOARD = ("https://site.web.api.espn.com/apis/site/v2/sports/football/"
+                    "college-football/scoreboard?dates={date}&groups=80&limit=400")
+
+
+def fetch_ncaaf_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[float, float]]:
+    """(date, home, away) -> (home_score, away_score) for finished FBS games.
+
+    FBS only (ESPN groups=80) -- see ingest_ncaaf.py for why. Unlike
+    fetch_nfl_results, this queries one date at a time: a date-RANGE query
+    against this endpoint (dates=START-END) silently returns an incomplete
+    set (confirmed: 68 of 71 known games for a 2-day span), where the NFL
+    scoreboard's range query does not have that problem. Falls back to
+    data/ncaaf_schedule.json (written by ingest_ncaaf.py) for any date the
+    live feed does not answer for, same pattern as the NFL fetcher.
+    """
+    out: Dict[Tuple[str, str, str], Tuple[float, float]] = {}
+
+    def add(date: str, home: str, away: str, hs: Any, ras: Any) -> None:
+        if not (date and home and away) or hs is None or ras is None:
+            return
+        out[(date[:10], normalise_team(home), normalise_team(away))] = (
+            float(hs), float(ras))
+
+    try:
+        start_date = _dt.date.fromisoformat(start)
+        end_date = _dt.date.fromisoformat(end)
+        day = start_date
+        while day <= end_date:
+            try:
+                payload = _get_json(NCAAF_SCOREBOARD.format(date=day.strftime("%Y%m%d")))
+                events = payload.get("events") or []
+                for league in payload.get("leagues") or []:
+                    events = events or (league.get("events") or [])
+                for event in events:
+                    competitions = event.get("competitions") or []
+                    if not competitions:
+                        continue
+                    competition = competitions[0]
+                    status = ((competition.get("status") or {}).get("type") or {})
+                    if not status.get("completed"):
+                        continue
+                    sides = {}
+                    for competitor in competition.get("competitors") or []:
+                        which = str(competitor.get("homeAway", "")).lower()
+                        if which in ("home", "away"):
+                            team = competitor.get("team") or {}
+                            sides[which] = (team.get("displayName") or team.get("name"),
+                                            competitor.get("score"))
+                    if "home" in sides and "away" in sides:
+                        # Key by the queried calendar date, NOT event["date"]
+                        # (ESPN's raw UTC timestamp) -- a Friday-night US game
+                        # can carry a UTC date one day later, which stored the
+                        # same completed game under two different date keys
+                        # here (confirmed: 71 real games, 85 with duplicates,
+                        # 14 late-night games double-counted) once merged with
+                        # ingest_ncaaf.py's file, which keys by query date.
+                        add(day.isoformat(), sides["home"][0], sides["away"][0],
+                            sides["home"][1], sides["away"][1])
+            except Exception as exc:  # noqa: BLE001
+                log(f"[ncaaf] {day.isoformat()} unavailable ({type(exc).__name__})")
+            day += _dt.timedelta(days=1)
+    except ValueError:
+        log(f"[ncaaf] could not parse date range {start}..{end}")
+
+    schedule_path = ROOT / "data" / "ncaaf_schedule.json"
+    if schedule_path.exists():
+        try:
+            stored = json.loads(schedule_path.read_text(encoding="utf-8-sig"))
+            for game in stored.get("games", []):
+                if not game.get("completed"):
+                    continue
+                if not (start <= str(game.get("date", "")) <= end):
+                    continue
+                key = (str(game["date"])[:10],
+                       normalise_team(game["home_team"]),
+                       normalise_team(game["away_team"]))
+                if key not in out:      # the live feed wins where both have it
+                    add(game["date"], game["home_team"], game["away_team"],
+                        game.get("home_score"), game.get("away_score"))
+        except (json.JSONDecodeError, KeyError) as exc:
+            log(f"[ncaaf] could not read ncaaf_schedule.json: {exc}")
+
+    return out
+
+
 AUTO_SOURCES = {
     "mlb": fetch_mlb_results,
     "baseball": fetch_mlb_results,   # rows logged as 'baseball' that are MLB games
     "nfl": fetch_nfl_results,
-    "ncaaf": fetch_nfl_results,      # same feed, different league path when built
+    "ncaaf": fetch_ncaaf_results,
+    "tennis": fetch_tennis_results,
 }
 
 
@@ -628,6 +819,18 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
         subset = [r for r in bets if tier_of(r["recommendation"]) == tier]
         if subset:
             log(_line(f"  {tier.lower()}", _tally(subset)))
+
+    # LEAN is real intent, not noise -- tennis/MLB's "LEAN ... (edge: +5.0%)"
+    # strings are a genuine, if softer, recommendation. tier_of() didn't even
+    # have a LEAN category before this fix, so these rows used to disappear
+    # into "informational" below. Reporting it as its own section rather than
+    # folding it into "ACTUAL BETS" -- it's a real signal, just a weaker one
+    # than what this project's own thresholds call worth a full bet.
+    leans = [r for r in rows if tier_of(r["recommendation"]) == "LEAN"]
+    if leans:
+        log("\nLEANS (a real signal, below this project's own BET threshold)")
+        log(header)
+        log(_line("all leans", _tally(leans)))
 
     log("\nBY SPORT")
     log(header)
