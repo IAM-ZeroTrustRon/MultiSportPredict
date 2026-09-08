@@ -70,10 +70,22 @@ LEAGUES: Dict[str, Dict[str, str]] = {
     "champions":      {"slug": "uefa.champions", "name": "UEFA Champions League"},
     "brasileirao":    {"slug": "bra.1", "name": "Brasileirao"},
     "argentina":      {"slug": "arg.1", "name": "Liga Profesional Argentina"},
+    "saudi_pro_league":  {"slug": "ksa.1", "name": "Saudi Pro League"},
+    "turkish_super_lig": {"slug": "tur.1", "name": "Turkish Super Lig"},
 }
 
-STANDINGS_URL = "https://site.api.espn.com/apis/v2/sports/soccer/{slug}/standings"
-SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/soccer/{slug}/scoreboard"
+
+# "site.api.espn.com" (no "web") is Akamai-blocked for requests-library calls
+# from this machine -- confirmed by testing both hosts directly: raw urllib
+# got through on the no-web host (different TLS/connection fingerprint than
+# requests/urllib3), but requests.get() got a 403 "Access Denied" from Akamai
+# on every soccer endpoint tested. ingest_nfl_schedule.py and
+# grade_predictions.py already learned this same lesson for other sports;
+# this file had the wrong host the whole time, which likely means Liga MX/
+# Brasileirao/Argentina (the leagues football-data.co.uk doesn't cover, so
+# this adapter is their only source) have been silently failing here too.
+STANDINGS_URL = "https://site.web.api.espn.com/apis/v2/sports/soccer/{slug}/standings"
+SCOREBOARD_URL = "https://site.web.api.espn.com/apis/site/v2/sports/soccer/{slug}/scoreboard"
 
 DEBUG = False
 

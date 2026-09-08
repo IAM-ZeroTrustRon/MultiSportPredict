@@ -1276,7 +1276,8 @@ def ingest_tennis(check: bool = False, season: Optional[int] = None) -> AdapterR
 # ==========================================================================
 
 ESPN_SOCCER_LEAGUES = ["liga_mx", "epl", "la_liga", "bundesliga", "serie_a",
-                       "ligue_1", "eredivisie", "mls"]
+                       "ligue_1", "eredivisie", "mls", "eerste_divisie",
+                       "saudi_pro_league", "turkish_super_lig"]
 
 
 def ingest_soccer_espn_delegate(check: bool = False,
