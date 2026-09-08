@@ -29,7 +29,7 @@ import os
 import argparse
 import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 
 # ---------------------------------------------------------------------------
@@ -448,8 +448,13 @@ def run_baseball_prop_market(
     home_stats = get_mlb_team_stats(home_team)
     away_stats = get_mlb_team_stats(away_team)
 
+    # k9 is a real per-team number in baseball_stats.json and was never mapped,
+    # so every club used the hardcoded k_projection_per_9 = 8.0 and every game
+    # projected identical strikeouts for both sides.
     _FIELD_MAP = {"runs": "runs_per_game", "runs_allowed": "runs_allowed",
-                  "era": "era", "whip": "whip", "obp": "obp", "slg": "slg"}
+                  "era": "era", "whip": "whip", "obp": "obp", "slg": "slg",
+                  "k9": "k_projection_per_9", "bb9": "bb9",
+                  "avg": "avg", "ops": "ops"}
     if team_overrides:
         for side, stats in (("home", home_stats), ("away", away_stats)):
             applied = []
@@ -461,6 +466,16 @@ def run_baseball_prop_market(
             if applied:
                 stats["source"] = "baseball_stats.json"
                 stats["_overridden"] = applied
+                # No feed here publishes home-run rate, but isolated power
+                # (slugging minus average) tracks it closely. Estimated, and
+                # labelled as such -- the alternative was one constant for all
+                # thirty clubs, which is what produced identical projections.
+                iso = None
+                if stats.get("slg") is not None and stats.get("avg") is not None:
+                    iso = float(stats["slg"]) - float(stats["avg"])
+                if iso is not None and iso > 0:
+                    stats["hr_per_game"] = round(iso * 7.4, 3)
+                    stats["hr_rate_tier"] = 2
 
     print(f"    Home Stats Source: {home_stats.get('source', 'unknown')}"
           f"  ({home_stats.get('runs_per_game')} R/g, "
@@ -557,8 +572,12 @@ def run_baseball_prop_market(
             }
 
         elif market_clean in {"ks", "strikeouts", "k"}:
-            home_k_proj = home_stats["k_rate"] * 38 * 0.5
-            away_k_proj = away_stats["k_rate"] * 38 * 0.5
+            # Was k_rate * 19, where k_rate is a hardcoded 0.22 for every club:
+            # 4.2 projected strikeouts for both teams in every game ever run.
+            # k9 is the staff's real rate per nine innings.
+            _INNINGS = 8.9          # a nine-inning game averages just under 9
+            home_k_proj = float(home_stats.get("k_projection_per_9", 8.0)) * _INNINGS / 9.0
+            away_k_proj = float(away_stats.get("k_projection_per_9", 8.0)) * _INNINGS / 9.0
 
             if league_upper == "MLB" and umpire_name != "Unknown":
                 try:
@@ -569,37 +588,65 @@ def run_baseball_prop_market(
                     pass
 
             result["props"]["strikeouts"] = {
-                "lean": "Projected Ks",
-                "probability": 0.0,
-                "home_team_projected_ks": round(float(home_k_proj), 1),
-                "away_team_projected_ks": round(float(away_k_proj), 1),
+                # probability was a literal 0.0, which renders as "0%" -- a
+                # real-looking claim that the event cannot happen. There is no
+                # market line for this prop, so there is no probability to
+                # state and no bet to recommend. Say that.
+                "lean": None,
+                "probability": None,
+                "recommendation": "PROJECTION ONLY -- no market line supplied",
+                "home_projection": round(float(home_k_proj), 1),
+                "away_projection": round(float(away_k_proj), 1),
+                "source": "team k9 from baseball_stats.json",
+                "data_tier": 1,
             }
 
         elif market_clean in {"hrs", "home_runs", "hr"}:
-            home_hr_proj = home_stats["hr_rate"] * 38 * 0.5
-            away_hr_proj = away_stats["hr_rate"] * 38 * 0.5
+            home_hr_proj = float(home_stats.get("hr_per_game")
+                                 or home_stats.get("hr_rate", 0.03) * 19)
+            away_hr_proj = float(away_stats.get("hr_per_game")
+                                 or away_stats.get("hr_rate", 0.03) * 19)
+            estimated = ("hr_per_game" in home_stats and "hr_per_game" in away_stats)
             result["props"]["home_runs"] = {
-                "lean": "Projected HRs",
-                "probability": 0.0,
-                "home_team_projected_hrs": round(float(home_hr_proj), 1),
-                "away_team_projected_hrs": round(float(away_hr_proj), 1),
+                "lean": None,
+                "probability": None,
+                "recommendation": "PROJECTION ONLY -- no market line supplied",
+                "home_projection": round(home_hr_proj, 2),
+                "away_projection": round(away_hr_proj, 2),
+                "source": ("estimated from isolated power (slg - avg)" if estimated
+                           else "league-average constant -- NOT team specific"),
+                "data_tier": 2 if estimated else 3,
             }
 
     # 4) Integrate Sharp Consensus into Confidence Scoring (best-effort defaults)
     edge_val = total_proj - market_total
 
+    # SHARP CONSENSUS IS OFF UNLESS REAL SPLITS ARE SUPPLIED.
+    #
+    # This used to call calculate_sharp_confidence(sharp_money_pct=0.75,
+    # public_ticket_pct=0.35) -- two hardcoded numbers, not data. That function
+    # decides alignment with `sharp_money_pct > 0.65 and public_ticket_pct <
+    # 0.45`, which those constants satisfy by construction. So every baseball
+    # prediction ever produced here printed "ALIGNED WITH SHARPS" and took a
+    # confidence boost for it.
+    #
+    # It was a claim about where professional money sat, invented and then
+    # believed. Nothing in this project has access to betting splits, so the
+    # honest confidence is the one the edge alone supports.
     conf = None
-    try:
-        from market_consensus import calculate_sharp_confidence
-        consensus = calculate_sharp_confidence(
-            model_edge=edge_val,
-            sharp_money_pct=0.75,
-            public_ticket_pct=0.35,
-        )
-        conf = float(consensus["final_confidence"])
-        print(f"    Consensus Note: {consensus['alignment_note']}")
-    except ImportError:
-        pass
+    splits = (betting_splits or {}) if "betting_splits" in dir() else {}
+    if splits.get("sharp_money_pct") is not None and splits.get("public_ticket_pct") is not None:
+        try:
+            from market_consensus import calculate_sharp_confidence
+            consensus = calculate_sharp_confidence(
+                model_edge=edge_val,
+                sharp_money_pct=float(splits["sharp_money_pct"]),
+                public_ticket_pct=float(splits["public_ticket_pct"]),
+            )
+            conf = float(consensus["final_confidence"])
+            print(f"    Consensus (real splits): {consensus['alignment_note']}")
+        except ImportError:
+            pass
 
     if conf is None:
         conf = min(100, max(0, 50 + (abs(edge_val) / max(1.3, 0.01)) * 25))
@@ -608,10 +655,36 @@ def run_baseball_prop_market(
     implied_over_prob = min(99.9, max(0.1, 50 + (edge_val * 15)))
     implied_under_prob = 100.0 - implied_over_prob
 
+    # A DECISION, not a readout. This field used to hold
+    # "Over: 46.1% | Under: 53.9%" -- two probabilities where a pick belongs.
+    # grade_predictions.py reads `recommendation` to decide whether a row is a
+    # bet or an informational note, so a string of percentages made the row
+    # ungradable and dumped it into the "not bets" bucket forever. Every total
+    # this model has ever produced landed there.
+    #
+    # Half a run is the floor. Below that the disagreement is inside the noise
+    # of a projection built from season averages.
+    MIN_EDGE_RUNS = 0.5
+    if edge_val >= MIN_EDGE_RUNS:
+        decision = "OVER"
+    elif edge_val <= -MIN_EDGE_RUNS:
+        decision = "UNDER"
+    else:
+        decision = "PASS"
+
     result["summary"] = {
-        "recommendation": f"Over: {implied_over_prob:.1f}% | Under: {implied_under_prob:.1f}%",
+        "recommendation": decision,
+        "pick": decision,
+        # A pass is not a confident call. Reporting 69% conviction beside a
+        # decision not to bet is how a PASS ends up looking like a play.
+        "confidence_note": ("no bet -- confidence describes the projection, "
+                            "not a recommendation" if decision == "PASS" else ""),
+        "readout": f"Over: {implied_over_prob:.1f}% | Under: {implied_under_prob:.1f}%",
         "confidence": round(float(conf), 1),
-        "edge": f"{edge_val:+.2f} Runs vs {market_total} Total",
+        "edge": round(edge_val, 2),
+        "edge_note": f"{edge_val:+.2f} runs vs a {market_total} total",
+        "min_edge_runs": MIN_EDGE_RUNS,
+        "edge_value": round(edge_val, 2),
         # Raw 0-1 probabilities, exposed so callers (e.g. universal_runner.py's
         # prediction logging) don't have to re-parse the formatted string above.
         "implied_over_prob": round(implied_over_prob / 100.0, 4),
@@ -857,11 +930,78 @@ def run_soccer_game(home_team: str, away_team: str, league: str = "Premier Leagu
         return {}
 
 
+def _american_to_prob(odds: Optional[float]) -> Optional[float]:
+    if odds is None:
+        return None
+    value = float(odds)
+    return (-value) / ((-value) + 100.0) if value < 0 else 100.0 / (value + 100.0)
+
+
+def _devig_two_way(home_ml: Optional[float],
+                   away_ml: Optional[float]) -> Tuple[Optional[float], Optional[float]]:
+    """American odds for both sides -> no-vig probabilities. Same math the
+    tennis and soccer resolvers already use for their moneyline/1X2 markets."""
+    home_p, away_p = _american_to_prob(home_ml), _american_to_prob(away_ml)
+    if home_p is None or away_p is None:
+        return None, None
+    total = home_p + away_p
+    if total <= 0:
+        return None, None
+    return home_p / total, away_p / total
+
+
+def _moneyline_edge(model_home_prob: Optional[float], home_name: str, away_name: str,
+                    home_ml: Optional[float], away_ml: Optional[float]) -> Dict[str, Any]:
+    """Model win probability vs a real market price -> edge + recommendation.
+
+    The model has always computed home_win_probability here; it just never
+    got compared against a market price, so the moneyline never carried a
+    real edge (or reached the recommendations table/Discord embed) even on
+    a run where --home-ml/--away-ml were supplied and fetched live. Mirrors
+    the BET/LEAN/PASS thresholds tennis's moneyline market uses, but handles
+    both directions -- baseball's own totals market already picks OVER or
+    UNDER symmetrically, so a value edge on the underdog should read the
+    same way, not just "PASS - Market efficient" the way tennis currently
+    does for negative edges.
+    """
+    if model_home_prob is None or (home_ml is None and away_ml is None):
+        return {}
+    market_home_prob, market_away_prob = _devig_two_way(home_ml, away_ml)
+    if market_home_prob is None:
+        return {"market_home_prob": None, "market_away_prob": None}
+
+    edge = (model_home_prob - market_home_prob) * 100.0
+    conf = round(min(98.0, max(0.0, 50.0 + abs(model_home_prob - 0.5) * 150.0)), 1)
+    side = home_name if edge >= 0 else away_name
+    magnitude = abs(edge)
+    if magnitude >= 4.5 and conf >= 63:
+        rec = f"BET {side} ML (edge: {edge:+.1f}%)"
+    elif magnitude >= 2.0 and conf >= 57:
+        rec = f"LEAN {side} ML (edge: {edge:+.1f}%)"
+    elif magnitude >= 0.5:
+        rec = f"SLIGHT LEAN {side} ML (edge: {edge:+.1f}%)"
+    else:
+        rec = "PASS - Market efficient"
+    return {
+        "market_home_prob": round(market_home_prob, 4),
+        "market_away_prob": round(market_away_prob, 4),
+        "edge_pct": round(edge, 1),
+        # NOT "confidence" -- that key already holds the predictor's nested
+        # {total: {...}, side: {...}} block; overwriting it with this flat
+        # number silently destroyed that structure for every stored row that
+        # had market odds attached.
+        "ml_confidence": conf,
+        "recommendation": rec,
+    }
+
+
 def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
                       markets: List[str] = None, market_total: float = 8.5,
                       home_sp_overrides: Optional[Dict[str, float]] = None,
                       away_sp_overrides: Optional[Dict[str, float]] = None,
-                      team_overrides: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
+                      team_overrides: Optional[Dict[str, float]] = None,
+                      home_ml: Optional[float] = None,
+                      away_ml: Optional[float] = None) -> Dict[str, Any]:
     """Run moneyline/run-line and prop-market baseball predictions together."""
     print(f"\n{'='*60}")
     print(f"BASEBALL ({league.upper()}) MATCHUP: {home_team} vs {away_team}")
@@ -899,6 +1039,9 @@ def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
             features, None, home_team, away_team, league=league
         )
         result["moneyline_and_side"] = ml_result.get("game", {})
+        result["moneyline_and_side"].update(_moneyline_edge(
+            result["moneyline_and_side"].get("home_win_probability"),
+            home_team, away_team, home_ml, away_ml))
     except Exception as exc:  # noqa: BLE001
         print(f"[WARNING] Moneyline/run-line prediction unavailable: {exc}")
         result["moneyline_and_side"] = {}

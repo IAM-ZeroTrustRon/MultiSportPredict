@@ -261,16 +261,33 @@ def run_one(p1: str, p2: str, store: Dict[str, Any], surface: str,
     if market_prob is not None:
         log(f"  market: {p1} {p1_ml:+g} / {p2} {p2_ml:+g}   "
             f"no-vig {market_prob:.1%} for {p1}")
-    else:
-        log("  no market odds given -- the model number is printed but no edge "
-            "is claimed against a price that was not supplied")
 
     from universal_runner import run_tennis
+    tour = str(store.get(p1, {}).get("tour") or store.get(p2, {}).get("tour") or "").lower()
     result = run_tennis(
         p1, p2, surface=surface, tournament=tournament, round_name=round_name,
         best_of_5=best_of_5, store_to_db=True, push_discord=push_discord,
-        market_prob=market_prob,
+        market_prob=market_prob, tour=tour or None,
     )
+
+    # market_prob above was only from typed --p1-ml/--p2-ml -- run_tennis()
+    # may have auto-fetched a real price internally when neither was given.
+    # That reassignment lives inside run_tennis()'s own frame and does not
+    # propagate back to this variable by itself, so both the log line AND
+    # this function's returned market_prob (which show_review()'s table
+    # reads) have to be recomputed from result["auto_odds"] here -- without
+    # this, the review table would show blank market/edge columns for a
+    # pick that was, underneath, actually made against a real fetched price.
+    auto = (result or {}).get("auto_odds") or {} if isinstance(result, dict) else {}
+    if market_prob is None:
+        if auto.get("status") in ("live", "cached") and auto.get("home_ml") is not None:
+            market_prob = no_vig(american_to_prob(auto.get("home_ml")), american_to_prob(auto.get("away_ml")))
+            log(f"  odds auto-fetched ({auto['status']}, captured {auto.get('captured_at')}): "
+                f"{p1} {auto['home_ml']:+g} / {p2} {auto.get('away_ml', 0):+g}   "
+                f"no-vig {market_prob:.1%} for {p1}" if market_prob is not None else "")
+        else:
+            log(f"  no market odds -- {auto.get('reason', 'not typed and none auto-fetched')}. "
+                f"The model number is printed but no edge is claimed against a price that was not supplied.")
 
     moneyline = (result or {}).get("moneyline", {}) if isinstance(result, dict) else {}
     return {
@@ -278,6 +295,7 @@ def run_one(p1: str, p2: str, store: Dict[str, Any], surface: str,
         "round": round_name, "best_of_5": best_of_5,
         "model_prob": moneyline.get("home_win_prob"),
         "market_prob": market_prob,
+        "odds_captured_at": auto.get("captured_at"),
         "recommendation": moneyline.get("recommendation"),
         "confidence": moneyline.get("confidence"),
     }
@@ -285,28 +303,39 @@ def run_one(p1: str, p2: str, store: Dict[str, Any], surface: str,
 
 def show_review(rows: List[Dict[str, Any]]) -> None:
     log("")
-    rule()
-    log("REVIEW  -  model vs market (vig removed).  Nothing has been pushed.")
-    rule()
-    log(f"  {'#':>3}  {'MATCH':<44}{'MODEL':>7}{'NO-VIG':>8}{'EDGE':>7}  REC")
-    log("  " + "-" * 92)
+    rule("=", 110)
+    log("📋  REVIEW  —  model vs market (vig removed).  Nothing has been pushed.")
+    rule("=", 110)
+    header = (
+        f"  {'#':>2}  {'🎾 MATCH':<46}{'🏆 TOURN':<16}{'🏟️ SURF':<8}"
+        f"{'🤖 MODEL':>8}{'📊 NO-VIG':>8}{'⚡ EDGE':>8}{'📈 CONF':>8}  {'🎯 REC'}"
+    )
+    log(header)
+    log("  " + "-" * 110)
     for index, row in enumerate(rows, start=1):
         model = row.get("model_prob")
         market = row.get("market_prob")
         edge = (model - market) * 100 if (model is not None and market is not None) else None
-        log(f"  {index:>3}  {row['p1'] + ' v ' + row['p2']:<44}"
-            f"{(f'{model:.1%}' if model is not None else '-'):>7}"
-            f"{(f'{market:.1%}' if market is not None else '-'):>8}"
-            f"{(f'{edge:+.1f}' if edge is not None else '-'):>7}  "
+        conf = row.get("confidence")
+        match_label = f"{row['p1']} vs {row['p2']}"[:44]
+        tourn_label = row.get("tournament", "Tennis")[:14]
+        surf_emoji = {"hard": "🟦", "clay": "🟧", "grass": "🟩", "carpet": "⬜"}
+        surf_icon = surf_emoji.get(row.get("surface", "").lower(), "🎾")
+        surface_label = f"{surf_icon} {row.get('surface', '?')[:4]}"
+        log(f"  {index:>2}  {match_label:<46}{tourn_label:<16}{surface_label:<8}"
+            f"{(f'{model:.1%}' if model is not None else '   -   '):>8}"
+            f"{(f'{market:.1%}' if market is not None else '   -   '):>8}"
+            f"{(f'{edge:+.1f}%' if edge is not None else '   -   '):>8}"
+            f"{(f'{conf:.0f}%' if conf is not None else '   -   '):>8}  "
             f"{row.get('recommendation') or '-'}")
-    rule()
-    log("  Push the ones you want:")
+    rule("-", 110)
+    log("  💡  Push the ones you want:")
     log("      venv/Scripts/python.exe run_tennis.py --push 1")
     log("")
-    log("  An edge under a couple of points is model error, not disagreement.")
-    log("  Elo knows who is better. It does not know who is injured, who flew in")
-    log("  yesterday, or who has a bad record in this stadium.")
-    rule()
+    log("  ⚠️   An edge under a couple of points is model error, not disagreement.")
+    log("  🧠  Elo knows who is better. It does not know who is injured, who flew in")
+    log("      yesterday, or who has a bad record in this stadium.")
+    rule("=", 110)
 
 
 def main() -> None:

@@ -293,9 +293,84 @@ def fetch_mlb_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[
     return out
 
 
+NFL_SCOREBOARD = ("https://site.web.api.espn.com/apis/site/v2/sports/football/"
+                  "nfl/scoreboard?dates={start}-{end}&limit=400")
+
+
+def fetch_nfl_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[float, float]]:
+    """(date, home, away) -> (home_score, away_score) for finished NFL games.
+
+    Reads ESPN's scoreboard, and falls back to data/nfl_schedule.json for any
+    date the feed does not answer for -- the ingest already stores every final
+    score, so a network hiccup does not have to leave a week ungraded.
+
+    Home and away come from the explicit "homeAway" field, never from position
+    in the array. Getting that backwards grades a bet as a win when it lost.
+
+    Note site.WEB.api: site.api.espn.com (no "web") is Akamai-blocked here.
+    """
+    out: Dict[Tuple[str, str, str], Tuple[float, float]] = {}
+
+    def add(date: str, home: str, away: str, hs: Any, ras: Any) -> None:
+        if not (date and home and away) or hs is None or ras is None:
+            return
+        out[(date[:10], normalise_team(home), normalise_team(away))] = (
+            float(hs), float(ras))
+
+    try:
+        payload = _get_json(NFL_SCOREBOARD.format(
+            start=start.replace("-", ""), end=end.replace("-", "")))
+        events = payload.get("events") or []
+        for league in payload.get("leagues") or []:
+            events = events or (league.get("events") or [])
+        for event in events:
+            competitions = event.get("competitions") or []
+            if not competitions:
+                continue
+            competition = competitions[0]
+            status = ((competition.get("status") or {}).get("type") or {})
+            if not status.get("completed"):
+                continue
+            sides = {}
+            for competitor in competition.get("competitors") or []:
+                which = str(competitor.get("homeAway", "")).lower()
+                if which in ("home", "away"):
+                    team = competitor.get("team") or {}
+                    sides[which] = (team.get("displayName") or team.get("name"),
+                                    competitor.get("score"))
+            if "home" in sides and "away" in sides:
+                add(str(event.get("date", "")), sides["home"][0], sides["away"][0],
+                    sides["home"][1], sides["away"][1])
+    except Exception as exc:  # noqa: BLE001
+        log(f"[nfl] scoreboard unavailable ({type(exc).__name__}) -- "
+            f"falling back to data/nfl_schedule.json")
+
+    schedule_path = ROOT / "data" / "nfl_schedule.json"
+    if schedule_path.exists():
+        try:
+            stored = json.loads(schedule_path.read_text(encoding="utf-8-sig"))
+            for game in stored.get("games", []):
+                if not game.get("completed"):
+                    continue
+                if not (start <= str(game.get("date", "")) <= end):
+                    continue
+                key = (str(game["date"])[:10],
+                       normalise_team(game["home_team"]),
+                       normalise_team(game["away_team"]))
+                if key not in out:      # the live feed wins where both have it
+                    add(game["date"], game["home_team"], game["away_team"],
+                        game.get("home_score"), game.get("away_score"))
+        except (json.JSONDecodeError, KeyError) as exc:
+            log(f"[nfl] could not read nfl_schedule.json: {exc}")
+
+    return out
+
+
 AUTO_SOURCES = {
     "mlb": fetch_mlb_results,
     "baseball": fetch_mlb_results,   # rows logged as 'baseball' that are MLB games
+    "nfl": fetch_nfl_results,
+    "ncaaf": fetch_nfl_results,      # same feed, different league path when built
 }
 
 

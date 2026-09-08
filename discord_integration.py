@@ -448,8 +448,7 @@ def push_to_discord(
             payload = {"content": message}
 
         # ---- DEDUPLICATION: skip if this exact payload was sent recently ----
-        content_id = _content_hash(
-        payload, targets + (["bot-channel"] if bot_wanted else []))
+        content_id = _content_hash(payload, [target_url])
         if _is_duplicate(content_id):
             logger.info(
                 "Discord push skipped (duplicate content within %ds window): %s vs %s [%s]",
@@ -497,76 +496,92 @@ def push_baseball_prediction_to_discord(
     if not target_url:
         return False
 
-    # Real data structure: game -> confidence -> total/side
-    ml  = prediction.get("moneyline_and_side", {})
-    game = prediction.get("game", ml)
+    summary = prediction.get("summary", {})
     proj = prediction.get("game_projection", {})
     props = prediction.get("props", {})
 
-    home_prob = game.get("home_win_probability", ml.get("home_win_probability", 0))
-    away_prob = game.get("away_win_probability", ml.get("away_win_probability", 0))
-    proj_total = game.get("projected_total_runs", proj.get("total", "N/A"))
+    proj_total = proj.get("total", "N/A")
+    home_runs = proj.get("home_runs", 0)
+    away_runs = proj.get("away_runs", 0)
 
-    summary = game
+    # Extract total recommendation and confidence
+    rec_text = summary.get("recommendation", "PASS")
+    conf = summary.get("confidence", 50)
+    edge = summary.get("edge", "+0.00 Runs vs 8.5")
 
-    # 1. Format Confidence & Recommendations with Emojis
-    def format_rec(recommendation, conf):
-        rec_str = str(recommendation).strip().upper()
-        emoji = "🟢" if rec_str == "BET" else ("🔴" if rec_str == "PASS" else "🟡")
-        return f"{emoji} **{rec_str}**\n*(Conf: {conf})*"
+    def emoji_for_rec(rec_str):
+        r = str(rec_str).strip().upper()
+        if "BET" in r:
+            return "🟢"
+        elif "PASS" in r:
+            return "🔴"
+        else:
+            return "🟡"
 
-    # 2. Extract Total and Run Line Data
-    confidence_sources = (game.get("confidence"), ml.get("confidence"))
-    conf_block = next(
-        (block for block in confidence_sources if isinstance(block, dict)),
-        {},
-    )
-    
-    total_block = conf_block.get("total", {})
-    rec = total_block.get("recommendation", summary.get("recommendation", "PASS"))
-    conf_score = total_block.get("score", summary.get("confidence", "N/A"))
-    total_display = format_rec(rec, conf_score)
+    # 1. TOTAL MARKET (main recommendation)
+    total_emoji = emoji_for_rec(rec_text)
+    total_display = f"{total_emoji} **{rec_text}**\nEdge: {edge}\nConf: {conf}%"
 
-    rl_block = conf_block.get("run_line", conf_block.get("side", {}))
-    rl_rec = rl_block.get("recommendation", "PASS")
-    rl_conf = rl_block.get("score", "N/A")
-    run_line_display = format_rec(rl_rec, rl_conf)
-
-    # 3. Clean up NRFI Formatting
+    # 2. NRFI Formatting
     nrfi_data = props.get("nrfi", {})
     nrfi_prob = nrfi_data.get("probability", nrfi_data.get("prob", None))
     nrfi_rec = nrfi_data.get("recommendation", nrfi_data.get("lean", "N/A"))
+    nrfi_emoji = emoji_for_rec(nrfi_rec)
     if nrfi_prob is not None:
-        nrfi_display = f"**Prob:** {float(nrfi_prob)*100:.1f}%\n**Rec:** {nrfi_rec}"
+        nrfi_display = f"{nrfi_emoji} **{nrfi_rec}** ({float(nrfi_prob)*100:.1f}%)"
     else:
-        nrfi_display = "N/A"
+        nrfi_display = f"{nrfi_emoji} **{nrfi_rec}**"
 
-    # 4. Clean up Strikeout Props Formatting
+    # 3. Strikeout Props Formatting
     ks_data = props.get("strikeouts", {})
     home_ks = ks_data.get("home_team_projected_ks", "N/A")
     away_ks = ks_data.get("away_team_projected_ks", "N/A")
-    ks_lean = ks_data.get("lean", "N/A")
-    ks_display = f"**{home}:** {home_ks} Ks\n**{away}:** {away_ks} Ks\n**Lean:** {ks_lean}"
+    ks_display = f"**{home}:** {home_ks} K\n**{away}:** {away_ks} K"
 
-    # 5. Build the Final Beautiful Embed
+    # 4. Home Run Props Formatting
+    hr_data = props.get("home_runs", {})
+    home_hrs = hr_data.get("home_team_projected_hrs", "N/A")
+    away_hrs = hr_data.get("away_team_projected_hrs", "N/A")
+    hr_display = f"**{home}:** {home_hrs} HR\n**{away}:** {away_hrs} HR"
+
+    # Build the embed with clear table format
     fields = [
-        {"name": "💰 MONEYLINE", "value": f"**{home}:** {float(home_prob)*100:.1f}%\n**{away}:** {float(away_prob)*100:.1f}%\n{format_rec(conf_block.get('side', {}).get('recommendation', 'N/A'), conf_block.get('side', {}).get('score', 'N/A'))}", "inline": True},
-        {"name": "📈 PROJ TOTAL", "value": f"**{proj_total}** runs", "inline": True},
-        {"name": "🎯 TOTAL", "value": total_display, "inline": True},
-        {"name": "🏃 RUN LINE", "value": run_line_display, "inline": True},
-        {"name": "🔥 NRFI / YRFI", "value": nrfi_display, "inline": True},
-        {"name": "⚾ STRIKEOUT PROPS", "value": ks_display, "inline": False}
+        {
+            "name": "📊 PROJECTION",
+            "value": f"**Total:** {proj_total} runs\n**{home}:** {home_runs}R\n**{away}:** {away_runs}R",
+            "inline": True
+        },
+        {
+            "name": "🎯 TOTAL O/U",
+            "value": total_display,
+            "inline": True
+        },
+        {
+            "name": "🔥 NRFI / YRFI",
+            "value": nrfi_display,
+            "inline": True
+        },
+        {
+            "name": "⚾ STRIKEOUTS",
+            "value": ks_display,
+            "inline": True
+        },
+        {
+            "name": "🏟️ HOME RUNS",
+            "value": hr_display,
+            "inline": True
+        },
     ]
 
-    color_map = {"STRONG BET": 3066993, "BET": 10181046, "PASS": 9807270}
-    color = color_map.get(str(rec).upper(), 9807270)
+    color_map = {"BET": 3066993, "LEAN": 16776960, "PASS": 15158332}
+    color = next((v for k, v in color_map.items() if k in str(rec_text).upper()), 9807270)
 
     embed = {
-        "title": f"[{sport.upper()}] {home.upper()} vs {away.upper()}",
-        "description": f"{sport.upper()} Prediction Report",
+        "title": f"[{sport.upper()}] {home.upper()} @ {away.upper()}",
+        "description": f"**{away}** at **{home}**",
         "color": color,
         "fields": fields,
-        "footer": {"text": "MultiSportPredict | Baseball"},
+        "footer": {"text": "MultiSportPredict Baseball Slate"},
         "timestamp": datetime.utcnow().isoformat() + "Z",
     }
 
@@ -1199,98 +1214,237 @@ def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="predictio
 
 
 # ============================================================================
+# SOCCER EMBED FORMATTER
+# ============================================================================
+
+def _soccer_teams(data: dict) -> Tuple[str, str]:
+    """Pull home/away team names from soccer prediction data."""
+    for home_key, away_key in (("home_team", "away_team"),
+                               ("home", "away"),
+                               ("home_player", "away_player")):
+        home, away = data.get(home_key), data.get(away_key)
+        if home and away:
+            return str(home), str(away)
+    raise ValueError(
+        "Cannot find both team names in soccer prediction. "
+        f"Keys present: {sorted(data)}")
+
+
+def format_soccer_embed(data: dict) -> dict:
+    """Format a soccer prediction into a rich Discord embed.
+
+    Reads the actual keys produced by run_soccer_game() / SoccerPredictor
+    rather than guessing from the tennis-shaped moneyline dict.
+    """
+    home, away = _soccer_teams(data)
+    game = data.get("game", {}) or {}
+    preds = data.get("predictions", {}) or {}
+    goals = data.get("goals_analysis", {}) or {}
+    corners = data.get("corners_analysis", {}) or {}
+    league = data.get("league", "")
+
+    home_prob = game.get("home_win_prob")
+    draw_prob = game.get("draw_prob")
+    away_prob = game.get("away_win_prob")
+    proj_home = game.get("projected_home_goals")
+    proj_away = game.get("projected_away_goals")
+    proj_total = game.get("projected_total_goals")
+
+    total_block = preds.get("total", {}) or {}
+    side_block = preds.get("side", {}) or {}
+    btts_block = preds.get("btts", {}) or {}
+    total_rec = total_block.get("recommendation", "PASS")
+    total_conf = total_block.get("confidence")
+    total_edge = total_block.get("edge")
+    side_rec = side_block.get("recommendation", "PASS")
+    side_conf = side_block.get("confidence")
+    side_edge = side_block.get("edge")
+    btts_rec = btts_block.get("recommendation", "PASS")
+    btts_prob = btts_block.get("probability") or data.get("btts_probability")
+
+    over_15 = goals.get("over_15_prob")
+    over_25 = goals.get("over_25_prob")
+    over_35 = goals.get("over_35_prob")
+    corner_proj = corners.get("projection")
+
+    em = data.get("extra_markets", {}) or {}
+    ttg = em.get("team_total_goals", {}) or {}
+    fh = em.get("first_half_goals", {}) or {}
+    tc = em.get("team_corners", {}) or {}
+
+    conf_num = float(total_conf) if total_conf else 50.0
+    if btts_rec.upper() == "BET" and conf_num >= 70:
+        color = COLORS["strong_bet"]
+    elif total_rec.upper() == "BET" and conf_num >= 65:
+        color = COLORS["strong_bet"]
+    elif btts_rec.upper() == "BET" or total_rec.upper() == "BET":
+        color = COLORS["bet"]
+    elif "pass" in str(total_rec).lower() and "pass" in str(side_rec).lower():
+        color = COLORS["pass"]
+    else:
+        color = COLORS["neutral"]
+
+    emoji = SPORT_EMOJIS.get("soccer", "")
+    title_parts = [f"{emoji}SOCCER"]
+    if league:
+        title_parts.append(f" {league}")
+    title_parts.append(f" | {home} vs {away}")
+    title = "".join(title_parts)
+
+    fields = []
+
+    # Row 1: Score projection
+    if proj_home is not None and proj_away is not None:
+        score_line = f"**{home}** `{proj_home:.2f}`  \u2014  **{away}** `{proj_away:.2f}`"
+        if proj_total is not None:
+            score_line += f"\n**Total:** `{proj_total:.2f}`"
+        fields.append({"name": "\U0001f4ca Projected Score", "value": score_line, "inline": False})
+
+    # Row 2: 1X2 probabilities
+    if any(p is not None for p in (home_prob, draw_prob, away_prob)):
+        hp = f"{home_prob*100:.1f}%" if home_prob is not None else "\u2014"
+        dp = f"{draw_prob*100:.1f}%" if draw_prob is not None else "\u2014"
+        ap = f"{away_prob*100:.1f}%" if away_prob is not None else "\u2014"
+        fields.append({
+            "name": "\U0001f3af Match Outcome (1X2)",
+            "value": f"{home} **{hp}**  |  Draw **{dp}**  |  {away} **{ap}**",
+            "inline": False,
+        })
+
+    # Row 3: Best picks
+    best_picks = []
+    if total_rec.upper() in ("BET", "LEAN"):
+        te = f" (edge {float(total_edge):+.2f})" if total_edge is not None else ""
+        tc_ = f" {float(total_conf):.0f}% conf" if total_conf else ""
+        best_picks.append(f"\U0001f4c8 **Total O/U**: {total_rec}{tc_}{te}")
+    if btts_rec.upper() in ("BET", "LEAN"):
+        bp = f" ({float(btts_prob)*100:.1f}%)" if btts_prob else ""
+        bc_ = f" {float(btts_block.get('confidence', 0)):.0f}% conf" if btts_block.get("confidence") else ""
+        best_picks.append(f"\U0001f4aa **BTTS**: {btts_rec}{bp}{bc_}")
+    if side_rec.upper() in ("BET", "LEAN"):
+        se = f" (edge {float(side_edge):+.2f})" if side_edge is not None else ""
+        sc_ = f" {float(side_conf):.0f}% conf" if side_conf else ""
+        best_picks.append(f"\U0001f3e0 **Side**: {side_rec}{se}{sc_}")
+    if best_picks:
+        fields.append({"name": "\U0001f514 Active Bets", "value": "\n".join(best_picks), "inline": False})
+
+    # Row 4: Goal probabilities
+    goal_vals = []
+    if over_15 is not None:
+        goal_vals.append(f"O1.5 **{over_15*100:.1f}%**")
+    if over_25 is not None:
+        goal_vals.append(f"O2.5 **{over_25*100:.1f}%**")
+    if over_35 is not None:
+        goal_vals.append(f"O3.5 **{over_35*100:.1f}%**")
+    if goal_vals:
+        fields.append({"name": "\u26bd Goal Probabilities",
+                       "value": " \u00b7 ".join(goal_vals), "inline": True})
+
+    # Row 5: Corners
+    corner_vals = []
+    if corner_proj is not None:
+        corner_vals.append(f"Proj **{corner_proj:.1f}**")
+    for key, label in [("over_85_prob", "O8.5"), ("over_95_prob", "O9.5"),
+                       ("over_105_prob", "O10.5")]:
+        v = corners.get(key)
+        if v is not None:
+            corner_vals.append(f"{label} **{v*100:.1f}%**")
+    if corner_vals:
+        fields.append({"name": "\U0001f3f0 Corners",
+                       "value": " \u00b7 ".join(corner_vals), "inline": True})
+
+    # Row 6: BTTS + FH Goals
+    extra_vals = []
+    if btts_prob is not None:
+        extra_vals.append(f"BTTS Yes **{btts_prob*100:.1f}%**")
+    fh_proj = fh.get("projection")
+    if fh_proj is not None:
+        extra_vals.append(f"FH Goals **{fh_proj}**")
+    if extra_vals:
+        fields.append({"name": "\U0001f4ca Extra Markets",
+                       "value": " \u00b7 ".join(extra_vals), "inline": True})
+
+    # Row 7: Team corners split
+    if tc and "_warning" not in tc:
+        hc = tc.get("home", {}).get("projection")
+        ac = tc.get("away", {}).get("projection")
+        if hc is not None and ac is not None:
+            fields.append({
+                "name": "\U0001f3f0 Team Corners",
+                "value": f"{home} **{hc}**  \u2014  {away} **{ac}**",
+                "inline": False,
+            })
+
+    # Row 8: Team totals
+    if ttg:
+        home_lines = []
+        for k in ("over_05", "over_15", "over_25"):
+            v = ttg.get("home", {}).get(k)
+            if v is not None:
+                lbl = k.replace("over_", "O")
+                if len(lbl) == 2:
+                    lbl = lbl[0] + "." + lbl[1]
+                home_lines.append(f"{lbl} {v*100:.0f}%")
+        away_lines = []
+        for k in ("over_05", "over_15", "over_25"):
+            v = ttg.get("away", {}).get(k)
+            if v is not None:
+                lbl = k.replace("over_", "O")
+                if len(lbl) == 2:
+                    lbl = lbl[0] + "." + lbl[1]
+                away_lines.append(f"{lbl} {v*100:.0f}%")
+        if home_lines or away_lines:
+            ttg_text = f"{home}: {' \u00b7 '.join(home_lines)}\n{away}: {' \u00b7 '.join(away_lines)}"
+            fields.append({"name": "\U0001f3e0 Team Totals",
+                           "value": ttg_text, "inline": False})
+
+    return {"title": title, "color": color, "fields": fields,
+            "footer": {"text": "MultiSportPredict Sports Engine | Real-Time Model Feeds"}}
+
+
+# ============================================================================
 # SPORT-TO-FORMATTER ROUTER
 # ============================================================================
 
 def format_prediction_embed(sport, prediction_data):
-    """Route prediction_data to the appropriate sport-specific embed formatter."""
-    sport = sport.strip().lower()
-    if sport == "tennis":
-        return format_tennis_embed(prediction_data)
-    home, away = _tennis_players(prediction_data)
-    # Baseball does not put its numbers under "moneyline". It uses
-    # "moneyline_and_side" with "home_win_probability", and its confidence is a
-    # nested {side:{score}}. Reading only the tennis-shaped keys meant `ml` was
-    # empty for every baseball game, home_prob fell to its 0.5 default, and the
-    # embed announced 50.0% / 50.0% for four different matchups while the model
-    # underneath had said 69.6% / 30.4%.
-    ml = (prediction_data.get("moneyline")
-          or prediction_data.get("moneyline_and_side")
-          or {})
-    summary = prediction_data.get("summary") or {}
+    """Build the embed for any sport. One renderer, one shape.
 
-    home_prob = None
-    for key in ("home_win_prob", "home_win_probability"):
-        if ml.get(key) is not None:
-            home_prob = float(ml[key])
-            break
+    This used to route to a per-sport formatter, each guessing at the keys its
+    predictor returns, and each wrong in its own way: baseball rendered
+    50.0%/50.0% because it read "moneyline" instead of "moneyline_and_side";
+    tennis published "Player 1 vs Player 2" because it read "home_player";
+    props were never rendered at all. Every fix added a fifth special case.
 
-    conf = ml.get("confidence")
-    if isinstance(conf, dict):                 # baseball: {side:{score}, total:{score}}
-        side = conf.get("side") or conf.get("total") or {}
-        rec = side.get("recommendation")
-        conf = side.get("score")
-    else:
-        rec = None
-    rec = (rec or ml.get("recommendation") or summary.get("recommendation")
-           or prediction_data.get("recommendation") or "PASS")
-    if conf is None:
-        conf = ml.get("confidence") if not isinstance(ml.get("confidence"), dict) else None
-    if conf is None:
-        conf = summary.get("confidence")
+    embed_builder.py holds the extraction per sport and one renderer for all of
+    them. A value it cannot find is OMITTED rather than defaulted, and a
+    prediction with nothing readable raises instead of publishing an empty
+    card. The old formatters are kept below for anything still calling them
+    directly, but nothing routes through them any more.
+    """
+    from embed_builder import build_embed
+    return build_embed(sport, prediction_data)
 
-    edge = ml.get("edge_pct")
-    if edge is None:
-        edge = summary.get("edge")
-
-    # A missing probability is not a coin flip. Say so rather than printing one.
-    prob_home = f"**{home_prob:.1%}**" if home_prob is not None else "n/a"
-    prob_away = f"**{1 - home_prob:.1%}**" if home_prob is not None else "n/a"
-    edge_text = f"**{float(edge):+.1f}%**" if edge is not None else "no market price"
-    conf_text = f"**{float(conf):.0f}%**" if conf is not None else "n/a"
-    edge = float(edge) if edge is not None else 0.0
-    conf = float(conf) if conf is not None else 50.0
-    tournament = prediction_data.get("tournament") or prediction_data.get("tournament_name", "")
-    league = prediction_data.get("league", "")
-    emoji = SPORT_EMOJIS.get(sport, "")
-    parts = [f"{emoji}{sport.upper()}"]
-    if tournament:
-        parts.append(f" {tournament}")
-    if league:
-        parts.append(f" {league}")
-    parts.append(f" | {home} vs {away}")
-    if edge >= 5.0 and conf >= 65:
-        color = COLORS["strong_bet"]
-    elif edge > 0 or conf >= 70:
-        color = COLORS["bet"]
-    elif "pass" in str(rec).lower():
-        color = COLORS["pass"]
-    else:
-        color = COLORS["neutral"]
-    fields = [
-        {"name": f"{emoji} {home}", "value": prob_home, "inline": True},
-        {"name": f"{emoji} {away}", "value": prob_away, "inline": True},
-        {"name": "🎯 Best Selection", "value": f"**{rec}**", "inline": True},
-        # These two were literal empty strings -- the fields rendered with a
-        # heading and no value, which reads as "zero edge" rather than "never
-        # filled in".
-        {"name": "📊 Model Edge", "value": edge_text, "inline": True},
-        {"name": "⚡ Confidence", "value": conf_text, "inline": True},
-    ]
-    embed = {"title": "".join(parts), "color": color, "fields": fields, "footer": {"text": "MultiSportPredict Sports Engine | Real-Time Model Feeds"}}
-    return embed
-
-
-# ============================================================================
-# MASTER ENTRY POINT
-# ============================================================================
 
 def push_prediction_to_all(sport, prediction_data, dry_run=False, extra_webhooks=None):
-    """Master entry point — format a prediction and broadcast to every Discord webhook."""
-    embed = format_prediction_embed(sport, prediction_data)
-    home, away = _tennis_players(prediction_data)
-    label = f"{sport}: {home} vs {away}"
-    return _broadcast_embed(embed, extra_webhooks=extra_webhooks, dry_run=dry_run, label=label)
+    """Format and broadcast one prediction. Returns the number of destinations.
+
+    A prediction that cannot be rendered is NOT pushed. Publishing a card with
+    a title and blank fields is worse than an error, because it reads as a pick
+    -- which is exactly what happened for weeks.
+    """
+    from embed_builder import UnrenderablePrediction
+    try:
+        embed = format_prediction_embed(sport, prediction_data)
+    except UnrenderablePrediction as exc:
+        print(f"[REFUSED] Nothing was pushed: {exc}")
+        return 0
+    except Exception as exc:  # noqa: BLE001
+        print(f"[REFUSED] Could not build the embed ({type(exc).__name__}: {exc}). "
+              f"Nothing was pushed.")
+        return 0
+    label = f"{sport} {prediction_data.get('match') or ''}".strip()
+    return _broadcast_embed(embed, extra_webhooks=extra_webhooks,
+                            dry_run=dry_run, label=label or sport)
 
 
 def _tennis_players(data: dict) -> Tuple[str, str]:

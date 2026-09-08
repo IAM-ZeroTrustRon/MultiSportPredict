@@ -159,8 +159,13 @@ def _store_prediction(
     recommendation: str,
     raw_json: Dict[str, Any],
     league: Optional[str] = None,
-) -> None:
-    """Log a prediction to core.historical_storage (canonical store)."""
+) -> bool:
+    """Log a prediction to core.historical_storage. Returns whether it landed.
+
+    This used to return None and swallow the exception, so a caller counting
+    its own loop reported "3 stored" when two had failed with disk I/O errors
+    printed one line above. A write that did not happen is not a write.
+    """
     try:
         from core.historical_storage import init_db, store_prediction
 
@@ -180,6 +185,7 @@ def _store_prediction(
         )
     except Exception as exc:  # noqa: BLE001
         print(f"[WARN] Failed to store prediction to historical_storage: {exc}")
+        return False
 
 
 def _display_full_result(result: Dict[str, Any]) -> None:
@@ -224,7 +230,8 @@ def _display_full_result(result: Dict[str, Any]) -> None:
             if probability is not None:
                 market_rows.append((f"Corners Over {int(line) / 10:g}", "Model probability", f"{probability:.1%}", ""))
 
-    for section in ("props", "markets", "moneyline", "totals", "side", "btts", "corners", "halftime", "player_props"):
+    for section in ("props", "markets", "moneyline", "totals",
+                     "side", "btts", "corners", "halftime", "player_props"):
         values = result.get(section)
         if isinstance(values, dict):
             if any(key in values for key in ("recommendation", "lean", "probability", "over_prob")):
@@ -233,6 +240,17 @@ def _display_full_result(result: Dict[str, Any]) -> None:
                 for market_name, market_values in values.items():
                     if isinstance(market_values, dict):
                         add_market(f"{section}.{market_name}", market_values)
+
+    # Baseball's moneyline/run-line lives under "moneyline_and_side" (not
+    # "moneyline") and only carries a real market edge when --home-ml/
+    # --away-ml were actually supplied -- without that, silently say nothing
+    # rather than print a probability with no recommendation attached to it.
+    baseball_ml = result.get("moneyline_and_side")
+    if isinstance(baseball_ml, dict) and baseball_ml.get("recommendation"):
+        # "confidence" on this dict is the predictor's nested {total, side}
+        # block; the table wants the flat market-edge confidence instead --
+        # substitute it for display only, without touching the stored dict.
+        add_market("moneyline", {**baseball_ml, "confidence": baseball_ml.get("ml_confidence")})
 
     game = result.get("game", result.get("game_projection", {}))
     if isinstance(game, dict):
@@ -327,16 +345,39 @@ def _fetch_live_soccer_market(home: str, away: str, league: Optional[str]) -> Di
 
 def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
                market_total: float, store_to_db: bool,
-               push_discord: bool, live_odds: bool = False) -> Dict[str, Any]:
+               push_discord: bool, live_odds: bool = False,
+               auto_odds: bool = True, market_total_given: bool = False) -> Dict[str, Any]:
+    """
+    auto_odds: try live_odds.get_soccer_odds() BEFORE predicting, so the
+    prediction itself (not just an attached "live_market" afterthought) is
+    built against a real total when one is fetchable. This is the fix for
+    "PASS, model probability only" runs that used to need a second, manual
+    re-run once someone typed a price in -- see live_odds.py.
+
+    market_total_given: True when the CALLER explicitly supplied a real
+    market_total (CLI flag or slate file), not the bare 2.5 default. A real
+    caller-supplied number always wins over an auto-fetch; auto-fetch only
+    fills the gap when nothing was actually given.
+    """
     from predict_match import run_soccer_game
 
     hs = get_soccer_team_stats(home, league)
     aws = get_soccer_team_stats(away, league)
     if hs is None or aws is None:
         raise ValueError(f"Stats missing for '{home}' or '{away}'. Seed stats in team_stats_provider.py before running.")
+
+    fetched_market: Dict[str, Any] = {}
+    if auto_odds and not market_total_given:
+        from live_odds import get_soccer_odds
+        fetched_market = get_soccer_odds(league, home, away)
+        if fetched_market.get("status") in ("live", "cached") and fetched_market.get("total_line") is not None:
+            market_total = float(fetched_market["total_line"])
+
     result = run_soccer_game(home, away, league=league or "Premier League",
                              market_line=market_line, market_total=market_total,
                              home_stats=hs, away_stats=aws)
+    if fetched_market:
+        result["auto_odds"] = fetched_market
 
     # Wire extra_markets — halftime, team corners, BTTS enrichment
     try:
@@ -506,7 +547,8 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
                  away_sp_era: Optional[float], away_sp_k: Optional[float],
                  store_to_db: bool, push_discord: bool,
                  home_pitcher: Optional[str] = None, away_pitcher: Optional[str] = None,
-                 home_hitters: Optional[List[str]] = None, away_hitters: Optional[List[str]] = None) -> Dict[str, Any]:
+                 home_hitters: Optional[List[str]] = None, away_hitters: Optional[List[str]] = None,
+                 home_ml: Optional[float] = None, away_ml: Optional[float] = None) -> Dict[str, Any]:
     from predict_match import run_baseball_game
 
     advanced_args = (home_pitcher, away_pitcher, home_hitters, away_hitters)
@@ -568,7 +610,8 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
             print(f"[WARNING] No real team stats for '{team_name}'. This matchup will fall "
                   f"back to league averages. Fix: python ingest_all_sports.py --only {adapter}")
             continue
-        for field in ("runs", "runs_allowed", "era", "whip", "obp", "slg"):
+        for field in ("runs", "runs_allowed", "era", "whip", "obp", "slg", 
+                       "k9", "avg", "ops", "bb9"):
             value = stats.get(field)
             if value is not None:
                 team_overrides[f"{side}_{field}"] = float(value)
@@ -582,13 +625,14 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
         home_sp_overrides=home_sp_overrides,
         away_sp_overrides=away_sp_overrides,
         team_overrides=team_overrides or None,
+        home_ml=home_ml, away_ml=away_ml,
     )
     _display_full_result(result)
 
     summary = result.get("summary", {})
     conf = float(summary.get("confidence", 50.0))
     rec = summary.get("recommendation", "PASS")
-    edge = summary.get("edge", "0.0")
+    edge = float(summary.get("edge_value", 0.0))
     proj_total = float(result.get("game_projection", {}).get("total", 0.0))
 
     if store_to_db:
@@ -622,11 +666,22 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
             f"Total: {summary.get('recommendation', 'PASS')}",
             f"NRFI: {nrfi.get('lean', 'N/A')}"
             f" ({float(nrfi.get('probability', 0.0)):.1%})",
-            f"K Props: {strikeouts.get('home_team_projected_ks', 0.0):.1f}"
-            f" home / {strikeouts.get('away_team_projected_ks', 0.0):.1f} away",
-            f"HR Props: {home_runs.get('home_team_projected_hrs', 0.0):.1f}"
-            f" home / {home_runs.get('away_team_projected_hrs', 0.0):.1f} away",
+            f"K Props: {strikeouts.get('home_projection', 0.0):.1f}"
+            f" home / {strikeouts.get('away_projection', 0.0):.1f} away",
+            f"HR Props: {home_runs.get('home_projection', 0.0):.1f}"
+            f" home / {home_runs.get('away_projection', 0.0):.1f} away",
         ])
+        # Add F5 betting slip if available
+        f5 = props.get("f5", {})
+        if f5.get("total") is not None:
+            f5_slip = []
+            f5_slip.append(f"    F5 Total: {f5.get('total'):.2f} ({f5.get('recommendation_over', 'PASS')})")
+            f5_slip.append(f"    F5 Moneyline: {home} {f5.get('home_fair_odds', '-')} / {away} {f5.get('away_fair_odds', '-')}")
+            f5_rl = f5.get("run_line_rec")
+            if f5_rl and f5_rl != "PASS":
+                f5_slip.append(f"    F5 Run Line: {f5_rl}")
+            full_slip_message += "\n" + "\n".join(f5_slip)
+
         print(f"\nFull betting slip for {home} vs {away}:\n{full_slip_message}")
         status = _push_full_result("baseball", home, away, result)
         print(f"[{ 'OK' if status else 'FAILED' }] Full baseball result pushed to Discord")
@@ -634,10 +689,98 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
     return result
 
 
+def run_nfl(home: str, away: str, *,
+            market_spread: Optional[float] = None,
+            market_total: Optional[float] = None,
+            market_home_ml: Optional[float] = None,
+            market_away_ml: Optional[float] = None,
+            neutral_site: bool = False,
+            store_to_db: bool = True,
+            push_discord: bool = False) -> Dict[str, Any]:
+    """NFL branch: points model -> spread, moneyline, total, halftime.
+
+    Each market is stored as its own row, because they settle separately and a
+    single row cannot record that the spread lost while the total won.
+
+    THE SPREAD PICK IS WRITTEN DOWN. Soccer and basketball spreads in this
+    database are permanently ungradable: model_value holds a number but nothing
+    records which side it belongs to, so the grader cannot tell a cover from a
+    push. That is not repeated here -- the side goes into `pick` at prediction
+    time, when it is still known.
+    """
+    from models.nfl_predictor import predict_nfl_game, describe
+
+    result = predict_nfl_game(
+        home, away,
+        market_spread=market_spread, market_total=market_total,
+        market_home_ml=market_home_ml, market_away_ml=market_away_ml,
+        neutral_site=neutral_site,
+    )
+
+    print()
+    print(describe(result))
+    print()
+
+    if store_to_db:
+        spread, total, moneyline = (result["spread"], result["total"],
+                                    result["moneyline"])
+        blend = result["prior_blend"]
+        # Confidence is capped while the model is running on a prior season. A
+        # number derived entirely from last year should not present itself with
+        # the same conviction as one built on games that have been played.
+        cap = 60.0 if blend["current_season_weight"] < 0.5 else 100.0
+
+        rows = []
+        if spread.get("market_spread") is not None:
+            cover = float(spread.get("cover_prob", 0.5))
+            rows.append(("spread", cover, 0.5,
+                         float(spread.get("edge_points", 0.0)),
+                         min(abs(cover - 0.5) * 200.0, cap),
+                         spread.get("pick", "PASS")))
+        if total.get("market_total") is not None:
+            rows.append(("total", float(total["model_total"]),
+                         float(total["market_total"]),
+                         float(total.get("edge_points", 0.0)),
+                         min(abs(float(total.get("edge_points", 0.0))) * 12.0, cap),
+                         total.get("pick", "PASS")))
+        if moneyline.get("market_home_prob") is not None:
+            rows.append(("moneyline", float(moneyline["home_win_probability"]),
+                         float(moneyline["market_home_prob"]),
+                         float(moneyline.get("edge_pct", 0.0)),
+                         min(abs(float(moneyline.get("edge_pct", 0.0))) * 4.0, cap),
+                         moneyline.get("recommendation", "PASS")))
+
+        stored = 0
+        for market_type, model_value, market_value, edge, confidence, pick in rows:
+            stored += bool(_store_prediction(
+                sport="nfl", home=result["home"], away=result["away"],
+                market_type=market_type, model_value=model_value,
+                market_value=market_value, edge=edge, confidence=confidence,
+                recommendation=pick,
+                raw_json={**result, "_pick": pick, "_market": market_type},
+                league="NFL",
+            ))
+        if stored == len(rows) and rows:
+            print(f"[OK] {stored} NFL market(s) stored to multisport_history.db")
+        elif rows:
+            print(f"[WARN] only {stored} of {len(rows)} NFL market(s) stored -- "
+                  f"the rest are NOT in the database")
+        else:
+            print("[skip] No market lines supplied, so nothing was stored -- a "
+                  "projection with no price is not a bet.")
+
+    if push_discord:
+        status = _push_full_result("nfl", result["home"], result["away"], result)
+        print(f"[{'OK' if status else 'FAILED'}] NFL result pushed to Discord")
+
+    return result
+
+
 def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
                round_name: Optional[str], best_of_5: bool,
                store_to_db: bool, push_discord: bool,
-               market_prob: Optional[float] = None) -> Dict[str, Any]:
+               market_prob: Optional[float] = None,
+               tour: Optional[str] = None, auto_odds: bool = True) -> Dict[str, Any]:
     """Tennis branch: call the real predictor directly (bypass predict_match.py).
 
     market_prob is the de-vigged probability the book gives `home`. Without it
@@ -645,8 +788,29 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
     from a coin flip rather than disagreement with a price -- a number that
     looks like an edge and is not one. Passing it makes the edge real; leaving
     it None is honest about there being no market to compare against.
+
+    When market_prob isn't given (no --p1-ml/--p2-ml typed), auto_odds tries
+    live_odds.get_tennis_odds() before falling back to "no market" -- this is
+    the fix for a run producing "PASS, model probability only" not because
+    there's no edge, but because nobody typed a price in, which is why the
+    same match used to get run twice. tour ("atp"/"wta") is required for the
+    auto-fetch since The Odds API keys tennis per tour+tournament, not
+    generally; the caller already knows it (it's what picks best_of_5).
     """
     from models.tennis_predictor import predict_tennis_match
+
+    auto_odds_result: Dict[str, Any] = {}
+    if market_prob is None and auto_odds and tour:
+        from live_odds import get_tennis_odds
+        auto_odds_result = get_tennis_odds(tour, home, away)
+        if auto_odds_result.get("status") in ("live", "cached"):
+            home_ml, away_ml = auto_odds_result.get("home_ml"), auto_odds_result.get("away_ml")
+            if home_ml is not None and away_ml is not None:
+                home_p = (-home_ml) / ((-home_ml) + 100.0) if home_ml < 0 else 100.0 / (home_ml + 100.0)
+                away_p = (-away_ml) / ((-away_ml) + 100.0) if away_ml < 0 else 100.0 / (away_ml + 100.0)
+                total = home_p + away_p
+                if total > 0:
+                    market_prob = home_p / total
 
     result = predict_tennis_match(
         home_player=home,
@@ -657,6 +821,8 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
         round_name=round_name,
         market_prob=market_prob,
     )
+    if auto_odds_result:
+        result["auto_odds"] = auto_odds_result
     _display_full_result(result)
 
     ml = result.get("moneyline", {})
