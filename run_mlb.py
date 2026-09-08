@@ -60,8 +60,8 @@ def log(message: str = "") -> None:
     print(message, flush=True)
 
 
-def rule(char: str = "=") -> None:
-    log(char * 78)
+def rule(char: str = "=", width: int = 78) -> None:
+    log(char * width)
 
 
 # ==========================================================================
@@ -503,16 +503,51 @@ def main() -> None:
                              "error": f"{type(exc).__name__}: {exc}"})
 
     log("")
-    rule()
-    log("SUMMARY")
-    rule()
-    for outcome in outcomes:
-        marker = {"ok": "OK     ", "failed": "FAILED ",
-                  "dry-run": "DRY-RUN"}.get(outcome["status"], "?")
-        log(f"  [{marker}] {outcome['away']} @ {outcome['home']}")
-        if outcome.get("error"):
-            log(f"             {outcome['error']}")
-    rule()
+    rule("=", 90)
+    log("📋  MLB SUMMARY")
+    rule("=", 90)
+    header = (
+        f"  {'#':>2}  {'⚾ GAME':<46}{'📊 PROJ':>12}{'🎯 LINE':>8}"
+        f"{'⚡ EDGE':>7}  {'📈 CONF':>7}  REC"
+    )
+    log(header)
+    log("  " + "-" * 90)
+    for idx, outcome in enumerate(outcomes, start=1):
+        if outcome["status"] != "ok":
+            marker = {"failed": "❌", "dry-run": "🔍", "fixture_not_found": "🚫"}.get(outcome["status"], "❓")
+            log(f"  {idx:>2}  {marker}  {outcome.get('away', '?')} @ {outcome.get('home', '?'):<40}"
+                f"{outcome.get('error', outcome['status']):>30}")
+            continue
+
+        result = outcome.get("result", {})
+        ml = result.get("moneyline", {}) if isinstance(result, dict) else {}
+        proj = result.get("game_projection", {}) if isinstance(result, dict) else {}
+        home_prob = ml.get("home_win_prob", ml.get("probability"))
+        away_prob = ml.get("away_win_prob", 1 - home_prob if home_prob else None)
+        proj_total = proj.get("projected_total_runs", proj.get("total"))
+        market_total = proj.get("market_total", proj.get("market_line"))
+        edge = ml.get("edge_pct")
+        conf = ml.get("confidence")
+        rec = ml.get("recommendation", "-")
+
+        if proj_total is not None and market_total is not None:
+            total_edge = proj_total - market_total
+            total_str = f"{proj_total:.1f}"
+            line_str = f"{market_total:.1f}"
+        else:
+            total_str = f"{proj_total:.1f}" if proj_total is not None else "-"
+            line_str = "-"
+
+        if home_prob is not None:
+            prob_str = f"{home_prob:.0%}"
+        else:
+            prob_str = "-"
+
+        log(f"  {idx:>2}  {outcome['away']} @ {outcome['home']:<40}"
+            f"{total_str:>7} vs {line_str:<5}"
+            f"{(f'{edge:+.1f}%' if edge is not None else '  -   '):>7}"
+            f"{(f'{conf:.0f}%' if conf is not None else '  -   '):>7}  {rec or '-'}")
+    rule("-", 90)
 
     if any(o["status"] == "ok" for o in outcomes):
         if not live_totals and not args.total:
