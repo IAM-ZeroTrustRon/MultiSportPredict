@@ -489,6 +489,64 @@ def run_baseball_prop_market(
               "the same league baseline, so this projection does not describe "
               "these two teams. Fix: python ingest_all_sports.py --only mlb")
 
+    # 1a) Starter workload.
+    #
+    # The override block below overwrites team ERA and K/9 with the starter's
+    # own numbers, and everything downstream then treated those as if the
+    # starter threw all nine innings. He does not. A league-average start is
+    # 5.4 innings; the other 3.5 belong to relievers this project has no
+    # separate read on, so the team staff rate -- captured here, before the
+    # overwrite -- stands in for them. It is a real team number, not a
+    # constant, and it is labelled as a proxy in the stored result.
+    #
+    # A pitch limit is the only thing that shortens the first term. Pass
+    # pitch_limit in the sp_overrides dict for a starter on a cap (rehab
+    # start, opener, innings-managed rookie). Without one, the split is the
+    # league average and the arithmetic below is unchanged.
+    _PITCHES_PER_INNING = 16.5   # MLB starter average, 2025-26
+    _GAME_INNINGS = 8.9          # a nine-inning game averages just under 9
+    _BASELINE_SP_INNINGS = 5.4   # league-average start length, uncapped
+
+    _pen = {
+        "home_era": float(home_stats.get("era") or 4.20),
+        "away_era": float(away_stats.get("era") or 4.20),
+        "home_k9": float(home_stats.get("k_projection_per_9") or 8.0),
+        "away_k9": float(away_stats.get("k_projection_per_9") or 8.0),
+    }
+
+    def _starter_innings(overrides: Optional[Dict[str, float]]) -> float:
+        """Innings the starter is expected to cover."""
+        limit = (overrides or {}).get("pitch_limit")
+        if limit is None:
+            return _BASELINE_SP_INNINGS
+        return max(0.0, min(7.0, float(limit) / _PITCHES_PER_INNING))
+
+    def _blended_era(sp_era: float, pen_era: float,
+                     sp_ip: float, pen_ip: float) -> float:
+        """Innings-weighted ERA across the starter and the relief innings."""
+        innings = sp_ip + pen_ip
+        if innings <= 0:
+            return pen_era
+        return (sp_era * sp_ip + pen_era * pen_ip) / innings
+
+    home_sp_ip = _starter_innings(home_sp_overrides)
+    away_sp_ip = _starter_innings(away_sp_overrides)
+    home_pen_ip = max(0.0, _GAME_INNINGS - home_sp_ip)
+    away_pen_ip = max(0.0, _GAME_INNINGS - away_sp_ip)
+    home_capped = (home_sp_overrides or {}).get("pitch_limit") is not None
+    away_capped = (away_sp_overrides or {}).get("pitch_limit") is not None
+
+    for _side, _capped, _limit, _ip, _pen_ip in (
+        ("Home", home_capped, (home_sp_overrides or {}).get("pitch_limit"),
+         home_sp_ip, home_pen_ip),
+        ("Away", away_capped, (away_sp_overrides or {}).get("pitch_limit"),
+         away_sp_ip, away_pen_ip),
+    ):
+        if _capped:
+            print(f"    {_side} SP pitch limit {int(_limit)} -> "
+                  f"{_ip:.1f} IP starter / {_pen_ip:.1f} IP bullpen "
+                  f"(league-average start is {_BASELINE_SP_INNINGS} IP)")
+
     # 1b) Apply live starting-pitcher overrides, if supplied, so today's
     # actual starter (not the league-average baseline) drives the projection.
     if home_sp_overrides:
@@ -518,8 +576,18 @@ def run_baseball_prop_market(
         except ImportError:
             print("    [WARNING] Umpire modules not found. Using baseline stats.")
 
-    proj_home = home_stats["runs_per_game"] + (away_stats["era"] - 4.0) * 0.3
-    proj_away = away_stats["runs_per_game"] + (home_stats["era"] - 4.0) * 0.3
+    # Runs allowed follow whoever is on the mound, weighted by innings. This
+    # line used to apply the starter's ERA to the whole game, which credited
+    # (or blamed) him for three and a half innings he never pitched. With no
+    # override and no cap, both terms are the same team ERA and this is
+    # identical to what it replaced.
+    home_eff_era = _blended_era(float(home_stats["era"]), _pen["home_era"],
+                                home_sp_ip, home_pen_ip)
+    away_eff_era = _blended_era(float(away_stats["era"]), _pen["away_era"],
+                                away_sp_ip, away_pen_ip)
+
+    proj_home = home_stats["runs_per_game"] + (away_eff_era - 4.0) * 0.3
+    proj_away = away_stats["runs_per_game"] + (home_eff_era - 4.0) * 0.3
     total_proj = proj_home + proj_away
 
     result: Dict[str, Any] = {
@@ -536,6 +604,18 @@ def run_baseball_prop_market(
         "props": {},
         "summary": {},
         "data_source": home_stats.get("source", "baseline"),
+        # Stored so grading can separate capped starts from normal ones later.
+        "starter_workload": {
+            "home_pitch_limit": (home_sp_overrides or {}).get("pitch_limit"),
+            "away_pitch_limit": (away_sp_overrides or {}).get("pitch_limit"),
+            "home_starter_innings": round(home_sp_ip, 2),
+            "away_starter_innings": round(away_sp_ip, 2),
+            "home_bullpen_innings": round(home_pen_ip, 2),
+            "away_bullpen_innings": round(away_pen_ip, 2),
+            "pitches_per_inning": _PITCHES_PER_INNING,
+            "relief_rate_source": (
+                "team staff ERA/K9 -- relief-only splits are not ingested"),
+        },
     }
 
     # 3) Calculate Markets with Umpire Modifiers (MLB only)
@@ -576,9 +656,18 @@ def run_baseball_prop_market(
             # Was k_rate * 19, where k_rate is a hardcoded 0.22 for every club:
             # 4.2 projected strikeouts for both teams in every game ever run.
             # k9 is the staff's real rate per nine innings.
-            _INNINGS = 8.9          # a nine-inning game averages just under 9
-            home_k_proj = float(home_stats.get("k_projection_per_9", 8.0)) * _INNINGS / 9.0
-            away_k_proj = float(away_stats.get("k_projection_per_9", 8.0)) * _INNINGS / 9.0
+            # Split the same way: the starter's K/9 for the innings he
+            # covers, the staff rate for the rest. A pitch limit shortens the
+            # first term and lengthens the second, which is why a capped
+            # strikeout artist projects fewer team strikeouts, not more.
+            home_sp_k9 = float((home_sp_overrides or {}).get("k9")
+                               or _pen["home_k9"])
+            away_sp_k9 = float((away_sp_overrides or {}).get("k9")
+                               or _pen["away_k9"])
+            home_k_proj = (home_sp_k9 * home_sp_ip
+                           + _pen["home_k9"] * home_pen_ip) / 9.0
+            away_k_proj = (away_sp_k9 * away_sp_ip
+                           + _pen["away_k9"] * away_pen_ip) / 9.0
 
             if league_upper == "MLB" and umpire_name != "Unknown":
                 try:
@@ -598,8 +687,18 @@ def run_baseball_prop_market(
                 "recommendation": "PROJECTION ONLY -- no market line supplied",
                 "home_projection": round(float(home_k_proj), 1),
                 "away_projection": round(float(away_k_proj), 1),
-                "source": "team k9 from baseball_stats.json",
-                "data_tier": 1,
+                "source": ("starter K/9 over capped innings + staff K/9 for relief"
+                           if (home_capped or away_capped)
+                           else "team k9 from baseball_stats.json"),
+                # A capped start is a guess about a decision a manager has not
+                # made yet. Say so on the prop rather than letting the number
+                # read like a normal projection.
+                "caution": ("Starter on a pitch limit -- actual length depends "
+                            "on the manager and pitch efficiency, so this "
+                            "projection carries much wider error than usual. "
+                            "Do not bet a strikeout prop off it."
+                            if (home_capped or away_capped) else None),
+                "data_tier": 3 if (home_capped or away_capped) else 1,
             }
 
         elif market_clean in {"hrs", "home_runs", "hr"}:
@@ -627,6 +726,17 @@ def run_baseball_prop_market(
             _F5_RATIO = 0.57          # 5 innings / 9, slightly elevated by SP
             sp_home_era = home_sp_overrides.get("era", home_stats.get("era", 4.2)) if home_sp_overrides else home_stats.get("era", 4.2)
             sp_away_era = away_sp_overrides.get("era", away_stats.get("era", 4.2)) if away_sp_overrides else away_stats.get("era", 4.2)
+
+            # F5 assumes the starters cover the first five. A 60-pitch cap is
+            # about three and a half innings, so the bullpen is already in the
+            # game before the F5 bet settles -- blend those innings in.
+            _F5_IP = 5.0
+            _h5 = min(home_sp_ip, _F5_IP)
+            _a5 = min(away_sp_ip, _F5_IP)
+            sp_home_era = _blended_era(float(sp_home_era), _pen["home_era"],
+                                       _h5, _F5_IP - _h5)
+            sp_away_era = _blended_era(float(sp_away_era), _pen["away_era"],
+                                       _a5, _F5_IP - _a5)
 
             f5_home = float(home_stats.get("runs_per_game", 4.5)) * _F5_RATIO + (sp_away_era - 4.0) * 0.15
             f5_away = float(away_stats.get("runs_per_game", 4.5)) * _F5_RATIO + (sp_home_era - 4.0) * 0.15
