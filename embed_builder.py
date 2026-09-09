@@ -383,25 +383,6 @@ def extract_tennis(data: Dict[str, Any]) -> Dict[str, Any]:
                            market_value=dec(games.get("line"), 1),
                            pick=clean(games.get("recommendation"))))
 
-
-    # F5 (First 5 Innings) Markets
-    f5 = dig(props, "f5") or {}
-    f5_total = f5.get("total")
-    if f5_total is not None:
-        rows.append(market("🎯 F5 Total",
-                           model=dec(f5_total, 2),
-                           pick=clean(f5.get("recommendation_over"))))
-    f5_home_wp = f5.get("home_win_prob")
-    if f5_home_wp is not None:
-        f5_home_odds = f5.get("home_fair_odds") or "-"
-        f5_away_odds = f5.get("away_fair_odds") or "-"
-        rows.append(market("🎯 F5 Moneyline",
-                           model=f"{pct(f5_home_wp)} / {pct(f5.get('away_win_prob'))}",
-                           extra=f"fair odds: {f5_home_odds} / {f5_away_odds}"))
-    f5_rl = clean(f5.get("run_line_rec"))
-    if f5_rl and f5_rl != "PASS":
-        rows.append(market("📐 F5 Run Line", pick=clean(f5.get("run_line_rec"))))
-
     notes: List[str] = []
     elo = data.get("elo_ratings") or {}
     if elo:
