@@ -546,6 +546,8 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
                  home_sp_era: Optional[float], home_sp_k: Optional[float],
                  away_sp_era: Optional[float], away_sp_k: Optional[float],
                  store_to_db: bool, push_discord: bool,
+                 home_sp_limit: Optional[float] = None,
+                 away_sp_limit: Optional[float] = None,
                  home_pitcher: Optional[str] = None, away_pitcher: Optional[str] = None,
                  home_hitters: Optional[List[str]] = None, away_hitters: Optional[List[str]] = None,
                  home_ml: Optional[float] = None, away_ml: Optional[float] = None) -> Dict[str, Any]:
@@ -575,9 +577,18 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
             print(f"[{ 'OK' if status else 'FAILED' }] Full baseball result pushed to Discord")
         return result
 
-    batters_faced_est = max(5.5 * 4.3, 1.0)
+    # K/9 is strikeouts per NINE INNINGS, so the denominator has to be batters
+    # faced per nine innings -- about 4.25 per inning, so ~38.
+    #
+    # This was 5.5 * 4.3 = 23.65, which is batters faced in an average START.
+    # Dividing a per-nine number by a per-start number inflated every starter's
+    # strikeout rate by about 60%: Sean Burke at 9.7 K/9 came out as a .41
+    # strikeout rate, which no pitcher in history has posted. NRFI reads
+    # k_rate directly, so every NRFI this project has produced was too high --
+    # a Pirates/White Sox game priced at 72% when the league baseline is 53%.
+    batters_faced_est = 9.0 * 4.25
     home_sp_overrides = None
-    if home_sp_era is not None or home_sp_k is not None:
+    if home_sp_era is not None or home_sp_k is not None or home_sp_limit is not None:
         home_sp_overrides = {}
         if home_sp_era is not None:
             home_sp_overrides["era"] = float(home_sp_era)
@@ -585,9 +596,16 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
             home_sp_overrides["k_rate"] = max(
                 0.0, min(0.60, float(home_sp_k) / batters_faced_est)
             )
+            # The prop model needs the rate per nine, not per batter faced.
+            # Only k_rate was passed, so the starter never reached the
+            # strikeout projection at all -- it used the staff rate for all
+            # nine innings no matter who was pitching.
+            home_sp_overrides["k9"] = float(home_sp_k)
+        if home_sp_limit is not None:
+            home_sp_overrides["pitch_limit"] = float(home_sp_limit)
 
     away_sp_overrides = None
-    if away_sp_era is not None or away_sp_k is not None:
+    if away_sp_era is not None or away_sp_k is not None or away_sp_limit is not None:
         away_sp_overrides = {}
         if away_sp_era is not None:
             away_sp_overrides["era"] = float(away_sp_era)
@@ -595,6 +613,9 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
             away_sp_overrides["k_rate"] = max(
                 0.0, min(0.60, float(away_sp_k) / batters_faced_est)
             )
+            away_sp_overrides["k9"] = float(away_sp_k)
+        if away_sp_limit is not None:
+            away_sp_overrides["pitch_limit"] = float(away_sp_limit)
 
     # Real team metrics, written daily by ingest_all_sports.py. Missing data is
     # reported rather than silently replaced with a league average.
