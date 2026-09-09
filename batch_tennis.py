@@ -461,6 +461,18 @@ def run_tennis_batch(dry_run: bool = False, push: bool = False):
         logger.info("Running inference for %s...", match_name)
 
         try:
+            # best_of_5 has no safe default -- defaulting True put best-of-5
+            # set metrics on a WTA match the one time this was a silent
+            # fallback (models/tennis_predictor.py's _set_rec() had the same
+            # bug one level down; fixed there today). Require it explicitly
+            # here too rather than guess either direction.
+            if "best_of_5" not in match:
+                raise KeyError(
+                    f"{match_name}: TENNIS_MATCHES entry is missing "
+                    f"\"best_of_5\" -- set it explicitly (True for a Grand "
+                    f"Slam / ATP tour, False otherwise) rather than let it "
+                    f"default.")
+
             # Calculate market probability if odds are available
             market_prob = None
             if match.get("market_home_odds") and match.get("market_away_odds"):
@@ -473,7 +485,7 @@ def run_tennis_batch(dry_run: bool = False, push: bool = False):
                 home_player=home_player,
                 away_player=away_player,
                 surface=match.get("surface", "hard"),
-                best_of_5=match.get("best_of_5", True),
+                best_of_5=match["best_of_5"],
                 tournament=match.get("tournament"),
                 round_name=match.get("round_name"),
                 market_prob=market_prob,
