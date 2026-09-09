@@ -109,12 +109,25 @@ def _recommendation(home_prob: float, market_prob: Optional[float] = None) -> Di
 # SET DISTRIBUTION
 # ============================================================================
 
-def _set_rec(p_over_35: float) -> str:
+def _set_rec(p_over_35: float, best_of_5: bool) -> str:
+    """Text label for the sets-total O/U market.
+
+    The line printed here has to key off best_of_5, not just the number --
+    a best-of-3 match can only ever produce 2 or 3 sets, so "OVER 3.5 Sets"
+    describes a result that cannot happen. p_over_35 was already computed
+    correctly per format one level up (the caller branches on best_of_5
+    when building it); this used to hardcode "3.5"/5-set wording onto that
+    correct number regardless of format, which is what put best-of-5 set
+    lines on WTA cards. Bo5's line is 3.5 (over = 4-5 sets, under = a 3-0
+    sweep); Bo3's is 2.5 (over = 3 sets, under = a 2-0 sweep).
+    """
+    line = 3.5 if best_of_5 else 2.5
+    sweep_sets = 3 if best_of_5 else 2
     if p_over_35 >= 0.55:
-        return f"OVER 3.5 Sets -- P(over)={p_over_35:.0%}"
+        return f"OVER {line} Sets -- P(over)={p_over_35:.0%}"
     elif p_over_35 <= 0.40:
-        return f"UNDER 3.5 Sets -- P(3 or 4 sets)={1-p_over_35:.0%}"
-    return f"LEAN OVER 3.5 Sets -- P(over)={p_over_35:.0%}"
+        return f"UNDER {line} Sets -- P({sweep_sets} sets)={1-p_over_35:.0%}"
+    return f"LEAN OVER {line} Sets -- P(over)={p_over_35:.0%}"
 
 
 def _spread_rec(p_fav_spread: float, fav_name: str) -> str:
@@ -324,7 +337,7 @@ def predict_tennis_match(
         "market_prob": market_prob,
         "sets": {
             "over_35_prob": p_over_35,
-            "recommendation_sets_ou": _set_rec(p_over_35),
+            "recommendation_sets_ou": _set_rec(p_over_35, best_of_5),
             "fav_spread_prob": p_fav_spread,
             "recommendation_spread": _spread_rec(p_fav_spread, fav_name),
         },
