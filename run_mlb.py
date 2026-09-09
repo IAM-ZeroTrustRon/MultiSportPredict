@@ -43,6 +43,12 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
 
+# Ensure UTF-8 output on Windows consoles (cp1252 can't encode emoji)
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 PROBABLES = ROOT / "data" / "mlb_probables.json"
 STORE = ROOT / "data" / "baseball_stats.json"
 TODAY = _dt.date.today().isoformat()
@@ -289,7 +295,9 @@ def record_market_odds(home: str, away: str, total: float,
 def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
             total_source: str, push_discord: bool, dry_run: bool,
             home_ml: Optional[int] = None,
-            away_ml: Optional[int] = None) -> Dict[str, Any]:
+            away_ml: Optional[int] = None,
+            home_sp_limit: Optional[int] = None,
+            away_sp_limit: Optional[int] = None) -> Dict[str, Any]:
     rule()
     log(f"MLB:  {away}  @  {home}")
     rule("-")
@@ -311,6 +319,10 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
             log(f"  [ERROR] {msg}")
             return {"status": "fixture_not_found", "home": home, "away": away}
 
+    if home_sp_limit or away_sp_limit:
+        log(f"  Pitch cap  {away} {away_sp_limit or 'none'}"
+            f"  |  {home} {home_sp_limit or 'none'}")
+
     log(f"  Total      {total}  [{total_source}]")
     if home_ml is not None or away_ml is not None:
         def fmt(value: Optional[int]) -> str:
@@ -324,7 +336,9 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
     result = run_baseball(home, away, league=LEAGUE, markets=MARKETS,
                           market_total=total, store_to_db=True,
                           push_discord=push_discord,
-                          home_ml=home_ml, away_ml=away_ml, **arguments)
+                          home_ml=home_ml, away_ml=away_ml,
+                          home_sp_limit=home_sp_limit,
+                          away_sp_limit=away_sp_limit, **arguments)
 
     tagged = record_market_odds(home, away, total, home_ml, away_ml)
     if tagged:
@@ -346,6 +360,15 @@ def main() -> None:
                         help="Home moneyline in American odds, e.g. -120.")
     parser.add_argument("--away-ml", type=int, action="append", metavar="ODDS",
                         help="Away moneyline, e.g. +105.")
+    parser.add_argument("--home-sp-limit", type=int, action="append", metavar="PITCHES",
+                        help="Home starter is on a pitch count (e.g. 60). "
+                             "Shortens his projected innings and hands the "
+                             "rest to the bullpen. Repeatable, pairs with "
+                             "--match in order.")
+    parser.add_argument("--away-sp-limit", type=int, action="append", metavar="PITCHES",
+                        help="Away starter is on a pitch count. Same rules. "
+                             "Use 0 for a game with no cap when you pass one "
+                             "value per game.")
     parser.add_argument("--odds", action="store_true",
                         help="Fetch live totals from The Odds API (uses quota).")
     parser.add_argument("--league", default="MLB",
@@ -479,6 +502,12 @@ def main() -> None:
     totals = pair_values(args.total, len(pairs), "total")
     home_mls = pair_values(args.home_ml, len(pairs), "home-ml")
     away_mls = pair_values(args.away_ml, len(pairs), "away-ml")
+    # pair_values requires one value or exactly N. On a multi-game slate where
+    # only one starter is capped, 0 is the way to say "no cap on this one".
+    home_limits = [v or None for v in
+                   pair_values(args.home_sp_limit, len(pairs), "home-sp-limit")]
+    away_limits = [v or None for v in
+                   pair_values(args.away_sp_limit, len(pairs), "away-sp-limit")]
 
     outcomes: List[Dict[str, Any]] = []
     for index, (home, away, game) in enumerate(pairs):
@@ -496,7 +525,9 @@ def main() -> None:
         try:
             outcomes.append(run_one(home, away, game, total, source,
                                     push_discord, args.dry_run,
-                                    home_ml=home_ml, away_ml=away_ml))
+                                    home_ml=home_ml, away_ml=away_ml,
+                                    home_sp_limit=home_limits[index],
+                                    away_sp_limit=away_limits[index]))
         except Exception as exc:  # noqa: BLE001
             log(f"  [FAILED] {type(exc).__name__}: {exc}")
             outcomes.append({"status": "failed", "home": home, "away": away,
