@@ -88,28 +88,72 @@ three caveats together, every time, or don't quote the numbers.
 
 ## 4. Open issues, ranked
 
-1. **`mcp_server.py` / `msp_bot.py` are incompatible — the Discord bot may
-   not survive a restart.** `msp_bot.py` calls `tools.TOOLS[name]["handler"]`
-   — a module-level dict. The `mcp_server.py` now on disk has no such dict,
-   only a class (`MCPServer`) with one tool (`tool_predict_match`,
-   soccer-only), built for Cline/Cowork integration per its own docstring.
-   The currently-running bot process (started Aug 29) likely still works
-   because it loaded the old, compatible file at startup — Python doesn't
-   hot-reload this. Restarting it would break every command (`!tennis`,
-   `!mlb`, `!push`, everything in the runbook) immediately. Not fixed —
-   reconciling the bot's needs with whatever `mcp_server.py` is becoming is
-   a design decision, not a bug fix.
-2. **Corner formula has no real input at all**, not just a contaminated one.
+1. **`mcp_server.py` / `msp_bot.py` are incompatible, CONFIRMED as the live
+   cause of stale Discord output, not just a restart risk.** `msp_bot.py`
+   calls `tools.TOOLS[name]["handler"]` — a module-level dict. The
+   `mcp_server.py` now on disk has no such dict, only a class (`MCPServer`)
+   with one tool (`tool_predict_match`, soccer-only), built for
+   Cline/Cowork integration. Confirmed 2026-09-09: `msp_bot.py` (PID
+   18840) has been running continuously **since 8/29/2026 11:11 PM** — 11
+   days, checked via `Get-CimInstance Win32_Process`. Python doesn't
+   hot-reload; every `!tennis`/`!mlb`/`!push` command since Aug 29 has been
+   served by 11-day-stale code, meaning **none of the fixes made in any
+   session since then — including the WTA best-of-5 fix below — have ever
+   reached Discord through the bot.** This is very likely the reason a bug
+   that looks fixed in the code can still show up live.
+   Restore plan, scoped 2026-09-09, not yet executed (Ron's call):
+   `git log --all --follow -- mcp_server.py` shows only two commits ever
+   touched this file — `421caee` (pre-session baseline, has a real 15-tool
+   `TOOLS` dict matching every one of `msp_bot.py`'s 11 required tool
+   names exactly: `list_teams`, `team_stats`, `list_players`, `run_tennis`,
+   `run_mlb`, `run_slate`, `push_to_discord`, `push_tennis`, `record`,
+   `pending_results`, `check_data`) and `6880b02` (this session's own
+   soccer-resolver commit, which swept in the class-based rewrite as one
+   of the documented accidental extra files — see §5 — not deliberate
+   work by this session). Restored the `421caee` version to a scratch file
+   and ran its own `--selftest`, plus called several handlers directly
+   with the exact kwargs `msp_bot.py` sends (`run_tennis` with a real
+   matchup, `team_stats`, `check_data`): all passed against **today's**
+   scripts and data with zero drift found across every subprocess target
+   (`run_tennis.py`, `run_mlb.py`, `run_soccer_batch.py`, `data_guard.py`,
+   `grade_predictions.py`) and every directly-read store file. `mcp_server.py`
+   currently has **no uncommitted changes** (checked immediately before
+   touching anything), so restoring it is not a clobber risk right now —
+   but restoring would discard the soccer-only class currently in the last
+   commit, and nobody has confirmed who wrote it or whether Ron or the
+   other active agent is relying on it for a Cline/Cowork workflow. That's
+   Ron's call, not an inferred one. **Ron must not restart the bot under
+   any circumstances until this is resolved and he's told it's safe** —
+   restarting onto today's incompatible file would break every bot command
+   immediately, trading "stale but working" for "fully broken."
+2. **Tennis best-of-3 vs best-of-5 was hardcoded downstream of a correct
+   detection, and there are two independent detections of it.** Fixed
+   2026-09-09: `predict_tennis_match()` correctly branched the *underlying
+   probability* by `best_of_5`, but handed it to `_set_rec()`, which
+   hardcoded the *display text* to "3.5 Sets" regardless of format —
+   reproduced on a real WTA match (Sabalenka vs Swiatek), which came back
+   "LEAN OVER 3.5 Sets," a result that cannot happen in a best-of-3 match.
+   `_set_rec()` now takes `best_of_5` and picks the real line (2.5 vs 3.5).
+   Regression test added: `tests/test_tennis_set_format.py`, 6/6 passing.
+   Also fixed a matching dangerous default in `batch_tennis.py`
+   (`match.get("best_of_5", True)` → now requires the key explicitly).
+   **Not consolidated, still a live overlap risk:** `run_tennis.py` (tour
+   membership: `tours == {"atp"}`) and `predict_match.py` (its own,
+   separate `league_lower in gs_keywords` check) each independently decide
+   best_of_5 for their own CLI entry point. Both are safe today, but two
+   implementations of the same decision will drift again — worth
+   consolidating into one function the next time either is touched.
+3. **Corner formula has no real input at all**, not just a contaminated one.
    Retired from the embed (commit `0d874dc`) rather than repaired, because
    there was nothing left to repair — see commit `350416b`'s note.
-3. **Soccer totals may need a compensating re-fit, not just the constant
+4. **Soccer totals may need a compensating re-fit, not just the constant
    removal.** The strip dropped projected totals 27-38% across three real
    matchups. The after-numbers are individually defensible, but this was a
    mechanical strip, not a recalibration, and hasn't been checked against
    real market totals fetched via today's new auto-fetch to see if the
    model now sits systematically below the market. **Check this before
    trusting soccer totals for anything sized.**
-4. **Odds API quota is a real, if now-manageable, constraint.** Free-tier
+5. **Odds API quota is a real, if now-manageable, constraint.** Free-tier
    assumption (~500/month, inferred from usage headers, not confirmed on
    Ron's actual dashboard). Measured real cost: 1 credit/market/call, cost
    independent of how many games are in a league that day. With today's
@@ -117,12 +161,12 @@ three caveats together, every time, or don't quote the numbers.
    design, realistic usage is roughly 6-10 credits on an active day —
    comfortably under budget, but Ron is separately raising the quota
    question with the provider; build against whichever plan he lands on.
-5. **Eerste Divisie is modellable but unpriceable.** Real team data exists
+6. **Eerste Divisie is modellable but unpriceable.** Real team data exists
    (20 teams), but The Odds API has no Dutch second-tier key under any
    name — checked the full sports list directly. Predictions for this
    league will never carry a real market edge until a different odds
    source is added.
-6. **Champions League is currently unpriceable too, but for a different,
+7. **Champions League is currently unpriceable too, but for a different,
    fixable reason.** Four real UCL matches were run on 2026-09-08 (AEK
    Athens–LASK, Dortmund–Villarreal, Porto–Man City, Club Brugge–Aston
    Villa); all four had to run on manually-typed market totals because
@@ -136,7 +180,7 @@ three caveats together, every time, or don't quote the numbers.
    check" item, not a "no data exists" one. Once verified, wiring it in is
    probably one line plus a credit-cost report, the same shape as the
    Saudi/Turkish additions earlier today.
-7. **The CLI's `--live-odds` flag is broken and has been returning nothing
+8. **The CLI's `--live-odds` flag is broken and has been returning nothing
    for a while.** Separate from everything above: `--live-odds` triggers a
    *different*, older code path (`_fetch_live_soccer_market`, hits
    `api.opticodds.com`) than this session's own `live_odds.py` auto-fetch.
@@ -147,17 +191,17 @@ three caveats together, every time, or don't quote the numbers.
    does nothing and getting a printed `[ERROR]` line instead of odds —
    worth either fixing the URL or removing the flag so it stops looking
    like it's supposed to work.
-8. **Pitcher FIP and BB9 are dead constants in the MLB moneyline path**,
+9. **Pitcher FIP and BB9 are dead constants in the MLB moneyline path**,
    found during a correctness pass but not fixed: `models/baseball_predictor.py`
    reads them via `kwargs.get(..., <constant>)` and nothing in the call
    chain ever passes them — same bug shape as soccer's shots/tempo, smaller
    blast radius (team-level runs/era/whip/obp/slg *are* real and do flow
    through correctly).
-9. **Frauen-Bundesliga: zero coverage, not thin coverage.** Neither ESPN nor
+10. **Frauen-Bundesliga: zero coverage, not thin coverage.** Neither ESPN nor
    football-data.co.uk has ever heard of it. This is a new-provider decision
    for Ron, same category as the quota question — don't build toward it
    without that decision made first.
-10. **The overlap map** (full detail was reported separately, summarized
+11. **The overlap map** (full detail was reported separately, summarized
    here): 8 competing Discord embed builders existed before today (1 now
    canonical, ~150 one-off scripts still use whichever legacy one they were
    written against — those weren't touched, they're not what Ron runs); 4
@@ -169,7 +213,7 @@ three caveats together, every time, or don't quote the numbers.
    mistake for live. Recommended consolidation order, if picked back up:
    embed routing for whatever Ron actually runs next → game-identity dedup
    design conversation → delete or clearly mark the dead files.
-11. **One real, unexplained tennis grading gap.** Keys vs Zheng (Sept 5) is
+12. **One real, unexplained tennis grading gap.** Keys vs Zheng (Sept 5) is
    confirmed completed on ESPN's own scoreboard but did not match during
    grading. Not chased down. Everything else in the 9 unmatched rows has a
    clear, benign explanation (not yet final, duplicate logging, a different
@@ -224,10 +268,11 @@ left as-is — evidence, not deliverables.
 
 ## 6. Recommended next steps, in priority order
 
-1. **Resolve the `mcp_server.py`/`msp_bot.py` mismatch before the bot next
-   restarts.** This is the only open item that turns into a hard outage
-   with no warning.
-2. **Check the soccer totals re-fit question (§4.3)** using real market
+1. **Resolve the `mcp_server.py`/`msp_bot.py` mismatch — scoped and
+   verified 2026-09-09, restore plan ready, needs Ron's sign-off before
+   executing (see §4.1).** Confirmed as the reason 11 days of fixes have
+   never reached Discord. Ron must not restart the bot until this lands.
+2. **Check the soccer totals re-fit question (§4.4)** using real market
    totals now that auto-fetch exists — this determines whether soccer
    totals are trustworthy or need another pass.
 3. **Wire hitter props into the embed and test against a real posted
@@ -238,6 +283,7 @@ left as-is — evidence, not deliverables.
    calls, both are currently the reason something can't be built further.
 5. **Chase the Keys/Zheng grading gap** — small, but it's the one loose
    thread in an otherwise fully-explained set of ungraded rows.
-6. **Pick up the overlap map's consolidation order (§4.8)** once the above
-   is settled — it's real technical debt but nothing on it is currently
-   producing a wrong number the way items 1-2 are.
+6. **Consolidate the two independent best-of-5 detections (§4.2)** and
+   pick up the overlap map's consolidation order (§4.11) once the above
+   is settled — real technical debt but nothing on it is currently
+   producing a wrong number the way item 1 was.
