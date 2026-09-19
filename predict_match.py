@@ -415,6 +415,7 @@ def run_baseball_prop_market(
     market_total: float = 8.5,
     home_sp_overrides: Optional[Dict[str, float]] = None,
     away_sp_overrides: Optional[Dict[str, float]] = None,
+    team_overrides: Optional[Dict[str, float]] = None,
 ) -> Dict[str, Any]:
     """
     Generic baseball prop market predictions for MLB + KBO.
@@ -427,6 +428,12 @@ def run_baseball_prop_market(
     Notes:
     - NRFI base probability differs by league environment.
     - Uses internal team stat baselines (pybaseball blocked); can be extended later.
+
+    team_overrides: optional flat dict of "{side}_{field}" keys (field in
+    runs/runs_allowed/era/whip/obp/slg, side in home/away) sourced from real
+    ingested per-team data, e.g. via team_stats_provider.get_baseball_team_stats().
+    Without this, every team's props are computed from the same fixed
+    internal baseline regardless of actual team performance.
 
     home_sp_overrides / away_sp_overrides: optional dicts with any of
     {"era": float, "k_rate": float} to override the static team baseline
@@ -444,6 +451,25 @@ def run_baseball_prop_market(
     away_stats = get_mlb_team_stats(away_team)
     print(f"    Home Stats Source: {home_stats.get('source', 'unknown')}")
     print(f"    Away Stats Source: {away_stats.get('source', 'unknown')}")
+
+    # 1a) Apply real per-team ingested stats, if supplied, in place of the
+    # fixed internal baseline above.
+    field_map = {
+        "runs": "runs_per_game", "runs_allowed": "runs_allowed",
+        "era": "era", "whip": "whip", "obp": "obp", "slg": "slg",
+    }
+    if team_overrides:
+        for field, stats_key in field_map.items():
+            home_value = team_overrides.get(f"home_{field}")
+            if home_value is not None:
+                home_stats[stats_key] = float(home_value)
+            away_value = team_overrides.get(f"away_{field}")
+            if away_value is not None:
+                away_stats[stats_key] = float(away_value)
+        if any(k.startswith("home_") for k in team_overrides):
+            home_stats["source"] = "real_team_stats"
+        if any(k.startswith("away_") for k in team_overrides):
+            away_stats["source"] = "real_team_stats"
 
     # 1b) Apply live starting-pitcher overrides, if supplied, so today's
     # actual starter (not the league-average baseline) drives the projection.
@@ -845,17 +871,25 @@ def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
         from models.baseball_predictor import BaseballPredictor
 
         predictor = BaseballPredictor()
+        # home_sp_overrides["k_rate"] is a per-batter-faced strikeout rate
+        # (e.g. 0.22 = 22%), derived upstream as projected_Ks / (5.5 * 4.3
+        # batters faced). Converting it to K/9 means multiplying back by
+        # batters faced per 9 innings (9 * 4.3), not by 9 -- multiplying by
+        # 9 alone yields a K/9 an order of magnitude below any real
+        # pitcher's, making a supplied elite strikeout arm score worse than
+        # the unset league-average default.
+        BATTERS_FACED_PER_9 = 9.0 * 4.3
         pitcher_kwargs: Dict[str, float] = {}
         if home_sp_overrides:
             if "era" in home_sp_overrides:
                 pitcher_kwargs["home_pitcher_era"] = home_sp_overrides["era"]
             if "k_rate" in home_sp_overrides:
-                pitcher_kwargs["home_k9"] = home_sp_overrides["k_rate"] * 9.0
+                pitcher_kwargs["home_k9"] = home_sp_overrides["k_rate"] * BATTERS_FACED_PER_9
         if away_sp_overrides:
             if "era" in away_sp_overrides:
                 pitcher_kwargs["away_pitcher_era"] = away_sp_overrides["era"]
             if "k_rate" in away_sp_overrides:
-                pitcher_kwargs["away_k9"] = away_sp_overrides["k_rate"] * 9.0
+                pitcher_kwargs["away_k9"] = away_sp_overrides["k_rate"] * BATTERS_FACED_PER_9
 
         # Real per-team run scoring/prevention from data/baseball_stats.json.
         # load_data() defaults each of these to a league average, so without
@@ -884,6 +918,7 @@ def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
             market_total=market_total,
             home_sp_overrides=home_sp_overrides,
             away_sp_overrides=away_sp_overrides,
+            team_overrides=team_overrides,
         ))
 
     result["_stats_source"] = (
