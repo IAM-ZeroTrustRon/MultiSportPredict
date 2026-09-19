@@ -293,8 +293,14 @@ def predict_nfl_game(home_team: str, away_team: str, *,
 
     average = averages["points"]
     hfa = 0.0 if neutral_site else HOME_FIELD_POINTS
-    home_pts = average + (home_off - average) - (away_def - average) + hfa
-    away_pts = average + (away_off - average) - (home_def - average)
+    # strengths() returns defence as POINTS ALLOWED, where a bigger number is
+    # a worse defence. These two lines subtracted that term, so facing a bad
+    # defence lowered your projected points and facing a good one raised them
+    # -- the relationship exactly backwards. It put Patriots/Seahawks, two of
+    # the best defences in the league, at a 62.7 total, and Jets/Titans at
+    # 31.5. Adding the term puts the slate back in the real 41-49 range.
+    home_pts = average + (home_off - average) + (away_def - average) + hfa
+    away_pts = average + (away_off - average) + (home_def - average)
 
     margin = home_pts - away_pts
     total = home_pts + away_pts
@@ -380,11 +386,12 @@ def predict_nfl_game(home_team: str, away_team: str, *,
                 and averages["has_real_1h"])
     if has_real:
         avg_1h = averages["points_1h"]
+        # Same inverted sign as the full-game block above.
         home_1h = (avg_1h + (float(home_1h_for) - avg_1h)
-                   - (float(away_rec.get("points_1h_against", avg_1h)) - avg_1h)
+                   + (float(away_rec.get("points_1h_against") or avg_1h) - avg_1h)
                    + hfa * FIRST_HALF_SHARE)
         away_1h = (avg_1h + (float(away_1h_for) - avg_1h)
-                   - (float(home_rec.get("points_1h_against", avg_1h)) - avg_1h))
+                   + (float(home_rec.get("points_1h_against") or avg_1h) - avg_1h))
         source = "real first-half splits"
     else:
         home_1h = home_pts * FIRST_HALF_SHARE

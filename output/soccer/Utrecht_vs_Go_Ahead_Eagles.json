@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "Eredivisie",
+  "home_team": "Utrecht",
+  "away_team": "Go Ahead Eagles",
+  "timestamp": "2026-09-05T11:04:34.579859",
+  "game": {
+    "projected_home_goals": 3.04,
+    "projected_away_goals": 3.23,
+    "projected_total_goals": 6.27,
+    "home_win_prob": 0.378,
+    "draw_prob": 0.195,
+    "away_win_prob": 0.427
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.195,
+      "market_line": 0.0,
+      "edge": -0.195,
+      "confidence": 28.7,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 6.267,
+      "market_total": 2.75,
+      "edge": 3.517,
+      "confidence": 69.8,
+      "recommendation": "BET"
+    },
+    "btts": {
+      "probability": 0.914,
+      "confidence": 73.9,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.986,
+    "over_25_prob": 0.949,
+    "over_35_prob": 0.871
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.914,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.809,
+      "xg_against": 2.709,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.809,
+      "goals_against": 2.709,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.309,
+      "xg_against": 2.109,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.309,
+      "goals_against": 2.109,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.2,
+    "avg_goals_per_game": 3.25,
+    "home_advantage": 0.4,
+    "draw_rate": 0.24,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

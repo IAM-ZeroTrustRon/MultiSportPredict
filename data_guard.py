@@ -54,18 +54,31 @@ STORES: Dict[str, List[Path]] = {
     "baseball":   [DATA / "baseball_stats.json"],
     "nfl":        [DATA / "nfl_stats.json"],
     "basketball": [DATA / "euroleague_stats.json", DATA / "basketball_stats.json"],
+    "tennis":     [DATA / "tennis" / "players.json"],
 }
 
 # How old the `updated` stamp may get before it is worth mentioning.
 MAX_AGE_DAYS: Dict[str, int] = {
-    "soccer": 10, "baseball": 3, "basketball": 10, "nfl": 14,
+    "soccer": 10, "baseball": 3, "basketball": 10, "nfl": 14, "tennis": 10,
 }
 
 # Fewest games before a team's numbers mean anything. Below this the record is
 # blocked: a 1-game sample produced 6-goal projections and 54% "edges".
 MIN_GAMES: Dict[str, int] = {
     "soccer": 5, "baseball": 15, "basketball": 5, "nfl": 4,
+    # Mirrors ingest_tennis.MIN_MATCHES -- if the two disagree, the ingest
+    # marks a player enough_matches=True that the guard then blocks.
+    "tennis": 8,
 }
+
+# Tennis records are per PLAYER, not per team, and were written by a different
+# ingest with its own field names: the sample count is `matches`, not `games`,
+# and the grouping is `tour` (atp/wta), not `league`. Without these the guard
+# loads the store, finds neither field, and reports every player clean -- the
+# silent pass this module exists to prevent.
+COUNT_FIELD: Dict[str, str] = {"tennis": "matches"}
+GROUP_FIELD: Dict[str, str] = {"tennis": "tour"}
+UNIT: Dict[str, str] = {"tennis": "players"}
 
 # Sports whose store legitimately holds a completed prior season.
 # EuroLeague runs October-May, so through the summer the most recent real data
@@ -95,6 +108,22 @@ def parse_season(value: Any) -> Optional[int]:
     """
     if value is None:
         return None
+    if isinstance(value, dict):
+        # ESPN ingests write season as {"year": 2026, "startDate": ...,
+        # "displayName": "2026-27 French Ligue 1"}. Stringifying that dict
+        # matched nothing, so every ESPN-sourced record was reported "no
+        # season recorded" and the wrong-season ERROR this module exists to
+        # raise could never fire for them -- the guard was blind to the data
+        # shape it now receives most often. Unpack a year-bearing field and
+        # re-parse it, so ESPN records enjoy the same season check as the
+        # string-store records.
+        for key in ("year", "startDate", "date", "name", "displayName", "season"):
+            nested = value.get(key)
+            if nested is not None:
+                parsed = parse_season(nested)
+                if parsed is not None:
+                    return parsed
+        return None
     if isinstance(value, (int, float)):
         year = int(value)
         return year if 1900 <= year <= 2100 else None
@@ -120,7 +149,12 @@ def expected_season(sport: str, today: Optional[_dt.date] = None) -> int:
         return today.year if today.month >= 10 else today.year - 1
     if sport == "nfl":
         return today.year if today.month >= 8 else today.year - 1
-    return today.year          # baseball runs inside one calendar year
+    # Baseball and tennis both run inside a single calendar year, so the
+    # season label is just the year. Tennis is deliberately NOT in
+    # PRIOR_SEASON_IS_FINE: the tour runs January-November, so a player whose
+    # newest record is last season has not been seen in months and their form
+    # is not what you are about to bet on.
+    return today.year
 
 
 def days_since(stamp: Any) -> Optional[int]:
@@ -168,7 +202,7 @@ def check_records(records: Dict[str, Dict[str, Any]], sport: str,
                 problems.append(Problem(
                     "warn", team, f"season {season} is ahead of {target}"))
 
-        games = record.get("games")
+        games = record.get(COUNT_FIELD.get(sport, "games"))
         floor = MIN_GAMES.get(sport)
         if floor is not None and isinstance(games, (int, float)):
             if games < floor:
@@ -248,8 +282,9 @@ def load_store(path: Path) -> Dict[str, Dict[str, Any]]:
     return data if isinstance(data, dict) else {}
 
 
-def audit(sport: str) -> Tuple[int, int, int]:
+def audit(sport: str) -> Tuple[int, int, int, int, int]:
     total = errors = warnings = 0
+    season_errors = sample_errors = 0
     for path in STORES.get(sport, []):
         store = load_store(path)
         records = {k: v for k, v in store.items()
@@ -259,15 +294,23 @@ def audit(sport: str) -> Tuple[int, int, int]:
             continue
 
         problems = check_records(records, sport)
+        group_key = GROUP_FIELD.get(sport, "league")
         by_league: Dict[str, List[str]] = {}
         for team, record in records.items():
-            by_league.setdefault(str(record.get("league", "?")), []).append(team)
+            by_league.setdefault(str(record.get(group_key, "?")), []).append(team)
 
         errored = {p.team for p in problems if p.severity == "error"}
         warned = {p.team for p in problems if p.severity == "warn"}
         total += len(records)
         errors += len(errored)
         warnings += len(warned)
+        for team in errored:
+            msgs = [p.message for p in problems
+                    if p.severity == "error" and p.team == team]
+            if any("season" in m for m in msgs):
+                season_errors += 1
+            if any("game" in m for m in msgs):
+                sample_errors += 1
 
         print(f"  {path.name}")
         for league, members in sorted(by_league.items()):
@@ -280,12 +323,12 @@ def audit(sport: str) -> Tuple[int, int, int]:
             flag = (f"  <-- {bad} " + ("WRONG SEASON" if reasons == {"season"}
                                        else "TOO FEW GAMES" if reasons == {"sample"}
                                        else "UNUSABLE")) if bad else ""
-            print(f"    {league:<24} {len(members):>3} teams   "
+            print(f"    {league:<24} {len(members):>3} {UNIT.get(sport, 'teams'):<7} "
                   f"season {','.join(seasons[:3]):<12} updated {stamps[-1]}{flag}")
 
         for problem in [p for p in problems if p.severity == "error"][:4]:
             print(f"      ERROR {problem.team}: {problem.message}")
-    return total, errors, warnings
+    return total, errors, warnings, season_errors, sample_errors
 
 
 def main() -> None:
@@ -301,7 +344,7 @@ def main() -> None:
     print(f"DATA AGE AUDIT  -  {TODAY}")
     print("=" * 78)
 
-    total = errors = warnings = 0
+    total = errors = warnings = season_errors = sample_errors = 0
     for sport in sports:
         print(f"\n[{sport}]  expecting season {expected_season(sport)}"
               + ("  (prior season is acceptable here)"
@@ -310,13 +353,21 @@ def main() -> None:
         total += counts[0]
         errors += counts[1]
         warnings += counts[2]
+        season_errors += counts[3]
+        sample_errors += counts[4]
 
     print("\n" + "=" * 78)
-    print(f"{total} record(s): {errors} wrong season, {warnings} stale or unverifiable")
-    if errors:
+    print(f"{total} record(s): {errors} unusable "
+          f"({season_errors} wrong season, {sample_errors} too few games), "
+          f"{warnings} stale or unverifiable")
+    if season_errors:
         print("\nWrong-season records will produce confident predictions from data")
         print("that does not describe the teams playing. Re-ingest before running a")
         print("slate that touches them.")
+    if sample_errors:
+        print("\nToo-few-games teams are on a correct season but their record is")
+        print("too thin to mean anything yet. Re-ingest once more games are played")
+        print("and re-run the slate - the guard refuses these on purpose.")
     print("=" * 78)
     sys.exit(1 if (args.strict and errors) else 0)
 

@@ -1,0 +1,159 @@
+{
+  "sport": "soccer",
+  "league": "Champions League",
+  "home_team": "AEK Athens",
+  "away_team": "LASK",
+  "timestamp": "2026-09-08T11:28:57.186552",
+  "game": {
+    "projected_home_goals": 2.23,
+    "projected_away_goals": 1.84,
+    "projected_total_goals": 4.07,
+    "home_win_prob": 0.465,
+    "draw_prob": 0.209,
+    "away_win_prob": 0.325
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.394,
+      "market_line": 0.0,
+      "edge": 0.394,
+      "confidence": 32.3,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 4.069,
+      "market_total": 3.5,
+      "edge": 0.569,
+      "confidence": 34.7,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.765,
+      "confidence": 64.4,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.913,
+    "over_25_prob": 0.772,
+    "over_35_prob": 0.58
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.765,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 3.333,
+      "xg_against": 0.333,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 3.333,
+      "goals_against": 0.333,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 3.0,
+      "xg_against": 0.4,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 3.0,
+      "goals_against": 0.4,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.05,
+    "avg_goals_per_game": 2.6,
+    "home_advantage": 0.35,
+    "draw_rate": 0.24,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real",
+  "auto_odds": {
+    "status": "unknown_league",
+    "captured_at": null,
+    "reason": "'Champions League' is not in SOCCER_LEAGUES -- add it there first"
+  },
+  "extra_markets": {
+    "_extra_markets_source": "derived_from_existing_projection",
+    "team_total_goals": {
+      "home": {
+        "over_05": 0.892,
+        "over_15": 0.653,
+        "over_25": 0.385
+      },
+      "away": {
+        "over_05": 0.841,
+        "over_15": 0.549,
+        "over_25": 0.28
+      }
+    },
+    "team_corners": {
+      "home": {
+        "over_35": 0.824,
+        "over_45": 0.679,
+        "over_55": 0.512,
+        "projection": 5.74
+      },
+      "away": {
+        "over_35": 0.757,
+        "over_45": 0.587,
+        "over_55": 0.412,
+        "projection": 5.16
+      },
+      "split_method": "attacking_share",
+      "degraded": false
+    },
+    "first_half_goals": {
+      "projection": 1.83,
+      "fraction_used": 0.45,
+      "over_05": 0.84,
+      "over_15": 0.546
+    },
+    "btts_confirmed": {
+      "probability": 0.765
+    },
+    "_teams": {
+      "home": "AEK Athens",
+      "away": "LASK"
+    }
+  },
+  "halftime": {
+    "recommendation_1h_total": "Over 0.5: 84.0% | Over 1.5: 54.6%",
+    "predicted_1h_result": "Proj: 1.83"
+  },
+  "team_corners": {
+    "home_proj": 5.74,
+    "away_proj": 5.16
+  },
+  "confidence_engine": {
+    "edge": 0.57,
+    "confidence": 34.7,
+    "recommendation": "PASS"
+  },
+  "live_market": {
+    "source": "odds_api",
+    "status": "event_not_found",
+    "league_key": "Champions League"
+  }
+}

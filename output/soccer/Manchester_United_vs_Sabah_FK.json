@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "Champions League",
+  "home_team": "Manchester United",
+  "away_team": "Sabah FK",
+  "timestamp": "2026-09-10T15:31:35.049005",
+  "game": {
+    "projected_home_goals": 1.5,
+    "projected_away_goals": 2.17,
+    "projected_total_goals": 3.67,
+    "home_win_prob": 0.268,
+    "draw_prob": 0.212,
+    "away_win_prob": 0.52
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.667,
+      "market_line": 0.0,
+      "edge": -0.667,
+      "confidence": 37.2,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.673,
+      "market_total": 3.5,
+      "edge": 0.173,
+      "confidence": 27.6,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.723,
+      "confidence": 60.2,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.881,
+    "over_25_prob": 0.71,
+    "over_35_prob": 0.5
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.723,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 2.333,
+      "xg_against": 2.0,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 2.333,
+      "goals_against": 2.0,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.667,
+      "xg_against": 0.0,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.667,
+      "goals_against": 0.0,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.05,
+    "avg_goals_per_game": 2.6,
+    "home_advantage": 0.35,
+    "draw_rate": 0.24,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

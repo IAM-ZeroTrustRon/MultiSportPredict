@@ -264,22 +264,40 @@ def write_atomic(path: Path, text: str) -> None:
     os.replace(tmp, path)
 
 
-def merge_first_half(averages: Dict[str, Dict[str, Any]]) -> int:
-    """Add the 1H fields to nfl_stats.json without disturbing anything else."""
+def merge_first_half(averages: Dict[str, Dict[str, Any]], season: int) -> int:
+    """Add the 1H fields to nfl_stats.json without disturbing anything else.
+
+    The season argument is load-bearing. norm_team() strips the "(2025)" tag on
+    purpose so the schedule feed's plain names match the store's keys -- which
+    means every season of a team normalises to the SAME string. Building a
+    {normalised: key} dict from a store holding both seasons therefore keeps
+    only one of them, and merging without checking the season wrote 2026 Week 1
+    averages into the 2025 records: 32 teams left claiming a 17-game season
+    whose first-half numbers came from one game. Baltimore's 2025 average went
+    from 10.76 to 31.0.
+
+    Match the season explicitly.
+    """
     if not STATS_PATH.exists():
         log(f"[warn] {STATS_PATH.name} missing -- 1H averages not merged.")
         return 0
     store = json.loads(STATS_PATH.read_text(encoding="utf-8-sig"))
 
-    by_norm = {norm_team(k): k for k in store if not k.startswith("_")}
+    by_norm: Dict[str, str] = {}
+    for key, record in store.items():
+        if key.startswith("_") or not isinstance(record, dict):
+            continue
+        if record.get("season") != season:
+            continue
+        by_norm[norm_team(key)] = key
+
     merged = 0
     for team, fields in averages.items():
         key = by_norm.get(norm_team(team))
         if key is None:
             continue
-        if isinstance(store.get(key), dict):
-            store[key].update(fields)
-            merged += 1
+        store[key].update(fields)
+        merged += 1
     write_atomic(STATS_PATH, json.dumps(store, indent=2, ensure_ascii=False))
     return merged
 
@@ -390,7 +408,7 @@ def main() -> None:
         f"seasons {', '.join(str(s) for s in all_seasons)})")
 
     if averages:
-        merged = merge_first_half(averages)
+        merged = merge_first_half(averages, prior)
         log(f"Merged first-half averages into {merged} team(s) in {STATS_PATH.name}")
         if merged == 0:
             log("[WARN] 0 teams matched. The stats store keys and the schedule "

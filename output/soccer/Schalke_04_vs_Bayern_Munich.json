@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "Bundesliga",
+  "home_team": "Schalke 04",
+  "away_team": "Bayern Munich",
+  "timestamp": "2026-09-05T11:04:38.516064",
+  "game": {
+    "projected_home_goals": 2.68,
+    "projected_away_goals": 2.93,
+    "projected_total_goals": 5.61,
+    "home_win_prob": 0.369,
+    "draw_prob": 0.195,
+    "away_win_prob": 0.437
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.248,
+      "market_line": 0.0,
+      "edge": -0.248,
+      "confidence": 29.7,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 5.613,
+      "market_total": 3.5,
+      "edge": 2.113,
+      "confidence": 57.8,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.873,
+      "confidence": 72.0,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.976,
+    "over_25_prob": 0.918,
+    "over_35_prob": 0.811
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.873,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.667,
+      "xg_against": 2.095,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.667,
+      "goals_against": 2.095,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.381,
+      "xg_against": 1.81,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.381,
+      "goals_against": 1.81,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.15,
+    "avg_goals_per_game": 3.1,
+    "home_advantage": 0.3,
+    "draw_rate": 0.23,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

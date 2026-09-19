@@ -3,40 +3,40 @@
   "league": "Premier League",
   "home_team": "Liverpool",
   "away_team": "Aston Villa",
-  "timestamp": "2026-06-24T11:57:11.753907",
+  "timestamp": "2026-09-08T09:24:55.654612",
   "game": {
-    "projected_home_goals": 2.41,
-    "projected_away_goals": 1.94,
-    "projected_total_goals": 4.36,
-    "home_win_prob": 0.477,
-    "draw_prob": 0.203,
-    "away_win_prob": 0.319
+    "projected_home_goals": 1.61,
+    "projected_away_goals": 1.27,
+    "projected_total_goals": 2.88,
+    "home_win_prob": 0.45,
+    "draw_prob": 0.247,
+    "away_win_prob": 0.303
   },
   "predictions": {
     "side": {
-      "model_xg_diff": 0.467,
+      "model_xg_diff": 0.335,
       "market_line": 0.0,
-      "edge": 0.467,
-      "confidence": 33.6,
+      "edge": 0.335,
+      "confidence": 31.3,
       "recommendation": "PASS"
     },
     "total": {
-      "model_total_xg": 4.355,
+      "model_total_xg": 2.881,
       "market_total": 2.5,
-      "edge": 1.855,
-      "confidence": 54.7,
+      "edge": 0.381,
+      "confidence": 31.4,
       "recommendation": "PASS"
     },
     "btts": {
-      "probability": 0.716,
-      "confidence": 59.4,
+      "probability": 0.582,
+      "confidence": 40.2,
       "recommendation": "PASS"
     }
   },
   "goals_analysis": {
-    "over_15_prob": 0.931,
-    "over_25_prob": 0.809,
-    "over_35_prob": 0.633
+    "over_15_prob": 0.782,
+    "over_25_prob": 0.55,
+    "over_35_prob": 0.326
   },
   "corners_analysis": {
     "projection": 10.9,
@@ -44,7 +44,7 @@
     "over_95_prob": 0.653,
     "over_105_prob": 0.533
   },
-  "btts_probability": 0.716,
+  "btts_probability": 0.582,
   "corner_projection": 10.9,
   "team_metrics": {
     "home": {
@@ -84,7 +84,9 @@
     "goal_variance": 1.1,
     "avg_goals_per_game": 2.85,
     "home_advantage": 0.35,
-    "draw_rate": 0.25
+    "draw_rate": 0.25,
+    "data_tier": 1
   },
-  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics"
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "placeholder_fallback"
 }

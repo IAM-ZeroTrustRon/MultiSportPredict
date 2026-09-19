@@ -1152,14 +1152,21 @@ def _moneyline_edge(model_home_prob: Optional[float], home_name: str, away_name:
     # a side is chosen, the edge shown must be THAT side's edge, which is
     # positive by construction -- that's the only reason it was recommended.
     display_edge = magnitude
+    # action/side/strength returned as their own fields (not just baked into
+    # `rec`) so a caller building a one-line verdict (embed_builder.
+    # moneyline_verdict) can assemble one from clean values instead of
+    # parsing this sentence back apart -- same pattern as tennis's
+    # _recommendation() in models/tennis_predictor.py.
     if magnitude >= 4.5 and conf >= 63:
-        rec = f"BET {side} ML (edge: {display_edge:+.1f}%)"
+        action_word, strength = "BET", "strong"
     elif magnitude >= 2.0 and conf >= 57:
-        rec = f"LEAN {side} ML (edge: {display_edge:+.1f}%)"
+        action_word, strength = "LEAN", "moderate"
     elif magnitude >= 0.5:
-        rec = f"SLIGHT LEAN {side} ML (edge: {display_edge:+.1f}%)"
+        action_word, strength = "SLIGHT LEAN", "slight"
     else:
-        rec = "PASS - Market efficient"
+        action_word, strength = "PASS", None
+    rec = (f"{action_word} {side} ML (edge: {display_edge:+.1f}%)"
+           if action_word != "PASS" else "PASS - Market efficient")
     return {
         "market_home_prob": round(market_home_prob, 4),
         "market_away_prob": round(market_away_prob, 4),
@@ -1174,6 +1181,9 @@ def _moneyline_edge(model_home_prob: Optional[float], home_name: str, away_name:
         # had market odds attached.
         "ml_confidence": conf,
         "recommendation": rec,
+        "action": action_word,
+        "side": side if action_word != "PASS" else None,
+        "strength": strength,
     }
 
 

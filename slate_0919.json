@@ -1,0 +1,24 @@
+{
+  "matches": [
+    {
+      "home": "Stuttgart",
+      "away": "Dortmund",
+      "league": "Bundesliga"
+    },
+    {
+      "home": "Ajax Amsterdam",
+      "away": "Excelsior",
+      "league": "Eredivisie"
+    },
+    {
+      "home": "Venezia",
+      "away": "Lazio",
+      "league": "Serie A"
+    },
+    {
+      "home": "Dynamo Dresden",
+      "away": "Hertha Berlin",
+      "league": "2. Bundesliga"
+    }
+  ]
+}

@@ -47,6 +47,18 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
 
+# Windows consoles/code pages default to cp1252, which cannot encode the
+# emoji used throughout the review table. Without this a run that already
+# finished (or already refused a match on the data guard) dies at the print
+# stage with UnicodeEncodeError, showing the user a traceback instead of the
+# refusal they were about to read. Force UTF-8 so the outcome is what prints.
+for stream in (sys.stdout, sys.stderr):
+    if stream is not None and hasattr(stream, "reconfigure"):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
 SLATE = ROOT / "slate_today.json"
 REVIEW = ROOT / "data" / "batch_review.json"
 
@@ -353,9 +365,16 @@ def print_review(rows: List[Dict[str, Any]]) -> None:
         league_label = row.get("league", "")[:16] or "-"
         if row["status"] != "ok":
             icon = {"skipped": "⏭️", "failed": "❌", "dry-run": "🔍"}.get(row["status"], "❓")
-            note = {"skipped": "no stats: " + ", ".join(row.get("missing", [])),
-                    "failed": row.get("error", "failed"),
-                    "dry-run": "dry run"}.get(row["status"], row["status"])
+            if row.get("reason") == "stale data":
+                # Guard refusal: teams ARE in the store (Brest and PSG have
+                # recorded stats) but sit below the minimum-game floor, so
+                # their numbers mean nothing yet. "no stats" would send you
+                # re-ingesting a league you already have.
+                note = "stale data (below min games)"
+            else:
+                note = {"skipped": "no stats: " + ", ".join(row.get("missing", [])),
+                        "failed": row.get("error", "failed"),
+                        "dry-run": "dry run"}.get(row["status"], row["status"])
             log(f"  {row['n']:>2}  {icon} {label:<34}{league_label:<18}{note[:40]}")
             continue
 
@@ -405,10 +424,20 @@ def print_review(rows: List[Dict[str, Any]]) -> None:
         log(f"      venv/Scripts/python.exe run_soccer_batch.py --push "
             f"{' '.join(str(r['n']) for r in ran[:3])}")
     if skipped:
-        log(f"\n  ⏭️  {len(skipped)} skipped for missing stats. Pull their leagues:")
-        leagues = sorted({r["league"] for r in skipped})
-        log(f"      leagues affected: {', '.join(leagues)}")
-        log(f"      venv/Scripts/python.exe ingest_soccer_fd.py --list")
+        guarded = [r for r in skipped if r.get("reason") == "stale data"]
+        no_stats = [r for r in skipped if r.get("reason") != "stale data"]
+        if no_stats:
+            log(f"\n  ⏭️  {len(no_stats)} skipped for missing stats. Pull their leagues:")
+            leagues = sorted({r["league"] for r in no_stats})
+            log(f"      leagues affected: {', '.join(leagues)}")
+            log(f"      venv/Scripts/python.exe ingest_soccer_fd.py --list")
+        if guarded:
+            log(f"\n  🛡️  {len(guarded)} guarded out: teams are in the store but below the")
+            log(f"      minimum-game floor, so their numbers mean nothing yet.")
+            log(f"      Re-ingest these leagues later and re-run the slate:")
+            leagues = sorted({r["league"] for r in guarded})
+            log(f"      leagues affected: {', '.join(leagues)}")
+            log(f"      venv/Scripts/python.exe ingest_soccer_espn.py --leagues ligue_1")
     log("  ⚠️   EDGE is model minus no-vig market. Small edges are noise: under a")
     log("      couple of points it is model error, not disagreement worth backing.")
     rule("=", 112)

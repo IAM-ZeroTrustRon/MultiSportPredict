@@ -183,6 +183,11 @@ def _store_prediction(
             raw_json=raw_json,
             league=league,
         )
+        # The success path fell off the end of the function and returned None,
+        # so `if _store_prediction(...)` was False on every write that actually
+        # landed -- the same swallow the docstring above says was fixed, just
+        # pointing the other way.
+        return True
     except Exception as exc:  # noqa: BLE001
         print(f"[WARN] Failed to store prediction to historical_storage: {exc}")
         return False

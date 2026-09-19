@@ -141,17 +141,57 @@ def as_notes(value: Any) -> List[str]:
 
 def market(name: str, *, model: Optional[str] = None, market_value: Optional[str] = None,
            edge: Optional[str] = None, pick: Optional[str] = None,
-           extra: Optional[str] = None) -> Optional[Dict[str, Any]]:
+           extra: Optional[str] = None, verdict: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """One row. Returns None when there is nothing real to show.
 
     A row needs at least a model number or a pick. A heading with an empty
     value renders as though the answer were zero, which is how "Model Edge"
     and "Confidence" once shipped as blank fields for weeks.
+
+    verdict: one unambiguous sentence -- action (BET/LEAN/PASS), the exact
+    side and market, the price it's predicated on, and the strength -- built
+    by the extractor (see moneyline_verdict()) and rendered FIRST and bold,
+    ahead of the supporting model/market/edge numbers. Without this, the
+    reader has to derive the verdict themselves from percentages scattered
+    across the field, which is how "LEAN St. Louis Cardinals ML
+    (edge: -9.1%)" shipped looking like a fadeable pick instead of the
+    correctly-recommended one it was. A row can carry both verdict and pick;
+    when verdict is set, the renderer shows verdict first and drops pick
+    from the body (verdict already says what pick would have said, plus
+    the price and the side, which pick alone did not).
     """
-    if model is None and pick is None and extra is None:
+    if model is None and pick is None and extra is None and verdict is None:
         return None
     return {"name": name, "model": model, "market": market_value,
-            "edge": edge, "pick": pick, "extra": extra}
+            "edge": edge, "pick": pick, "extra": extra, "verdict": verdict}
+
+
+def moneyline_verdict(action: Optional[str], side: Optional[str], strength: Optional[str],
+                      market_label: str, price_text: Optional[str], has_market: bool,
+                      model_side: Optional[str] = None,
+                      model_prob_text: Optional[str] = None) -> Optional[str]:
+    """One line: action + exact side + market + price it's predicated on + strength.
+
+    Assembled from the predictor's own already-resolved action/side/strength
+    (models/tennis_predictor.py's _recommendation(), predict_match.py's
+    _moneyline_edge() -- both return these as clean fields precisely so this
+    never has to re-derive or parse a sentence apart) plus the price it was
+    computed against. A reader should never have to combine model%, market%,
+    edge and confidence themselves to work out what the pick actually is.
+
+    When no market odds exist, that is the verdict -- PASS, stated as a
+    reason, not a bare model percentage that reads like a priced edge.
+    """
+    if not has_market:
+        who = f" ({model_side} {model_prob_text})" if model_side and model_prob_text else ""
+        return f"PASS — {market_label}: no market odds supplied{who}"
+
+    price_clause = f" @ {price_text} market" if price_text else ""
+    if action is None or action == "PASS" or side is None:
+        return f"PASS — {market_label} market efficient{price_clause}"
+
+    strength_clause = f" — {strength} edge" if strength else ""
+    return f"{action} {side} {market_label}{price_clause}{strength_clause}"
 
 
 def names_from(data: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
@@ -191,27 +231,34 @@ def extract_baseball(data: Dict[str, Any]) -> Dict[str, Any]:
     if home_prob is not None:
         hp = dig(ml, "home_win_probability")
         ap = dig(ml, "away_win_probability")
-        raw = dig(ml, "confidence", "side", "recommendation")
         home_name = (data.get("home_team") or "")[:20]
         away_name = (data.get("away_team") or "")[:20]
-        side_pick = raw if raw else "PASS"
-        if side_pick.upper() == "BET" and hp is not None and ap is not None:
-            if hp > ap and home_name:
-                side_pick = f"BET {home_name}"
-            elif ap > hp and away_name:
-                side_pick = f"BET {away_name}"
         has_market_edge = ml.get("edge_pct") is not None
-        no_market_note = "model probability only -- no market odds supplied"
-        base_conf = (f"conf {dec(dig(ml, 'confidence', 'side', 'score'), 0)}"
-                     if dig(ml, "confidence", "side", "score") is not None else None)
+        # action/side/strength come straight from _moneyline_edge() in
+        # predict_match.py (only present when real home_ml/away_ml were
+        # supplied) -- same clean-fields pattern as tennis's _recommendation(),
+        # so the verdict is assembled, not parsed or re-derived.
+        action, rec_side, strength = ml.get("action"), ml.get("side"), ml.get("strength")
+        market_home_prob = num(ml.get("market_home_prob"))
+        if has_market_edge and market_home_prob is not None:
+            side_price = (market_home_prob if rec_side == home_name
+                         else (1 - market_home_prob) if rec_side == away_name
+                         else market_home_prob)
+            price_text = pct(side_price)
+        else:
+            price_text = None
+        fav_name = home_name if num(hp or 0) >= num(ap or 0) else away_name
+        fav_prob = pct(hp if fav_name == home_name else ap)
+        verdict = moneyline_verdict(action, rec_side, strength, "Moneyline",
+                                    price_text, has_market_edge,
+                                    model_side=fav_name, model_prob_text=fav_prob)
         rows.append(market(
             "💰 Moneyline",
             model=f"{pct(hp)} / {pct(ap)}",
             market_value=pct(ml.get("market_home_prob")) if has_market_edge else None,
             edge=signed(ml.get("edge_pct"), 1) if has_market_edge else None,
-            pick=clean(ml.get("recommendation")) if has_market_edge else side_pick,
-            extra=(f"conf {dec(ml.get('ml_confidence'), 0)}" if has_market_edge else
-                   (f"{base_conf} -- {no_market_note}" if base_conf else no_market_note))))
+            verdict=verdict,
+            extra=(f"conf {dec(ml.get('ml_confidence'), 0)}" if has_market_edge else None)))
 
     total_model = projection.get("total") or ml.get("projected_total_runs")
     if total_model is not None:
@@ -364,14 +411,33 @@ def extract_tennis(data: Dict[str, Any]) -> Dict[str, Any]:
         # never populates, so checking those would always read as "no
         # market" even when --p1-ml/--p2-ml were given.
         has_market = data.get("market_prob") is not None
+        home_name, away_name = clean(ml.get("home")), clean(ml.get("away"))
+        market_prob = num(data.get("market_prob"))
+        rec_side, action, strength = ml.get("side"), ml.get("action"), ml.get("strength")
+        # Price the recommended side was actually priced against -- market_prob
+        # is home's devigged probability; the away side's is the complement
+        # (no_vig() makes the two sum to 1 by construction).
+        if market_prob is not None:
+            side_price = (market_prob if rec_side == home_name
+                         else (1 - market_prob) if rec_side == away_name
+                         else market_prob)
+            price_text = pct(side_price)
+        else:
+            price_text = None
+        fav_name = home_name if num(ml.get("home_win_prob") or 0) >= \
+                   num(ml.get("away_win_prob") or 0) else away_name
+        fav_prob = pct(ml.get("home_win_prob") if fav_name == home_name
+                       else ml.get("away_win_prob"))
+        verdict = moneyline_verdict(action, rec_side, strength, "Moneyline",
+                                    price_text, has_market,
+                                    model_side=fav_name, model_prob_text=fav_prob)
         rows.append(market(
             "💰 Moneyline",
             model=f"{pct(ml.get('home_win_prob'))} / {pct(ml.get('away_win_prob'))}",
             edge=signed(ml.get("edge_pct"), 1) if has_market else None,
-            pick=clean(ml.get("recommendation")),
-            extra=(f"conf {dec(ml.get('confidence'), 0)}"
-                   if has_market and ml.get("confidence") is not None
-                   else ("model probability only -- no market odds supplied" if not has_market else None))))
+            verdict=verdict,
+            extra=(f"conf {dec(ml.get('confidence'), 0)}" if has_market and
+                   ml.get("confidence") is not None else None)))
 
     if sets.get("over_35_prob") is not None:
         rows.append(market("Sets", model=pct(sets.get("over_35_prob")),
@@ -532,7 +598,12 @@ def normalise(sport: str, data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _tone(rows: List[Dict[str, Any]]) -> int:
-    picks = " ".join((row.get("pick") or "").upper() for row in rows)
+    # verdict rows carry the recommendation there instead of in pick (see
+    # market()'s docstring) -- both are scanned so a BET/PASS verdict still
+    # colours the embed correctly.
+    picks = " ".join(
+        f"{row.get('pick') or ''} {row.get('verdict') or ''}".upper()
+        for row in rows)
     if "STRONG" in picks:
         return COLOR_STRONG
     if "BET" in picks or "OVER" in picks or "UNDER" in picks or "HOME" in picks \
@@ -555,6 +626,29 @@ def build_embed(sport: str, data: Dict[str, Any]) -> Dict[str, Any]:
 
     fields: List[Dict[str, Any]] = []
     for row in shape["markets"]:
+        if row.get("verdict"):
+            # Verdict-first rendering: the one unambiguous line goes first
+            # and bold, ahead of the supporting model/market/edge numbers --
+            # see market()'s docstring for why. `pick` is intentionally not
+            # rendered here: verdict already carries what pick would have
+            # (the recommendation), plus the side and the price, which pick
+            # alone did not.
+            body = f"**{row['verdict']}**"
+            support: List[str] = []
+            if row["model"]:
+                support.append(row["model"])
+            if row["market"]:
+                support.append(f"mkt {row['market']}")
+            if row["edge"]:
+                support.append(f"edge {row['edge']}")
+            if support:
+                body += "\n" + "  ".join(support)
+            if row["extra"]:
+                body += f"\n*{row['extra']}*"
+            fields.append({"name": row["name"], "value": body or "​",
+                           "inline": True})
+            continue
+
         parts: List[str] = []
         if row["model"]:
             parts.append(f"**{row['model']}**")

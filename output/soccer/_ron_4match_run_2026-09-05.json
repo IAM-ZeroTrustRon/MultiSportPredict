@@ -1,0 +1,594 @@
+{
+  "Nijmegen_vs_Feyenoord": {
+    "sport": "soccer",
+    "league": "Eredivisie",
+    "home_team": "Nijmegen",
+    "away_team": "Feyenoord",
+    "timestamp": "2026-09-05T14:52:15.480429",
+    "game": {
+      "projected_home_goals": 3.21,
+      "projected_away_goals": 2.83,
+      "projected_total_goals": 6.05,
+      "home_win_prob": 0.452,
+      "draw_prob": 0.193,
+      "away_win_prob": 0.355
+    },
+    "predictions": {
+      "side": {
+        "model_xg_diff": 0.38,
+        "market_line": 0.0,
+        "edge": 0.38,
+        "confidence": 32.1,
+        "recommendation": "PASS"
+      },
+      "total": {
+        "model_total_xg": 6.048,
+        "market_total": 2.5,
+        "edge": 3.548,
+        "confidence": 70.0,
+        "recommendation": "BET"
+      },
+      "btts": {
+        "probability": 0.888,
+        "confidence": 72.8,
+        "recommendation": "BET"
+      }
+    },
+    "goals_analysis": {
+      "over_15_prob": 0.983,
+      "over_25_prob": 0.94,
+      "over_35_prob": 0.853
+    },
+    "corners_analysis": {
+      "projection": 10.9,
+      "over_85_prob": 0.762,
+      "over_95_prob": 0.653,
+      "over_105_prob": 0.533
+    },
+    "btts_probability": 0.888,
+    "corner_projection": 10.9,
+    "team_metrics": {
+      "home": {
+        "xg_for": 2.232,
+        "xg_against": 1.788,
+        "shots": 13.0,
+        "sot": 4.5,
+        "goals_for": 2.232,
+        "goals_against": 1.788,
+        "clean_sheets": 4,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.3,
+        "width_crossing": 0.55,
+        "final_third_pressure": 0.55
+      },
+      "away": {
+        "xg_for": 2.209,
+        "xg_against": 1.809,
+        "shots": 11.5,
+        "sot": 4.0,
+        "goals_for": 2.209,
+        "goals_against": 1.809,
+        "clean_sheets": 3,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.1,
+        "width_crossing": 0.5,
+        "final_third_pressure": 0.45
+      }
+    },
+    "league_config": {
+      "goal_variance": 1.2,
+      "avg_goals_per_game": 3.25,
+      "home_advantage": 0.4,
+      "draw_rate": 0.24,
+      "data_tier": 1
+    },
+    "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+    "_stats_source": "real",
+    "extra_markets": {
+      "_extra_markets_source": "derived_from_existing_projection",
+      "team_total_goals": {
+        "home": {
+          "over_05": 0.96,
+          "over_15": 0.83,
+          "over_25": 0.622
+        },
+        "away": {
+          "over_05": 0.941,
+          "over_15": 0.774,
+          "over_25": 0.538
+        }
+      },
+      "team_corners": {
+        "home": {
+          "over_35": 0.796,
+          "over_45": 0.639,
+          "over_55": 0.468,
+          "projection": 5.48
+        },
+        "away": {
+          "over_35": 0.789,
+          "over_45": 0.63,
+          "over_55": 0.457,
+          "projection": 5.42
+        },
+        "split_method": "attacking_share"
+      },
+      "first_half_goals": {
+        "projection": 2.72,
+        "fraction_used": 0.45,
+        "over_05": 0.934,
+        "over_15": 0.755
+      },
+      "btts_confirmed": {
+        "probability": 0.888
+      },
+      "_teams": {
+        "home": "Nijmegen",
+        "away": "Feyenoord"
+      }
+    },
+    "halftime": {
+      "recommendation_1h_total": "Over 0.5: 93.4% | Over 1.5: 75.5%",
+      "predicted_1h_result": "Proj: 2.72"
+    },
+    "team_corners": {
+      "home_proj": 5.48,
+      "away_proj": 5.42
+    },
+    "confidence_engine": {
+      "edge": 3.55,
+      "confidence": 70.0,
+      "recommendation": "BET"
+    }
+  },
+  "Utrecht_vs_Go Ahead Eagles": {
+    "sport": "soccer",
+    "league": "Eredivisie",
+    "home_team": "Utrecht",
+    "away_team": "Go Ahead Eagles",
+    "timestamp": "2026-09-05T14:52:15.615358",
+    "game": {
+      "projected_home_goals": 3.04,
+      "projected_away_goals": 3.23,
+      "projected_total_goals": 6.27,
+      "home_win_prob": 0.378,
+      "draw_prob": 0.195,
+      "away_win_prob": 0.427
+    },
+    "predictions": {
+      "side": {
+        "model_xg_diff": -0.195,
+        "market_line": 0.0,
+        "edge": -0.195,
+        "confidence": 28.7,
+        "recommendation": "PASS"
+      },
+      "total": {
+        "model_total_xg": 6.267,
+        "market_total": 2.5,
+        "edge": 3.767,
+        "confidence": 71.2,
+        "recommendation": "BET"
+      },
+      "btts": {
+        "probability": 0.914,
+        "confidence": 73.9,
+        "recommendation": "BET"
+      }
+    },
+    "goals_analysis": {
+      "over_15_prob": 0.986,
+      "over_25_prob": 0.949,
+      "over_35_prob": 0.871
+    },
+    "corners_analysis": {
+      "projection": 10.9,
+      "over_85_prob": 0.762,
+      "over_95_prob": 0.653,
+      "over_105_prob": 0.533
+    },
+    "btts_probability": 0.914,
+    "corner_projection": 10.9,
+    "team_metrics": {
+      "home": {
+        "xg_for": 1.809,
+        "xg_against": 2.709,
+        "shots": 13.0,
+        "sot": 4.5,
+        "goals_for": 1.809,
+        "goals_against": 2.709,
+        "clean_sheets": 4,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.3,
+        "width_crossing": 0.55,
+        "final_third_pressure": 0.55
+      },
+      "away": {
+        "xg_for": 2.309,
+        "xg_against": 2.109,
+        "shots": 11.5,
+        "sot": 4.0,
+        "goals_for": 2.309,
+        "goals_against": 2.109,
+        "clean_sheets": 3,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.1,
+        "width_crossing": 0.5,
+        "final_third_pressure": 0.45
+      }
+    },
+    "league_config": {
+      "goal_variance": 1.2,
+      "avg_goals_per_game": 3.25,
+      "home_advantage": 0.4,
+      "draw_rate": 0.24,
+      "data_tier": 1
+    },
+    "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+    "_stats_source": "real",
+    "extra_markets": {
+      "_extra_markets_source": "derived_from_existing_projection",
+      "team_total_goals": {
+        "home": {
+          "over_05": 0.952,
+          "over_15": 0.807,
+          "over_25": 0.586
+        },
+        "away": {
+          "over_05": 0.96,
+          "over_15": 0.833,
+          "over_25": 0.626
+        }
+      },
+      "team_corners": {
+        "home": {
+          "over_35": 0.704,
+          "over_45": 0.522,
+          "over_55": 0.347,
+          "projection": 4.79
+        },
+        "away": {
+          "over_35": 0.858,
+          "over_45": 0.729,
+          "over_55": 0.572,
+          "projection": 6.11
+        },
+        "split_method": "attacking_share"
+      },
+      "first_half_goals": {
+        "projection": 2.82,
+        "fraction_used": 0.45,
+        "over_05": 0.94,
+        "over_15": 0.773
+      },
+      "btts_confirmed": {
+        "probability": 0.914
+      },
+      "_teams": {
+        "home": "Utrecht",
+        "away": "Go Ahead Eagles"
+      }
+    },
+    "halftime": {
+      "recommendation_1h_total": "Over 0.5: 94.0% | Over 1.5: 77.3%",
+      "predicted_1h_result": "Proj: 2.82"
+    },
+    "team_corners": {
+      "home_proj": 4.79,
+      "away_proj": 6.11
+    },
+    "confidence_engine": {
+      "edge": 3.77,
+      "confidence": 71.2,
+      "recommendation": "BET"
+    }
+  },
+  "Dordrecht_vs_Jong AZ Alkmaar": {
+    "sport": "soccer",
+    "league": "Eerste Divisie",
+    "home_team": "Dordrecht",
+    "away_team": "Jong AZ Alkmaar",
+    "timestamp": "2026-09-05T14:52:15.729581",
+    "game": {
+      "projected_home_goals": 2.43,
+      "projected_away_goals": 2.7,
+      "projected_total_goals": 5.13,
+      "home_win_prob": 0.361,
+      "draw_prob": 0.197,
+      "away_win_prob": 0.442
+    },
+    "predictions": {
+      "side": {
+        "model_xg_diff": -0.272,
+        "market_line": 0.0,
+        "edge": -0.272,
+        "confidence": 30.1,
+        "recommendation": "PASS"
+      },
+      "total": {
+        "model_total_xg": 5.133,
+        "market_total": 2.5,
+        "edge": 2.633,
+        "confidence": 63.2,
+        "recommendation": "BET"
+      },
+      "btts": {
+        "probability": 0.834,
+        "confidence": 69.7,
+        "recommendation": "BET"
+      }
+    },
+    "goals_analysis": {
+      "over_15_prob": 0.964,
+      "over_25_prob": 0.886,
+      "over_35_prob": 0.753
+    },
+    "corners_analysis": {
+      "projection": 10.9,
+      "over_85_prob": 0.762,
+      "over_95_prob": 0.653,
+      "over_105_prob": 0.533
+    },
+    "btts_probability": 0.834,
+    "corner_projection": 10.9,
+    "team_metrics": {
+      "home": {
+        "xg_for": 1.25,
+        "xg_against": 2.5,
+        "shots": 13.0,
+        "sot": 4.5,
+        "goals_for": 1.25,
+        "goals_against": 2.5,
+        "clean_sheets": 4,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.3,
+        "width_crossing": 0.55,
+        "final_third_pressure": 0.55
+      },
+      "away": {
+        "xg_for": 1.8,
+        "xg_against": 1.8,
+        "shots": 11.5,
+        "sot": 4.0,
+        "goals_for": 1.8,
+        "goals_against": 1.8,
+        "clean_sheets": 3,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.1,
+        "width_crossing": 0.5,
+        "final_third_pressure": 0.45
+      }
+    },
+    "league_config": {
+      "goal_variance": 1.15,
+      "avg_goals_per_game": 3.1,
+      "home_advantage": 0.4,
+      "draw_rate": 0.25,
+      "data_tier": 2
+    },
+    "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+    "_stats_source": "real",
+    "extra_markets": {
+      "_extra_markets_source": "derived_from_existing_projection",
+      "team_total_goals": {
+        "home": {
+          "over_05": 0.912,
+          "over_15": 0.698,
+          "over_25": 0.438
+        },
+        "away": {
+          "over_05": 0.933,
+          "over_15": 0.751,
+          "over_25": 0.506
+        }
+      },
+      "team_corners": {
+        "home": {
+          "over_35": 0.653,
+          "over_45": 0.462,
+          "over_55": 0.292,
+          "projection": 4.47
+        },
+        "away": {
+          "over_35": 0.883,
+          "over_45": 0.768,
+          "over_55": 0.621,
+          "projection": 6.43
+        },
+        "split_method": "attacking_share"
+      },
+      "first_half_goals": {
+        "projection": 2.31,
+        "fraction_used": 0.45,
+        "over_05": 0.901,
+        "over_15": 0.671
+      },
+      "btts_confirmed": {
+        "probability": 0.834
+      },
+      "_teams": {
+        "home": "Dordrecht",
+        "away": "Jong AZ Alkmaar"
+      }
+    },
+    "halftime": {
+      "recommendation_1h_total": "Over 0.5: 90.1% | Over 1.5: 67.1%",
+      "predicted_1h_result": "Proj: 2.31"
+    },
+    "team_corners": {
+      "home_proj": 4.47,
+      "away_proj": 6.43
+    },
+    "confidence_engine": {
+      "edge": 2.63,
+      "confidence": 63.2,
+      "recommendation": "BET"
+    }
+  },
+  "Schalke 04_vs_Bayern Munich": {
+    "sport": "soccer",
+    "league": "Bundesliga",
+    "home_team": "Schalke 04",
+    "away_team": "Bayern Munich",
+    "timestamp": "2026-09-05T14:52:15.835923",
+    "game": {
+      "projected_home_goals": 2.68,
+      "projected_away_goals": 2.93,
+      "projected_total_goals": 5.61,
+      "home_win_prob": 0.369,
+      "draw_prob": 0.195,
+      "away_win_prob": 0.437
+    },
+    "predictions": {
+      "side": {
+        "model_xg_diff": -0.248,
+        "market_line": 0.0,
+        "edge": -0.248,
+        "confidence": 29.7,
+        "recommendation": "PASS"
+      },
+      "total": {
+        "model_total_xg": 5.613,
+        "market_total": 2.5,
+        "edge": 3.113,
+        "confidence": 67.2,
+        "recommendation": "BET"
+      },
+      "btts": {
+        "probability": 0.873,
+        "confidence": 72.0,
+        "recommendation": "BET"
+      }
+    },
+    "goals_analysis": {
+      "over_15_prob": 0.976,
+      "over_25_prob": 0.918,
+      "over_35_prob": 0.811
+    },
+    "corners_analysis": {
+      "projection": 10.9,
+      "over_85_prob": 0.762,
+      "over_95_prob": 0.653,
+      "over_105_prob": 0.533
+    },
+    "btts_probability": 0.873,
+    "corner_projection": 10.9,
+    "team_metrics": {
+      "home": {
+        "xg_for": 1.667,
+        "xg_against": 2.095,
+        "shots": 13.0,
+        "sot": 4.5,
+        "goals_for": 1.667,
+        "goals_against": 2.095,
+        "clean_sheets": 4,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.3,
+        "width_crossing": 0.55,
+        "final_third_pressure": 0.55
+      },
+      "away": {
+        "xg_for": 2.381,
+        "xg_against": 1.81,
+        "shots": 11.5,
+        "sot": 4.0,
+        "goals_for": 2.381,
+        "goals_against": 1.81,
+        "clean_sheets": 3,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.1,
+        "width_crossing": 0.5,
+        "final_third_pressure": 0.45
+      }
+    },
+    "league_config": {
+      "goal_variance": 1.15,
+      "avg_goals_per_game": 3.1,
+      "home_advantage": 0.3,
+      "draw_rate": 0.23,
+      "data_tier": 1
+    },
+    "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+    "_stats_source": "real",
+    "extra_markets": {
+      "_extra_markets_source": "derived_from_existing_projection",
+      "team_total_goals": {
+        "home": {
+          "over_05": 0.931,
+          "over_15": 0.748,
+          "over_25": 0.501
+        },
+        "away": {
+          "over_05": 0.947,
+          "over_15": 0.79,
+          "over_25": 0.561
+        }
+      },
+      "team_corners": {
+        "home": {
+          "over_35": 0.656,
+          "over_45": 0.466,
+          "over_55": 0.295,
+          "projection": 4.49
+        },
+        "away": {
+          "over_35": 0.882,
+          "over_45": 0.766,
+          "over_55": 0.618,
+          "projection": 6.41
+        },
+        "split_method": "attacking_share"
+      },
+      "first_half_goals": {
+        "projection": 2.52,
+        "fraction_used": 0.45,
+        "over_05": 0.92,
+        "over_15": 0.718
+      },
+      "btts_confirmed": {
+        "probability": 0.873
+      },
+      "_teams": {
+        "home": "Schalke 04",
+        "away": "Bayern Munich"
+      }
+    },
+    "halftime": {
+      "recommendation_1h_total": "Over 0.5: 92.0% | Over 1.5: 71.8%",
+      "predicted_1h_result": "Proj: 2.52"
+    },
+    "team_corners": {
+      "home_proj": 4.49,
+      "away_proj": 6.41
+    },
+    "confidence_engine": {
+      "edge": 3.11,
+      "confidence": 67.1,
+      "recommendation": "BET"
+    }
+  }
+}
