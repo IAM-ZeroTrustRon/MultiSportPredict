@@ -5,7 +5,7 @@ grades every forecast against real results. Built in Python with a hard rule: **
 refuses to produce a number it cannot justify.**
 
 Sports covered: soccer (Premier League, Championship, Eredivisie, Liga MX), baseball
-(MLB, KBO), basketball (EuroLeague), tennis, with an NFL engine in progress.
+(MLB, KBO), basketball (EuroLeague), tennis, with an NFL engine and WTA/ATP recently added 
 
 ---
 
