@@ -478,7 +478,7 @@ def run_basketball(home: str, away: str, league: Optional[str], market_line: flo
     full_game = result.get("full_game", {})
     model_prob = float(full_game.get("probability", 0.5))
     edge = float(full_game.get("model_edge", 0.0))
-    conf = float(full_game.get("confidence", 50.0)) or 50.0
+    conf = float(full_game.get("probability", 0.5)) * 100.0
     rec = full_game.get("lean", "PASS")
 
     if store_to_db:

@@ -562,22 +562,24 @@ class BasketballPredictor(SportPredictorBase):
         # Build full game prediction
         full_game_result = fiba_build_full_game(home_metrics, away_metrics, ctx)
         
-        # Build Q1 prediction (placeholder Q1 metrics)
+        # Build Q1 prediction. Sourced from kwargs the same way home_metrics/
+        # away_metrics are above -- without this, Q1 output was a fixed
+        # literal for every matchup regardless of the real stats passed in.
         home_q1_metrics = {
-            'pts_for': 20.0,
-            'pts_against': 18.0,
-            'home_edge': 2.0,
-            'coach_fast_start': 'green',
-            'injury_status': 'green',
-            'starting_five_net': 3.0,
+            'pts_for': kwargs.get('home_q1_pts_for', 20.0),
+            'pts_against': kwargs.get('home_q1_pts_against', 18.0),
+            'home_edge': kwargs.get('home_q1_home_edge', 2.0),
+            'coach_fast_start': kwargs.get('home_q1_coach_fast_start', 'green'),
+            'injury_status': kwargs.get('home_q1_injury_status', 'green'),
+            'starting_five_net': kwargs.get('home_q1_starting_five_net', 3.0),
         }
         away_q1_metrics = {
-            'pts_for': 18.0,
-            'pts_against': 20.0,
-            'home_edge': 0.0,
-            'coach_fast_start': 'yellow',
-            'injury_status': 'yellow',
-            'starting_five_net': 1.0,
+            'pts_for': kwargs.get('away_q1_pts_for', 18.0),
+            'pts_against': kwargs.get('away_q1_pts_against', 20.0),
+            'home_edge': kwargs.get('away_q1_home_edge', 0.0),
+            'coach_fast_start': kwargs.get('away_q1_coach_fast_start', 'yellow'),
+            'injury_status': kwargs.get('away_q1_injury_status', 'yellow'),
+            'starting_five_net': kwargs.get('away_q1_starting_five_net', 1.0),
         }
         q1_result = fiba_build_q1(home_metrics, away_metrics, home_q1_metrics, away_q1_metrics, ctx)
         
