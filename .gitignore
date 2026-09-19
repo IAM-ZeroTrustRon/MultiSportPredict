@@ -96,6 +96,8 @@ celerybeat.pid
 .venv
 env/
 venv/
+# Windows reserved device name (accidental `> nul` redirect artifact) - breaks git add -A
+nul
 ENV/
 env.bak/
 venv.bak/

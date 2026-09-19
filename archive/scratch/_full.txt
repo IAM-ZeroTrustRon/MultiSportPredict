@@ -1,0 +1,73 @@
+[home/away] schedule says St. Louis Cardinals @ San Francisco Giants -- using that, not the order typed
+==============================================================================
+MLB  -  1 game(s)   Discord: ON
+==============================================================================
+[age] 2 stale/unverifiable record(s):
+==============================================================================
+MLB:  St. Louis Cardinals  @  San Francisco Giants
+------------------------------------------------------------------------------
+  Starters   Michael McGreevy (ERA 3.97, K/9 6.23)
+             Logan Webb (ERA 4.21, K/9 7.16)
+  Total      7.5  [the line you gave]
+[OK] Loaded real team metrics for San Francisco Giants and St. Louis Cardinals
+
+============================================================
+BASEBALL (MLB) MATCHUP: San Francisco Giants vs St. Louis Cardinals
+============================================================
+
+[BaseballPredictor] Loading MLB baseball data for San Francisco Giants vs St. Louis Cardinals...
+[BaseballPredictor] Predicting MLB game: San Francisco Giants vs St. Louis Cardinals
+
+=== MLB PROP MARKETS: San Francisco Giants vs St. Louis Cardinals ===
+
+    Home Stats Source: baseball_stats.json  (4.089 R/g, 4.63 RA/g)
+    Away Stats Source: baseball_stats.json  (4.441 R/g, 4.515 RA/g)
+    Home SP override applied: ERA=4.21, K-rate=0.303
+    Away SP override applied: ERA=3.97, K-rate=0.263
+    Assigned Home Plate Umpire: Unknown
+    Projected Total: 8.58 | Edge vs 7.5: +1.08 | Confidence: 70.8%
+
+BASEBALL | San Francisco Giants vs St. Louis Cardinals MLB
+                                                    Recommendations                                                     
+┌────────────────────────┬────────────────────────────────────────────────────┬───────────────┬────────────────────────┐
+│ Market                 │ Recommendation                                     │   Probability │ Edge / Confidence      │
+├────────────────────────┼────────────────────────────────────────────────────┼───────────────┼────────────────────────┤
+│ props.nrfi             │ NRFI                                               │         62.0% │ Edge N/A | Conf N/A    │
+│ props.strikeouts       │ PROJECTION ONLY -- no market line supplied         │          None │ Edge N/A | Conf N/A    │
+│ props.home_runs        │ PROJECTION ONLY -- no market line supplied         │          None │ Edge N/A | Conf N/A    │
+│ markets.nrfi           │ NRFI                                               │         62.0% │ Edge N/A | Conf N/A    │
+│ markets.strikeouts     │ PROJECTION ONLY -- no market line supplied         │          None │ Edge N/A | Conf N/A    │
+│ markets.home_runs      │ PROJECTION ONLY -- no market line supplied         │          None │ Edge N/A | Conf N/A    │
+└────────────────────────┴────────────────────────────────────────────────────┴───────────────┴────────────────────────┘
+                                                  Projection & Context                                                  
+┌──────────────────────────────────────────────────┬───────────────────────────────────────────────────────────────────┐
+│ Metric                                           │ Value                                                             │
+├──────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────┤
+│ Home Runs                                        │ 4.080                                                             │
+│ Away Runs                                        │ 4.500                                                             │
+│ Total                                            │ 8.580                                                             │
+│ Umpire                                           │ Unknown                                                           │
+│ Data Source                                      │ live_sp_override                                                  │
+└──────────────────────────────────────────────────┴───────────────────────────────────────────────────────────────────┘
+[OK] Baseball prediction stored to multisport_history.db
+
+Full betting slip for San Francisco Giants vs St. Louis Cardinals:
+Moneyline: San Francisco Giants 45.2% / St. Louis Cardinals 54.8%
+Run Line: PASS (35.0% confidence)
+Total: OVER
+NRFI: NRFI (62.0%)
+K Props: 7.6 home / 7.8 away
+HR Props: 1.2 home / 1.1 away
+[OK] Pushed baseball to 2/1 webhook(s) + bot channel.
+[OK] Full baseball result pushed to Discord
+
+==========================================================================================
+📋  MLB SUMMARY
+==========================================================================================
+   #  ⚾ GAME                                              📊 PROJ  🎯 LINE ⚡ EDGE   📈 CONF  REC
+  ------------------------------------------------------------------------------------------
+   1  St. Louis Cardinals @ San Francisco Giants                        8.6 vs -       -      -     -
+------------------------------------------------------------------------------------------
+
+Stored to multisport_history.db. Grade tomorrow once they are final:
+    venv/Scripts/python.exe grade_predictions.py --auto --report

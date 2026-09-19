@@ -1,42 +1,42 @@
 {
   "sport": "soccer",
-  "league": "Premier League",
-  "home_team": "Test Home",
-  "away_team": "Test Away",
-  "timestamp": "2026-09-08T09:24:56.503599",
+  "league": "Bundesliga",
+  "home_team": "Bayern Munich",
+  "away_team": "Dortmund",
+  "timestamp": "2026-09-07T19:46:30.720238",
   "game": {
-    "projected_home_goals": 1.61,
-    "projected_away_goals": 1.27,
-    "projected_total_goals": 2.88,
-    "home_win_prob": 0.45,
-    "draw_prob": 0.247,
-    "away_win_prob": 0.303
+    "projected_home_goals": 2.34,
+    "projected_away_goals": 1.41,
+    "projected_total_goals": 3.75,
+    "home_win_prob": 0.571,
+    "draw_prob": 0.201,
+    "away_win_prob": 0.228
   },
   "predictions": {
     "side": {
-      "model_xg_diff": 0.335,
+      "model_xg_diff": 0.932,
       "market_line": 0.0,
-      "edge": 0.335,
-      "confidence": 31.3,
+      "edge": 0.932,
+      "confidence": 41.7,
       "recommendation": "PASS"
     },
     "total": {
-      "model_total_xg": 2.881,
+      "model_total_xg": 3.747,
       "market_total": 2.5,
-      "edge": 0.381,
-      "confidence": 31.4,
+      "edge": 1.247,
+      "confidence": 46.0,
       "recommendation": "PASS"
     },
     "btts": {
-      "probability": 0.582,
-      "confidence": 40.2,
+      "probability": 0.7,
+      "confidence": 57.5,
       "recommendation": "PASS"
     }
   },
   "goals_analysis": {
-    "over_15_prob": 0.782,
-    "over_25_prob": 0.55,
-    "over_35_prob": 0.326
+    "over_15_prob": 0.888,
+    "over_25_prob": 0.722,
+    "over_35_prob": 0.516
   },
   "corners_analysis": {
     "projection": 10.9,
@@ -44,16 +44,16 @@
     "over_95_prob": 0.653,
     "over_105_prob": 0.533
   },
-  "btts_probability": 0.582,
+  "btts_probability": 0.7,
   "corner_projection": 10.9,
   "team_metrics": {
     "home": {
-      "xg_for": 1.65,
-      "xg_against": 1.2,
+      "xg_for": 2.5,
+      "xg_against": 0.5,
       "shots": 13.0,
       "sot": 4.5,
-      "goals_for": 1.7,
-      "goals_against": 1.1,
+      "goals_for": 2.5,
+      "goals_against": 0.5,
       "clean_sheets": 4,
       "missing_attacker": 0,
       "missing_creator": 0,
@@ -64,12 +64,12 @@
       "final_third_pressure": 0.55
     },
     "away": {
-      "xg_for": 1.45,
-      "xg_against": 1.35,
+      "xg_for": 1.952,
+      "xg_against": 1.667,
       "shots": 11.5,
       "sot": 4.0,
-      "goals_for": 1.4,
-      "goals_against": 1.3,
+      "goals_for": 1.952,
+      "goals_against": 1.667,
       "clean_sheets": 3,
       "missing_attacker": 0,
       "missing_creator": 0,
@@ -81,11 +81,12 @@
     }
   },
   "league_config": {
-    "goal_variance": 1.1,
-    "avg_goals_per_game": 2.85,
-    "home_advantage": 0.35,
-    "draw_rate": 0.25,
+    "goal_variance": 1.15,
+    "avg_goals_per_game": 3.1,
+    "home_advantage": 0.3,
+    "draw_rate": 0.23,
     "data_tier": 1
   },
-  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics"
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
 }

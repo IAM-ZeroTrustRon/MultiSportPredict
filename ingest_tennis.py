@@ -63,7 +63,12 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 ROOT = Path(__file__).resolve().parent
 OUT_DIR = ROOT / "data" / "tennis"
 
-BASE = "http://www.tennis-data.co.uk"
+# The site answered plain http until 2026-08-30 and began refusing it some time
+# before 2026-09-18, which surfaced as four identical HTTPErrors and a store
+# frozen 19 days out of date. Try https first and keep http as the fallback so
+# a reversal on their side does not break this again.
+BASE = "https://www.tennis-data.co.uk"
+BASE_FALLBACK = "http://www.tennis-data.co.uk"
 UA = {"User-Agent": "Mozilla/5.0 (MultiSportPredict tennis ingest)"}
 
 SURFACES = {"hard", "clay", "grass", "carpet"}
@@ -97,12 +102,9 @@ def archive_urls(tour: str, year: int) -> List[str]:
     that way and a 300 costs one wasted request, not a wrong answer.
     """
     directory = f"{year}w" if tour == "wta" else f"{year}"
-    return [
-        f"{BASE}/{directory}/{year}.xlsx",
-        f"{BASE}/{directory}/{year}.xls",
-        f"{BASE}/{directory}/{year}.zip",
-        f"{BASE}/{directory}/{directory}.zip",
-    ]
+    names = [f"{year}.xlsx", f"{year}.xls", f"{year}.zip", f"{directory}.zip"]
+    return ([f"{BASE}/{directory}/{n}" for n in names]
+            + [f"{BASE_FALLBACK}/{directory}/{n}" for n in names])
 
 
 def fetch(url: str, timeout: int = 180, attempts: int = 3) -> bytes:
@@ -121,7 +123,11 @@ def fetch(url: str, timeout: int = 180, attempts: int = 3) -> bytes:
             with urllib.request.urlopen(request, timeout=timeout) as response:
                 return response.read()
         except urllib.error.HTTPError as exc:
-            raise                                   # 404/300: retrying changes nothing
+            # "HTTPError" alone told us nothing when all eight URLs failed at
+            # once. The status separates "file not published yet" (404) from
+            # "the server is refusing us" (403) from a scheme problem.
+            exc.msp_detail = f"HTTP {exc.code} {exc.reason}"
+            raise                                   # retrying a status changes nothing
         except Exception as exc:                    # noqa: BLE001
             last = exc
             if attempt < attempts:
@@ -484,8 +490,11 @@ def main() -> None:
                     blob, url = fetch(candidate), candidate
                     break
                 except Exception as exc:                # noqa: BLE001
-                    problems.append(f"{candidate.rsplit('/', 1)[-1]}: "
-                                    f"{type(exc).__name__}")
+                    # Show the scheme and the status, not just "HTTPError".
+                    scheme = candidate.split("://", 1)[0]
+                    detail = getattr(exc, "msp_detail", None) or type(exc).__name__
+                    problems.append(
+                        f"{scheme}:{candidate.rsplit('/', 1)[-1]}: {detail}")
             if blob is None:
                 log(f"  {label:<12} FAILED to download: {'; '.join(problems)}")
                 failures.append(f"{label}")

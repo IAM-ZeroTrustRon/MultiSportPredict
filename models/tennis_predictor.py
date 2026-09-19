@@ -81,27 +81,59 @@ def _american_to_decimal(s: str) -> float:
 # RECOMMENDATION
 # ============================================================================
 
-def _recommendation(home_prob: float, market_prob: Optional[float] = None) -> Dict[str, Any]:
-    """Generate recommendation strings from probabilities."""
+def _recommendation(home_prob: float, market_prob: Optional[float] = None,
+                    home_player: str = "Home", away_player: str = "Away") -> Dict[str, Any]:
+    """Generate recommendation strings from probabilities.
+
+    Bidirectional: `edge` here is the HOME side's edge (positive when the
+    model likes home more than the market does), but a real, betsize-worthy
+    edge can sit on EITHER side. This used to only ever test edge >= a
+    positive threshold, so a large edge on the away player (edge very
+    negative -- the model likes away far more than the market does) fell
+    through every branch to "PASS - Market efficient" no matter how large
+    it was -- tennis's moneyline could never recommend the away player, at
+    all, ever. Mirrors predict_match.py's _moneyline_edge(), which already
+    handles both directions for baseball: pick the side by sign, then
+    display THAT side's edge (magnitude, positive by construction) instead
+    of the raw home-signed number -- otherwise a correctly-recommended away
+    pick prints with a misleading negative-looking edge, which is the exact
+    bug that shipped as "LEAN St. Louis Cardinals ML (edge: -9.1%)" for MLB.
+    """
     edge = (home_prob - (market_prob or 0.5)) * 100
     conf = _prob_to_conf(home_prob)
 
     if market_prob is not None:
-        if edge >= 4.5 and conf >= 63:
-            rec = f"BET Home ML (edge: {edge:+.1f}%)"
-        elif edge >= 2.0 and conf >= 57:
-            rec = f"LEAN Home ML (edge: {edge:+.1f}%)"
-        elif edge >= 0.5:
-            rec = f"SLIGHT LEAN Home ML (edge: {edge:+.1f}%)"
+        side = home_player if edge >= 0 else away_player
+        magnitude = abs(edge)
+        display_edge = magnitude
+        # side/action_word/strength are returned as their own fields (not
+        # just baked into `rec`) so a caller building a one-line verdict
+        # (embed_builder.moneyline_verdict) can assemble one from clean
+        # values instead of parsing this sentence back apart.
+        if magnitude >= 4.5 and conf >= 63:
+            action_word, strength = "BET", "strong"
+        elif magnitude >= 2.0 and conf >= 57:
+            action_word, strength = "LEAN", "moderate"
+        elif magnitude >= 0.5:
+            action_word, strength = "SLIGHT LEAN", "slight"
         else:
-            rec = "PASS - Market efficient"
+            action_word, strength = "PASS", None
+        rec = (f"{action_word} {side} ML (edge: {display_edge:+.1f}%)"
+               if action_word != "PASS" else "PASS - Market efficient")
+        edge_pct = round(display_edge if magnitude >= 0.5 else edge, 1)
+        rec_side = side if action_word != "PASS" else None
     else:
         rec = f"Model Prob: {home_prob:.1%}"
+        edge_pct = round(edge, 1)
+        action_word, strength, rec_side = None, None, None
 
     return {
         "recommendation": rec,
-        "edge_pct": round(edge, 1),
+        "edge_pct": edge_pct,
         "confidence": conf,
+        "action": action_word,
+        "side": rec_side,
+        "strength": strength,
     }
 
 
@@ -283,7 +315,7 @@ def predict_tennis_match(
     away_fair = _prob_to_american(away_prob)
 
     # Market data
-    edge_rec = _recommendation(home_prob, market_prob)
+    edge_rec = _recommendation(home_prob, market_prob, home_player, away_player)
     market_note = ""
     if market_prob is not None:
         edge_vs_market = (fav_prob - market_prob) * 100

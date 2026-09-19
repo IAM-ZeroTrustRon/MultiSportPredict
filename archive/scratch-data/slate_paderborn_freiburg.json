@@ -1,0 +1,16 @@
+{
+  "_comment": "Paderborn vs Freiburg - Bundesliga 2026-09-05",
+  "_generated": "2026-09-05",
+  "matches": [
+    {
+      "league": "Bundesliga",
+      "home": "Paderborn",
+      "away": "Freiburg",
+      "home_ml": 280,
+      "draw_ml": 275,
+      "away_ml": -119,
+      "total": 2.5,
+      "push": false
+    }
+  ]
+}

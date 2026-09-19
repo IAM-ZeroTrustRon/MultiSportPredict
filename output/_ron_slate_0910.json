@@ -1,0 +1,1052 @@
+{
+  "soccer_Fenerbahce_vs_Roma": {
+    "sport": "soccer",
+    "league": "Champions League",
+    "home_team": "Fenerbahce",
+    "away_team": "Roma",
+    "timestamp": "2026-09-10T15:31:34.957014",
+    "game": {
+      "projected_home_goals": 1.64,
+      "projected_away_goals": 1.4,
+      "projected_total_goals": 3.04,
+      "home_win_prob": 0.431,
+      "draw_prob": 0.242,
+      "away_win_prob": 0.327
+    },
+    "predictions": {
+      "side": {
+        "model_xg_diff": 0.243,
+        "market_line": 0.0,
+        "edge": 0.243,
+        "confidence": 29.6,
+        "recommendation": "PASS"
+      },
+      "total": {
+        "model_total_xg": 3.036,
+        "market_total": 2.5,
+        "edge": 0.536,
+        "confidence": 34.1,
+        "recommendation": "PASS"
+      },
+      "btts": {
+        "probability": 0.629,
+        "confidence": 47.8,
+        "recommendation": "PASS"
+      }
+    },
+    "goals_analysis": {
+      "over_15_prob": 0.806,
+      "over_25_prob": 0.585,
+      "over_35_prob": 0.361
+    },
+    "corners_analysis": {
+      "projection": 10.9,
+      "over_85_prob": 0.762,
+      "over_95_prob": 0.653,
+      "over_105_prob": 0.533
+    },
+    "btts_probability": 0.629,
+    "corner_projection": 10.9,
+    "team_metrics": {
+      "home": {
+        "xg_for": 2.0,
+        "xg_against": 1.5,
+        "shots": 13.0,
+        "sot": 4.5,
+        "goals_for": 2.0,
+        "goals_against": 1.5,
+        "clean_sheets": 4,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.3,
+        "width_crossing": 0.55,
+        "final_third_pressure": 0.55
+      },
+      "away": {
+        "xg_for": 1.6,
+        "xg_against": 1.029,
+        "shots": 11.5,
+        "sot": 4.0,
+        "goals_for": 1.6,
+        "goals_against": 1.029,
+        "clean_sheets": 3,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.1,
+        "width_crossing": 0.5,
+        "final_third_pressure": 0.45
+      }
+    },
+    "league_config": {
+      "goal_variance": 1.05,
+      "avg_goals_per_game": 2.6,
+      "home_advantage": 0.35,
+      "draw_rate": 0.24,
+      "data_tier": 2
+    },
+    "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+    "_stats_source": "real",
+    "extra_markets": {
+      "_extra_markets_source": "derived_from_existing_projection",
+      "team_total_goals": {
+        "home": {
+          "over_05": 0.806,
+          "over_15": 0.488,
+          "over_25": 0.227
+        },
+        "away": {
+          "over_05": 0.753,
+          "over_15": 0.408,
+          "over_25": 0.167
+        }
+      },
+      "team_corners": {
+        "home": {
+          "over_35": 0.854,
+          "over_45": 0.723,
+          "over_55": 0.564,
+          "projection": 6.06
+        },
+        "away": {
+          "over_35": 0.712,
+          "over_45": 0.531,
+          "over_55": 0.356,
+          "projection": 4.84
+        },
+        "split_method": "attacking_share",
+        "degraded": false
+      },
+      "first_half_goals": {
+        "projection": 1.37,
+        "fraction_used": 0.45,
+        "over_05": 0.745,
+        "over_15": 0.397
+      },
+      "btts_confirmed": {
+        "probability": 0.629
+      },
+      "_teams": {
+        "home": "Fenerbahce",
+        "away": "Roma"
+      }
+    },
+    "halftime": {
+      "recommendation_1h_total": "Over 0.5: 74.5% | Over 1.5: 39.7%",
+      "predicted_1h_result": "Proj: 1.37"
+    },
+    "team_corners": {
+      "home_proj": 6.06,
+      "away_proj": 4.84
+    },
+    "confidence_engine": {
+      "edge": 0.54,
+      "confidence": 34.2,
+      "recommendation": "PASS"
+    }
+  },
+  "soccer_PSV Eindhoven_vs_Shakhtar Donetsk": {
+    "sport": "soccer",
+    "league": "Champions League",
+    "home_team": "PSV Eindhoven",
+    "away_team": "Shakhtar Donetsk",
+    "timestamp": "2026-09-10T15:31:34.986019",
+    "game": {
+      "projected_home_goals": 2.52,
+      "projected_away_goals": 1.53,
+      "projected_total_goals": 4.05,
+      "home_win_prob": 0.576,
+      "draw_prob": 0.194,
+      "away_win_prob": 0.23
+    },
+    "predictions": {
+      "side": {
+        "model_xg_diff": 0.988,
+        "market_line": 0.0,
+        "edge": 0.988,
+        "confidence": 42.7,
+        "recommendation": "PASS"
+      },
+      "total": {
+        "model_total_xg": 4.054,
+        "market_total": 3.0,
+        "edge": 1.054,
+        "confidence": 43.0,
+        "recommendation": "PASS"
+      },
+      "btts": {
+        "probability": 0.766,
+        "confidence": 64.5,
+        "recommendation": "BET"
+      }
+    },
+    "goals_analysis": {
+      "over_15_prob": 0.912,
+      "over_25_prob": 0.77,
+      "over_35_prob": 0.577
+    },
+    "corners_analysis": {
+      "projection": 10.9,
+      "over_85_prob": 0.762,
+      "over_95_prob": 0.653,
+      "over_105_prob": 0.533
+    },
+    "btts_probability": 0.766,
+    "corner_projection": 10.9,
+    "team_metrics": {
+      "home": {
+        "xg_for": 3.6,
+        "xg_against": 1.2,
+        "shots": 13.0,
+        "sot": 4.5,
+        "goals_for": 3.6,
+        "goals_against": 1.2,
+        "clean_sheets": 4,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.3,
+        "width_crossing": 0.55,
+        "final_third_pressure": 0.55
+      },
+      "away": {
+        "xg_for": 2.0,
+        "xg_against": 0.8,
+        "shots": 11.5,
+        "sot": 4.0,
+        "goals_for": 2.0,
+        "goals_against": 0.8,
+        "clean_sheets": 3,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.1,
+        "width_crossing": 0.5,
+        "final_third_pressure": 0.45
+      }
+    },
+    "league_config": {
+      "goal_variance": 1.05,
+      "avg_goals_per_game": 2.6,
+      "home_advantage": 0.35,
+      "draw_rate": 0.24,
+      "data_tier": 2
+    },
+    "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+    "_stats_source": "real",
+    "extra_markets": {
+      "_extra_markets_source": "derived_from_existing_projection",
+      "team_total_goals": {
+        "home": {
+          "over_05": 0.92,
+          "over_15": 0.717,
+          "over_25": 0.461
+        },
+        "away": {
+          "over_05": 0.783,
+          "over_15": 0.452,
+          "over_25": 0.199
+        }
+      },
+      "team_corners": {
+        "home": {
+          "over_35": 0.919,
+          "over_45": 0.828,
+          "over_55": 0.701,
+          "projection": 7.01
+        },
+        "away": {
+          "over_35": 0.545,
+          "over_45": 0.35,
+          "over_55": 0.198,
+          "projection": 3.89
+        },
+        "split_method": "attacking_share",
+        "degraded": false
+      },
+      "first_half_goals": {
+        "projection": 1.82,
+        "fraction_used": 0.45,
+        "over_05": 0.838,
+        "over_15": 0.544
+      },
+      "btts_confirmed": {
+        "probability": 0.766
+      },
+      "_teams": {
+        "home": "PSV Eindhoven",
+        "away": "Shakhtar Donetsk"
+      }
+    },
+    "halftime": {
+      "recommendation_1h_total": "Over 0.5: 83.8% | Over 1.5: 54.4%",
+      "predicted_1h_result": "Proj: 1.82"
+    },
+    "team_corners": {
+      "home_proj": 7.01,
+      "away_proj": 3.89
+    },
+    "confidence_engine": {
+      "edge": 1.05,
+      "confidence": 42.9,
+      "recommendation": "PASS"
+    }
+  },
+  "soccer_Como_vs_RB Leipzig": {
+    "sport": "soccer",
+    "league": "Champions League",
+    "home_team": "Como",
+    "away_team": "RB Leipzig",
+    "timestamp": "2026-09-10T15:31:35.006519",
+    "game": {
+      "projected_home_goals": 1.99,
+      "projected_away_goals": 1.47,
+      "projected_total_goals": 3.46,
+      "home_win_prob": 0.492,
+      "draw_prob": 0.221,
+      "away_win_prob": 0.287
+    },
+    "predictions": {
+      "side": {
+        "model_xg_diff": 0.522,
+        "market_line": 0.0,
+        "edge": 0.522,
+        "confidence": 34.6,
+        "recommendation": "PASS"
+      },
+      "total": {
+        "model_total_xg": 3.462,
+        "market_total": 2.5,
+        "edge": 0.962,
+        "confidence": 41.5,
+        "recommendation": "PASS"
+      },
+      "btts": {
+        "probability": 0.7,
+        "confidence": 57.5,
+        "recommendation": "PASS"
+      }
+    },
+    "goals_analysis": {
+      "over_15_prob": 0.86,
+      "over_25_prob": 0.672,
+      "over_35_prob": 0.455
+    },
+    "corners_analysis": {
+      "projection": 10.9,
+      "over_85_prob": 0.762,
+      "over_95_prob": 0.653,
+      "over_105_prob": 0.533
+    },
+    "btts_probability": 0.7,
+    "corner_projection": 10.9,
+    "team_metrics": {
+      "home": {
+        "xg_for": 2.333,
+        "xg_against": 1.0,
+        "shots": 13.0,
+        "sot": 4.5,
+        "goals_for": 2.333,
+        "goals_against": 1.0,
+        "clean_sheets": 4,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.3,
+        "width_crossing": 0.55,
+        "final_third_pressure": 0.55
+      },
+      "away": {
+        "xg_for": 2.0,
+        "xg_against": 1.5,
+        "shots": 11.5,
+        "sot": 4.0,
+        "goals_for": 2.0,
+        "goals_against": 1.5,
+        "clean_sheets": 3,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.1,
+        "width_crossing": 0.5,
+        "final_third_pressure": 0.45
+      }
+    },
+    "league_config": {
+      "goal_variance": 1.05,
+      "avg_goals_per_game": 2.6,
+      "home_advantage": 0.35,
+      "draw_rate": 0.24,
+      "data_tier": 2
+    },
+    "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+    "_stats_source": "real",
+    "extra_markets": {
+      "_extra_markets_source": "derived_from_existing_projection",
+      "team_total_goals": {
+        "home": {
+          "over_05": 0.863,
+          "over_15": 0.591,
+          "over_25": 0.321
+        },
+        "away": {
+          "over_05": 0.77,
+          "over_15": 0.432,
+          "over_25": 0.184
+        }
+      },
+      "team_corners": {
+        "home": {
+          "over_35": 0.837,
+          "over_45": 0.697,
+          "over_55": 0.533,
+          "projection": 5.87
+        },
+        "away": {
+          "over_35": 0.739,
+          "over_45": 0.565,
+          "over_55": 0.389,
+          "projection": 5.03
+        },
+        "split_method": "attacking_share",
+        "degraded": false
+      },
+      "first_half_goals": {
+        "projection": 1.56,
+        "fraction_used": 0.45,
+        "over_05": 0.789,
+        "over_15": 0.461
+      },
+      "btts_confirmed": {
+        "probability": 0.7
+      },
+      "_teams": {
+        "home": "Como",
+        "away": "RB Leipzig"
+      }
+    },
+    "halftime": {
+      "recommendation_1h_total": "Over 0.5: 78.9% | Over 1.5: 46.1%",
+      "predicted_1h_result": "Proj: 1.56"
+    },
+    "team_corners": {
+      "home_proj": 5.87,
+      "away_proj": 5.03
+    },
+    "confidence_engine": {
+      "edge": 0.96,
+      "confidence": 41.4,
+      "recommendation": "PASS"
+    }
+  },
+  "soccer_Bayern Munich_vs_Bodo/Glimt": {
+    "extra_markets": {
+      "_extra_markets_source": "derived_from_existing_projection",
+      "_warning": "Could not find ['home_goals', 'away_goals'] in the result dict - team goal markets skipped.",
+      "_teams": {
+        "home": "Bayern Munich",
+        "away": "Bodo/Glimt"
+      }
+    },
+    "halftime": {
+      "recommendation_1h_total": "Over 0.5: 0.0% | Over 1.5: 0.0%",
+      "predicted_1h_result": "Proj: N/A"
+    }
+  },
+  "soccer_Manchester United_vs_Sabah FK": {
+    "sport": "soccer",
+    "league": "Champions League",
+    "home_team": "Manchester United",
+    "away_team": "Sabah FK",
+    "timestamp": "2026-09-10T15:31:35.049005",
+    "game": {
+      "projected_home_goals": 1.5,
+      "projected_away_goals": 2.17,
+      "projected_total_goals": 3.67,
+      "home_win_prob": 0.268,
+      "draw_prob": 0.212,
+      "away_win_prob": 0.52
+    },
+    "predictions": {
+      "side": {
+        "model_xg_diff": -0.667,
+        "market_line": 0.0,
+        "edge": -0.667,
+        "confidence": 37.2,
+        "recommendation": "PASS"
+      },
+      "total": {
+        "model_total_xg": 3.673,
+        "market_total": 3.5,
+        "edge": 0.173,
+        "confidence": 27.6,
+        "recommendation": "PASS"
+      },
+      "btts": {
+        "probability": 0.723,
+        "confidence": 60.2,
+        "recommendation": "BET"
+      }
+    },
+    "goals_analysis": {
+      "over_15_prob": 0.881,
+      "over_25_prob": 0.71,
+      "over_35_prob": 0.5
+    },
+    "corners_analysis": {
+      "projection": 10.9,
+      "over_85_prob": 0.762,
+      "over_95_prob": 0.653,
+      "over_105_prob": 0.533
+    },
+    "btts_probability": 0.723,
+    "corner_projection": 10.9,
+    "team_metrics": {
+      "home": {
+        "xg_for": 2.333,
+        "xg_against": 2.0,
+        "shots": 13.0,
+        "sot": 4.5,
+        "goals_for": 2.333,
+        "goals_against": 2.0,
+        "clean_sheets": 4,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.3,
+        "width_crossing": 0.55,
+        "final_third_pressure": 0.55
+      },
+      "away": {
+        "xg_for": 2.667,
+        "xg_against": 0.0,
+        "shots": 11.5,
+        "sot": 4.0,
+        "goals_for": 2.667,
+        "goals_against": 0.0,
+        "clean_sheets": 3,
+        "missing_attacker": 0,
+        "missing_creator": 0,
+        "missing_cb": 0,
+        "missing_gk": 0,
+        "tempo": 0.1,
+        "width_crossing": 0.5,
+        "final_third_pressure": 0.45
+      }
+    },
+    "league_config": {
+      "goal_variance": 1.05,
+      "avg_goals_per_game": 2.6,
+      "home_advantage": 0.35,
+      "draw_rate": 0.24,
+      "data_tier": 2
+    },
+    "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+    "_stats_source": "real",
+    "extra_markets": {
+      "_extra_markets_source": "derived_from_existing_projection",
+      "team_total_goals": {
+        "home": {
+          "over_05": 0.777,
+          "over_15": 0.442,
+          "over_25": 0.191
+        },
+        "away": {
+          "over_05": 0.886,
+          "over_15": 0.638,
+          "over_25": 0.369
+        }
+      },
+      "team_corners": {
+        "home": {
+          "over_35": 0.747,
+          "over_45": 0.575,
+          "over_55": 0.4,
+          "projection": 5.09
+        },
+        "away": {
+          "over_35": 0.831,
+          "over_45": 0.689,
+          "over_55": 0.523,
+          "projection": 5.81
+        },
+        "split_method": "attacking_share",
+        "degraded": false
+      },
+      "first_half_goals": {
+        "projection": 1.65,
+        "fraction_used": 0.45,
+        "over_05": 0.808,
+        "over_15": 0.492
+      },
+      "btts_confirmed": {
+        "probability": 0.723
+      },
+      "_teams": {
+        "home": "Manchester United",
+        "away": "Sabah FK"
+      }
+    },
+    "halftime": {
+      "recommendation_1h_total": "Over 0.5: 80.8% | Over 1.5: 49.2%",
+      "predicted_1h_result": "Proj: 1.65"
+    },
+    "team_corners": {
+      "home_proj": 5.09,
+      "away_proj": 5.81
+    },
+    "confidence_engine": {
+      "edge": 0.17,
+      "confidence": 27.5,
+      "recommendation": "PASS"
+    }
+  },
+  "baseball_Philadelphia Phillies_at_Houston Astros": {
+    "moneyline_and_side": {
+      "projected_home_runs": 2.76,
+      "projected_away_runs": 6.2,
+      "projected_total_runs": 8.96,
+      "projected_run_differential": -3.44,
+      "home_win_probability": 0.1654,
+      "away_win_probability": 0.8346,
+      "confidence": {
+        "total": {
+          "score": 31.4,
+          "recommendation": "PASS"
+        },
+        "side": {
+          "score": 69.3,
+          "recommendation": "BET"
+        }
+      }
+    },
+    "sport": "baseball",
+    "league": "MLB",
+    "home": "Houston Astros",
+    "away": "Philadelphia Phillies",
+    "umpire": "Unknown",
+    "game_projection": {
+      "home_runs": 4.35,
+      "away_runs": 4.88,
+      "total": 9.23
+    },
+    "props": {
+      "nrfi": {
+        "probability": 0.582,
+        "lean": "NRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 8.9,
+        "away_projection": 10.3,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "summary": {
+      "recommendation": "OVER",
+      "pick": "OVER",
+      "confidence_note": "",
+      "readout": "Over: 60.9% | Under: 39.1%",
+      "confidence": 64.0,
+      "edge": 0.73,
+      "edge_note": "+0.73 runs vs a 8.5 total",
+      "min_edge_runs": 0.5,
+      "edge_value": 0.73,
+      "implied_over_prob": 0.609,
+      "implied_under_prob": 0.391,
+      "market_total": 8.5
+    },
+    "data_source": "live_sp_override",
+    "starter_workload": {
+      "home_pitch_limit": null,
+      "away_pitch_limit": null,
+      "home_starter_innings": 5.4,
+      "away_starter_innings": 5.4,
+      "home_bullpen_innings": 3.5,
+      "away_bullpen_innings": 3.5,
+      "pitches_per_inning": 16.5,
+      "relief_rate_source": "team staff ERA/K9 -- relief-only splits are not ingested"
+    },
+    "markets": {
+      "nrfi": {
+        "probability": 0.582,
+        "lean": "NRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 8.9,
+        "away_projection": 10.3,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "_stats_source": "real"
+  },
+  "baseball_Texas Rangers_at_Seattle Mariners": {
+    "moneyline_and_side": {
+      "projected_home_runs": 4.36,
+      "projected_away_runs": 4.12,
+      "projected_total_runs": 8.48,
+      "projected_run_differential": 0.25,
+      "home_win_probability": 0.5556,
+      "away_win_probability": 0.4444,
+      "confidence": {
+        "total": {
+          "score": 23.4,
+          "recommendation": "PASS"
+        },
+        "side": {
+          "score": 28.9,
+          "recommendation": "PASS"
+        }
+      }
+    },
+    "sport": "baseball",
+    "league": "MLB",
+    "home": "Seattle Mariners",
+    "away": "Texas Rangers",
+    "umpire": "Unknown",
+    "game_projection": {
+      "home_runs": 3.98,
+      "away_runs": 4.1,
+      "total": 8.08
+    },
+    "props": {
+      "nrfi": {
+        "probability": 0.588,
+        "lean": "NRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 9.1,
+        "away_projection": 8.8,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "summary": {
+      "recommendation": "PASS",
+      "pick": "PASS",
+      "confidence_note": "no bet -- confidence describes the projection, not a recommendation",
+      "readout": "Over: 43.7% | Under: 56.3%",
+      "confidence": 58.0,
+      "edge": -0.42,
+      "edge_note": "-0.42 runs vs a 8.5 total",
+      "min_edge_runs": 0.5,
+      "edge_value": -0.42,
+      "implied_over_prob": 0.4373,
+      "implied_under_prob": 0.5627,
+      "market_total": 8.5
+    },
+    "data_source": "live_sp_override",
+    "starter_workload": {
+      "home_pitch_limit": null,
+      "away_pitch_limit": null,
+      "home_starter_innings": 5.4,
+      "away_starter_innings": 5.4,
+      "home_bullpen_innings": 3.5,
+      "away_bullpen_innings": 3.5,
+      "pitches_per_inning": 16.5,
+      "relief_rate_source": "team staff ERA/K9 -- relief-only splits are not ingested"
+    },
+    "markets": {
+      "nrfi": {
+        "probability": 0.588,
+        "lean": "NRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 9.1,
+        "away_projection": 8.8,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "_stats_source": "real"
+  },
+  "baseball_Colorado Rockies_at_New York Yankees": {
+    "moneyline_and_side": {
+      "projected_home_runs": 6.95,
+      "projected_away_runs": 2.4,
+      "projected_total_runs": 9.35,
+      "projected_run_differential": 4.55,
+      "home_win_probability": 0.9148,
+      "away_win_probability": 0.0852,
+      "confidence": {
+        "total": {
+          "score": 38.2,
+          "recommendation": "PASS"
+        },
+        "side": {
+          "score": 74.4,
+          "recommendation": "STRONG BET"
+        }
+      }
+    },
+    "sport": "baseball",
+    "league": "MLB",
+    "home": "New York Yankees",
+    "away": "Colorado Rockies",
+    "umpire": "Unknown",
+    "game_projection": {
+      "home_runs": 5.04,
+      "away_runs": 4.43,
+      "total": 9.46
+    },
+    "props": {
+      "nrfi": {
+        "probability": 0.526,
+        "lean": "YRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 8.4,
+        "away_projection": 6.8,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "summary": {
+      "recommendation": "OVER",
+      "pick": "OVER",
+      "confidence_note": "",
+      "readout": "Over: 64.5% | Under: 35.5%",
+      "confidence": 68.5,
+      "edge": 0.96,
+      "edge_note": "+0.96 runs vs a 8.5 total",
+      "min_edge_runs": 0.5,
+      "edge_value": 0.96,
+      "implied_over_prob": 0.6446,
+      "implied_under_prob": 0.3554,
+      "market_total": 8.5
+    },
+    "data_source": "live_sp_override",
+    "starter_workload": {
+      "home_pitch_limit": null,
+      "away_pitch_limit": null,
+      "home_starter_innings": 5.4,
+      "away_starter_innings": 5.4,
+      "home_bullpen_innings": 3.5,
+      "away_bullpen_innings": 3.5,
+      "pitches_per_inning": 16.5,
+      "relief_rate_source": "team staff ERA/K9 -- relief-only splits are not ingested"
+    },
+    "markets": {
+      "nrfi": {
+        "probability": 0.526,
+        "lean": "YRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 8.4,
+        "away_projection": 6.8,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "_stats_source": "real"
+  },
+  "baseball_Pittsburgh Pirates_at_Chicago White Sox": {
+    "moneyline_and_side": {
+      "projected_home_runs": 6.57,
+      "projected_away_runs": 2.74,
+      "projected_total_runs": 9.31,
+      "projected_run_differential": 3.83,
+      "home_win_probability": 0.8822,
+      "away_win_probability": 0.1178,
+      "confidence": {
+        "total": {
+          "score": 37.6,
+          "recommendation": "PASS"
+        },
+        "side": {
+          "score": 71.5,
+          "recommendation": "BET"
+        }
+      }
+    },
+    "sport": "baseball",
+    "league": "MLB",
+    "home": "Chicago White Sox",
+    "away": "Pittsburgh Pirates",
+    "umpire": "Unknown",
+    "game_projection": {
+      "home_runs": 4.86,
+      "away_runs": 4.21,
+      "total": 9.07
+    },
+    "props": {
+      "nrfi": {
+        "probability": 0.691,
+        "lean": "NRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 11.0,
+        "away_projection": 9.9,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "summary": {
+      "recommendation": "OVER",
+      "pick": "OVER",
+      "confidence_note": "",
+      "readout": "Over: 58.5% | Under: 41.5%",
+      "confidence": 60.9,
+      "edge": 0.57,
+      "edge_note": "+0.57 runs vs a 8.5 total",
+      "min_edge_runs": 0.5,
+      "edge_value": 0.57,
+      "implied_over_prob": 0.5849,
+      "implied_under_prob": 0.4151,
+      "market_total": 8.5
+    },
+    "data_source": "live_sp_override",
+    "starter_workload": {
+      "home_pitch_limit": null,
+      "away_pitch_limit": null,
+      "home_starter_innings": 5.4,
+      "away_starter_innings": 5.4,
+      "home_bullpen_innings": 3.5,
+      "away_bullpen_innings": 3.5,
+      "pitches_per_inning": 16.5,
+      "relief_rate_source": "team staff ERA/K9 -- relief-only splits are not ingested"
+    },
+    "markets": {
+      "nrfi": {
+        "probability": 0.691,
+        "lean": "NRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 11.0,
+        "away_projection": 9.9,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "_stats_source": "real"
+  },
+  "baseball_Tampa Bay Rays_at_Atlanta Braves": {
+    "moneyline_and_side": {
+      "projected_home_runs": 4.25,
+      "projected_away_runs": 4.31,
+      "projected_total_runs": 8.56,
+      "projected_run_differential": -0.06,
+      "home_win_probability": 0.5179,
+      "away_win_probability": 0.4821,
+      "confidence": {
+        "total": {
+          "score": 24.2,
+          "recommendation": "PASS"
+        },
+        "side": {
+          "score": 25.5,
+          "recommendation": "PASS"
+        }
+      }
+    },
+    "sport": "baseball",
+    "league": "MLB",
+    "home": "Atlanta Braves",
+    "away": "Tampa Bay Rays",
+    "umpire": "Unknown",
+    "game_projection": {
+      "home_runs": 4.42,
+      "away_runs": 4.33,
+      "total": 8.76
+    },
+    "props": {
+      "nrfi": {
+        "probability": 0.524,
+        "lean": "YRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 7.4,
+        "away_projection": 6.4,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "summary": {
+      "recommendation": "PASS",
+      "pick": "PASS",
+      "confidence_note": "no bet -- confidence describes the projection, not a recommendation",
+      "readout": "Over: 53.8% | Under: 46.2%",
+      "confidence": 54.9,
+      "edge": 0.26,
+      "edge_note": "+0.26 runs vs a 8.5 total",
+      "min_edge_runs": 0.5,
+      "edge_value": 0.26,
+      "implied_over_prob": 0.5385,
+      "implied_under_prob": 0.4615,
+      "market_total": 8.5
+    },
+    "data_source": "live_sp_override",
+    "starter_workload": {
+      "home_pitch_limit": null,
+      "away_pitch_limit": null,
+      "home_starter_innings": 5.4,
+      "away_starter_innings": 5.4,
+      "home_bullpen_innings": 3.5,
+      "away_bullpen_innings": 3.5,
+      "pitches_per_inning": 16.5,
+      "relief_rate_source": "team staff ERA/K9 -- relief-only splits are not ingested"
+    },
+    "markets": {
+      "nrfi": {
+        "probability": 0.524,
+        "lean": "YRFI"
+      },
+      "strikeouts": {
+        "lean": null,
+        "probability": null,
+        "recommendation": "PROJECTION ONLY -- no market line supplied",
+        "home_projection": 7.4,
+        "away_projection": 6.4,
+        "source": "team k9 from baseball_stats.json",
+        "caution": null,
+        "data_tier": 1
+      }
+    },
+    "_stats_source": "real"
+  }
+}

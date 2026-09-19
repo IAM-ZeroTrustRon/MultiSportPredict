@@ -1,0 +1,160 @@
+{
+  "sport": "soccer",
+  "league": "Champions League",
+  "home_team": "Club Brugge",
+  "away_team": "Aston Villa",
+  "timestamp": "2026-09-08T11:39:22.854665",
+  "game": {
+    "projected_home_goals": 1.73,
+    "projected_away_goals": 0.21,
+    "projected_total_goals": 1.94,
+    "home_win_prob": 0.757,
+    "draw_prob": 0.203,
+    "away_win_prob": 0.04
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 1.518,
+      "market_line": 0.0,
+      "edge": 1.518,
+      "confidence": 50.8,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 1.938,
+      "market_total": 2.5,
+      "edge": -0.562,
+      "confidence": 34.6,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.257,
+      "confidence": 62.3,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.577,
+    "over_25_prob": 0.307,
+    "over_35_prob": 0.132
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.257,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.8,
+      "xg_against": 0.4,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.8,
+      "goals_against": 0.4,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 0.0,
+      "xg_against": 1.667,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 0.0,
+      "goals_against": 1.667,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.05,
+    "avg_goals_per_game": 2.6,
+    "home_advantage": 0.35,
+    "draw_rate": 0.24,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real",
+  "auto_odds": {
+    "status": "unknown_league",
+    "captured_at": null,
+    "reason": "'Champions League' is not in SOCCER_LEAGUES -- add it there first"
+  },
+  "extra_markets": {
+    "_extra_markets_source": "derived_from_existing_projection",
+    "team_total_goals": {
+      "home": {
+        "over_05": 0.823,
+        "over_15": 0.516,
+        "over_25": 0.251
+      },
+      "away": {
+        "over_05": 0.189,
+        "over_15": 0.019,
+        "over_25": 0.001
+      }
+    },
+    "team_corners": {
+      "home": {
+        "over_35": 0.86,
+        "over_45": 0.732,
+        "over_55": 0.575,
+        "projection": 6.13
+      },
+      "away": {
+        "over_35": 0.701,
+        "over_45": 0.518,
+        "over_55": 0.344,
+        "projection": 4.77
+      },
+      "split_method": "attacking_share_partial_data",
+      "degraded": true,
+      "degraded_reason": "away attacking number is missing or unreliable (value=0.0) -- substituted a league-average baseline (1.4) instead of collapsing to 0"
+    },
+    "first_half_goals": {
+      "projection": 0.87,
+      "fraction_used": 0.45,
+      "over_05": 0.582,
+      "over_15": 0.218
+    },
+    "btts_confirmed": {
+      "probability": 0.257
+    },
+    "_teams": {
+      "home": "Club Brugge",
+      "away": "Aston Villa"
+    }
+  },
+  "halftime": {
+    "recommendation_1h_total": "Over 0.5: 58.2% | Over 1.5: 21.8%",
+    "predicted_1h_result": "Proj: 0.87"
+  },
+  "team_corners": {
+    "home_proj": 6.13,
+    "away_proj": 4.77
+  },
+  "confidence_engine": {
+    "edge": -0.56,
+    "confidence": 34.6,
+    "recommendation": "PASS"
+  },
+  "live_market": {
+    "source": "odds_api",
+    "status": "event_not_found",
+    "league_key": "Champions League"
+  }
+}

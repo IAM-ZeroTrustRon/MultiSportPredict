@@ -1,0 +1,42 @@
+{
+  "_comment": "User-requested matches: Sep 5 2026. Market odds estimated for comparison table; model predictions are independent of odds.",
+  "_generated": "2026-09-05",
+  "matches": [
+    {
+      "home": "Nijmegen",
+      "away": "Feyenoord",
+      "league": "Eredivisie",
+      "home_ml": 250,
+      "draw_ml": 300,
+      "away_ml": -120,
+      "total": 3.0
+    },
+    {
+      "home": "Utrecht",
+      "away": "Go Ahead Eagles",
+      "league": "Eredivisie",
+      "home_ml": 150,
+      "draw_ml": 230,
+      "away_ml": 190,
+      "total": 2.75
+    },
+    {
+      "home": "FC Dordrecht",
+      "away": "Jong AZ Alkmaar",
+      "league": "Eerste Divisie",
+      "home_ml": 130,
+      "draw_ml": 240,
+      "away_ml": 210,
+      "total": 3.0
+    },
+    {
+      "home": "Schalke 04",
+      "away": "Bayern Munich",
+      "league": "Bundesliga",
+      "home_ml": 550,
+      "draw_ml": 500,
+      "away_ml": -250,
+      "total": 3.5
+    }
+  ]
+}

@@ -1,42 +1,42 @@
 {
   "sport": "soccer",
-  "league": "Premier League",
-  "home_team": "Liverpool",
-  "away_team": "Aston Villa",
-  "timestamp": "2026-09-08T09:24:55.654612",
+  "league": "Eredivisie",
+  "home_team": "Utrecht",
+  "away_team": "Go Ahead Eagles",
+  "timestamp": "2026-09-05T11:04:34.579859",
   "game": {
-    "projected_home_goals": 1.61,
-    "projected_away_goals": 1.27,
-    "projected_total_goals": 2.88,
-    "home_win_prob": 0.45,
-    "draw_prob": 0.247,
-    "away_win_prob": 0.303
+    "projected_home_goals": 3.04,
+    "projected_away_goals": 3.23,
+    "projected_total_goals": 6.27,
+    "home_win_prob": 0.378,
+    "draw_prob": 0.195,
+    "away_win_prob": 0.427
   },
   "predictions": {
     "side": {
-      "model_xg_diff": 0.335,
+      "model_xg_diff": -0.195,
       "market_line": 0.0,
-      "edge": 0.335,
-      "confidence": 31.3,
+      "edge": -0.195,
+      "confidence": 28.7,
       "recommendation": "PASS"
     },
     "total": {
-      "model_total_xg": 2.881,
-      "market_total": 2.5,
-      "edge": 0.381,
-      "confidence": 31.4,
-      "recommendation": "PASS"
+      "model_total_xg": 6.267,
+      "market_total": 2.75,
+      "edge": 3.517,
+      "confidence": 69.8,
+      "recommendation": "BET"
     },
     "btts": {
-      "probability": 0.582,
-      "confidence": 40.2,
-      "recommendation": "PASS"
+      "probability": 0.914,
+      "confidence": 73.9,
+      "recommendation": "BET"
     }
   },
   "goals_analysis": {
-    "over_15_prob": 0.782,
-    "over_25_prob": 0.55,
-    "over_35_prob": 0.326
+    "over_15_prob": 0.986,
+    "over_25_prob": 0.949,
+    "over_35_prob": 0.871
   },
   "corners_analysis": {
     "projection": 10.9,
@@ -44,16 +44,16 @@
     "over_95_prob": 0.653,
     "over_105_prob": 0.533
   },
-  "btts_probability": 0.582,
+  "btts_probability": 0.914,
   "corner_projection": 10.9,
   "team_metrics": {
     "home": {
-      "xg_for": 1.65,
-      "xg_against": 1.2,
+      "xg_for": 1.809,
+      "xg_against": 2.709,
       "shots": 13.0,
       "sot": 4.5,
-      "goals_for": 1.7,
-      "goals_against": 1.1,
+      "goals_for": 1.809,
+      "goals_against": 2.709,
       "clean_sheets": 4,
       "missing_attacker": 0,
       "missing_creator": 0,
@@ -64,12 +64,12 @@
       "final_third_pressure": 0.55
     },
     "away": {
-      "xg_for": 1.45,
-      "xg_against": 1.35,
+      "xg_for": 2.309,
+      "xg_against": 2.109,
       "shots": 11.5,
       "sot": 4.0,
-      "goals_for": 1.4,
-      "goals_against": 1.3,
+      "goals_for": 2.309,
+      "goals_against": 2.109,
       "clean_sheets": 3,
       "missing_attacker": 0,
       "missing_creator": 0,
@@ -81,12 +81,12 @@
     }
   },
   "league_config": {
-    "goal_variance": 1.1,
-    "avg_goals_per_game": 2.85,
-    "home_advantage": 0.35,
-    "draw_rate": 0.25,
+    "goal_variance": 1.2,
+    "avg_goals_per_game": 3.25,
+    "home_advantage": 0.4,
+    "draw_rate": 0.24,
     "data_tier": 1
   },
   "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
-  "_stats_source": "placeholder_fallback"
+  "_stats_source": "real"
 }

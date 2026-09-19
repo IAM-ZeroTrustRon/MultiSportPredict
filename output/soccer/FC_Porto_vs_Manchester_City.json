@@ -1,0 +1,159 @@
+{
+  "sport": "soccer",
+  "league": "Champions League",
+  "home_team": "FC Porto",
+  "away_team": "Manchester City",
+  "timestamp": "2026-09-08T11:34:13.042283",
+  "game": {
+    "projected_home_goals": 1.64,
+    "projected_away_goals": 1.41,
+    "projected_total_goals": 3.05,
+    "home_win_prob": 0.428,
+    "draw_prob": 0.241,
+    "away_win_prob": 0.33
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.231,
+      "market_line": 0.0,
+      "edge": 0.231,
+      "confidence": 29.4,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.051,
+      "market_total": 2.5,
+      "edge": 0.551,
+      "confidence": 34.4,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.595,
+      "confidence": 42.4,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.808,
+    "over_25_prob": 0.588,
+    "over_35_prob": 0.364
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.595,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 2.2,
+      "xg_against": 0.2,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 2.2,
+      "goals_against": 0.2,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.333,
+      "xg_against": 0.667,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.333,
+      "goals_against": 0.667,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.05,
+    "avg_goals_per_game": 2.6,
+    "home_advantage": 0.35,
+    "draw_rate": 0.24,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real",
+  "auto_odds": {
+    "status": "unknown_league",
+    "captured_at": null,
+    "reason": "'Champions League' is not in SOCCER_LEAGUES -- add it there first"
+  },
+  "extra_markets": {
+    "_extra_markets_source": "derived_from_existing_projection",
+    "team_total_goals": {
+      "home": {
+        "over_05": 0.806,
+        "over_15": 0.488,
+        "over_25": 0.227
+      },
+      "away": {
+        "over_05": 0.756,
+        "over_15": 0.412,
+        "over_25": 0.169
+      }
+    },
+    "team_corners": {
+      "home": {
+        "over_35": 0.773,
+        "over_45": 0.609,
+        "over_55": 0.435,
+        "projection": 5.29
+      },
+      "away": {
+        "over_35": 0.81,
+        "over_45": 0.659,
+        "over_55": 0.49,
+        "projection": 5.61
+      },
+      "split_method": "attacking_share",
+      "degraded": false
+    },
+    "first_half_goals": {
+      "projection": 1.37,
+      "fraction_used": 0.45,
+      "over_05": 0.747,
+      "over_15": 0.399
+    },
+    "btts_confirmed": {
+      "probability": 0.595
+    },
+    "_teams": {
+      "home": "FC Porto",
+      "away": "Manchester City"
+    }
+  },
+  "halftime": {
+    "recommendation_1h_total": "Over 0.5: 74.7% | Over 1.5: 39.9%",
+    "predicted_1h_result": "Proj: 1.37"
+  },
+  "team_corners": {
+    "home_proj": 5.29,
+    "away_proj": 5.61
+  },
+  "confidence_engine": {
+    "edge": 0.55,
+    "confidence": 34.4,
+    "recommendation": "PASS"
+  },
+  "live_market": {
+    "source": "odds_api",
+    "status": "event_not_found",
+    "league_key": "Champions League"
+  }
+}
