@@ -230,7 +230,7 @@ def test_cli_integration():
         
         # Test baseball CLI (quick test)
         result = run_baseball_game("Yankees", "Red Sox", league="MLB")
-        if result and 'game' in result:
+        if result and 'moneyline_and_side' in result:
             print("[PASS] Baseball CLI test passed")
         else:
             print("[FAIL] Baseball CLI test failed")

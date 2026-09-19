@@ -889,6 +889,29 @@ def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
     result["_stats_source"] = (
         "real" if (home_sp_overrides and away_sp_overrides) else "placeholder_fallback"
     )
+
+    game = result.get("moneyline_and_side", {})
+    if game:
+        print(f"Projected: {home_team} {game.get('projected_home_runs', 0):.2f}"
+              f" - {away_team} {game.get('projected_away_runs', 0):.2f}"
+              f" (Total: {game.get('projected_total_runs', 0):.2f})")
+        print(f"  {home_team} Win: {game.get('home_win_probability', 0):.1%}"
+              f" | {away_team} Win: {game.get('away_win_probability', 0):.1%}")
+        confidence = game.get("confidence", {})
+        total_conf = confidence.get("total", {})
+        side_conf = confidence.get("side", {})
+        print(f"  Total: {total_conf.get('recommendation', 'PASS')} "
+              f"({total_conf.get('score', 0):.1f}) | "
+              f"Side: {side_conf.get('recommendation', 'PASS')} "
+              f"({side_conf.get('score', 0):.1f})")
+
+    out_dir = Path("output/baseball")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{home_team.replace(' ', '_')}_vs_{away_team.replace(' ', '_')}.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2, default=str)
+    print(f"\nResults saved to: {out_path}")
+
     return result
 
 
@@ -1328,8 +1351,34 @@ def main():
                         "ssg", "nc dinos", "samsung", "lotte", "kt wiz", "lg twins"}
         league_code = "KBO" if sport == "kbo" or home.lower() in kbo_keywords or away.lower() in kbo_keywords else (league or "MLB")
 
+        # Convert projected-Ks counts into the k_rate fraction run_baseball_game()
+        # expects, same conversion universal_runner.py's run_baseball() applies.
+        batters_faced_est = max(5.5 * 4.3, 1.0)
+        home_sp_overrides: Optional[Dict[str, float]] = None
+        if args.home_sp_era is not None or args.home_sp_k is not None:
+            home_sp_overrides = {}
+            if args.home_sp_era is not None:
+                home_sp_overrides["era"] = float(args.home_sp_era)
+            if args.home_sp_k is not None:
+                home_sp_overrides["k_rate"] = max(
+                    0.0, min(0.60, float(args.home_sp_k) / batters_faced_est)
+                )
+
+        away_sp_overrides: Optional[Dict[str, float]] = None
+        if args.away_sp_era is not None or args.away_sp_k is not None:
+            away_sp_overrides = {}
+            if args.away_sp_era is not None:
+                away_sp_overrides["era"] = float(args.away_sp_era)
+            if args.away_sp_k is not None:
+                away_sp_overrides["k_rate"] = max(
+                    0.0, min(0.60, float(args.away_sp_k) / batters_faced_est)
+                )
+
         # Run the standard prediction
-        baseball_result = run_baseball_game(home, away, league=league_code, markets=args.markets)
+        baseball_result = run_baseball_game(
+            home, away, league=league_code, markets=args.markets,
+            home_sp_overrides=home_sp_overrides, away_sp_overrides=away_sp_overrides,
+        )
 
         # Direct Discord push (no subprocess)
         if getattr(args, "push_discord", False) and baseball_result:
