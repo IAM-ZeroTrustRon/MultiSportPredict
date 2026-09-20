@@ -26,7 +26,13 @@ import pandas as pd
 from typing import Dict, List, Optional
 from datetime import datetime
 
-from config import ODDS_API_DEFAULT_BASE_URL
+# NOTE: config.ODDS_API_DEFAULT_BASE_URL points at api.opticodds.com, which is
+# what ingest/odds_client.py's OddsClient talks to -- a different API with a
+# different schema. This class's request params (apiKey/regions/markets/
+# oddsFormat) and response parsing (bookmakers/markets/outcomes,
+# commence_time, sport_title) are The Odds API's v4 shape, so it needs its
+# own default host, not the shared OptiOdds one.
+THE_ODDS_API_BASE_URL = "https://api.the-odds-api.com"
 
 
 class OddsApiIngestor:
@@ -47,7 +53,7 @@ class OddsApiIngestor:
         if not self.api_key:
             raise ValueError("API key required. Set ODDS_API_KEY env var or pass api_key parameter.")
         
-        self.base_url = ODDS_API_DEFAULT_BASE_URL
+        self.base_url = os.environ.get("THE_ODDS_API_BASE_URL", THE_ODDS_API_BASE_URL)
         self.region = region
         self.markets = markets
         self.last_fetch = None
