@@ -1,0 +1,6 @@
+Read CLAUDE.md at the repo root before starting work in this repo. It
+covers the network-access split between local tools (you) and cloud
+Claude Code sessions, why data files under data/ and *.db never sync
+between environments, and the branch discipline both sides should follow.
+Keep that file as the single source of truth — if this workflow changes,
+edit CLAUDE.md, not this file.
