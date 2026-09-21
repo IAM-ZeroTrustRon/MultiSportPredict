@@ -150,6 +150,8 @@ def tier_of(recommendation: Optional[str]) -> str:
     text = (recommendation or "").strip().upper()
     if not text:
         return "INFO"
+    if text.startswith("VOID"):
+        return "VOID"
     if text.startswith("STRONG BET") or " STRONG BET" in text:
         return "STRONG BET"
     if "NO BET" not in text and re.search(r"\bBET\b", text):
@@ -202,15 +204,17 @@ def dedup_key(row: sqlite3.Row) -> Tuple[str, str, str, str]:
 
 
 def is_excluded_tier(recommendation: Optional[str]) -> bool:
-    """PASS and INFO rows are not bets: don't grade, don't count.
+    """PASS, INFO and VOID rows are not bets: don't grade, don't count.
 
     PASS is the model declining to bet. INFO is a recommendation string that
     names no side ('Over: 55.9% | Under: 44.1%') -- it was never settleable,
     and tier_of() has classified it as INFO all along; grading ignored that.
-    Both stay in the database as calibration data, but neither can be part of
-    a betting record.
+    VOID is set by hand on a row whose output was not a real model call (the
+    June 2026 soccer BTTS rows were one canned projection whatever the teams);
+    grade_note records what the row was and why. All three stay in the
+    database, but none can be part of a betting record.
     """
-    return tier_of(recommendation) in {"PASS", "INFO"}
+    return tier_of(recommendation) in {"PASS", "INFO", "VOID"}
 
 
 def newest_per_fixture(rows: Sequence[sqlite3.Row]
@@ -1400,7 +1404,7 @@ def cmd_regrade(conn: sqlite3.Connection, sport: Optional[str]) -> int:
             (f"excluded: {tier_of(row['recommendation'])} row is not a bet "
              f"(regrade 2026-09-20)", row["id"]),
         )
-    log(f"Un-graded {len(excluded)} PASS/INFO row(s) -- they are not bets.")
+    log(f"Un-graded {len(excluded)} PASS/INFO/VOID row(s) -- they are not bets.")
 
     keep, dropped = newest_per_fixture(
         [r for r in rows if not is_excluded_tier(r["recommendation"])])
