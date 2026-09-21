@@ -46,7 +46,7 @@ ROOT = Path(__file__).resolve().parent
 # --------------------------------------------------------------------------
 ENTRY_POINTS = [
     "run_mlb.py", "run_nfl.py", "run_tennis.py", "run_soccer_batch.py",
-    "run_slate.py", "run_tonight.py", "run_liga_mx.py", "batch_tennis.py",
+    "run_tonight.py", "run_liga_mx.py", "batch_tennis.py",
     "run_match.py", "run_match_safe.py",
     "universal_runner.py", "predict_match.py",
     "grade_predictions.py", "import_picks.py", "backtest_report.py",

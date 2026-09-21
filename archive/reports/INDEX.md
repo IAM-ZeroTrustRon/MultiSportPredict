@@ -10,7 +10,7 @@ One page. If you are looking for a file, it is described here.
 | NFL | `venv\Scripts\python.exe run_nfl.py --week N --odds` |
 | Tennis | `venv\Scripts\python.exe run_tennis.py ...` |
 | Soccer | `venv\Scripts\python.exe run_soccer_batch.py ...` |
-| Mixed slate from CSV | `venv\Scripts\python.exe run_slate.py --input input/slate.csv` |
+| Soccer slate from file | `venv\Scripts\python.exe run_soccer_batch.py --slate slate_today.json` |
 
 Add `--dry-run` to see the matchups without storing. Add `--no-discord` to keep
 it off the server.
