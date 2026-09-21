@@ -34,9 +34,25 @@ WHAT "GRADED" MEANS HERE
 Nothing is graded from a guess. A prediction with no matching final score
 stays ungraded and shows up in --pending forever until a result arrives.
 
-PROFIT/LOSS uses -110 pricing (risk 1 to win 0.909) unless the prediction's
-raw_json carries real odds. That is a modelling convention, not a claim about
-what you were actually priced at -- treat the unit record as directional.
+PROFIT/LOSS uses the price that was actually on the board when one is recorded
+in raw_json["market_odds"] (moneyline rows carry home_ml/away_ml today). A
+bet with no recorded price -- every total row, because only the LINE is
+stored, never a total price -- settles at the -110 convention (risk 1 to win
+0.909) and is noted in grade_note as such. That is a modelling convention,
+not a claim about what you were actually priced at -- treat the unit record
+as directional.
+
+PASS and INFO rows are NOT graded or counted. PASS is the model declining to
+bet; INFO is a legacy recommendation string that names no side ('Over: 55.9% |
+Under: 44.1%') and was never settleable in the first place. Both stay in the
+database as calibration data (grade_note says why) but never appear in the
+win/loss record. Duplicate fixtures -- the same (date, sport, teams, market)
+seen twice, in either home/away orientation or from a slate re-run -- collapse
+to their newest row; the older one is set aside with a note.
+
+    python grade_predictions.py --regrade   un-grade PASS/INFO + re-settle
+                                            existing grades at recorded prices
+    python grade_predictions.py --report    the honest record
 """
 
 from __future__ import annotations
@@ -45,6 +61,7 @@ import argparse
 import csv
 import datetime as _dt
 import json
+import math
 import os
 import re
 import sqlite3
@@ -147,7 +164,80 @@ def tier_of(recommendation: Optional[str]) -> str:
 
 
 def normalise_team(name: str) -> str:
-    return re.sub(r"[^a-z0-9]", "", (name or "").lower())
+    # Strip a trailing season tag first. run_nfl.py stores "Arizona Cardinals
+    # (2026)"; ESPN returns "Arizona Cardinals". Without this the tag survived
+    # as "arizonacardinals2026", no NFL row could ever match a result, and all
+    # 39 stored NFL predictions sat ungraded looking like "finals not in yet".
+    name = DEDUP_TEAM_NOISE.sub("", name or "")
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+DEDUP_TEAM_NOISE = re.compile(r"\s*\((?:19|20)\d{2}(?:[-/]\d{2,4})?\)\s*$")
+
+
+def dedup_key(row: sqlite3.Row) -> Tuple[str, str, str, str]:
+    """(date, sport, {teams} sorted, market) -- the identity of 'one bet'.
+
+    The teams are an unordered pair, so 'A vs B' and 'B vs A' (both recorded
+    orientations of the same fixture have been seen) collapse to one key. The
+    season tag is stripped: NFL rows may store 'Buffalo Bills (2026)' one day
+    and 'Buffalo Bills' the next, and the report must treat them as one team.
+
+    NOTE: `game_date` belongs in the key because the same two clubs meet again
+    and again (Lotte and KIA faced off three times inside one week in Aug
+    2026). A matchup-pair-only key would settle every one of those meetings at
+    a single night's score -- that is a fabricated result, not a grade.
+    """
+    def strip_season(name: str) -> str:
+        return normalise_team(DEDUP_TEAM_NOISE.sub("", name or ""))
+
+    home, away = strip_season(row["home_team"]), strip_season(row["away_team"])
+    pair = f"{home}|{away}" if home <= away else f"{away}|{home}"
+    return (
+        str(row["game_date"] or ""),
+        (row["sport"] or "").strip().lower(),
+        pair,
+        (row["market_type"] or "").strip().lower(),
+    )
+
+
+def is_excluded_tier(recommendation: Optional[str]) -> bool:
+    """PASS and INFO rows are not bets: don't grade, don't count.
+
+    PASS is the model declining to bet. INFO is a recommendation string that
+    names no side ('Over: 55.9% | Under: 44.1%') -- it was never settleable,
+    and tier_of() has classified it as INFO all along; grading ignored that.
+    Both stay in the database as calibration data, but neither can be part of
+    a betting record.
+    """
+    return tier_of(recommendation) in {"PASS", "INFO"}
+
+
+def newest_per_fixture(rows: Sequence[sqlite3.Row]
+                      ) -> Tuple[List[sqlite3.Row], List[sqlite3.Row]]:
+    """Split rows into (kept, dropped) keeping the HIGHEST id per dedup key.
+
+    'A vs B' and 'B vs A' orientations of the same game, re-runs of a slate,
+    and one fixture with a second prediction after a line move are all the
+    same bet -- the identities collapse under dedup_key(). The newest row (by
+    id; ids are monotonic) is kept because a re-run of a slate produces a
+    later row with the fresher line, so that is the one that reflects what
+    would actually have been bet. Deterministic either way; newest chosen on
+    that principle.
+    """
+    kept: Dict[str, sqlite3.Row] = {}
+    order: List[str] = []
+    for row in rows:
+        key = dedup_key(row)
+        existing = kept.get(key)
+        if existing is None or row["id"] > existing["id"]:
+            if existing is None:
+                order.append(key)
+            kept[key] = row
+    kept_rows = [kept[key] for key in order]
+    dropped_ids = {row["id"] for row in rows} - {row["id"] for row in kept_rows}
+    dropped = [row for row in rows if row["id"] in dropped_ids]
+    return kept_rows, dropped
 
 
 def american_to_profit(odds: float) -> float:
@@ -163,33 +253,116 @@ class Ungradable(Exception):
     pass
 
 
-def grade_row(row: sqlite3.Row, home_score: float, away_score: float) -> Tuple[str, str, float]:
-    """Return (outcome, pick, profit_loss) for one prediction.
+def _price(value: Any) -> Optional[float]:
+    """An American price, or None. 0 and non-numbers are not prices."""
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return None
+    return v if v != 0 and math.isfinite(v) else None
 
-    outcome is 'win' | 'loss' | 'push' -- the three values
-    update_prediction_outcome() already expects.
+
+def _recorded_prices(raw: Dict[str, Any]) -> Dict[str, Optional[float]]:
+    """Every real price stored with a prediction, under one set of names.
+
+    Standard location (written by universal_runner._store_prediction since
+    2026-09-21): raw_json["market_odds"] with home_ml, away_ml, draw_ml,
+    over, under, spread_home_price, spread_away_price.
+    Older rows are read from where each runner used to put them:
+      run_mlb.py    market_odds.home_ml / away_ml
+      run_tennis.py auto_odds.home_ml / away_ml
+      soccer        auto_odds.over_price / under_price / home_ml / away_ml
+      moneyline     moneyline.market_home / market_away
+    """
+    out: Dict[str, Optional[float]] = {k: None for k in (
+        "home_ml", "away_ml", "draw_ml", "over", "under",
+        "spread_home_price", "spread_away_price")}
+    sources = []
+    for key in ("market_odds", "auto_odds"):
+        if isinstance(raw.get(key), dict):
+            sources.append(raw[key])
+    ml = raw.get("moneyline")
+    if isinstance(ml, dict):
+        sources.append({"home_ml": ml.get("market_home") or ml.get("home_ml"),
+                        "away_ml": ml.get("market_away") or ml.get("away_ml")})
+    aliases = {"over": ("over", "over_price"), "under": ("under", "under_price")}
+    for name in out:
+        for src in sources:
+            for k in aliases.get(name, (name,)):
+                v = _price(src.get(k))
+                if v is not None and out[name] is None:
+                    out[name] = v
+    return out
+
+
+def _side_bet(row: sqlite3.Row, raw: Dict[str, Any]) -> Optional[str]:
+    """HOME or AWAY as the recommendation actually said, or None.
+
+    The moneyline side used to be taken from the win probability
+    (>= 0.5 -> HOME). A value bet on an underdog -- "BET HOME ML" at a 35%
+    home win probability -- was therefore settled as a bet on AWAY. Two tennis
+    bets that lost were recorded as wins that way. The recommendation is what
+    was bet; read it first.
+    """
+    text = str(row["recommendation"] or "").upper()
+    if re.search(r"\bAWAY\b", text):
+        return "AWAY"
+    if re.search(r"\bHOME\b", text):
+        return "HOME"
+    squashed = normalise_team(text)
+    home, away = normalise_team(row["home_team"]), normalise_team(row["away_team"])
+    if home and home in squashed and not (away and away in squashed):
+        return "HOME"
+    if away and away in squashed and not (home and home in squashed):
+        return "AWAY"
+    stored = str(raw.get("_pick") or "").upper()
+    if stored in ("HOME", "AWAY"):
+        return stored
+    return None
+
+
+def grade_row(row: sqlite3.Row, home_score: float, away_score: float) -> Tuple[str, str, float, bool]:
+    """Return (outcome, pick, profit_loss, priced) for one prediction.
+
+    outcome is 'win' | 'loss' | 'push'. `priced` is True when the bet was
+    settled at a real recorded price rather than the DEFAULT_ODDS convention.
     """
     market = (row["market_type"] or "").strip().lower()
     model_value = row["model_value"]
     market_value = row["market_value"]
     sport = (row["sport"] or "").strip().lower()
     total = home_score + away_score
+    try:
+        raw = json.loads(row["raw_json"]) if row["raw_json"] else {}
+    except (json.JSONDecodeError, TypeError):
+        raw = {}
+    if not isinstance(raw, dict):
+        raw = {}
+    prices = _recorded_prices(raw)
+    price_key: Optional[str] = None
 
     if market == "total":
         if model_value is None or market_value is None:
             raise Ungradable("total needs both a projection and a market line")
-        pick = "OVER" if model_value > market_value else "UNDER"
+        text = str(row["recommendation"] or "").upper()
+        if re.search(r"\bUNDER\b", text):
+            pick = "UNDER"
+        elif re.search(r"\bOVER\b", text):
+            pick = "OVER"
+        else:
+            pick = "OVER" if model_value > market_value else "UNDER"
         if abs(total - market_value) < 1e-9:
             outcome = "push"
         elif (total > market_value) == (pick == "OVER"):
             outcome = "win"
         else:
             outcome = "loss"
+        price_key = "over" if pick == "OVER" else "under"
 
     elif market == "moneyline":
         if model_value is None:
             raise Ungradable("moneyline needs a home win probability")
-        pick = "HOME" if model_value >= 0.5 else "AWAY"
+        pick = _side_bet(row, raw) or ("HOME" if model_value >= 0.5 else "AWAY")
         if home_score > away_score:
             winner = "HOME"
         elif away_score > home_score:
@@ -198,9 +371,30 @@ def grade_row(row: sqlite3.Row, home_score: float, away_score: float) -> Tuple[s
             # Soccer settles a draw as a loss on a two-way price; the other
             # sports here cannot draw, so a tie means the data is wrong.
             if sport in {"soccer", "football"}:
-                return "loss", pick, -1.0
+                return "loss", pick, -1.0, True
             raise Ungradable(f"tie score in {sport}, which should not happen")
         outcome = "win" if pick == winner else "loss"
+        price_key = "home_ml" if pick == "HOME" else "away_ml"
+
+    elif market == "spread":
+        # The line is not in a column: market_value holds 0.5 and model_value
+        # the cover probability. It lives in raw_json["spread"], signed from
+        # the home side (+2.5 = home gets 2.5). Every NFL spread bet was
+        # ungradable until this branch existed.
+        spread = raw.get("spread") if isinstance(raw.get("spread"), dict) else {}
+        line = spread.get("market_spread")
+        if line is None:
+            raise Ungradable("spread line not recorded in raw_json['spread']")
+        pick = (_side_bet(row, raw)
+                or str(spread.get("pick") or "").upper() or None)
+        if pick not in ("HOME", "AWAY"):
+            raise Ungradable("spread bet does not say which side")
+        cover = (home_score - away_score) + float(line)
+        if abs(cover) < 1e-9:
+            outcome = "push"
+        else:
+            outcome = "win" if (cover > 0) == (pick == "HOME") else "loss"
+        price_key = "spread_home_price" if pick == "HOME" else "spread_away_price"
 
     elif market == "btts":
         if model_value is None:
@@ -215,40 +409,42 @@ def grade_row(row: sqlite3.Row, home_score: float, away_score: float) -> Tuple[s
             f"model_value does not say which side the number belongs to"
         )
 
-    # Settle at the price that was actually on the board when it can be found.
-    # DEFAULT_ODDS is only a stand-in, and a unit record built on a stand-in
-    # drifts from what the bets were really worth.
     odds = DEFAULT_ODDS
-    try:
-        raw = json.loads(row["raw_json"]) if row["raw_json"] else {}
-    except (json.JSONDecodeError, TypeError):
-        raw = {}
-    if isinstance(raw, dict):
-        recorded = raw.get("market_odds")
-        if isinstance(recorded, dict):
-            if market == "moneyline":
-                side = "home_ml" if pick == "HOME" else "away_ml"
-                value = recorded.get(side)
-                if isinstance(value, (int, float)):
-                    odds = float(value)
-            else:
-                value = recorded.get("total_price")
-                if isinstance(value, (int, float)):
-                    odds = float(value)
-        for key in ("odds", "american_odds", "price"):
-            if isinstance(raw.get(key), (int, float)):
-                odds = float(raw[key])
-                break
+    priced = False
+    if price_key and prices.get(price_key) is not None:
+        odds = prices[price_key]
+        priced = True
+    for key in ("odds", "american_odds", "price"):      # legacy single-price rows
+        if not priced and _price(raw.get(key)) is not None:
+            odds = _price(raw[key])
+            priced = True
 
     profit = {"win": american_to_profit(odds), "loss": -1.0, "push": 0.0}[outcome]
-    return outcome, pick, round(profit, 4)
+    return outcome, pick, round(profit, 4), priced
 
 
 def apply_result(conn: sqlite3.Connection, row: sqlite3.Row,
                  home_score: float, away_score: float, source: str) -> Optional[str]:
-    """Grade one row and write it back. Returns the outcome, or None if skipped."""
+    """Grade one row and write it back. Returns the outcome, or None if skipped.
+
+    Rows whose recommendation is PASS or INFO are deliberately NOT graded: they
+    are not bets. They keep their identity in the database (calibration data)
+    but get a grade_note explaining why they were excluded rather than a score
+    that would fake a settled bet.
+    """
+    if is_excluded_tier(row["recommendation"]):
+        conn.execute(
+            "UPDATE predictions SET result_outcome=NULL, profit_loss=NULL, "
+            "actual_home_score=?, actual_away_score=?, graded_at=NULL, grade_note=? "
+            "WHERE id=?",
+            (home_score, away_score,
+             f"excluded: {tier_of(row['recommendation'])} row is not a bet "
+             f"(source: {source})", row["id"]),
+        )
+        return None
+
     try:
-        outcome, pick, profit = grade_row(row, home_score, away_score)
+        outcome, pick, profit, priced = grade_row(row, home_score, away_score)
     except Ungradable as exc:
         conn.execute(
             "UPDATE predictions SET actual_home_score=?, actual_away_score=?, grade_note=? "
@@ -257,13 +453,26 @@ def apply_result(conn: sqlite3.Connection, row: sqlite3.Row,
         )
         return None
 
+    note = f"source: {source}"
+    if not priced:
+        note += f"; settled at default {DEFAULT_ODDS:.0f} (no real price recorded)"
+    # Record the settlement price so the report counts truly-priced rows rather
+    # than re-inferring it from raw_json["market_odds"] presence.
+    try:
+        raw = json.loads(row["raw_json"]) if row["raw_json"] else {}
+    except (json.JSONDecodeError, TypeError):
+        raw = {}
+    if not isinstance(raw, dict):
+        raw = {}
+    raw["_settled_at_recorded_price"] = bool(priced)
     conn.execute(
         """UPDATE predictions
            SET result_outcome=?, profit_loss=?, pick=?, actual_home_score=?,
-               actual_away_score=?, graded_at=?, grade_note=?
+               actual_away_score=?, graded_at=?, grade_note=?, raw_json=?
            WHERE id=?""",
         (outcome, profit, pick, home_score, away_score,
-         _dt.datetime.now().isoformat(timespec="seconds"), f"source: {source}", row["id"]),
+         _dt.datetime.now().isoformat(timespec="seconds"), note, json.dumps(raw),
+         row["id"]),
     )
     return outcome
 
@@ -309,8 +518,12 @@ def fetch_mlb_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[
     return out
 
 
+# One day per request. The old single range request (dates=START-END) failed
+# with RuntimeError on every run, so the live feed never graded anything and
+# only the nfl_schedule.json fallback worked. The per-day form is the one the
+# NCAAF grader already uses successfully.
 NFL_SCOREBOARD = ("https://site.web.api.espn.com/apis/site/v2/sports/football/"
-                  "nfl/scoreboard?dates={start}-{end}&limit=400")
+                  "nfl/scoreboard?dates={date}&limit=400")
 
 
 def fetch_nfl_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[float, float]]:
@@ -333,33 +546,44 @@ def fetch_nfl_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[
         out[(date[:10], normalise_team(home), normalise_team(away))] = (
             float(hs), float(ras))
 
-    try:
-        payload = _get_json(NFL_SCOREBOARD.format(
-            start=start.replace("-", ""), end=end.replace("-", "")))
-        events = payload.get("events") or []
-        for league in payload.get("leagues") or []:
-            events = events or (league.get("events") or [])
-        for event in events:
-            competitions = event.get("competitions") or []
-            if not competitions:
-                continue
-            competition = competitions[0]
-            status = ((competition.get("status") or {}).get("type") or {})
-            if not status.get("completed"):
-                continue
-            sides = {}
-            for competitor in competition.get("competitors") or []:
-                which = str(competitor.get("homeAway", "")).lower()
-                if which in ("home", "away"):
-                    team = competitor.get("team") or {}
-                    sides[which] = (team.get("displayName") or team.get("name"),
-                                    competitor.get("score"))
-            if "home" in sides and "away" in sides:
-                add(str(event.get("date", "")), sides["home"][0], sides["away"][0],
-                    sides["home"][1], sides["away"][1])
-    except Exception as exc:  # noqa: BLE001
-        log(f"[nfl] scoreboard unavailable ({type(exc).__name__}) -- "
-            f"falling back to data/nfl_schedule.json")
+    failures: List[str] = []
+    day = _dt.date.fromisoformat(start)
+    last = _dt.date.fromisoformat(end)
+    while day <= last:
+        try:
+            payload = _get_json(NFL_SCOREBOARD.format(date=day.strftime("%Y%m%d")))
+            events = payload.get("events") or []
+            for league in payload.get("leagues") or []:
+                events = events or (league.get("events") or [])
+            for event in events:
+                competitions = event.get("competitions") or []
+                if not competitions:
+                    continue
+                competition = competitions[0]
+                status = ((competition.get("status") or {}).get("type") or {})
+                if not status.get("completed"):
+                    continue
+                sides = {}
+                for competitor in competition.get("competitors") or []:
+                    which = str(competitor.get("homeAway", "")).lower()
+                    if which in ("home", "away"):
+                        team = competitor.get("team") or {}
+                        sides[which] = (team.get("displayName") or team.get("name"),
+                                        competitor.get("score"))
+                if "home" in sides and "away" in sides:
+                    # Key on the US date asked for, not event["date"]. That
+                    # field is UTC, so every Sunday and Monday night game
+                    # (8:15pm ET = 00:15Z next day) was filed under the wrong
+                    # date and could never match its prediction.
+                    add(day.isoformat(), sides["home"][0], sides["away"][0],
+                        sides["home"][1], sides["away"][1])
+        except Exception as exc:  # noqa: BLE001
+            failures.append(f"{day}: {exc}")
+        day += _dt.timedelta(days=1)
+    if failures:
+        # Say what failed instead of a bare class name.
+        log(f"[nfl] live scoreboard failed for {len(failures)} day(s), first: "
+            f"{failures[0]} -- using data/nfl_schedule.json for those")
 
     schedule_path = ROOT / "data" / "nfl_schedule.json"
     if schedule_path.exists():
@@ -556,12 +780,145 @@ def fetch_ncaaf_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tupl
     return out
 
 
+# --------------------------------------------------------------------------
+# SOCCER
+# --------------------------------------------------------------------------
+# Stored soccer rows have no league (league was never written until 09-21), so
+# this grader is league-agnostic: for each date a prediction was made it reads
+# ESPN's cross-league scoreboard, then each league slug it knows, and matches
+# on the team pair. Only the dates that have pending rows are fetched.
+#
+# Soccer markets settle on 90 minutes. ESPN's score for a cup tie that went to
+# extra time includes the extra goals, so AET/penalty finishes are NOT graded;
+# they stay pending with a note rather than settle on the wrong score.
+SOCCER_SCOREBOARD = ("https://site.web.api.espn.com/apis/site/v2/sports/soccer/"
+                     "{slug}/scoreboard?dates={date}&limit=500")
+SOCCER_EXTRA_SLUGS = [
+    "fifa.world", "fifa.friendly", "fifa.worldq.uefa", "fifa.worldq.conmebol",
+    "fifa.worldq.concacaf", "fifa.worldq.caf", "fifa.worldq.afc",
+    "uefa.europa", "uefa.europa.conf", "uefa.nations", "concacaf.leagues.cup",
+    "concacaf.champions", "conmebol.libertadores", "conmebol.sudamericana",
+    "eng.2", "esp.2", "ger.2", "ita.2", "fra.2", "por.1", "sco.1", "bel.1",
+    "tur.1", "gre.1", "den.1", "den.2", "rou.1", "geo.1", "uru.1", "mar.1",
+    "jpn.1", "chn.1", "aus.1", "col.1", "chi.1",
+]
+AET_MARKERS = ("AET", "PEN", "EXTRA", "SHOOTOUT")
+
+
+def _soccer_slugs() -> List[str]:
+    slugs: List[str] = []
+    try:
+        from ingest_soccer_espn import LEAGUES as _L
+        slugs = [cfg["slug"] for cfg in _L.values() if cfg.get("slug")]
+    except Exception:  # noqa: BLE001  (ingest module needs requests; grader does not)
+        pass
+    for slug in SOCCER_EXTRA_SLUGS:
+        if slug not in slugs:
+            slugs.append(slug)
+    return slugs
+
+
+def _soccer_events(payload: Any) -> List[Tuple[str, str, Any, Any, bool]]:
+    """(home, away, home_score, away_score, settled_in_90) for finished games."""
+    out = []
+    events = payload.get("events") or []
+    for event in events:
+        comps = event.get("competitions") or []
+        if not comps:
+            continue
+        comp = comps[0]
+        stype = ((comp.get("status") or event.get("status") or {}).get("type") or {})
+        if not stype.get("completed"):
+            continue
+        label = " ".join(str(stype.get(k) or "") for k in ("name", "detail", "shortDetail")).upper()
+        in_90 = not any(m in label for m in AET_MARKERS)
+        sides = {}
+        for c in comp.get("competitors") or []:
+            which = str(c.get("homeAway", "")).lower()
+            if which in ("home", "away"):
+                team = c.get("team") or {}
+                sides[which] = (team.get("displayName") or team.get("name") or "",
+                                c.get("score"))
+        if "home" in sides and "away" in sides:
+            out.append((sides["home"][0], sides["away"][0],
+                        sides["home"][1], sides["away"][1], in_90))
+    return out
+
+
+def fetch_soccer_results(start: str, end: str,
+                         dates: Optional[List[str]] = None
+                         ) -> Dict[Tuple[str, str, str], Tuple[float, float]]:
+    """(date, home, away) -> 90-minute score, for every date that has a pending row.
+
+    A prediction's game_date comes from when it was run, and kickoffs cross UTC
+    midnight, so each date also reads the next day's scoreboard and files what
+    it finds under both dates.
+    """
+    wanted = sorted(set(dates or [])) or [start]
+    out: Dict[Tuple[str, str, str], Tuple[float, float]] = {}
+    extra_time: List[str] = []
+    fetched: Dict[str, List[Tuple[str, str, Any, Any, bool]]] = {}
+    failures: List[str] = []
+    slugs = _soccer_slugs()
+
+    def day_events(day: _dt.date) -> List[Tuple[str, str, Any, Any, bool]]:
+        key = day.isoformat()
+        if key in fetched:
+            return fetched[key]
+        found: Dict[Tuple[str, str], Tuple[str, str, Any, Any, bool]] = {}
+        for slug in ["all"] + slugs:
+            try:
+                payload = _get_json(SOCCER_SCOREBOARD.format(
+                    slug=slug, date=day.strftime("%Y%m%d")))
+            except Exception as exc:  # noqa: BLE001
+                if slug == "all":
+                    failures.append(f"{key} all: {exc}")
+                continue
+            for ev in _soccer_events(payload):
+                found[(normalise_team(ev[0]), normalise_team(ev[1]))] = ev
+            if slug == "all" and found:
+                break          # the cross-league board answered; skip the loop
+        fetched[key] = list(found.values())
+        return fetched[key]
+
+    for d in wanted:
+        try:
+            base = _dt.date.fromisoformat(d[:10])
+        except ValueError:
+            continue
+        for day in (base, base + _dt.timedelta(days=1)):
+            for home, away, hs, as_, in_90 in day_events(day):
+                if hs is None or as_ is None:
+                    continue
+                if not in_90:
+                    extra_time.append(f"{home} v {away} ({day})")
+                    continue
+                try:
+                    score = (float(hs), float(as_))
+                except (TypeError, ValueError):
+                    continue
+                for filed in (day.isoformat(), d[:10]):
+                    out.setdefault((filed, normalise_team(home), normalise_team(away)), score)
+    if failures:
+        log(f"[soccer] cross-league board failed for {len(failures)} day(s), "
+            f"first: {failures[0]} -- fell back to per-league boards")
+    if extra_time:
+        log(f"[soccer] {len(extra_time)} game(s) went to extra time/penalties "
+            f"and were NOT graded (90-minute markets): {', '.join(extra_time[:5])}")
+    return out
+
+
+fetch_soccer_results.wants_dates = True   # type: ignore[attr-defined]
+
+
 AUTO_SOURCES = {
     "mlb": fetch_mlb_results,
     "baseball": fetch_mlb_results,   # rows logged as 'baseball' that are MLB games
     "nfl": fetch_nfl_results,
     "ncaaf": fetch_ncaaf_results,
     "tennis": fetch_tennis_results,
+    "soccer": fetch_soccer_results,
+    "football": fetch_soccer_results,   # older rows logged as 'football'
 }
 
 
@@ -589,7 +946,11 @@ def ungraded(conn: sqlite3.Connection, sport: Optional[str] = None,
         query += " AND game_date >= ?"
         params.append(cutoff)
     query += " ORDER BY game_date DESC, id DESC"
-    return list(conn.execute(query, params))
+    rows = list(conn.execute(query, params))
+    # PASS and INFO rows are not bets, so they are not "awaiting a result" --
+    # filtering here keeps them out of --pending, --auto and --manual alike,
+    # while they remain in the database as calibration data.
+    return [row for row in rows if not is_excluded_tier(row["recommendation"])]
 
 
 def cmd_pending(conn: sqlite3.Connection, sport: Optional[str], days: Optional[int]) -> int:
@@ -635,8 +996,27 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
         log("Nothing to grade.")
         return 0
 
+    # A fixture can be logged twice (both orientations, or a slate re-run).
+    # Grade only the newest row per (date, sport, {teams}, market), and never a
+    # key that already has a settled result. The older duplicate rows stay in
+    # the database, ungraded and noted, so the duplicate stays visible without
+    # double-counting in the record.
+    rows, dropped = newest_per_fixture(rows)
+    graded_keys = {
+        dedup_key(r) for r in conn.execute(
+            "SELECT * FROM predictions WHERE result_outcome IS NOT NULL")}
+    to_grade = [r for r in rows if dedup_key(r) not in graded_keys]
+    skip_dupes = [r for r in rows if dedup_key(r) in graded_keys]
+    if dropped or skip_dupes:
+        for row in dropped + skip_dupes:
+            conn.execute(
+                "UPDATE predictions SET grade_note='duplicate fixture -- "
+                "excluded from grading (newest row kept)' WHERE id=?",
+                (row["id"],))
+        conn.commit()
+
     by_sport: Dict[str, List[sqlite3.Row]] = {}
-    for row in rows:
+    for row in to_grade:
         by_sport.setdefault((row["sport"] or "").lower(), []).append(row)
 
     graded = skipped = unmatched = 0
@@ -656,7 +1036,10 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
 
         log(f"[{sport_key}] fetching results for {dates[0]} .. {dates[-1]} ...")
         try:
-            results = fetcher(dates[0], dates[-1])
+            if getattr(fetcher, "wants_dates", False):
+                results = fetcher(dates[0], dates[-1], dates=dates)
+            else:
+                results = fetcher(dates[0], dates[-1])
         except Exception as exc:  # noqa: BLE001
             log(f"[FAILED] {sport_key}: {type(exc).__name__}: {exc}")
             skipped += len(sport_rows)
@@ -674,6 +1057,9 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
                     scores = (flipped[1], flipped[0])
             if scores is None:
                 unmatched += 1
+                if sport_key in ("soccer", "football"):
+                    log(f"    [no result] #{row['id']} {row['game_date']} "
+                        f"{row['home_team']} vs {row['away_team']}")
                 continue
             outcome = apply_result(conn, row, scores[0], scores[1], f"{sport_key} feed")
             if outcome:
@@ -685,6 +1071,9 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
 
     log(f"\nGraded {graded}. Unmatched {unmatched}. Skipped {skipped} "
         f"(no automatic source or no date).")
+    if dropped or skip_dupes:
+        log(f"{len(dropped) + len(skip_dupes)} duplicate row(s) excluded "
+            f"(newest per fixture kept).")
     if unmatched:
         log("Unmatched usually means the game was on a different day than the "
             "prediction timestamp, or the team name is spelled differently.")
@@ -731,8 +1120,19 @@ def cmd_manual(conn: sqlite3.Connection, path: Path) -> int:
                 return (flipped[1], flipped[0])
         return None
 
-    graded = 0
-    for row in ungraded(conn):
+    graded = skipped_dupes = 0
+    pending, dropped = newest_per_fixture(ungraded(conn))
+    graded_keys = {
+        dedup_key(r) for r in conn.execute(
+            "SELECT * FROM predictions WHERE result_outcome IS NOT NULL")}
+    for row in pending:
+        if dedup_key(row) in graded_keys:
+            skipped_dupes += 1
+            conn.execute(
+                "UPDATE predictions SET grade_note='duplicate fixture -- "
+                "excluded from grading (newest row kept)' WHERE id=?",
+                (row["id"],))
+            continue
         scores = find(str(row["game_date"] or "").strip(),
                       normalise_team(row["home_team"]),
                       normalise_team(row["away_team"]))
@@ -743,9 +1143,16 @@ def cmd_manual(conn: sqlite3.Connection, path: Path) -> int:
             graded += 1
             log(f"  #{row['id']:>4} {row['home_team']} vs {row['away_team']} "
                 f"({row['market_type']}) -> {outcome.upper()}")
+    for row in dropped:
+        conn.execute(
+            "UPDATE predictions SET grade_note='duplicate fixture -- "
+            "excluded from grading (newest row kept)' WHERE id=?",
+            (row["id"],))
     conn.commit()
     log(f"\nGraded {graded} prediction(s) from {path.name}."
-        + (f" {incomplete} row(s) had no scores yet." if incomplete else ""))
+        + (f" {incomplete} row(s) had no scores yet." if incomplete else "")
+        + (f" {len(dropped) + skipped_dupes} duplicate row(s) excluded."
+           if dropped or skipped_dupes else ""))
     return 0
 
 
@@ -798,6 +1205,11 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
         params.append((_dt.date.today() - _dt.timedelta(days=days)).isoformat())
     rows = list(conn.execute(query, params))
 
+    # Deduplicate before anything is tallied. Both orientations of one game and
+    # re-runs of a slate collapse to the same (date, sport, {teams}, market),
+    # and the newest row per key is the one that reflects the fresher line.
+    rows, dropped = newest_per_fixture(rows)
+
     total_logged = conn.execute("SELECT COUNT(*) FROM predictions").fetchone()[0]
     if not rows:
         log(f"No graded predictions yet ({total_logged} logged in total).")
@@ -808,10 +1220,15 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
     header = f"  {'':<26}{'W-L':<12}{'WIN%':>8}{'UNITS':>11}{'ROI':>10}"
     log("=" * 78)
     log(f"PREDICTION RECORD   ({len(rows)} graded of {total_logged} logged"
-        + (f", last {days} days" if days else "") + ")")
+        + (f", last {days} days" if days else "") + ")"
+        + (f", {len(dropped)} duplicate row(s) excluded" if dropped else ""))
     log("=" * 78)
 
-    bets = [r for r in rows if tier_of(r["recommendation"]) in {"STRONG BET", "BET"}]
+    # PASS and INFO rows are not bets (see is_excluded_tier); they are not part
+    # of the record, only of the calibration breakdown at the bottom. Everything
+    # else -- BET, STRONG BET, LEAN -- is a real decision with money behind it.
+    record_rows = [r for r in rows if not is_excluded_tier(r["recommendation"])]
+    bets = [r for r in record_rows if tier_of(r["recommendation"]) in {"STRONG BET", "BET"}]
     log("\nACTUAL BETS (STRONG BET + BET only -- this is the record that matters)")
     log(header)
     log(_line("all bets", _tally(bets)) if bets else "  (none yet)")
@@ -826,26 +1243,33 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
     # into "informational" below. Reporting it as its own section rather than
     # folding it into "ACTUAL BETS" -- it's a real signal, just a weaker one
     # than what this project's own thresholds call worth a full bet.
-    leans = [r for r in rows if tier_of(r["recommendation"]) == "LEAN"]
+    leans = [r for r in record_rows if tier_of(r["recommendation"]) == "LEAN"]
     if leans:
         log("\nLEANS (a real signal, below this project's own BET threshold)")
         log(header)
         log(_line("all leans", _tally(leans)))
 
+    # Combined line: every non-PASS/INFO bet, LEANs included. This is the
+    # decision-covering number; the ACTUAL BETS section above keeps the
+    # strict subset for reference.
+    log("\nALL DECISIONS (BET + LEAN -- the full betting record)")
+    log(header)
+    log(_line("all decisions", _tally(record_rows)) if record_rows else "  (none yet)")
+
     log("\nBY SPORT")
     log(header)
-    for name in sorted({(r["sport"] or "?") for r in rows}):
-        log(_line(name, _tally([r for r in rows if r["sport"] == name])))
+    for name in sorted({(r["sport"] or "?") for r in record_rows}):
+        log(_line(name, _tally([r for r in record_rows if r["sport"] == name])))
 
     log("\nBY MARKET")
     log(header)
-    for market in sorted({(r["market_type"] or "?") for r in rows}):
-        log(_line(market, _tally([r for r in rows if r["market_type"] == market])))
+    for market in sorted({(r["market_type"] or "?") for r in record_rows}):
+        log(_line(market, _tally([r for r in record_rows if r["market_type"] == market])))
 
     log("\nBY CONFIDENCE  (is a higher score actually more reliable?)")
     log(header)
     for bucket in ("75+", "65-74", "55-64", "<55", "unknown"):
-        subset = [r for r in rows if _bucket(r["confidence"]) == bucket]
+        subset = [r for r in record_rows if _bucket(r["confidence"]) == bucket]
         if subset:
             log(_line(bucket, _tally(subset)))
 
@@ -859,7 +1283,7 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
         if informational:
             log(_line("informational", _tally(informational)))
 
-    overall = _tally(bets)
+    overall = _tally(record_rows)
     if overall["win_pct"] is not None:
         log("\n" + "-" * 78)
         breakeven = 100.0 / (1.0 + american_to_profit(DEFAULT_ODDS))
@@ -869,20 +1293,20 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
         if overall["wins"] + overall["losses"] < 30:
             log("  Sample is small -- under about 30 settled bets this number moves a lot.")
     priced = 0
-    for row in rows:
+    for row in record_rows:
         try:
             blob = json.loads(row["raw_json"]) if row["raw_json"] else {}
-            if isinstance(blob, dict) and isinstance(blob.get("market_odds"), dict):
+            if blob.get("_settled_at_recorded_price"):
                 priced += 1
         except (json.JSONDecodeError, TypeError):
             pass
     if priced:
-        log(f"  {priced} of {len(rows)} graded row(s) settled at recorded prices; "
+        log(f"  {priced} of {len(record_rows)} decision row(s) settled at recorded prices; "
             f"the rest assumed {DEFAULT_ODDS:.0f}.")
     log("=" * 78)
 
     if push_discord:
-        _push_record_to_discord(rows, bets, days)
+        _push_record_to_discord(record_rows, bets, days)
     return 0
 
 
@@ -929,6 +1353,100 @@ def _push_record_to_discord(rows: Sequence[sqlite3.Row], bets: Sequence[sqlite3.
 
 
 # ==========================================================================
+# REGRADE
+# ==========================================================================
+
+def cmd_regrade(conn: sqlite3.Connection, sport: Optional[str]) -> int:
+    """Reset grading artifacts and re-settle every graded row from its store.
+
+    The first honestly-settled record requires the 38 PASS and 42 INFO rows
+    that were graded as if they were bets to be un-graded, the duplicate
+    fixtures to collapse to their newest row, and every remaining graded row
+    to be re-settled at its recorded price. Nothing here is guessed: a graded
+    row that lost its stored score is left ungraded with a note rather than
+    fabricated from nothing.
+
+    Ungraded rows are untouched -- they still await a result via --auto or
+    --manual. --regrade re-settles what is already graded; it does not fetch.
+    """
+    clause = "WHERE result_outcome IS NOT NULL"
+    params: List[Any] = []
+    if sport:
+        clause += " AND lower(sport) = ?"
+        params.append(sport.lower())
+
+    rows = list(conn.execute(f"SELECT * FROM predictions {clause}", params))
+
+    excluded = [r for r in rows if is_excluded_tier(r["recommendation"])]
+    for row in excluded:
+        conn.execute(
+            "UPDATE predictions SET result_outcome=NULL, profit_loss=NULL, "
+            "graded_at=NULL, grade_note=? WHERE id=?",
+            (f"excluded: {tier_of(row['recommendation'])} row is not a bet "
+             f"(regrade 2026-09-20)", row["id"]),
+        )
+    log(f"Un-graded {len(excluded)} PASS/INFO row(s) -- they are not bets.")
+
+    keep, dropped = newest_per_fixture(
+        [r for r in rows if not is_excluded_tier(r["recommendation"])])
+    for row in dropped:
+        conn.execute(
+            "UPDATE predictions SET result_outcome=NULL, profit_loss=NULL, "
+            "graded_at=NULL, grade_note='duplicate fixture -- excluded "
+            "(newest row kept)' WHERE id=?",
+            (row["id"],),
+        )
+    log(f"Dropped {len(dropped)} duplicate fixture row(s) (newest per fixture kept).")
+
+    # Re-settle the surviving rows from the scores already stored in the row.
+    regraded = ungradable = 0
+    for row in keep:
+        home = row["actual_home_score"]
+        away = row["actual_away_score"]
+        if home is None or away is None:
+            conn.execute(
+                "UPDATE predictions SET result_outcome=NULL, profit_loss=NULL, "
+                "graded_at=NULL, grade_note='regrade: no stored score -- "
+                "left pending' WHERE id=?",
+                (row["id"],),
+            )
+            ungradable += 1
+            continue
+        try:
+            outcome, pick, profit, priced = grade_row(row, float(home), float(away))
+        except Ungradable as exc:
+            conn.execute(
+                "UPDATE predictions SET grade_note='regrade ungradable: %s' "
+                "WHERE id=?" % exc,
+                (row["id"],),
+            )
+            ungradable += 1
+            continue
+        try:
+            raw = json.loads(row["raw_json"]) if row["raw_json"] else {}
+        except (json.JSONDecodeError, TypeError):
+            raw = {}
+        if not isinstance(raw, dict):
+            raw = {}
+        raw["_settled_at_recorded_price"] = bool(priced)
+        conn.execute(
+            "UPDATE predictions SET result_outcome=?, profit_loss=?, pick=?, "
+            "graded_at=?, raw_json=? WHERE id=?",
+            (outcome, profit, pick,
+             _dt.datetime.now().isoformat(timespec="seconds"), json.dumps(raw),
+             row["id"]),
+        )
+        regraded += 1
+    conn.commit()
+
+    log(f"Re-settled {regraded} graded row(s) from stored scores "
+        f"({ungradable} left pending -- no score recorded).")
+    log("Run --report to see the honest record, then --auto to fetch the "
+        "remaining results.")
+    return 0
+
+
+# ==========================================================================
 # MAIN
 # ==========================================================================
 
@@ -944,6 +1462,10 @@ def main() -> None:
                         help="Grade from a CSV of final scores.")
     parser.add_argument("--pending", action="store_true",
                         help="List ungraded predictions and write pending_results.csv.")
+    parser.add_argument("--regrade", action="store_true",
+                        help="Un-grade PASS/INFO rows, drop duplicate fixtures, and "
+                             "re-settle every graded bet from its stored score at its "
+                             "recorded price. Does not fetch new results.")
     parser.add_argument("--report", action="store_true", help="Print the win-rate record.")
     parser.add_argument("--push-discord", action="store_true",
                         help="Post the record to Discord (uses DISCORD_RESULTS_WEBHOOK_URL, "
@@ -953,8 +1475,8 @@ def main() -> None:
                         help="Limit to the last N days (auto-grading defaults to 14).")
     args = parser.parse_args()
 
-    if not any((args.auto, args.manual, args.pending, args.report)):
-        parser.error("Pick at least one of --auto, --manual, --pending, --report.")
+    if not any((args.auto, args.manual, args.pending, args.report, args.regrade)):
+        parser.error("Pick at least one of --auto, --manual, --pending, --report, --regrade.")
 
     conn = open_db()
     added = ensure_schema(conn)
@@ -964,12 +1486,14 @@ def main() -> None:
     try:
         if args.pending:
             cmd_pending(conn, args.sport, args.days)
+        if args.regrade:
+            cmd_regrade(conn, args.sport)
         if args.auto:
             cmd_auto(conn, args.sport, args.days or 14)
         if args.manual:
             cmd_manual(conn, args.manual)
         if args.report:
-            if args.auto or args.manual:
+            if args.auto or args.manual or args.regrade:
                 log("")
             cmd_report(conn, args.sport, args.days, args.push_discord)
     finally:

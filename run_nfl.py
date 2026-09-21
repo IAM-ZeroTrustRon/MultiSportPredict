@@ -78,6 +78,26 @@ def parse_match(text: str) -> Tuple[str, str]:
 from ingest_nfl_schedule import norm_team as _norm   # strips a "(2025)" suffix
 
 
+PRICE_KEYS = ("home_ml", "away_ml", "spread_home_price", "spread_away_price",
+              "over_price", "under_price")
+LINE_KEYS = ("spread", "total") + PRICE_KEYS
+
+
+def _to_american(price: Any) -> Optional[float]:
+    """The feed asks for decimal odds (1.91). The model and grader use American
+    (-110). Decimal is always between 1 and 100; American is always 100 or more
+    in size. Anything else is not a price and becomes None, not a guess."""
+    try:
+        x = float(price)
+    except (TypeError, ValueError):
+        return None
+    if abs(x) >= 100:
+        return x
+    if 1.0 < x < 100:
+        return round((x - 1.0) * 100.0) if x >= 2.0 else round(-100.0 / (x - 1.0))
+    return None
+
+
 def fetch_odds() -> Dict[str, Dict[str, Optional[float]]]:
     """(home|away) -> {spread, total, home_ml, away_ml}. Empty on any failure.
 
@@ -104,8 +124,7 @@ def fetch_odds() -> Dict[str, Dict[str, Optional[float]]]:
         home, away = event.get("home_team"), event.get("away_team")
         if not home or not away:
             continue
-        entry: Dict[str, Optional[float]] = {
-            "spread": None, "total": None, "home_ml": None, "away_ml": None}
+        entry: Dict[str, Optional[float]] = {k: None for k in LINE_KEYS}
         for book in event.get("bookmakers", []):
             for market in book.get("markets", []):
                 kind, outcomes = market.get("key"), market.get("outcomes", [])
@@ -113,17 +132,22 @@ def fetch_odds() -> Dict[str, Dict[str, Optional[float]]]:
                 if kind == "spreads" and entry["spread"] is None:
                     if home in prices and prices[home].get("point") is not None:
                         entry["spread"] = float(prices[home]["point"])
+                        entry["spread_home_price"] = _to_american(prices[home].get("price"))
+                        entry["spread_away_price"] = _to_american(
+                            prices.get(away, {}).get("price"))
                 elif kind == "totals" and entry["total"] is None:
                     for outcome in outcomes:
                         if outcome.get("point") is not None:
                             entry["total"] = float(outcome["point"])
                             break
+                    entry["over_price"] = _to_american(prices.get("Over", {}).get("price"))
+                    entry["under_price"] = _to_american(prices.get("Under", {}).get("price"))
                 elif kind == "h2h" and entry["home_ml"] is None:
-                    if (prices.get(home, {}).get("price") is not None
-                            and prices.get(away, {}).get("price") is not None):
-                        entry["home_ml"] = float(prices[home]["price"])
-                        entry["away_ml"] = float(prices[away]["price"])
-            if all(v is not None for v in entry.values()):
+                    h = _to_american(prices.get(home, {}).get("price"))
+                    a = _to_american(prices.get(away, {}).get("price"))
+                    if h is not None and a is not None:
+                        entry["home_ml"], entry["away_ml"] = h, a
+            if all(entry[k] is not None for k in ("spread", "total", "home_ml")):
                 break
         out[f"{_norm(home)}|{_norm(away)}"] = entry
 
@@ -143,6 +167,9 @@ def run_one(home: str, away: str, lines: Dict[str, Optional[float]],
         home, away,
         market_spread=lines.get("spread"), market_total=lines.get("total"),
         market_home_ml=lines.get("home_ml"), market_away_ml=lines.get("away_ml"),
+        spread_home_price=lines.get("spread_home_price"),
+        spread_away_price=lines.get("spread_away_price"),
+        over_price=lines.get("over_price"), under_price=lines.get("under_price"),
         neutral_site=neutral, store_to_db=True, push_discord=push,
     )
 
@@ -193,6 +220,11 @@ def main() -> None:
     parser.add_argument("--total", type=float, action="append")
     parser.add_argument("--home-ml", type=float, action="append")
     parser.add_argument("--away-ml", type=float, action="append")
+    parser.add_argument("--spread-home-price", type=float, action="append",
+                        help="American price on the home spread, e.g. -110")
+    parser.add_argument("--spread-away-price", type=float, action="append")
+    parser.add_argument("--over-price", type=float, action="append")
+    parser.add_argument("--under-price", type=float, action="append")
     parser.add_argument("--neutral-site", action="store_true")
     parser.add_argument("--push", nargs="+", type=int, metavar="N")
     parser.add_argument("--no-fixture-check", action="store_true",
@@ -299,11 +331,14 @@ def main() -> None:
 
     def lines_for(index: int, home: str, away: str) -> Dict[str, Optional[float]]:
         entry = dict(lines_by_game.get(f"{_norm(home)}|{_norm(away)}",
-                                       {"spread": None, "total": None,
-                                        "home_ml": None, "away_ml": None}))
+                                       {k: None for k in LINE_KEYS}))
         # Hand-passed values win over the feed.
         for key, values in (("spread", args.spread), ("total", args.total),
-                            ("home_ml", args.home_ml), ("away_ml", args.away_ml)):
+                            ("home_ml", args.home_ml), ("away_ml", args.away_ml),
+                            ("spread_home_price", args.spread_home_price),
+                            ("spread_away_price", args.spread_away_price),
+                            ("over_price", args.over_price),
+                            ("under_price", args.under_price)):
             if values and index < len(values):
                 entry[key] = values[index]
         return entry

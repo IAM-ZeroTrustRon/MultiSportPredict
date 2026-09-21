@@ -274,6 +274,7 @@ def run_one(p1: str, p2: str, store: Dict[str, Any], surface: str,
         p1, p2, surface=surface, tournament=tournament, round_name=round_name,
         best_of_5=best_of_5, store_to_db=True, push_discord=push_discord,
         market_prob=market_prob, tour=tour or None,
+        home_ml=p1_ml, away_ml=p2_ml,
     )
 
     # market_prob above was only from typed --p1-ml/--p2-ml -- run_tennis()
