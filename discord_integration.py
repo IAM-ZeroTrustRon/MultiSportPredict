@@ -1253,6 +1253,7 @@ def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="predictio
         print(json.dumps(payload, indent=2, default=str))
         return len(targets)
     success_count = 0
+    failed_hooks: List[str] = []
     for url in targets:
         dest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:16]
         existing_id = _superseded_message_id(game_key, dest) if game_key else None
@@ -1276,8 +1277,10 @@ def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="predictio
                     if message_id:
                         _record_pushed_message(game_key, dest, message_id)
             else:
+                failed_hooks.append(f"...{url.rstrip('/')[-8:]} [{resp.status_code}]")
                 logger.error("Webhook post failed [%d] %s ... Body: %.200s", resp.status_code, url[:50], resp.text)
         except Exception as exc:
+            failed_hooks.append(f"...{url.rstrip('/')[-8:]} [error]")
             logger.error("Webhook request error for %s ...: %s", url[:50], exc)
     # ---- Bot channel push (Discord REST API, not webhook) ----
     bot_token = os.getenv("DISCORD_BOT_TOKEN")
@@ -1319,16 +1322,21 @@ def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="predictio
     else:
         bot_ok = True  # not configured is not a failure
 
-    if success_count or (bot_wanted and bot_ok):
-        printed = success_count
-        extra = ""
-        if bot_ok and bot_token and bot_channel:
-            printed += 1
-            extra = " + bot channel"
-        print(f"[OK] Pushed {label} to {printed}/{len(targets)} webhook(s){extra}.")
-    else:
-        print(f"[WARN] {label} — none of {len(targets)} webhook(s) accepted the payload.")
-    return success_count + (1 if bot_ok and bot_token and bot_channel else 0)
+    # Webhooks and the bot channel are counted separately. They used to be
+    # summed and printed over the webhook total, so 1 good webhook + the bot
+    # read "2/2 webhook(s)" while the other webhook 404'd. The bot only counts
+    # when this push was meant for it (bot_wanted), not merely configured.
+    bot_sent = bot_wanted and bot_ok and not dry_run
+    parts = []
+    if targets:
+        parts.append(f"{success_count}/{len(targets)} webhook(s)")
+    if bot_wanted:
+        parts.append("bot channel" if bot_sent else "bot channel FAILED")
+    tag = "[OK]" if (success_count or bot_sent) and not failed_hooks and (bot_sent or not bot_wanted) \
+        else ("[PARTIAL]" if success_count or bot_sent else "[WARN]")
+    print(f"{tag} {label}: {' + '.join(parts)}."
+          + (f" Failed: {', '.join(failed_hooks)}" if failed_hooks else ""))
+    return success_count + (1 if bot_sent else 0)
 
 
 # ============================================================================
