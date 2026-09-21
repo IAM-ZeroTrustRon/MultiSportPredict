@@ -8,10 +8,14 @@ MLB Stats API (no API key required), computes live SP metrics, and fires
 universal_runner.py for every game with confirmed starters.
 
 Usage:
-    python auto_mlb_scraper.py
-    python auto_mlb_scraper.py --date 2026-06-19
-    python auto_mlb_scraper.py --dry-run          # print commands without executing
-    python auto_mlb_scraper.py --market-total 9.0 # override default O/U total
+    python auto_mlb_scraper.py --market-total 8.5
+    python auto_mlb_scraper.py --market-total 8.5 --date 2026-06-19
+    python auto_mlb_scraper.py --market-total 8.5 --dry-run   # print commands only
+
+--market-total is REQUIRED. It used to default to 8.5, so a run without it
+stored and pushed every game against a line nobody quoted. The one total you
+pass is applied to every game and carries no price, so CLV is unavailable --
+the run says so. For real per-game lines and prices use run_mlb.py --odds.
 
 MLB Stats API (free, official):
     Schedule:  https://statsapi.mlb.com/api/v1/schedule
@@ -349,8 +353,9 @@ def main() -> None:
     parser.add_argument(
         "--market-total",
         type=float,
-        default=8.5,
-        help="Default O/U market total to use for all games (default: 8.5)",
+        default=None,
+        help="O/U market total applied to EVERY game (required; no default -- "
+             "a made-up line must not be stored or pushed as a market)",
     )
     parser.add_argument(
         "--dry-run",
@@ -364,10 +369,22 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # Fail closed: no market total means no market. The old 8.5 default was
+    # stored (--store-to-db) and pushed (--push-discord) as if it were a quote.
+    if args.market_total is None:
+        parser.error("--market-total is required. There is no default: running "
+                     "on a made-up line would store and push every game against "
+                     "a market nobody quoted. For real per-game odds use "
+                     "run_mlb.py --odds.")
+    if not (math.isfinite(args.market_total) and args.market_total > 0):
+        parser.error(f"--market-total must be a positive number, got {args.market_total}")
+
     print("=" * 70)
     print("  AUTO MLB SCRAPER - Daily Prop Engine")
     print(f"  Target Date : {args.date or date.today().isoformat()}")
-    print(f"  Market Total: {args.market_total}")
+    print(f"  Market Total: {args.market_total} (applied to every game, from --market-total)")
+    print("  [WARN] Running without market odds -- CLV unavailable. One total for "
+          "all games, no prices; use run_mlb.py --odds for real lines.")
     print(f"  Dry-Run     : {args.dry_run}")
     print("=" * 70)
 
