@@ -47,8 +47,9 @@ You'll see a test message in your Discord channel! ✅
 # Option 1: Force push single match
 python run_match.py --sport soccer --home Liverpool --away Arsenal --push-discord
 
-# Option 2: Process batch
-python run_slate.py --push-discord
+# Option 2: Process batch (soccer): run + review, then push
+python run_soccer_batch.py --slate slate_today.json
+python run_soccer_batch.py --push-all
 
 # Option 3: Web app
 streamlit run app.py  # Check "Push to Discord" checkbox
@@ -85,7 +86,7 @@ Discord is already integrated into:
 |--------|---------|
 | `run_match.py` | `--push-discord` flag for single predictions |
 | `app.py` | "Push to Discord" checkbox in web UI |
-| `run_slate.py` | `--push-discord` flag for batch processing |
+| `run_soccer_batch.py` | `--push N` / `--push-all` after reviewing a slate |
 | Any Python script | Import and use `discord_integration` module |
 
 ## 💡 Common Usage Patterns
@@ -104,8 +105,8 @@ python run_match.py --sport soccer --home Liverpool --away Arsenal --push-discor
 
 ### Pattern 3: Batch Processing
 ```bash
-python run_slate.py --push-discord
-# Processes all matches from CSV, pushes all results
+python run_soccer_batch.py --slate slate_today.json   # predict + review
+python run_soccer_batch.py --push-all                  # push every reviewed row
 ```
 
 ### Pattern 4: Custom Script

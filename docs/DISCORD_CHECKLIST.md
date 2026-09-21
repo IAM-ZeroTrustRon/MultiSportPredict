@@ -25,9 +25,9 @@ Complete this checklist to enable Discord predictions in your project.
 - [ ] Always pushes regardless of confidence
 
 ### Option C: Batch Processing
-- [ ] Create `input/slate.csv` with your matches
-- [ ] Run `python run_slate.py --push-discord`
-- [ ] All results push to Discord
+- [ ] Create `slate_today.json` with your matches (soccer)
+- [ ] Run `python run_soccer_batch.py --slate slate_today.json` and read the review
+- [ ] Push with `python run_soccer_batch.py --push-all` (or `--push 2 5`)
 
 ### Option D: Web App
 - [ ] Run `streamlit run app.py`
@@ -48,7 +48,7 @@ Complete this checklist to enable Discord predictions in your project.
 - [ ] Create `.bat` file:
   ```batch
   cd C:\MultiSportPredict
-  python run_slate.py --push-discord
+  python run_soccer_batch.py --slate slate_today.json && python run_soccer_batch.py --push-all
   ```
 - [ ] Create scheduled task in Task Scheduler
 - [ ] Run daily at your preferred time
@@ -56,7 +56,7 @@ Complete this checklist to enable Discord predictions in your project.
 ### Linux/Mac Cron
 - [ ] Create cron job:
   ```bash
-  0 8 * * * cd /path/to/MultiSportPredict && python run_slate.py --push-discord
+  0 8 * * * cd /path/to/MultiSportPredict && python run_soccer_batch.py --slate slate_today.json && python run_soccer_batch.py --push-all
   ```
 
 ## Troubleshooting Checklist
@@ -87,7 +87,7 @@ If Discord integration isn't working:
 ⚠️ **Existing Files (Already Support Discord):**
 - `run_match.py` - Already has `--push-discord` flag
 - `app.py` - Already has "Push to Discord" checkbox
-- `run_slate.py` - Already supports `--push-discord` flag
+- `run_soccer_batch.py` - `--push N` / `--push-all` after reviewing a slate
 - `requirements.txt` - Already has requests & python-dotenv
 
 ## Quick Start Command

@@ -131,23 +131,26 @@ python predict_match.py mlb "NYY" "BOS"
 
 ### Batch Slate Processing
 
-Process multiple matchups at once by creating a CSV and running:
+Each sport has its own slate runner (`run_mlb.py --today`, `run_nfl.py --week N`,
+`batch_tennis.py`). For soccer, run a slate file, review, then push what you pick:
 
 ```bash
-python run_slate.py                              # Uses input/slate.csv
-python run_slate.py --input my_matches.csv       # Custom CSV
-python run_slate.py --store-to-db                # Save all to SQLite
+python run_soccer_batch.py --slate slate_today.json   # predict + store, NO Discord
+python run_soccer_batch.py --review                    # reprint the review table
+python run_soccer_batch.py --push 2 5                  # push those line numbers
+python run_soccer_batch.py --push-all                  # push every reviewed row
 ```
 
-Example CSV format (`input/slate.csv`):
-```csv
-sport,home_team,away_team,league,market_line,market_total
-soccer,Liverpool,Aston Villa,EPL,0.25,2.5
-mlb,NYY,BOS,MLB,0.0,8.5
-tennis,Djokovic,Alcaraz,Grass,0.0,0.0
+Slate format (`slate_today.json`):
+
+```json
+{"date": "2026-09-20", "matches": [
+  {"home": "Corinthians", "away": "Fluminense", "league": "Brasileirao"}
+]}
 ```
 
-Output is a sorted Markdown report by **Highest Confidence Score**.
+A club with no stats in the store is skipped, never run on league averages.
+(The old mixed-sport `run_slate.py` CSV runner is retired in `archive/legacy-modules/`.)
 
 ### Run Pre-built Analysis Scripts
 
