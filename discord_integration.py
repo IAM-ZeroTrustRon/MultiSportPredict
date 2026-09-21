@@ -41,16 +41,15 @@ COLORS = {
     "neutral": 9807270,         # Gray
 }
 
-SPORT_EMOJIS = {
-    "soccer": "",
-    "football": "",
-    "basketball": "",
-    "baseball": "",
-    "mlb": "",
-    "kbo": "",
-    "tennis": "",
-    "hockey": "",
-}
+# One table: emojis come from embed_builder.SPORT_LABEL, which build_embed()
+# already uses for model cards. This dict only feeds the legacy formatters
+# and the slate-summary / msp_bot paths. Aliases SPORT_LABEL doesn't carry:
+# "football" is soccer throughout this codebase; "hockey" has no engine yet.
+from embed_builder import SPORT_LABEL
+
+SPORT_EMOJIS = {sport: emoji for sport, (emoji, _label) in SPORT_LABEL.items()}
+SPORT_EMOJIS["football"] = SPORT_EMOJIS["soccer"]
+SPORT_EMOJIS["hockey"] = "\U0001f3d2"
 
 # ---------------------------------------------------------------------------
 # DEDUPLICATION CACHE
