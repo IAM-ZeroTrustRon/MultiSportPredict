@@ -240,6 +240,22 @@ def newest_per_fixture(rows: Sequence[sqlite3.Row]
     return kept_rows, dropped
 
 
+def split_duplicates(conn: sqlite3.Connection, rows: Sequence[sqlite3.Row]
+                     ) -> Tuple[List[sqlite3.Row], List[sqlite3.Row]]:
+    """Split ungraded rows into (still to settle, duplicates).
+
+    A duplicate is an older row for a key in this batch, or any row whose key
+    already has a settled result. --auto and --pending share this so a row
+    --auto refuses to grade is not listed by --pending as awaiting a result.
+    """
+    kept, dropped = newest_per_fixture(rows)
+    graded_keys = {
+        dedup_key(r) for r in conn.execute(
+            "SELECT * FROM predictions WHERE result_outcome IS NOT NULL")}
+    live = [r for r in kept if dedup_key(r) not in graded_keys]
+    return live, dropped + [r for r in kept if dedup_key(r) in graded_keys]
+
+
 def american_to_profit(odds: float) -> float:
     """Profit on a 1-unit win at American odds."""
     return (100.0 / abs(odds)) if odds < 0 else (odds / 100.0)
@@ -954,7 +970,11 @@ def ungraded(conn: sqlite3.Connection, sport: Optional[str] = None,
 
 
 def cmd_pending(conn: sqlite3.Connection, sport: Optional[str], days: Optional[int]) -> int:
-    rows = ungraded(conn, sport, days)
+    rows, dupes = split_duplicates(conn, ungraded(conn, sport, days))
+    if dupes:
+        log(f"{len(dupes)} duplicate row(s) hidden (same fixture + market as a "
+            f"newer or already-settled row): ids "
+            f"{', '.join(str(r['id']) for r in sorted(dupes, key=lambda r: r['id']))}\n")
     if not rows:
         log("Nothing pending -- every prediction in range has a result.")
         return 0
@@ -1001,14 +1021,9 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
     # key that already has a settled result. The older duplicate rows stay in
     # the database, ungraded and noted, so the duplicate stays visible without
     # double-counting in the record.
-    rows, dropped = newest_per_fixture(rows)
-    graded_keys = {
-        dedup_key(r) for r in conn.execute(
-            "SELECT * FROM predictions WHERE result_outcome IS NOT NULL")}
-    to_grade = [r for r in rows if dedup_key(r) not in graded_keys]
-    skip_dupes = [r for r in rows if dedup_key(r) in graded_keys]
-    if dropped or skip_dupes:
-        for row in dropped + skip_dupes:
+    to_grade, dupes = split_duplicates(conn, rows)
+    if dupes:
+        for row in dupes:
             conn.execute(
                 "UPDATE predictions SET grade_note='duplicate fixture -- "
                 "excluded from grading (newest row kept)' WHERE id=?",
@@ -1071,8 +1086,8 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
 
     log(f"\nGraded {graded}. Unmatched {unmatched}. Skipped {skipped} "
         f"(no automatic source or no date).")
-    if dropped or skip_dupes:
-        log(f"{len(dropped) + len(skip_dupes)} duplicate row(s) excluded "
+    if dupes:
+        log(f"{len(dupes)} duplicate row(s) excluded "
             f"(newest per fixture kept).")
     if unmatched:
         log("Unmatched usually means the game was on a different day than the "
