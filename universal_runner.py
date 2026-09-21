@@ -159,13 +159,28 @@ def _store_prediction(
     recommendation: str,
     raw_json: Dict[str, Any],
     league: Optional[str] = None,
+    prices: Optional[Dict[str, Any]] = None,
 ) -> bool:
     """Log a prediction to core.historical_storage. Returns whether it landed.
+
+    prices: the real American prices on the board when the prediction was
+    made -- any of home_ml, away_ml, draw_ml, over, under, spread_home_price,
+    spread_away_price. They go into raw_json["market_odds"], the one place the
+    grader reads, so a win settles at what was actually offered instead of a
+    flat -110. Missing prices are left out, never guessed.
 
     This used to return None and swallow the exception, so a caller counting
     its own loop reported "3 stored" when two had failed with disk I/O errors
     printed one line above. A write that did not happen is not a write.
     """
+    if prices:
+        clean = {k: float(v) for k, v in prices.items()
+                 if isinstance(v, (int, float)) and v != 0}
+        if clean:
+            raw_json = dict(raw_json)
+            existing = raw_json.get("market_odds")
+            raw_json["market_odds"] = {**(existing if isinstance(existing, dict) else {}),
+                                       **clean}
     try:
         from core.historical_storage import init_db, store_prediction
 
@@ -452,6 +467,11 @@ def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
             confidence=confidence,
             recommendation=rec,
             raw_json=result,
+            league=league,
+            prices={k: (result.get("auto_odds") or {}).get(src)
+                    for k, src in (("over", "over_price"), ("under", "under_price"),
+                                   ("home_ml", "home_ml"), ("away_ml", "away_ml"),
+                                   ("draw_ml", "draw_ml"))},
         )
         print(f"[OK] Soccer prediction stored to multisport_history.db")
 
@@ -501,6 +521,7 @@ def run_basketball(home: str, away: str, league: Optional[str], market_line: flo
                 confidence=float(full_game["probability"]) * 100.0,
                 recommendation=str(full_game["lean"]),
                 raw_json=result,
+                league=league,
             )
             print("[OK] EuroLeague prediction stored to multisport_history.db")
         if push_discord:
@@ -537,6 +558,7 @@ def run_basketball(home: str, away: str, league: Optional[str], market_line: flo
             confidence=conf,
             recommendation=rec,
             raw_json=result,
+            league=league,
         )
         print(f"[OK] Basketball prediction stored to multisport_history.db")
 
@@ -555,7 +577,8 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
                  away_sp_limit: Optional[float] = None,
                  home_pitcher: Optional[str] = None, away_pitcher: Optional[str] = None,
                  home_hitters: Optional[List[str]] = None, away_hitters: Optional[List[str]] = None,
-                 home_ml: Optional[float] = None, away_ml: Optional[float] = None) -> Dict[str, Any]:
+                 home_ml: Optional[float] = None, away_ml: Optional[float] = None,
+                 over_price: Optional[float] = None, under_price: Optional[float] = None) -> Dict[str, Any]:
     from predict_match import run_baseball_game
 
     advanced_args = (home_pitcher, away_pitcher, home_hitters, away_hitters)
@@ -674,6 +697,8 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
             recommendation=rec,
             raw_json=result,
             league=league or "MLB",
+            prices={"home_ml": home_ml, "away_ml": away_ml,
+                    "over": over_price, "under": under_price},
         )
         print(f"[OK] Baseball prediction stored to multisport_history.db")
 
@@ -720,6 +745,10 @@ def run_nfl(home: str, away: str, *,
             market_total: Optional[float] = None,
             market_home_ml: Optional[float] = None,
             market_away_ml: Optional[float] = None,
+            spread_home_price: Optional[float] = None,
+            spread_away_price: Optional[float] = None,
+            over_price: Optional[float] = None,
+            under_price: Optional[float] = None,
             neutral_site: bool = False,
             store_to_db: bool = True,
             push_discord: bool = False) -> Dict[str, Any]:
@@ -785,6 +814,10 @@ def run_nfl(home: str, away: str, *,
                 recommendation=pick,
                 raw_json={**result, "_pick": pick, "_market": market_type},
                 league="NFL",
+                prices={"home_ml": market_home_ml, "away_ml": market_away_ml,
+                        "spread_home_price": spread_home_price,
+                        "spread_away_price": spread_away_price,
+                        "over": over_price, "under": under_price},
             ))
         if stored == len(rows) and rows:
             print(f"[OK] {stored} NFL market(s) stored to multisport_history.db")
@@ -806,7 +839,8 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
                round_name: Optional[str], best_of_5: bool,
                store_to_db: bool, push_discord: bool,
                market_prob: Optional[float] = None,
-               tour: Optional[str] = None, auto_odds: bool = True) -> Dict[str, Any]:
+               tour: Optional[str] = None, auto_odds: bool = True,
+               home_ml: Optional[float] = None, away_ml: Optional[float] = None) -> Dict[str, Any]:
     """Tennis branch: call the real predictor directly (bypass predict_match.py).
 
     market_prob is the de-vigged probability the book gives `home`. Without it
@@ -830,7 +864,8 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
         from live_odds import get_tennis_odds
         auto_odds_result = get_tennis_odds(tour, home, away)
         if auto_odds_result.get("status") in ("live", "cached"):
-            home_ml, away_ml = auto_odds_result.get("home_ml"), auto_odds_result.get("away_ml")
+            home_ml = auto_odds_result.get("home_ml")
+            away_ml = auto_odds_result.get("away_ml")
             if home_ml is not None and away_ml is not None:
                 home_p = (-home_ml) / ((-home_ml) + 100.0) if home_ml < 0 else 100.0 / (home_ml + 100.0)
                 away_p = (-away_ml) / ((-away_ml) + 100.0) if away_ml < 0 else 100.0 / (away_ml + 100.0)
@@ -869,6 +904,7 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
             confidence=conf,
             recommendation=rec,
             raw_json=result,
+            prices={"home_ml": home_ml, "away_ml": away_ml},
         )
         print(f"[OK] Tennis prediction stored to multisport_history.db")
 

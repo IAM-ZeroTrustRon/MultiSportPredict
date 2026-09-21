@@ -297,7 +297,9 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
             home_ml: Optional[int] = None,
             away_ml: Optional[int] = None,
             home_sp_limit: Optional[int] = None,
-            away_sp_limit: Optional[int] = None) -> Dict[str, Any]:
+            away_sp_limit: Optional[int] = None,
+            over_price: Optional[int] = None,
+            under_price: Optional[int] = None) -> Dict[str, Any]:
     rule()
     log(f"MLB:  {away}  @  {home}")
     rule("-")
@@ -337,13 +339,234 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
                           market_total=total, store_to_db=True,
                           push_discord=push_discord,
                           home_ml=home_ml, away_ml=away_ml,
+                          over_price=over_price, under_price=under_price,
                           home_sp_limit=home_sp_limit,
                           away_sp_limit=away_sp_limit, **arguments)
 
     tagged = record_market_odds(home, away, total, home_ml, away_ml)
     if tagged:
         log(f"  [odds] real prices attached to {tagged} stored row(s)")
-    return {"status": "ok", "home": home, "away": away, "result": result}
+    return {"status": "ok", "home": home, "away": away, "result": result,
+            "game": game, "total": total, "total_source": total_source,
+            "home_ml": home_ml, "away_ml": away_ml}
+
+
+# ==========================================================================
+# REPORT
+# ==========================================================================
+#
+# Every market the model produced gets a line, and every line carries a badge
+# saying whether it is playable. A market that came back without a price still
+# prints -- as PASS with the projection -- because "the model had no opinion"
+# and "the model was never asked" are different things and a report that hides
+# the second one reads like the slate was thinner than it was.
+#
+# The badges are the engine's own tiers, not a second opinion invented here:
+# moneyline uses the action word predict_match._moneyline_edge already chose,
+# and the rest use core.confidence_engine.BET_THRESHOLDS for their market key.
+
+BADGE_STRONG = "🔥 STRONG"
+BADGE_BET = "✅ BET"
+BADGE_LEAN = "🟡 LEAN"
+BADGE_PASS = "⚪ PASS"
+BADGE_NODATA = "⛔ NO DATA"
+
+
+def badge_for(confidence: Optional[float], market_key: str) -> str:
+    """Tier a confidence number with the same thresholds the engine grades on."""
+    if confidence is None:
+        return BADGE_NODATA
+    try:
+        from core.confidence_engine import BET_THRESHOLDS, DEFAULT_BET_THRESHOLD
+        thresholds = BET_THRESHOLDS.get(market_key, DEFAULT_BET_THRESHOLD)
+    except ImportError:
+        thresholds = {"bet": 60, "strong": 75}
+    if confidence >= thresholds["strong"]:
+        return BADGE_STRONG
+    if confidence >= thresholds["bet"]:
+        return BADGE_BET
+    if confidence >= thresholds["bet"] - 5:
+        return BADGE_LEAN
+    return BADGE_PASS
+
+
+ACTION_BADGES = {
+    "BET": BADGE_STRONG,
+    "LEAN": BADGE_BET,
+    "SLIGHT LEAN": BADGE_LEAN,
+    "PASS": BADGE_PASS,
+}
+
+BADGE_RANK = {BADGE_STRONG: 0, BADGE_BET: 1, BADGE_LEAN: 2,
+              BADGE_PASS: 3, BADGE_NODATA: 4}
+
+
+def american(value: Optional[float]) -> str:
+    if value is None:
+        return "n/a"
+    return f"{value:+.0f}"
+
+
+def market_lines(outcome: Dict[str, Any]) -> List[Tuple[str, str, str, str]]:
+    """Flatten one game's result into (badge, market, pick, detail) rows."""
+    result = outcome.get("result") or {}
+    rows: List[Tuple[str, str, str, str]] = []
+
+    # ---- moneyline -------------------------------------------------------
+    ml = result.get("moneyline_and_side", {}) or {}
+    action = ml.get("action")
+    side = ml.get("side")
+    edge = ml.get("edge_pct")
+    ml_conf = ml.get("ml_confidence")
+    home_prob = ml.get("home_win_probability")
+    away_prob = ml.get("away_win_probability")
+    if action:
+        badge = ACTION_BADGES.get(action, BADGE_PASS)
+        price = None
+        if side == outcome["home"]:
+            price = outcome.get("home_ml")
+        elif side == outcome["away"]:
+            price = outcome.get("away_ml")
+        pick = f"{side} ML {american(price)}" if side else "no side"
+        detail = (f"edge {edge:+.1f}%  conf {ml_conf:.0f}%"
+                  if edge is not None and ml_conf is not None else "")
+    else:
+        badge, pick, detail = BADGE_NODATA, "no moneyline priced", ""
+    if home_prob is not None and away_prob is not None:
+        win = f"  |  win% {outcome['away']} {away_prob:.0%} / {outcome['home']} {home_prob:.0%}"
+        detail = (detail + win) if detail else win.strip("  |  ")
+    rows.append((badge, "💰 MONEYLINE", pick, detail))
+
+    # ---- total -----------------------------------------------------------
+    summary = result.get("summary", {}) or {}
+    projection = result.get("game_projection", {}) or {}
+    proj_total = projection.get("total")
+    market_total = summary.get("market_total")
+    total_conf = summary.get("confidence")
+    total_pick = summary.get("recommendation") or summary.get("pick")
+    total_edge = summary.get("edge")
+    if total_pick and total_pick != "PASS":
+        badge = badge_for(total_conf, "mlb_totals")
+        pick = f"{total_pick} {market_total:g}" if market_total is not None else str(total_pick)
+    else:
+        badge, pick = BADGE_PASS, f"PASS ({market_total:g})" if market_total is not None else "PASS"
+    detail_bits = []
+    if proj_total is not None:
+        detail_bits.append(f"proj {proj_total:.2f}")
+    if total_edge is not None:
+        detail_bits.append(f"{total_edge:+.2f} runs")
+    if total_conf is not None:
+        detail_bits.append(f"conf {total_conf:.0f}%")
+    if summary.get("readout"):
+        detail_bits.append(summary["readout"])
+    rows.append((badge, "📊 TOTAL", pick, "  ".join(detail_bits)))
+
+    # ---- run split -------------------------------------------------------
+    home_runs = projection.get("home_runs")
+    away_runs = projection.get("away_runs")
+    if home_runs is not None and away_runs is not None:
+        rows.append(("  ", "🧮 RUN SPLIT",
+                     f"{outcome['away']} {away_runs:.2f} - {home_runs:.2f} {outcome['home']}",
+                     f"margin {home_runs - away_runs:+.2f} to {outcome['home']}"))
+
+    # ---- props -----------------------------------------------------------
+    props = result.get("props", result.get("markets", {})) or {}
+
+    nrfi = props.get("nrfi") or {}
+    nrfi_prob = nrfi.get("probability")
+    if nrfi_prob is not None:
+        # No confidence number is produced for NRFI, so the probability itself
+        # is tiered -- a 76% NRFI is the same conviction the totals model needs
+        # a 76 confidence to claim.
+        lean = nrfi.get("lean") or ("NRFI" if nrfi_prob >= 0.5 else "YRFI")
+        shown = nrfi_prob if lean == "NRFI" else 1 - nrfi_prob
+        rows.append((badge_for(shown * 100, "mlb_nrfi"), "🥎 NRFI/YRFI",
+                     lean, f"{shown:.1%} (no market line)"))
+    else:
+        rows.append((BADGE_NODATA, "🥎 NRFI/YRFI", "not modelled", ""))
+
+    strikeouts = props.get("strikeouts") or {}
+    if strikeouts.get("probability") is not None:
+        rows.append((badge_for(strikeouts["probability"] * 100, "mlb_k_props"),
+                     "🔺 STRIKEOUTS", strikeouts.get("lean") or "-",
+                     f"{strikeouts['probability']:.1%}"))
+    elif strikeouts.get("home_projection") is not None:
+        rows.append((BADGE_PASS, "🔺 STRIKEOUTS", "no line supplied",
+                     f"proj K: {outcome['away']} {strikeouts.get('away_projection')}"
+                     f" / {outcome['home']} {strikeouts.get('home_projection')}"
+                     f"  [tier {strikeouts.get('data_tier', '?')}]"))
+    else:
+        rows.append((BADGE_NODATA, "🔺 STRIKEOUTS", "not modelled", ""))
+
+    homers = props.get("home_runs") or {}
+    if homers.get("probability") is not None:
+        rows.append((badge_for(homers["probability"] * 100, "mlb_hr_props"),
+                     "💣 HOME RUNS", homers.get("lean") or "-",
+                     f"{homers['probability']:.1%}"))
+    elif homers.get("home_projection") is not None:
+        rows.append((BADGE_PASS, "💣 HOME RUNS", "no line supplied",
+                     f"proj HR: {outcome['away']} {homers.get('away_projection')}"
+                     f" / {outcome['home']} {homers.get('home_projection')}"
+                     f"  [tier {homers.get('data_tier', '?')}]"))
+    else:
+        rows.append((BADGE_NODATA, "💣 HOME RUNS", "not modelled", ""))
+
+    return rows
+
+
+def render_report(outcomes: List[Dict[str, Any]], default_total: float) -> None:
+    log("")
+    rule("=", 96)
+    log(f"⚾  MLB SLATE  —  {TODAY}  —  {len(outcomes)} game(s)")
+    rule("=", 96)
+    log(f"   Badges:  {BADGE_STRONG} = max conviction   {BADGE_BET} = playable   "
+        f"{BADGE_LEAN} = marginal   {BADGE_PASS} = no play   {BADGE_NODATA} = missing input")
+
+    best: List[Tuple[int, str, str, str, str]] = []
+
+    for index, outcome in enumerate(outcomes, start=1):
+        log("")
+        if outcome["status"] != "ok":
+            marker = {"failed": "❌", "dry-run": "🔍",
+                      "fixture_not_found": "🚫"}.get(outcome["status"], "❓")
+            log(f"{marker}  #{index}  {outcome.get('away', '?')} @ {outcome.get('home', '?')}"
+                f"  —  {outcome.get('error', outcome['status'])}")
+            continue
+
+        rule("─", 96)
+        log(f"⚾  #{index}  {outcome['away']}  @  {outcome['home']}")
+        game = outcome.get("game") or {}
+        if game.get("away_pitcher") or game.get("home_pitcher"):
+            log(f"    🧢 {game.get('away_pitcher') or 'TBD'} "
+                f"(ERA {game.get('away_pitcher_era', '?')}, K/9 {game.get('away_pitcher_k9', '?')})"
+                f"   vs   {game.get('home_pitcher') or 'TBD'} "
+                f"(ERA {game.get('home_pitcher_era', '?')}, K/9 {game.get('home_pitcher_k9', '?')})")
+        source = outcome.get("total_source", "")
+        flag = "⚠️ placeholder" if outcome.get("total") == default_total and "live" not in source else source
+        log(f"    📉 Market: total {outcome.get('total')} [{flag}]   "
+            f"ML {outcome['away']} {american(outcome.get('away_ml'))} / "
+            f"{outcome['home']} {american(outcome.get('home_ml'))}")
+        umpire = (outcome.get("result") or {}).get("umpire")
+        if umpire and umpire != "Unknown":
+            log(f"    🧑‍⚖️ Umpire: {umpire}")
+        rule("─", 96)
+
+        for badge, market, pick, detail in market_lines(outcome):
+            log(f"    {badge:<11} {market:<15} {pick:<34} {detail}")
+            if badge in (BADGE_STRONG, BADGE_BET):
+                best.append((BADGE_RANK[badge], badge, market,
+                             f"{outcome['away']} @ {outcome['home']}", f"{pick}  —  {detail}"))
+
+    log("")
+    rule("=", 96)
+    log("🎯  BEST PLAYS  (only 🔥 STRONG and ✅ BET make this board)")
+    rule("=", 96)
+    if not best:
+        log("    ⚪ Nothing cleared the bet threshold on this slate. That is a result, not a gap.")
+    else:
+        for _, badge, market, matchup, text in sorted(best, key=lambda row: row[0]):
+            log(f"    {badge:<11} {market:<15} {matchup:<46} {text}")
+    rule("=", 96)
 
 
 def main() -> None:
@@ -360,6 +583,10 @@ def main() -> None:
                         help="Home moneyline in American odds, e.g. -120.")
     parser.add_argument("--away-ml", type=int, action="append", metavar="ODDS",
                         help="Away moneyline, e.g. +105.")
+    parser.add_argument("--over-price", type=int, action="append", metavar="ODDS",
+                        help="Price on the over, e.g. -115. Pairs with --match.")
+    parser.add_argument("--under-price", type=int, action="append", metavar="ODDS",
+                        help="Price on the under, e.g. -105.")
     parser.add_argument("--home-sp-limit", type=int, action="append", metavar="PITCHES",
                         help="Home starter is on a pitch count (e.g. 60). "
                              "Shortens his projected innings and hands the "
@@ -502,6 +729,8 @@ def main() -> None:
     totals = pair_values(args.total, len(pairs), "total")
     home_mls = pair_values(args.home_ml, len(pairs), "home-ml")
     away_mls = pair_values(args.away_ml, len(pairs), "away-ml")
+    over_prices = pair_values(args.over_price, len(pairs), "over-price")
+    under_prices = pair_values(args.under_price, len(pairs), "under-price")
     # pair_values requires one value or exactly N. On a multi-game slate where
     # only one starter is capped, 0 is the way to say "no cap on this one".
     home_limits = [v or None for v in
@@ -527,58 +756,15 @@ def main() -> None:
                                     push_discord, args.dry_run,
                                     home_ml=home_ml, away_ml=away_ml,
                                     home_sp_limit=home_limits[index],
-                                    away_sp_limit=away_limits[index]))
+                                    away_sp_limit=away_limits[index],
+                                    over_price=over_prices[index],
+                                    under_price=under_prices[index]))
         except Exception as exc:  # noqa: BLE001
             log(f"  [FAILED] {type(exc).__name__}: {exc}")
             outcomes.append({"status": "failed", "home": home, "away": away,
                              "error": f"{type(exc).__name__}: {exc}"})
 
-    log("")
-    rule("=", 90)
-    log("📋  MLB SUMMARY")
-    rule("=", 90)
-    header = (
-        f"  {'#':>2}  {'⚾ GAME':<46}{'📊 PROJ':>12}{'🎯 LINE':>8}"
-        f"{'⚡ EDGE':>7}  {'📈 CONF':>7}  REC"
-    )
-    log(header)
-    log("  " + "-" * 90)
-    for idx, outcome in enumerate(outcomes, start=1):
-        if outcome["status"] != "ok":
-            marker = {"failed": "❌", "dry-run": "🔍", "fixture_not_found": "🚫"}.get(outcome["status"], "❓")
-            log(f"  {idx:>2}  {marker}  {outcome.get('away', '?')} @ {outcome.get('home', '?'):<40}"
-                f"{outcome.get('error', outcome['status']):>30}")
-            continue
-
-        result = outcome.get("result", {})
-        ml = result.get("moneyline", {}) if isinstance(result, dict) else {}
-        proj = result.get("game_projection", {}) if isinstance(result, dict) else {}
-        home_prob = ml.get("home_win_prob", ml.get("probability"))
-        away_prob = ml.get("away_win_prob", 1 - home_prob if home_prob else None)
-        proj_total = proj.get("projected_total_runs", proj.get("total"))
-        market_total = proj.get("market_total", proj.get("market_line"))
-        edge = ml.get("edge_pct")
-        conf = ml.get("confidence")
-        rec = ml.get("recommendation", "-")
-
-        if proj_total is not None and market_total is not None:
-            total_edge = proj_total - market_total
-            total_str = f"{proj_total:.1f}"
-            line_str = f"{market_total:.1f}"
-        else:
-            total_str = f"{proj_total:.1f}" if proj_total is not None else "-"
-            line_str = "-"
-
-        if home_prob is not None:
-            prob_str = f"{home_prob:.0%}"
-        else:
-            prob_str = "-"
-
-        log(f"  {idx:>2}  {outcome['away']} @ {outcome['home']:<40}"
-            f"{total_str:>7} vs {line_str:<5}"
-            f"{(f'{edge:+.1f}%' if edge is not None else '  -   '):>7}"
-            f"{(f'{conf:.0f}%' if conf is not None else '  -   '):>7}  {rec or '-'}")
-    rule("-", 90)
+    render_report(outcomes, DEFAULT_TOTAL)
 
     if any(o["status"] == "ok" for o in outcomes):
         if not live_totals and not args.total:

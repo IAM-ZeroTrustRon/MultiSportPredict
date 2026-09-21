@@ -43,9 +43,9 @@ run ingest_nfl_schedule.py --season 2026
 run ingest_nfl.py --season 2026
 
 step "6/6  NCAAF results since the last pull"
-# Rolling 3-day window ending today, so this stops going stale between runs.
+# Rolling 8-day window ending today (a missed weekend still gets caught).
 ncaaf_dates=()
-for d in 2 1 0; do
+for d in 7 6 5 4 3 2 1 0; do
   ncaaf_dates+=("$(date -d "$d days ago" +%Y-%m-%d)")
 done
 run ingest_ncaaf.py --dates "${ncaaf_dates[@]}"
