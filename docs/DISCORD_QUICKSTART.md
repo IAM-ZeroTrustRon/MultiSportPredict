@@ -47,7 +47,8 @@ python run_match.py --sport soccer --home Liverpool --away Arsenal --push-discor
 ### Method 3: Batch Processing
 Process multiple matches:
 ```bash
-python run_slate.py --push-discord
+python run_soccer_batch.py --slate slate_today.json   # predict + review
+python run_soccer_batch.py --push-all                  # then push
 ```
 
 ### Method 4: Web App

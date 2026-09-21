@@ -29,22 +29,25 @@ python run_match.py --sport soccer --home "Liverpool" --away "Arsenal" --push-di
 python run_match.py --sport mlb --home "NYY" --away "BOS" --market-line 0.0 --market-total 8.5 --push-discord
 ```
 
-### 2. `run_slate.py` - Batch Processing
+### 2. `run_soccer_batch.py` - Batch Processing (soccer)
 
-**Process multiple matches from CSV:**
+**Run a slate, review, then push what you pick:**
 ```bash
-python run_slate.py --input matches.csv --push-discord
+python run_soccer_batch.py --slate slate_today.json   # predict + store, NO Discord
+python run_soccer_batch.py --push 2 5                  # push those review lines
+python run_soccer_batch.py --push-all                  # or push every reviewed row
 ```
 
-**All results pushed to Discord automatically**
+Nothing is pushed until you ask. Slate format (`slate_today.json`):
+```json
+{"date": "2026-09-20", "matches": [
+  {"home": "Corinthians", "away": "Fluminense", "league": "Brasileirao"}
+]}
+```
 
-CSV format (`matches.csv`):
-```
-sport,home,away,league
-soccer,Liverpool,Arsenal,Premier League
-basketball,Real Madrid,FC Barcelona,EuroLeague
-baseball,NYY,BOS,MLB
-```
+Other sports batch through their own runners: `run_mlb.py --today`,
+`run_nfl.py --week N`, `batch_tennis.py`. (The old mixed-sport `run_slate.py`
+CSV runner is retired in `archive/legacy-modules/`.)
 
 ### 3. `predict_match.py` - Legacy CLI
 

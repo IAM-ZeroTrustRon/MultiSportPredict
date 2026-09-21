@@ -66,9 +66,10 @@ streamlit run app.py
 
 ### Option D: Batch Processing
 ```bash
-python run_slate.py --push-discord
+python run_soccer_batch.py --slate slate_today.json   # predict + review, no Discord
+python run_soccer_batch.py --push-all                  # then push
 ```
-Processes multiple matches and pushes all results to Discord.
+Runs a soccer slate, prints a review table, and pushes only when you ask.
 
 ## Message Format
 
