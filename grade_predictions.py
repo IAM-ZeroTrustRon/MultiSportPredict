@@ -341,11 +341,13 @@ def _side_bet(row: sqlite3.Row, raw: Dict[str, Any]) -> Optional[str]:
     return None
 
 
-def grade_row(row: sqlite3.Row, home_score: float, away_score: float) -> Tuple[str, str, float, bool]:
-    """Return (outcome, pick, profit_loss, priced) for one prediction.
+def grade_row(row: sqlite3.Row, home_score: float, away_score: float
+              ) -> Tuple[str, str, float, bool, float]:
+    """Return (outcome, pick, profit_loss, priced, odds) for one prediction.
 
     outcome is 'win' | 'loss' | 'push'. `priced` is True when the bet was
     settled at a real recorded price rather than the DEFAULT_ODDS convention.
+    `odds` is the American price it was settled at, whichever it was.
     """
     market = (row["market_type"] or "").strip().lower()
     model_value = row["model_value"]
@@ -440,7 +442,7 @@ def grade_row(row: sqlite3.Row, home_score: float, away_score: float) -> Tuple[s
             priced = True
 
     profit = {"win": american_to_profit(odds), "loss": -1.0, "push": 0.0}[outcome]
-    return outcome, pick, round(profit, 4), priced
+    return outcome, pick, round(profit, 4), priced, odds
 
 
 def apply_result(conn: sqlite3.Connection, row: sqlite3.Row,
@@ -464,7 +466,7 @@ def apply_result(conn: sqlite3.Connection, row: sqlite3.Row,
         return None
 
     try:
-        outcome, pick, profit, priced = grade_row(row, home_score, away_score)
+        outcome, pick, profit, priced, odds = grade_row(row, home_score, away_score)
     except Ungradable as exc:
         conn.execute(
             "UPDATE predictions SET actual_home_score=?, actual_away_score=?, grade_note=? "
@@ -485,6 +487,7 @@ def apply_result(conn: sqlite3.Connection, row: sqlite3.Row,
     if not isinstance(raw, dict):
         raw = {}
     raw["_settled_at_recorded_price"] = bool(priced)
+    raw["_settled_odds"] = odds
     conn.execute(
         """UPDATE predictions
            SET result_outcome=?, profit_loss=?, pick=?, actual_home_score=?,
@@ -877,6 +880,7 @@ def fetch_soccer_results(start: str, end: str,
     wanted = sorted(set(dates or [])) or [start]
     out: Dict[Tuple[str, str, str], Tuple[float, float]] = {}
     extra_time: List[str] = []
+    extra_keys: set = set()
     fetched: Dict[str, List[Tuple[str, str, Any, Any, bool]]] = {}
     failures: List[str] = []
     slugs = _soccer_slugs()
@@ -911,7 +915,11 @@ def fetch_soccer_results(start: str, end: str,
                 if hs is None or as_ is None:
                     continue
                 if not in_90:
-                    extra_time.append(f"{home} v {away} ({day})")
+                    tag = f"{home} v {away} ({day})"
+                    if tag not in extra_time:     # boards overlap (d and d+1)
+                        extra_time.append(tag)
+                    for filed in (day.isoformat(), d[:10]):
+                        extra_keys.add((filed, normalise_team(home), normalise_team(away)))
                     continue
                 try:
                     score = (float(hs), float(as_))
@@ -923,8 +931,11 @@ def fetch_soccer_results(start: str, end: str,
         log(f"[soccer] cross-league board failed for {len(failures)} day(s), "
             f"first: {failures[0]} -- fell back to per-league boards")
     if extra_time:
-        log(f"[soccer] {len(extra_time)} game(s) went to extra time/penalties "
-            f"and were NOT graded (90-minute markets): {', '.join(extra_time[:5])}")
+        # These are every extra-time game on the boards read, mostly not ones
+        # you predicted. cmd_auto flags any of YOUR rows among them by name.
+        log(f"[soccer] {len(extra_time)} game(s) on the boards read went to "
+            f"extra time/penalties; 90-minute markets on them are not auto-graded.")
+    fetch_soccer_results.extra_time_keys = extra_keys   # type: ignore[attr-defined]
     return out
 
 
@@ -1076,7 +1087,12 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
                     scores = (flipped[1], flipped[0])
             if scores is None:
                 unmatched += 1
-                if sport_key in ("soccer", "football"):
+                went_long = getattr(fetcher, "extra_time_keys", set())
+                if key in went_long or (key[0], key[2], key[1]) in went_long:
+                    log(f"    [extra time] #{row['id']} {row['game_date']} "
+                        f"{row['home_team']} vs {row['away_team']} -- went past 90 "
+                        f"minutes; settle with --manual using the 90-minute score")
+                elif sport_key in ("soccer", "football"):
                     log(f"    [no result] #{row['id']} {row['game_date']} "
                         f"{row['home_team']} vs {row['away_team']}")
                 continue
@@ -1302,23 +1318,35 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
         if informational:
             log(_line("informational", _tally(informational)))
 
-    overall = _tally(record_rows)
-    if overall["win_pct"] is not None:
-        log("\n" + "-" * 78)
-        breakeven = 100.0 / (1.0 + american_to_profit(DEFAULT_ODDS))
-        verdict = "above" if overall["win_pct"] > breakeven else "below"
-        log(f"  Break-even at {DEFAULT_ODDS:.0f} is {breakeven:.1f}%. "
-            f"You are {verdict} it on {overall['wins'] + overall['losses']} decided bets.")
-        if overall["wins"] + overall["losses"] < 30:
-            log("  Sample is small -- under about 30 settled bets this number moves a lot.")
+    # Break-even is the average implied probability of the prices the decided
+    # bets were actually settled at (_settled_odds, written at settlement),
+    # not a flat -110: a book of +150 dogs breaks even far below 52.4%.
     priced = 0
+    implied: List[float] = []
     for row in record_rows:
         try:
             blob = json.loads(row["raw_json"]) if row["raw_json"] else {}
-            if blob.get("_settled_at_recorded_price"):
-                priced += 1
         except (json.JSONDecodeError, TypeError):
-            pass
+            blob = {}
+        if not isinstance(blob, dict):
+            blob = {}
+        if blob.get("_settled_at_recorded_price"):
+            priced += 1
+        if row["result_outcome"] in ("win", "loss"):
+            odds = _price(blob.get("_settled_odds")) or DEFAULT_ODDS
+            implied.append(100.0 / (1.0 + american_to_profit(odds)))
+
+    overall = _tally(record_rows)
+    if overall["win_pct"] is not None and implied:
+        log("\n" + "-" * 78)
+        breakeven = sum(implied) / len(implied)
+        verdict = "above" if overall["win_pct"] > breakeven else "below"
+        basis = (f"at {DEFAULT_ODDS:.0f}" if not priced
+                 else "at the prices these bets settled at")
+        log(f"  Break-even {basis} is {breakeven:.1f}%. "
+            f"You are {verdict} it on {len(implied)} decided bets.")
+        if len(implied) < 30:
+            log("  Sample is small -- under about 30 settled bets this number moves a lot.")
     if priced:
         log(f"  {priced} of {len(record_rows)} decision row(s) settled at recorded prices; "
             f"the rest assumed {DEFAULT_ODDS:.0f}.")
@@ -1402,7 +1430,7 @@ def cmd_regrade(conn: sqlite3.Connection, sport: Optional[str]) -> int:
             "UPDATE predictions SET result_outcome=NULL, profit_loss=NULL, "
             "graded_at=NULL, grade_note=? WHERE id=?",
             (f"excluded: {tier_of(row['recommendation'])} row is not a bet "
-             f"(regrade 2026-09-20)", row["id"]),
+             f"(regrade {_dt.date.today().isoformat()})", row["id"]),
         )
     log(f"Un-graded {len(excluded)} PASS/INFO/VOID row(s) -- they are not bets.")
 
@@ -1432,7 +1460,7 @@ def cmd_regrade(conn: sqlite3.Connection, sport: Optional[str]) -> int:
             ungradable += 1
             continue
         try:
-            outcome, pick, profit, priced = grade_row(row, float(home), float(away))
+            outcome, pick, profit, priced, odds = grade_row(row, float(home), float(away))
         except Ungradable as exc:
             conn.execute(
                 "UPDATE predictions SET grade_note='regrade ungradable: %s' "
@@ -1448,6 +1476,7 @@ def cmd_regrade(conn: sqlite3.Connection, sport: Optional[str]) -> int:
         if not isinstance(raw, dict):
             raw = {}
         raw["_settled_at_recorded_price"] = bool(priced)
+        raw["_settled_odds"] = odds
         conn.execute(
             "UPDATE predictions SET result_outcome=?, profit_loss=?, pick=?, "
             "graded_at=?, raw_json=? WHERE id=?",
