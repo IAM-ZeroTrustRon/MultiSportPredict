@@ -919,6 +919,45 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
 # MAIN
 # ============================================================================
 
+def _lookup_mlb_odds(home: str, away: str, fallback_total: float):
+    """This game's live moneyline and total, or what was passed in.
+
+    run_mlb.fetch_live_odds() already does the API call, the team-name
+    matching and the quota logging, so it is reused rather than re-written.
+    Failure returns the fallback: a missing price must not become a made-up
+    one (the card then says plainly that no market was supplied).
+    """
+    try:
+        from run_mlb import fetch_live_odds, _odds_key   # type: ignore
+    except Exception:                                     # noqa: BLE001
+        from run_mlb import fetch_live_odds              # type: ignore
+        _odds_key = None                                  # type: ignore
+    try:
+        totals, mls = fetch_live_odds()
+    except Exception as exc:                              # noqa: BLE001
+        print(f"[odds] lookup failed ({type(exc).__name__}) -- no market prices.")
+        return None, None, fallback_total
+
+    def norm(name: str) -> str:
+        return "".join(ch for ch in str(name).lower() if ch.isalnum())
+
+    for key, (h_ml, a_ml) in mls.items():
+        parts = key.split("|")
+        if len(parts) != 2:
+            continue
+        k_home, k_away = norm(parts[0]), norm(parts[1])
+        n_home, n_away = norm(home), norm(away)
+        hit = ((n_home in k_home or k_home in n_home) and
+               (n_away in k_away or k_away in n_away))
+        if hit:
+            total = totals.get(key, fallback_total)
+            print(f"[odds] {away} {a_ml:+.0f} @ {home} {h_ml:+.0f}, total {total}")
+            return h_ml, a_ml, total
+    print(f"[odds] no live market found for {away} @ {home} -- "
+          f"card will say no market odds were supplied.")
+    return None, None, fallback_total
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Universal match prediction hub (canonical runner for all sports)."
@@ -940,6 +979,18 @@ def main() -> None:
                         help="Push result to Discord.")
     parser.add_argument("--live-odds", action="store_true",
                         help="Fetch matched live soccer odds when ODDS_API_KEY is configured.")
+    # MLB market prices. run_baseball() has always accepted these, but main()
+    # had no flags for them, so every CLI run (auto_mlb_scraper included) went
+    # in with no moneyline and every card read "no market odds supplied".
+    parser.add_argument("--home-ml", type=float, default=None,
+                        help="Home moneyline, American odds (e.g. -125).")
+    parser.add_argument("--away-ml", type=float, default=None,
+                        help="Away moneyline, American odds (e.g. +105).")
+    parser.add_argument("--over-price", type=float, default=None)
+    parser.add_argument("--under-price", type=float, default=None)
+    parser.add_argument("--auto-odds", action="store_true",
+                        help="MLB: look up this game's live moneyline/total "
+                             "(needs ODDS_API_KEY) when prices are not passed.")
     # MLB SP overrides
     parser.add_argument("--home-sp-era", type=float, default=None)
     parser.add_argument("--home-sp-k", type=float, default=None)
@@ -979,12 +1030,19 @@ def main() -> None:
         run_basketball(home, away, args.league, args.market_line,
                        args.store_to_db, args.push_discord)
     elif sport in ("baseball", "mlb", "kbo"):
-        run_baseball(home, away, args.league, args.markets, args.market_total,
+        home_ml, away_ml = args.home_ml, args.away_ml
+        market_total = args.market_total
+        if args.auto_odds and home_ml is None and away_ml is None:
+            home_ml, away_ml, market_total = _lookup_mlb_odds(
+                home, away, market_total)
+        run_baseball(home, away, args.league, args.markets, market_total,
                      args.home_sp_era, args.home_sp_k,
                      args.away_sp_era, args.away_sp_k,
                      args.store_to_db, args.push_discord,
-                     args.home_pitcher, args.away_pitcher,
-                     args.home_hitters, args.away_hitters)
+                     home_pitcher=args.home_pitcher, away_pitcher=args.away_pitcher,
+                     home_hitters=args.home_hitters, away_hitters=args.away_hitters,
+                     home_ml=home_ml, away_ml=away_ml,
+                     over_price=args.over_price, under_price=args.under_price)
     elif sport == "tennis":
         run_tennis(home, away, args.surface, args.tournament, args.round_name,
                    best_of_5, args.store_to_db, args.push_discord)
