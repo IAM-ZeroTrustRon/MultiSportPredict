@@ -118,6 +118,42 @@ def clean(text: Any) -> Optional[str]:
     return out or None
 
 
+def short_name(name: Any) -> Optional[str]:
+    """A team label short enough for an inline field, still unambiguous.
+
+    Inline fields are a third of the card wide, so "Los Angeles Dodgers" wraps
+    and pushes the number onto its own line. Abbreviations and short names are
+    kept whole; longer ones drop to the nickname, keeping two words when the
+    last is tiny so "Chicago White Sox" is "White Sox" and not "Sox".
+    """
+    text = clean(name)
+    if text is None or len(text) <= 14:
+        return text
+    parts = text.split()
+    if len(parts) >= 2 and len(parts[-1]) <= 4:
+        return " ".join(parts[-2:])
+    return parts[-1]
+
+
+def pair(away_name: Any, away_value: Optional[str],
+         home_name: Any, home_value: Optional[str]) -> Optional[str]:
+    """Two sides, each tied to the team it belongs to, away first.
+
+    An unlabelled "67.4% / 32.6%" is not readable: nothing on the card says
+    which end is which, and the pair was home-first while the title reads
+    "away at home", so the natural reading was exactly backwards. Every
+    two-sided row goes through here. A side with no number is dropped rather
+    than shown as a bare slash.
+    """
+    away, home = short_name(away_name), short_name(home_name)
+    bits = []
+    if away_value and away:
+        bits.append(f"**{away}** {away_value}")
+    if home_value and home:
+        bits.append(f"**{home}** {home_value}")
+    return "\n".join(bits) or None
+
+
 # ==========================================================================
 # NORMALISED SHAPE
 # ==========================================================================
@@ -221,18 +257,38 @@ def names_from(data: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
 # EXTRACTORS -- written against real stored payloads, not assumed shapes
 # ==========================================================================
 
+def _nrfi_pick(pick: Optional[str]) -> str:
+    """A bare "YRFI" under two percentages does not say what it is.
+
+    The predictor's lean is one token; on the card it sits directly beneath
+    the NRFI and YRFI numbers, where it reads like a third value rather than
+    the side being leaned. Anything already phrased (BET/LEAN/PASS) is left
+    exactly as the predictor wrote it.
+    """
+    if not pick:
+        return "PASS — no side"
+    if pick.strip().upper() in {"NRFI", "YRFI", "YES", "NO"}:
+        return f"lean {pick.strip().upper()}"
+    return pick
+
+
 def extract_baseball(data: Dict[str, Any]) -> Dict[str, Any]:
     rows: List[Optional[Dict[str, Any]]] = []
     ml, projection, summary = (data.get("moneyline_and_side") or {},
                                data.get("game_projection") or {},
                                data.get("summary") or {})
 
+    # Every two-sided row is labelled with these, so they are resolved once
+    # here rather than per row (and via names_from() when the payload carries
+    # the names somewhere other than home_team/away_team).
+    fallback_home, fallback_away = names_from(data)
+    home_name = clean(data.get("home_team")) or fallback_home
+    away_name = clean(data.get("away_team")) or fallback_away
+
     home_prob = dig(ml, "home_win_probability")
     if home_prob is not None:
         hp = dig(ml, "home_win_probability")
         ap = dig(ml, "away_win_probability")
-        home_name = (data.get("home_team") or "")[:20]
-        away_name = (data.get("away_team") or "")[:20]
         has_market_edge = ml.get("edge_pct") is not None
         # action/side/strength come straight from _moneyline_edge() in
         # predict_match.py (only present when real home_ml/away_ml were
@@ -251,10 +307,11 @@ def extract_baseball(data: Dict[str, Any]) -> Dict[str, Any]:
         fav_prob = pct(hp if fav_name == home_name else ap)
         verdict = moneyline_verdict(action, rec_side, strength, "Moneyline",
                                     price_text, has_market_edge,
-                                    model_side=fav_name, model_prob_text=fav_prob)
+                                    model_side=short_name(fav_name),
+                                    model_prob_text=fav_prob)
         rows.append(market(
             "💰 Moneyline",
-            model=f"{pct(hp)} / {pct(ap)}",
+            model=pair(away_name, pct(ap), home_name, pct(hp)),
             market_value=pct(ml.get("market_home_prob")) if has_market_edge else None,
             edge=signed(ml.get("edge_pct"), 1) if has_market_edge else None,
             verdict=verdict,
@@ -262,34 +319,48 @@ def extract_baseball(data: Dict[str, Any]) -> Dict[str, Any]:
 
     total_model = projection.get("total") or ml.get("projected_total_runs")
     if total_model is not None:
+        total_pick = clean(summary.get("recommendation"))
         rows.append(market(
-            "📊 Total runs", model=dec(total_model, 2),
+            "📊 Total runs (O/U)", model=f"proj {dec(total_model, 2)}",
             market_value=dec(summary.get("market_total"), 1),
             edge=signed(summary.get("edge_value") or summary.get("edge")),
-            pick=clean(summary.get("recommendation"))))
+            # "PASS" alone reads as a missing value; say what was passed on.
+            pick=(total_pick if total_pick and total_pick.upper() not in ("PASS", "NO BET")
+                  else ("PASS — no side on the total" if total_pick else None))))
 
     home_runs, away_runs = projection.get("home_runs"), projection.get("away_runs")
     if home_runs is not None and away_runs is not None:
-        rows.append(market("🏟‍ Team totals",
-                           model=f"{dec(home_runs, 2)} / {dec(away_runs, 2)}"))
+        rows.append(market("🏟‍ Team totals (runs)",
+                           model=pair(away_name, dec(away_runs, 2),
+                                      home_name, dec(home_runs, 2))))
 
     props = data.get("props") or data.get("markets") or {}
     nrfi = dig(props, "nrfi", "probability") or dig(props, "nrfi", "nrfi_probability")
     if nrfi is not None:
-        rows.append(market("📛 NRFI", model=pct(nrfi),
-                           pick=(clean(dig(props, "nrfi", "recommendation"))
-                                 or clean(dig(props, "nrfi", "lean"))
-                                 or "PASS")))
+        # "50.8%" beside a YRFI lean read as though YRFI were the 50.8%. Both
+        # sides are now named with their own number, so the lean is checkable.
+        nrfi_num = num(nrfi)
+        nrfi_prob = nrfi_num / 100.0 if nrfi_num is not None and nrfi_num > 1.0 else nrfi_num
+        yrfi_text = pct(1.0 - nrfi_prob) if nrfi_prob is not None else None
+        rows.append(market(
+            "📛 NRFI / YRFI",
+            model="\n".join(bit for bit in (
+                f"**NRFI** {pct(nrfi)}" if pct(nrfi) else None,
+                f"**YRFI** {yrfi_text}" if yrfi_text else None) if bit) or None,
+            pick=_nrfi_pick(clean(dig(props, "nrfi", "recommendation"))
+                            or clean(dig(props, "nrfi", "lean")))))
     strikeouts = dig(props, "strikeouts", "home_projection")
     if strikeouts is not None:
-        rows.append(market("⚾ Strikeouts (H/A)",
-                           model=f"{dec(strikeouts, 1)} / "
-                                 f"{dec(dig(props, 'strikeouts', 'away_projection'), 1)}"))
+        rows.append(market("⚾ Strikeouts (SP)",
+                           model=pair(away_name,
+                                      dec(dig(props, 'strikeouts', 'away_projection'), 1),
+                                      home_name, dec(strikeouts, 1))))
     home_hr = dig(props, "home_runs", "home_projection")
     if home_hr is not None:
-        rows.append(market("🔥 Home runs (H/A)",
-                           model=f"{dec(home_hr, 1)} / "
-                                 f"{dec(dig(props, 'home_runs', 'away_projection'), 1)}"))
+        rows.append(market("🔥 Home runs",
+                           model=pair(away_name,
+                                      dec(dig(props, 'home_runs', 'away_projection'), 1),
+                                      home_name, dec(home_hr, 1))))
 
 
     # F5 (First 5 Innings) Markets
@@ -304,8 +375,10 @@ def extract_baseball(data: Dict[str, Any]) -> Dict[str, Any]:
         f5_home_odds = f5.get("home_fair_odds") or "-"
         f5_away_odds = f5.get("away_fair_odds") or "-"
         rows.append(market("🎯 F5 Moneyline",
-                           model=f"{pct(f5_home_wp)} / {pct(f5.get('away_win_prob'))}",
-                           extra=f"fair odds: {f5_home_odds} / {f5_away_odds}"))
+                           model=pair(away_name, pct(f5.get('away_win_prob')),
+                                      home_name, pct(f5_home_wp)),
+                           extra=f"fair odds: {short_name(away_name)} {f5_away_odds} / "
+                                 f"{short_name(home_name)} {f5_home_odds}"))
     f5_rl = clean(f5.get("run_line_rec"))
     if f5_rl and f5_rl != "PASS":
         rows.append(market("📐 F5 Run Line", pick=clean(f5.get("run_line_rec"))))
@@ -599,7 +672,7 @@ def normalise(sport: str, data: Dict[str, Any]) -> Dict[str, Any]:
 
 def _tone(rows: List[Dict[str, Any]]) -> int:
     # verdict rows carry the recommendation there instead of in pick (see
-    # market()'s docstring) -- both are scanned so a BET/PASS verdict still
+    # market()''s docstring) -- both are scanned so a BET/PASS verdict still
     # colours the embed correctly.
     picks = " ".join(
         f"{row.get('pick') or ''} {row.get('verdict') or ''}".upper()
@@ -612,6 +685,35 @@ def _tone(rows: List[Dict[str, Any]]) -> int:
     if "PASS" in picks:
         return COLOR_PASS
     return COLOR_INFO
+
+
+def _signal_badge(pick: Optional[str]) -> Optional[str]:
+    """Bold emoji badge for one market row.
+
+    Goes far beyond the single `pick` string: subscribers asked for a clearly
+    scannable table where a STRONG/BET/PASS signal is visible at a glance
+    instead of buried in a line of model percentages. `pick` and `verdict`
+    already carry the canonical uppercase tokens the tone logic scans; this
+    renders the SAME tokens with a colour-consistent emoji so the card reads
+    like a table row heading rather than a footnote.
+
+    Returns None when there is no actionable token (projection-only rows like
+    "Team goals" keep their bare numbers -- no badge is a statement that the
+    row is informational, not a recommendation).
+    """
+    text = " ".join(str(pick or "").split()).upper()
+    if "STRONG" in text:
+        return "🟢 **STRONG**"
+    # PASS is tested before YES/NO, and YES/NO match whole words only: the
+    # verdict "PASS — Moneyline: no market odds supplied" contains "NO" inside
+    # "no market", which badged a declined market as a blue YES/NO call.
+    if "PASS" in text or "NO BET" in text:
+        return "⚪ **PASS**"
+    if "BET" in text or "OVER" in text or "UNDER" in text:
+        return "🔵 **BET**"
+    if re.search(r"\b(YES|NO|YRFI|NRFI)\b", text):
+        return "🔵 **YES/NO**"
+    return None
 
 
 def build_embed(sport: str, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -632,37 +734,47 @@ def build_embed(sport: str, data: Dict[str, Any]) -> Dict[str, Any]:
             # see market()'s docstring for why. `pick` is intentionally not
             # rendered here: verdict already carries what pick would have
             # (the recommendation), plus the side and the price, which pick
-            # alone did not.
+            # alone did not. The signal badge (🟢 STRONG / 🔵 BET / ⚪ PASS)
+            # sits on the field NAME so it stays on the left edge of the
+            # three-across grid where the eye lands first.
+            signal = _signal_badge(row.get("verdict") or row.get("pick"))
             body = f"**{row['verdict']}**"
-            support: List[str] = []
-            if row["model"]:
-                support.append(row["model"])
+            numbers: List[str] = []
             if row["market"]:
-                support.append(f"mkt {row['market']}")
+                numbers.append(f"mkt {row['market']}")
             if row["edge"]:
-                support.append(f"edge {row['edge']}")
-            if support:
-                body += "\n" + "  ".join(support)
+                numbers.append(f"edge {row['edge']}")
+            if row["model"]:
+                body += "\n" + row["model"]
+            if numbers:
+                body += "\n" + "  ".join(numbers)
             if row["extra"]:
                 body += f"\n*{row['extra']}*"
-            fields.append({"name": row["name"], "value": body or "​",
-                           "inline": True})
+            fields.append({"name": f"{signal + ' ' if signal else ''}{row['name']}",
+                           "value": body or "​", "inline": True})
             continue
 
-        parts: List[str] = []
-        if row["model"]:
-            parts.append(f"**{row['model']}**")
+        # A model value that already carries its own markup (the per-team
+        # labels from pair(), one side per line) is not re-bolded: wrapping a
+        # multi-line, already-bold block in another ** pair renders the
+        # asterisks literally. Its support numbers go on their own line.
+        support: List[str] = []
         if row["market"]:
-            parts.append(f"mkt {row['market']}")
+            support.append(f"mkt {row['market']}")
         if row["edge"]:
-            parts.append(f"edge {row['edge']}")
-        body = "  ".join(parts)
+            support.append(f"edge {row['edge']}")
+        if row["model"] and "**" in row["model"]:
+            body = row["model"] + ("\n" + "  ".join(support) if support else "")
+        else:
+            parts = ([f"**{row['model']}**"] if row["model"] else []) + support
+            body = "  ".join(parts)
         if row["pick"]:
             body = f"{body}\n{row['pick']}" if body else row["pick"]
         if row["extra"]:
             body = f"{body}\n*{row['extra']}*" if body else f"*{row['extra']}*"
-        fields.append({"name": row["name"], "value": body or "​",
-                       "inline": True})
+        signal = _signal_badge(row.get("pick"))
+        fields.append({"name": f"{signal + ' ' if signal else ''}{row['name']}",
+                       "value": body or "​", "inline": True})
 
     # Discord renders three per row; a trailing single field looks broken.
     while len(fields) % 3 and len(fields) > 3:
