@@ -319,6 +319,7 @@ def fire_universal_runner(game_info: Dict, dry_run: bool) -> int:
         "--away",          game_info["away_abbr"],
         "--markets",       "nrfi", "strikeouts",
         "--market-total",  str(game_info["market_total"]),
+        "--auto-odds",     # real moneyline/total per game when available
         "--home-sp-era",   str(game_info["home_era"]),
         "--home-sp-k",     str(game_info["home_k_proj"]),
         "--away-sp-era",   str(game_info["away_era"]),
