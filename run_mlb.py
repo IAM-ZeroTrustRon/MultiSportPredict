@@ -169,6 +169,64 @@ def pitcher_args(game: Optional[Dict[str, Any]]) -> Dict[str, Optional[float]]:
 # LIVE TOTALS (optional, costs Odds API quota)
 # ==========================================================================
 
+def _okey(home: str, away: str) -> str:
+    """Match key that survives punctuation and spelling drift between feeds.
+
+    The lookup used to be an exact f"{home}|{away}" string, so one feed saying
+    "St. Louis Cardinals" and the other "St Louis Cardinals" produced no
+    moneyline at all -- and the card then read "PASS - Moneyline: no market
+    odds supplied", which looks like the model had no opinion when in fact it
+    had one and no price to measure it against."""
+    def one(name: str) -> str:
+        return re.sub(r"[^a-z0-9]", "", (name or "").lower())
+    return f"{one(home)}|{one(away)}"
+
+
+def fetch_espn_mlb_odds() -> Dict[str, Tuple[float, float]]:
+    """Second moneyline source: ESPN's scoreboard. No API key, no quota.
+
+    The Odds API key is the single point of failure for every price in this
+    pipeline -- rotate it, exhaust the quota, or typo the .env line and every
+    MLB card silently loses its moneyline. ESPN publishes the same two numbers
+    for today's games, so one source failing no longer means no price.
+    Returns {} on any failure; it never invents a price.
+    """
+    out: Dict[str, Tuple[float, float]] = {}
+    try:
+        import requests
+        url = ("https://site.web.api.espn.com/apis/site/v2/sports/baseball/mlb/"
+               "scoreboard?limit=100")
+        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
+        if response.status_code != 200:
+            log(f"[odds] ESPN fallback HTTP {response.status_code}")
+            return {}
+        for event in response.json().get("events", []):
+            comps = event.get("competitions") or []
+            if not comps:
+                continue
+            comp = comps[0]
+            sides = {}
+            for competitor in comp.get("competitors", []):
+                which = str(competitor.get("homeAway", "")).lower()
+                team = competitor.get("team") or {}
+                if which in ("home", "away"):
+                    sides[which] = team.get("displayName") or team.get("name")
+            if "home" not in sides or "away" not in sides:
+                continue
+            for odds in comp.get("odds", []) or []:
+                home_ml = (odds.get("homeTeamOdds") or {}).get("moneyLine")
+                away_ml = (odds.get("awayTeamOdds") or {}).get("moneyLine")
+                if home_ml is None or away_ml is None:
+                    continue
+                out[_okey(sides["home"], sides["away"])] = (float(home_ml), float(away_ml))
+                break
+        if out:
+            log(f"[odds] ESPN fallback supplied moneylines for {len(out)} game(s)")
+    except Exception as exc:  # noqa: BLE001
+        log(f"[odds] ESPN fallback failed ({type(exc).__name__}: {exc})")
+    return out
+
+
 def fetch_live_odds() -> Tuple[Dict[str, float], Dict[str, Tuple[float, float]]]:
     key = os.environ.get("ODDS_API_KEY", "").strip()
     if not key:
@@ -179,8 +237,9 @@ def fetch_live_odds() -> Tuple[Dict[str, float], Dict[str, Tuple[float, float]]]
                     key = raw.split("=", 1)[1].strip().strip('"').strip("'")
                     break
     if not key:
-        log("[odds] ODDS_API_KEY not found -- keeping the default total.")
-        return {}, {}
+        log("[odds] ODDS_API_KEY not found in env or .env -- trying ESPN for "
+            "moneylines; the total will use the line you pass or the default.")
+        return {}, fetch_espn_mlb_odds()
     try:
         import requests
         response = requests.get(
@@ -191,13 +250,19 @@ def fetch_live_odds() -> Tuple[Dict[str, float], Dict[str, Tuple[float, float]]]
         if remaining:
             log(f"[odds] quota remaining: {remaining}")
         if response.status_code != 200:
-            log(f"[odds] HTTP {response.status_code} -- keeping defaults.")
-            return {}, {}
+            # Say which failure it is. A rotated or exhausted key is the most
+            # common reason a whole slate pushes with no moneyline, and a bare
+            # "HTTP 401" does not tell you to go fix .env.
+            hint = {401: "key rejected -- ODDS_API_KEY in .env is wrong or was rotated",
+                    429: "quota exhausted for this key"}.get(response.status_code, "")
+            log(f"[odds] The Odds API HTTP {response.status_code}"
+                + (f" ({hint})" if hint else "") + " -- trying ESPN.")
+            return {}, fetch_espn_mlb_odds()
         totals: Dict[str, float] = {}
         moneylines: Dict[str, Tuple[float, float]] = {}
         for event in response.json():
             home, away = event.get("home_team"), event.get("away_team")
-            key = f"{home}|{away}"
+            key = _okey(home, away)
             for book in event.get("bookmakers", []):
                 for market in book.get("markets", []):
                     kind = market.get("key")
@@ -218,12 +283,14 @@ def fetch_live_odds() -> Tuple[Dict[str, float], Dict[str, Tuple[float, float]]]
                             moneylines[key] = (float(prices[home]), float(prices[away]))
                 if key in totals and key in moneylines:
                     break
+        if not moneylines:
+            moneylines = fetch_espn_mlb_odds()
         log(f"[odds] totals for {len(totals)} game(s), "
             f"moneylines for {len(moneylines)} game(s)")
         return totals, moneylines
     except Exception as exc:  # noqa: BLE001
-        log(f"[odds] failed ({type(exc).__name__}) -- keeping defaults.")
-        return {}, {}
+        log(f"[odds] The Odds API failed ({type(exc).__name__}: {exc}) -- trying ESPN.")
+        return {}, fetch_espn_mlb_odds()
 
 
 
@@ -596,8 +663,18 @@ def main() -> None:
                         help="Away starter is on a pitch count. Same rules. "
                              "Use 0 for a game with no cap when you pass one "
                              "value per game.")
-    parser.add_argument("--odds", action="store_true",
-                        help="Fetch live totals from The Odds API (uses quota).")
+    # Odds are ON by default. They were opt-in, so an ordinary run produced
+    # cards reading "no market odds supplied" and rows that graded at a
+    # default -110 -- the model's edge was measured against nothing.
+    parser.add_argument("--odds", action="store_true", default=True,
+                        help="Fetch live totals/moneylines from The Odds API "
+                             "(default: on; uses quota).")
+    parser.add_argument("--no-odds", dest="odds", action="store_false",
+                        help="Skip the odds API (no market, no CLV).")
+    parser.add_argument("--teams", metavar="NAMES",
+                        help="With --today: keep only games involving these "
+                             "teams. Comma separated, partial names fine, e.g. "
+                             '--teams "Phillies,Marlins,Dodgers".')
     parser.add_argument("--league", default="MLB",
                         help="Which league in baseball_stats.json (MLB or KBO).")
     parser.add_argument("--no-discord", action="store_true")
@@ -726,6 +803,23 @@ def main() -> None:
     except ImportError:
         pass
 
+    if args.teams:
+        # A slate filter, applied AFTER the schedule is read, so home/away and
+        # the fixture check still come from the feed rather than typed names.
+        wanted = [w.strip().lower() for w in args.teams.split(",") if w.strip()]
+        kept = [p for p in pairs
+                if any(w in p[0].lower() or w in p[1].lower() for w in wanted)]
+        missing = [w for w in wanted
+                   if not any(w in p[0].lower() or w in p[1].lower() for p in kept)]
+        if missing:
+            log(f"[teams] not on today's schedule: {', '.join(missing)}")
+        if not kept:
+            log("[teams] filter matched no game on today's schedule -- nothing run.")
+            sys.exit(1)
+        log(f"[teams] {len(kept)} of {len(pairs)} game(s) kept: "
+            + "; ".join(f"{a} @ {h}" for h, a, _ in kept))
+        pairs = kept
+
     totals = pair_values(args.total, len(pairs), "total")
     home_mls = pair_values(args.home_ml, len(pairs), "home-ml")
     away_mls = pair_values(args.away_ml, len(pairs), "away-ml")
@@ -740,7 +834,7 @@ def main() -> None:
 
     outcomes: List[Dict[str, Any]] = []
     for index, (home, away, game) in enumerate(pairs):
-        key = f"{home}|{away}"
+        key = _okey(home, away)
         if key in live_totals:
             total, source = live_totals[key], "live odds"
         elif totals[index] is not None:
@@ -748,9 +842,21 @@ def main() -> None:
         else:
             total, source = DEFAULT_TOTAL, "DEFAULT placeholder"
         home_ml, away_ml = home_mls[index], away_mls[index]
-        if home_ml is None and away_ml is None and key in live_mls:
-            home_ml, away_ml = live_mls[key]
-            log(f"  [odds] moneyline {home_ml:+g} / {away_ml:+g} (live)")
+        if home_ml is None and away_ml is None:
+            found = live_mls.get(key)
+            if found is None:
+                flipped = live_mls.get(_okey(away, home))
+                if flipped is not None:      # feed had the fixture reversed
+                    found = (flipped[1], flipped[0])
+            if found:
+                home_ml, away_ml = found
+                log(f"  [odds] moneyline {home_ml:+g} / {away_ml:+g} (live)")
+        if home_ml is None and away_ml is None:
+            # Loud, because the card that follows will say "no market odds
+            # supplied" -- that is a missing price, not a model opinion.
+            log(f"  [NO PRICE] {away} @ {home}: no moneyline from any source. "
+                f"The Discord card will read \"PASS - Moneyline: no market "
+                f"odds supplied\". Pass --home-ml/--away-ml to price it.")
         try:
             outcomes.append(run_one(home, away, game, total, source,
                                     push_discord, args.dry_run,
