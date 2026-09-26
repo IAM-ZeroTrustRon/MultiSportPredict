@@ -40,23 +40,21 @@ def test_wta_set_distribution_has_no_fourth_or_fifth_set():
     ok = not bad and keys <= BO3_SCORES
     print(f"[{'PASS' if ok else 'FAIL'}] WTA set_distribution keys {sorted(keys)} "
           f"(best-of-5-only scores present: {sorted(bad) or 'none'})")
-    return ok
+    assert ok
 
 
 def test_wta_total_games_line_is_best_of_3():
     result = predict_tennis_match(**WTA_MATCH)
     line = result["total_games"]["line"]
-    ok = line == 22.5
-    print(f"[{'PASS' if ok else 'FAIL'}] WTA total_games line = {line} (expected 22.5)")
-    return ok
+    print(f"[{'PASS' if line == 22.5 else 'FAIL'}] WTA total_games line = {line} (expected 22.5)")
+    assert line == 22.5
 
 
 def test_wta_sets_recommendation_does_not_say_35():
     result = predict_tennis_match(**WTA_MATCH)
     text = result["sets"]["recommendation_sets_ou"]
-    ok = "2.5 Sets" in text and "3.5" not in text
-    print(f"[{'PASS' if ok else 'FAIL'}] WTA recommendation_sets_ou = {text!r}")
-    return ok
+    print(f"[{'PASS' if '2.5 Sets' in text and '3.5' not in text else 'FAIL'}] WTA recommendation_sets_ou = {text!r}")
+    assert "2.5 Sets" in text and "3.5" not in text
 
 
 def test_atp_set_distribution_can_reach_a_fifth_set():
@@ -68,23 +66,21 @@ def test_atp_set_distribution_can_reach_a_fifth_set():
     ok = bool(keys & BO5_ONLY_SCORES)
     print(f"[{'PASS' if ok else 'FAIL'}] ATP set_distribution keys {sorted(keys)} "
           f"(best-of-5 scores present: {ok})")
-    return ok
+    assert ok
 
 
 def test_atp_total_games_line_is_best_of_5():
     result = predict_tennis_match(**ATP_MATCH)
     line = result["total_games"]["line"]
-    ok = line == 40.5
-    print(f"[{'PASS' if ok else 'FAIL'}] ATP total_games line = {line} (expected 40.5)")
-    return ok
+    print(f"[{'PASS' if line == 40.5 else 'FAIL'}] ATP total_games line = {line} (expected 40.5)")
+    assert line == 40.5
 
 
 def test_atp_sets_recommendation_says_35():
     result = predict_tennis_match(**ATP_MATCH)
     text = result["sets"]["recommendation_sets_ou"]
-    ok = "3.5 Sets" in text
-    print(f"[{'PASS' if ok else 'FAIL'}] ATP recommendation_sets_ou = {text!r}")
-    return ok
+    print(f"[{'PASS' if '3.5 Sets' in text else 'FAIL'}] ATP recommendation_sets_ou = {text!r}")
+    assert "3.5 Sets" in text
 
 
 def main() -> int:
