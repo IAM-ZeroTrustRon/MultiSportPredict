@@ -93,12 +93,24 @@ def run_basketball_game(
     print(f"\n=== BASKETBALL: {home_team} vs {away_team} ===\n")
     
     # Use the existing MultiSportModel for sophisticated predictions
-    from MultiSportModel import (
-        GameContext,
-        TeamMetrics,
-        eu_build_full_game,
-        project_basketball_q1,
-    )
+    try:
+        from MultiSportModel import (
+            GameContext,
+            TeamMetrics,
+            eu_build_full_game,
+            project_basketball_q1,
+        )
+    except ImportError:
+        import sys
+        legacy_dir = str(Path(__file__).resolve().parent.parent / "archive" / "legacy-modules")
+        if legacy_dir not in sys.path:
+            sys.path.insert(0, legacy_dir)
+        from MultiSportModel import (
+            GameContext,
+            TeamMetrics,
+            eu_build_full_game,
+            project_basketball_q1,
+        )
     
     # Fetch external data (referee and consensus)
     ref_data = fetch_basketball_ref_data(home_team, away_team)

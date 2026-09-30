@@ -56,6 +56,8 @@ SEEDS: List[Tuple[str, str, List[str]]] = [
     ("gh_user_repos", "https://api.github.com/users/JeffSackmann/repos?per_page=100&sort=updated", []),
     ("gh_api_repo", "https://api.github.com/repos/JeffSackmann/tennis_atp", []),
     ("tennisabstract", "https://www.tennisabstract.com/", []),
+    ("tennismylife", "https://stats.tennismylife.org/tennis-match-database", []),
+    ("valuebetennis", "https://www.valuebetennis.com/en/guide/base-de-donnees-tennis.htm", []),
 
     # --- Soccer: FBref is Cloudflare-blocked; is a different source reachable? ---
     ("football_data_uk", "https://www.football-data.co.uk/data.php", []),

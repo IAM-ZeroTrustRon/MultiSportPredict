@@ -207,11 +207,33 @@ def build_report(db_path: str, sport: Optional[str], market_type: Optional[str],
     df = df[df["result_outcome"].isin(["win", "loss"])].copy()
     df["actual"] = (df["result_outcome"] == "win").astype(int)
 
+    # Same honesty rules as grade_predictions.py --report: PASS and INFO rows
+    # are not bets (they were never gradeable decisions), and duplicate
+    # fixtures (both orientations of one game, or a slate re-run) collapse to
+    # the newest row. Without this the backtest counts rows the model never
+    # bet on and double-counts games, which is exactly the old inflated record.
+    # Reuse the grader's own helpers so the two reports can never drift apart.
+    from grade_predictions import is_excluded_tier, newest_per_fixture
+
+    records = df.to_dict("records")
+    kept, _dropped = newest_per_fixture(
+        [r for r in records if not is_excluded_tier(r.get("recommendation"))])
+    if not kept:
+        print("No settled REAL bets after excluding PASS/INFO rows and duplicates.")
+        print("(The model has passed on everything it has settled so far -- that is")
+        print("a result, not a gap, but there is nothing to calibrate yet.)")
+        return
+    n_all = len(records)
+    df = df[df["id"].isin({r["id"] for r in kept})].copy()
+
     n = len(df)
     print("=" * 78)
     print("BACKTEST / CALIBRATION REPORT")
     print("=" * 78)
     print(f"Settled predictions analyzed: {n}")
+    if n != n_all:
+        print(f"  ({n_all} settled rows; {n_all - n} excluded: PASS/INFO rows and "
+              f"duplicate fixtures -- see grade_predictions.py --report)")
     if sport:
         print(f"Sport filter: {sport}")
     if market_type:
@@ -224,7 +246,8 @@ def build_report(db_path: str, sport: Optional[str], market_type: Optional[str],
 
     # For Brier/log-loss, only rows where model_value is a 0-1 probability
     # (moneyline-style markets) are meaningful — see module docstring.
-    prob_df = df[_is_probability_valued(df)]
+    prob_mask = df["model_value"].between(0.0, 1.0)
+    prob_df = df[prob_mask].copy()
     if prob_df.empty:
         print("\n[NOTE] No moneyline-style rows (model_value is a 0-1 probability) found.")
         print("Brier score / log-loss are SKIPPED because historical_storage's generic")
