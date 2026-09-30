@@ -60,6 +60,7 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as _dt
+import html
 import json
 import math
 import os
@@ -67,6 +68,7 @@ import re
 import sqlite3
 import sys
 import urllib.request
+import unicodedata
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -165,16 +167,187 @@ def tier_of(recommendation: Optional[str]) -> str:
     return "INFO"
 
 
-def normalise_team(name: str) -> str:
-    # Strip a trailing season tag first. run_nfl.py stores "Arizona Cardinals
-    # (2026)"; ESPN returns "Arizona Cardinals". Without this the tag survived
-    # as "arizonacardinals2026", no NFL row could ever match a result, and all
-    # 39 stored NFL predictions sat ungraded looking like "finals not in yet".
-    name = DEDUP_TEAM_NOISE.sub("", name or "")
-    return re.sub(r"[^a-z0-9]", "", name.lower())
-
-
 DEDUP_TEAM_NOISE = re.compile(r"\s*\((?:19|20)\d{2}(?:[-/]\d{2,4})?\)\s*$")
+
+
+def _team_key(name: str) -> str:
+    name = html.unescape(DEDUP_TEAM_NOISE.sub("", name or "")).strip().casefold()
+    name = unicodedata.normalize("NFKD", name)
+    name = "".join(char for char in name if not unicodedata.combining(char))
+    return re.sub(r"[^a-z0-9]", "", name)
+
+
+# Alias groups are deliberately sport-scoped: abbreviations such as KC, ATL,
+# and SF identify different clubs in different leagues. Add new feed spellings
+# here rather than relying on substring/fuzzy matches that can swap opponents.
+_TEAM_ALIAS_GROUPS = {
+    "mlb": [
+        ("Arizona Diamondbacks", "ARI", "Diamondbacks"),
+        ("Atlanta Braves", "ATL", "Braves"),
+        ("Baltimore Orioles", "BAL", "Orioles"),
+        ("Boston Red Sox", "BOS", "Red Sox"),
+        ("Chicago Cubs", "CHC", "Cubs"),
+        ("Chicago White Sox", "CWS", "White Sox"),
+        ("Cincinnati Reds", "CIN", "Reds"),
+        ("Cleveland Guardians", "CLE", "Guardians"),
+        ("Colorado Rockies", "COL", "Rockies"),
+        ("Detroit Tigers", "DET", "Tigers"),
+        ("Houston Astros", "HOU", "Astros"),
+        ("Kansas City Royals", "KC", "Royals"),
+        ("Los Angeles Angels", "LAA", "Angels"),
+        ("Los Angeles Dodgers", "LAD", "Dodgers"),
+        ("Miami Marlins", "MIA", "Marlins"),
+        ("Milwaukee Brewers", "MIL", "Brewers"),
+        ("Minnesota Twins", "MIN", "Twins"),
+        ("New York Mets", "NYM", "Mets"),
+        ("New York Yankees", "NYY", "Yankees"),
+        ("Oakland Athletics", "OAK", "Athletics", "Athletics A's"),
+        ("Philadelphia Phillies", "PHI", "Phillies"),
+        ("Pittsburgh Pirates", "PIT", "Pirates"),
+        ("San Diego Padres", "SD", "Padres"),
+        ("San Francisco Giants", "SF", "Giants"),
+        ("Seattle Mariners", "SEA", "Mariners"),
+        ("St. Louis Cardinals", "STL", "Cardinals"),
+        ("Tampa Bay Rays", "TB", "Rays"),
+        ("Texas Rangers", "TEX", "Rangers"),
+        ("Toronto Blue Jays", "TOR", "Blue Jays"),
+        ("Washington Nationals", "WSH", "WAS", "Nationals"),
+    ],
+    "nfl": [
+        ("Arizona Cardinals", "ARI"), ("Atlanta Falcons", "ATL"),
+        ("Baltimore Ravens", "BAL"), ("Buffalo Bills", "BUF"),
+        ("Carolina Panthers", "CAR"), ("Chicago Bears", "CHI"),
+        ("Cincinnati Bengals", "CIN"), ("Cleveland Browns", "CLE"),
+        ("Dallas Cowboys", "DAL"), ("Denver Broncos", "DEN"),
+        ("Detroit Lions", "DET"), ("Green Bay Packers", "GB"),
+        ("Houston Texans", "HOU"), ("Indianapolis Colts", "IND"),
+        ("Jacksonville Jaguars", "JAX", "JAC"),
+        ("Kansas City Chiefs", "KC"), ("Las Vegas Raiders", "LV", "LVR"),
+        ("Los Angeles Chargers", "LAC", "LA Chargers"),
+        ("Los Angeles Rams", "LAR", "LA Rams"),
+        ("Miami Dolphins", "MIA"), ("Minnesota Vikings", "MIN"),
+        ("New England Patriots", "NE"), ("New Orleans Saints", "NO"),
+        ("New York Giants", "NYG"), ("New York Jets", "NYJ"),
+        ("Philadelphia Eagles", "PHI"), ("Pittsburgh Steelers", "PIT"),
+        ("San Francisco 49ers", "SF", "49ers", "Niners"),
+        ("Seattle Seahawks", "SEA"), ("Tampa Bay Buccaneers", "TB", "Tampa Bay Bucs"),
+        ("Tennessee Titans", "TEN"),
+        ("Washington Commanders", "WSH", "WAS", "Washington Football Team", "Redskins"),
+    ],
+    "kbo": [
+        ("Doosan Bears", "Doosan", "Bears", "두산 베어스", "두산"),
+        ("LG Twins", "LG", "Twins", "LG 트윈스", "엘지 트윈스"),
+        ("SSG Landers", "SSG", "Landers", "SSG 랜더스"),
+        ("Kiwoom Heroes", "Kiwoom", "Heroes", "키움 히어로즈"),
+        ("KT Wiz", "KT", "Wiz", "케이티 위즈"),
+        ("KIA Tigers", "KIA", "Kia", "Tigers", "기아 타이거즈"),
+        ("Samsung Lions", "Samsung", "Lions", "삼성 라이온즈"),
+        ("Lotte Giants", "Lotte", "Giants", "롯데 자이언츠"),
+        ("NC Dinos", "NC", "Dinos", "엔씨 다이노스", "엔씨"),
+        ("Hanwha Eagles", "Hanwha", "Eagles", "한화 이글스"),
+    ],
+    "ncaaf": [
+        ("Arizona State", "ASU", "Arizona St", "Arizona State Sun Devils"),
+        ("Texas A&M", "TAMU", "Texas A and M", "Texas A&M Aggies"),
+        ("Oklahoma", "OKLA", "Oklahoma Sooners"),
+        ("Michigan", "MICH", "Michigan Wolverines"),
+        ("Penn State", "PSU", "Penn State Nittany Lions"),
+        ("Temple", "Temple Owls"),
+        ("Oregon", "Oregon Ducks"),
+        ("Oklahoma State", "OKST", "Okla State", "Oklahoma State Cowboys"),
+        ("Oregon State", "ORST", "Oregon St", "Oregon State Beavers"),
+    ],
+    "kbl": [
+        ("Anyang JungKwanJang Red Boosters", "Anyang", "Anyang Red Boosters", "Red Boosters"),
+        ("Busan KCC Egis", "Busan", "Busan Egis", "KCC Egis", "Egis"),
+        ("Changwon LG Sakers", "Changwon", "Changwon Sakers", "LG Sakers", "Sakers"),
+        ("Daegu KOGAS Pegasus", "Daegu", "Daegu Pegasus", "KOGAS Pegasus", "Pegasus"),
+        ("Goyang Sono Skygunners", "Goyang", "Goyang Skygunners", "Sono Skygunners", "Skygunners"),
+        ("Wonju DB Promy", "Wonju", "Wonju Promy", "DB Promy", "Promy"),
+        ("Seoul SK Knights", "Seoul Knights", "SK Knights", "Knights"),
+        ("Seoul Samsung Thunders", "Seoul Thunders", "Samsung Thunders", "Thunders"),
+        ("Suwon KT Sonicboom", "Suwon Sonicboom", "KT Sonicboom", "Sonicboom"),
+        ("Ulsan Hyundai Mobis Phoebus", "Ulsan Phoebus", "Mobis Phoebus", "Phoebus"),
+    ],
+    "nz nbl": [
+        ("Auckland Tuatara", "Auckland", "Tuatara"),
+        ("Canterbury Rams", "Canterbury", "Rams"),
+        ("Franklin Bulls", "Franklin", "Bulls"),
+        ("Hawke's Bay Hawks", "Hawkes Bay Hawks", "Hawke's Bay", "Hawks"),
+        ("Manawatu Jets", "Manawatu", "Jets"),
+        ("Otago Nuggets", "Otago", "Nuggets"),
+        ("Southland Sharks", "Southland", "Sharks"),
+        ("Taranaki Airs", "Taranaki", "Airs"),
+        ("Wellington Saints", "Wellington", "Saints"),
+        ("Nelson Giants", "Nelson", "Giants"),
+    ],
+    "euroleague": [
+        ("Alba Berlin", "ALBA"), ("Anadolu Efes", "Efes"),
+        ("AS Monaco", "Monaco"), ("Baskonia", "Cazoo Baskonia"),
+        ("Crvena Zvezda", "Red Star", "Crvena Zvezda Meridianbet"),
+        ("FC Barcelona", "Barcelona", "Barca"),
+        ("FC Bayern Munich", "Bayern", "Bayern Munich"),
+        ("Fenerbahce", "Fenerbahce Beko"),
+        ("LDLC ASVEL Villeurbanne", "ASVEL", "Villeurbanne"),
+        ("Maccabi Tel Aviv", "Maccabi", "Maccabi Playtika Tel Aviv"),
+        ("EA7 Emporio Armani Milan", "Milano", "Milan", "Olimpia Milano"),
+        ("Olympiacos Piraeus", "Olympiacos"),
+        ("Panathinaikos", "Panathinaikos AKTOR"),
+        ("Paris Basketball", "Paris"),
+        ("Partizan", "Partizan Mozzart Bet"),
+        ("Real Madrid",),
+        ("Virtus Bologna", "Virtus", "Virtus Segafredo Bologna"),
+        ("Zalgiris Kaunas", "Zalgiris"),
+    ],
+    "soccer": [
+        ("Club America", "Club América"),
+        ("Guadalajara", "Chivas", "Chivas Guadalajara"),
+        ("Columbus Crew", "Columbus", "Crew"),
+        ("Austin FC", "Austin"), ("Toluca",),
+        ("Manchester City", "Man City", "MCFC"),
+        ("Manchester United", "Man United", "Man Utd", "MUFC"),
+        ("VfB Stuttgart", "Stuttgart"),
+        ("Borussia Dortmund", "Dortmund", "BVB"),
+        ("Ajax Amsterdam", "Ajax"), ("Excelsior Rotterdam", "Excelsior"),
+        ("Lazio", "SS Lazio"), ("Venezia", "Venezia FC"),
+        ("FC Midtjylland", "Midtjylland"), ("Odense BK", "Odense"),
+        ("Galatasaray", "Galatasaray SK"), ("Trabzonspor",),
+        ("FC Barcelona", "Barcelona", "Barca"),
+    ],
+    "tennis": [
+        ("Madison Keys", "Keys M.", "Keys M"),
+        ("Zheng Qinwen", "Zheng Q.", "Zheng Q"),
+        ("Wu Yibing", "Wu Y.", "Wu Y"),
+        ("Adam Walton", "Walton A.", "Walton A"),
+    ],
+}
+
+_SPORT_ALIASES = {
+    "baseball": "mlb", "mlb": "mlb", "nfl": "nfl", "ncaaf": "ncaaf",
+    "college football": "ncaaf", "kbo": "kbo", "kbl": "kbl",
+    "nz nbl": "nz nbl", "new zealand nbl": "nz nbl", "nz_nbl": "nz nbl",
+    "euroleague": "euroleague", "euro league": "euroleague",
+    "soccer": "soccer", "football": "soccer", "liga mx": "soccer",
+    "mls": "soccer", "premier league": "soccer", "tennis": "tennis",
+}
+
+_TEAM_ALIASES = {
+    sport: {_team_key(alias): _team_key(group[0])
+            for group in groups for alias in group}
+    for sport, groups in _TEAM_ALIAS_GROUPS.items()
+}
+
+
+def normalise_team(name: str, sport: str = "") -> str:
+    """Normalize a team/player name using aliases scoped to its sport."""
+    key = _team_key(name)
+    sport_key = normalise_sport(sport)
+    return _TEAM_ALIASES.get(sport_key, {}).get(key, key)
+
+
+def normalise_sport(sport: str) -> str:
+    key = re.sub(r"\s+", " ", (sport or "").strip().casefold())
+    return _SPORT_ALIASES.get(key, key)
 
 
 def dedup_key(row: sqlite3.Row) -> Tuple[str, str, str, str]:
@@ -190,8 +363,9 @@ def dedup_key(row: sqlite3.Row) -> Tuple[str, str, str, str]:
     2026). A matchup-pair-only key would settle every one of those meetings at
     a single night's score -- that is a fabricated result, not a grade.
     """
+    sport = row["sport"] or ""
     def strip_season(name: str) -> str:
-        return normalise_team(DEDUP_TEAM_NOISE.sub("", name or ""))
+        return normalise_team(DEDUP_TEAM_NOISE.sub("", name or ""), sport)
 
     home, away = strip_season(row["home_team"]), strip_season(row["away_team"])
     pair = f"{home}|{away}" if home <= away else f"{away}|{home}"
@@ -329,8 +503,10 @@ def _side_bet(row: sqlite3.Row, raw: Dict[str, Any]) -> Optional[str]:
         return "AWAY"
     if re.search(r"\bHOME\b", text):
         return "HOME"
-    squashed = normalise_team(text)
-    home, away = normalise_team(row["home_team"]), normalise_team(row["away_team"])
+    sport = row["sport"] or ""
+    squashed = normalise_team(text, sport)
+    home = normalise_team(row["home_team"], sport)
+    away = normalise_team(row["away_team"], sport)
     if home and home in squashed and not (away and away in squashed):
         return "HOME"
     if away and away in squashed and not (home and home in squashed):
@@ -535,7 +711,8 @@ def fetch_mlb_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[
             away_name = ((away.get("team") or {}).get("name") or "").strip()
             if home.get("score") is None or away.get("score") is None:
                 continue
-            out[(date, normalise_team(home_name), normalise_team(away_name))] = (
+            out[(date, normalise_team(home_name, "mlb"),
+                 normalise_team(away_name, "mlb"))] = (
                 float(home["score"]), float(away["score"])
             )
     return out
@@ -566,7 +743,8 @@ def fetch_nfl_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[
     def add(date: str, home: str, away: str, hs: Any, ras: Any) -> None:
         if not (date and home and away) or hs is None or ras is None:
             return
-        out[(date[:10], normalise_team(home), normalise_team(away))] = (
+        out[(date[:10], normalise_team(home, "nfl"),
+             normalise_team(away, "nfl"))] = (
             float(hs), float(ras))
 
     failures: List[str] = []
@@ -618,8 +796,8 @@ def fetch_nfl_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[
                 if not (start <= str(game.get("date", "")) <= end):
                     continue
                 key = (str(game["date"])[:10],
-                       normalise_team(game["home_team"]),
-                       normalise_team(game["away_team"]))
+                       normalise_team(game["home_team"], "nfl"),
+                       normalise_team(game["away_team"], "nfl"))
                 if key not in out:      # the live feed wins where both have it
                     add(game["date"], game["home_team"], game["away_team"],
                         game.get("home_score"), game.get("away_score"))
@@ -711,7 +889,8 @@ def fetch_tennis_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tup
                         away_key = resolved(away_name)
                         if not home_key or not away_key:
                             continue
-                        out[(day.isoformat(), normalise_team(home_key), normalise_team(away_key))] = (
+                            out[(day.isoformat(), normalise_team(home_key, "tennis"),
+                                normalise_team(away_key, "tennis"))] = (
                             (1.0, 0.0) if home_won else (0.0, 1.0))
         day += _dt.timedelta(days=1)
 
@@ -738,7 +917,8 @@ def fetch_ncaaf_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tupl
     def add(date: str, home: str, away: str, hs: Any, ras: Any) -> None:
         if not (date and home and away) or hs is None or ras is None:
             return
-        out[(date[:10], normalise_team(home), normalise_team(away))] = (
+        out[(date[:10], normalise_team(home, "ncaaf"),
+             normalise_team(away, "ncaaf"))] = (
             float(hs), float(ras))
 
     try:
@@ -792,8 +972,8 @@ def fetch_ncaaf_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tupl
                 if not (start <= str(game.get("date", "")) <= end):
                     continue
                 key = (str(game["date"])[:10],
-                       normalise_team(game["home_team"]),
-                       normalise_team(game["away_team"]))
+                       normalise_team(game["home_team"], "ncaaf"),
+                       normalise_team(game["away_team"], "ncaaf"))
                 if key not in out:      # the live feed wins where both have it
                     add(game["date"], game["home_team"], game["away_team"],
                         game.get("home_score"), game.get("away_score"))
@@ -899,7 +1079,8 @@ def fetch_soccer_results(start: str, end: str,
                     failures.append(f"{key} all: {exc}")
                 continue
             for ev in _soccer_events(payload):
-                found[(normalise_team(ev[0]), normalise_team(ev[1]))] = ev
+                  found[(normalise_team(ev[0], "soccer"),
+                      normalise_team(ev[1], "soccer"))] = ev
             if slug == "all" and found:
                 break          # the cross-league board answered; skip the loop
         fetched[key] = list(found.values())
@@ -919,14 +1100,16 @@ def fetch_soccer_results(start: str, end: str,
                     if tag not in extra_time:     # boards overlap (d and d+1)
                         extra_time.append(tag)
                     for filed in (day.isoformat(), d[:10]):
-                        extra_keys.add((filed, normalise_team(home), normalise_team(away)))
+                        extra_keys.add((filed, normalise_team(home, "soccer"),
+                                        normalise_team(away, "soccer")))
                     continue
                 try:
                     score = (float(hs), float(as_))
                 except (TypeError, ValueError):
                     continue
                 for filed in (day.isoformat(), d[:10]):
-                    out.setdefault((filed, normalise_team(home), normalise_team(away)), score)
+                    out.setdefault((filed, normalise_team(home, "soccer"),
+                                    normalise_team(away, "soccer")), score)
     if failures:
         log(f"[soccer] cross-league board failed for {len(failures)} day(s), "
             f"first: {failures[0]} -- fell back to per-league boards")
@@ -1076,8 +1259,8 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
             continue
 
         for row in sport_rows:
-            key = (str(row["game_date"]), normalise_team(row["home_team"]),
-                   normalise_team(row["away_team"]))
+            key = (str(row["game_date"]), normalise_team(row["home_team"], sport_key),
+                   normalise_team(row["away_team"], sport_key))
             scores = results.get(key)
             if scores is None:
                 # Try the reversed orientation -- home/away is sometimes logged
@@ -1126,7 +1309,7 @@ def cmd_manual(conn: sqlite3.Connection, path: Path) -> int:
     # 27th and the 29th of one week. Matching on the pair alone settled every
     # one of those meetings at a single night's score, which is not a grade --
     # it is a fabricated result wearing the same shape as one.
-    lookup: Dict[Tuple[str, str, str], Tuple[float, float]] = {}
+    lookup: Dict[Tuple[str, str, str, str], Tuple[float, float]] = {}
     incomplete = 0
     for entry in entries:
         try:
@@ -1135,22 +1318,23 @@ def cmd_manual(conn: sqlite3.Connection, path: Path) -> int:
         except (KeyError, TypeError, ValueError):
             incomplete += 1
             continue
-        lookup[(str(entry.get("game_date") or "").strip(),
-                normalise_team(entry.get("home_team", "")),
-                normalise_team(entry.get("away_team", "")))] = (home_score, away_score)
+        entry_sport = normalise_sport(entry.get("sport", ""))
+        lookup[(entry_sport, str(entry.get("game_date") or "").strip(),
+            normalise_team(entry.get("home_team", ""), entry_sport),
+            normalise_team(entry.get("away_team", ""), entry_sport))] = (home_score, away_score)
 
     if not lookup:
         raise SystemExit(f"{path.name} has no rows with both scores filled in.")
 
-    def find(date, home, away):
+    def find(sport, date, home, away):
         """Prefer the same-date row; fall back to a dateless one only if the CSV
         left the date blank. A prediction whose date matches no filled row stays
         pending rather than borrowing another night's score."""
         for key_date in (date, ""):
-            hit = lookup.get((key_date, home, away))
+            hit = lookup.get((sport, key_date, home, away))
             if hit is not None:
                 return hit
-            flipped = lookup.get((key_date, away, home))
+            flipped = lookup.get((sport, key_date, away, home))
             if flipped is not None:
                 return (flipped[1], flipped[0])
         return None
@@ -1168,9 +1352,10 @@ def cmd_manual(conn: sqlite3.Connection, path: Path) -> int:
                 "excluded from grading (newest row kept)' WHERE id=?",
                 (row["id"],))
             continue
-        scores = find(str(row["game_date"] or "").strip(),
-                      normalise_team(row["home_team"]),
-                      normalise_team(row["away_team"]))
+        sport = normalise_sport(row["sport"] or "")
+        scores = find(sport, str(row["game_date"] or "").strip(),
+                  normalise_team(row["home_team"], sport),
+                  normalise_team(row["away_team"], sport))
         if scores is None:
             continue
         outcome = apply_result(conn, row, scores[0], scores[1], f"manual:{path.name}")

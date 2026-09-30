@@ -67,13 +67,26 @@ def run_soccer_game(
     print(f"\n=== SOCCER: {home_team} vs {away_team} ===\n")
     
     # Use the existing MultiSportModel for sophisticated predictions
-    from MultiSportModel import (
-        estimate_team_goals,
-        estimate_btts_prob,
-        poisson_over_prob,
-        team_corner_strength,
-        estimate_corner_total,
-    )
+    try:
+        from MultiSportModel import (
+            estimate_team_goals,
+            estimate_btts_prob,
+            poisson_over_prob,
+            team_corner_strength,
+            estimate_corner_total,
+        )
+    except ImportError:
+        import sys
+        legacy_dir = str(Path(__file__).resolve().parent.parent / 'archive' / 'legacy-modules')
+        if legacy_dir not in sys.path:
+            sys.path.insert(0, legacy_dir)
+        from MultiSportModel import (
+            estimate_team_goals,
+            estimate_btts_prob,
+            poisson_over_prob,
+            team_corner_strength,
+            estimate_corner_total,
+        )
     from core.utils import poisson_pmf
     
     # Fetch external data (referee)

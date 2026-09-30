@@ -322,6 +322,12 @@ class BaseballGameContext:
     notes: Optional[str] = None
 
 
+# Share of a game's run prevention attributed to the starting pitcher. A
+# typical MLB start is ~5.5-6 of 9 innings; the rest is bullpen, which the
+# team's season runs-allowed covers.
+SP_SHARE_OF_GAME = 0.60
+
+
 @dataclass
 class BaseballTeamMetrics:
     """Team performance metrics for baseball"""
@@ -547,20 +553,37 @@ class BaseballPredictor(SportPredictorBase):
         # Get league configuration
         league_config = get_league_config(league)
         
-        # Calculate expected runs (base)
-        home_expected_runs = (home_stats.avg_runs_scored + away_stats.avg_runs_allowed) / 2
-        away_expected_runs = (away_stats.avg_runs_scored + home_stats.avg_runs_allowed) / 2
-        
+        # Expected runs = the offence against the run prevention it actually
+        # faces, and that prevention is mostly TODAY'S STARTER, not the season
+        # bullpen-and-all team average. A starter covers roughly six of nine
+        # innings, so his ERA carries most of the weight.
+        #
+        # This is why every total came back OVER. The old base used only
+        # avg_runs_allowed, and the pitcher term below was added to one side
+        # and subtracted from the other -- so it CANCELLED out of the total
+        # exactly. An ace and a replacement produced the same projected total,
+        # which sat near the sum of the two offences (Marlins/Cubs projected
+        # 9.95 into a 6.5 market) and read STRONG OVER on almost every game.
+        sp_weight = SP_SHARE_OF_GAME
+        home_prevention = (sp_weight * home_pitcher.era
+                           + (1.0 - sp_weight) * home_stats.avg_runs_allowed)
+        away_prevention = (sp_weight * away_pitcher.era
+                           + (1.0 - sp_weight) * away_stats.avg_runs_allowed)
+
+        home_expected_runs = (home_stats.avg_runs_scored + away_prevention) / 2
+        away_expected_runs = (away_stats.avg_runs_scored + home_prevention) / 2
+
         # Apply league run environment factor
         home_expected_runs *= league_config["run_environment_factor"]
         away_expected_runs *= league_config["run_environment_factor"]
-        
-        # Pitcher matchup impact
-        # Lower ERA is better, so negative coefficient
-        pitcher_advantage_home = (away_pitcher.era - home_pitcher.era) * 0.5
-        pitcher_advantage_home += (home_pitcher.k_per_9 - away_pitcher.k_per_9) * 0.1
+
+        # Residual matchup edge: strikeouts and walks only. ERA is already in
+        # the projections above, so re-applying it here would double-count it.
+        # This term is deliberately symmetric -- it moves the SPLIT between the
+        # two sides, not the total.
+        pitcher_advantage_home = (home_pitcher.k_per_9 - away_pitcher.k_per_9) * 0.1
         pitcher_advantage_home += (away_pitcher.bb_per_9 - home_pitcher.bb_per_9) * 0.1
-        
+
         # KBO specific: Foreign player impact
         if league.upper() == "KBO":
             # Foreign pitchers typically have significant impact in KBO

@@ -94,14 +94,30 @@ TODAY = _dt.date.today().isoformat()
 
 _last_request_at: Dict[str, float] = {}
 
-# requests is already a project dependency. It is preferred over urllib because
-# it sends a full browser-like header set and handles gzip/redirects, which is
-# the difference between a 200 and a 403 on sites that screen simple clients.
+# requests and cloudscraper are project dependencies.
+# cloudscraper is preferred because it bypasses Cloudflare bot protection on RealGM
+# and other scraped feeds, handling JS challenges and TLS fingerprints that block requests/urllib.
+try:
+    import cloudscraper  # type: ignore
+    _HAS_CLOUDSCRAPER = True
+except ImportError:
+    _HAS_CLOUDSCRAPER = False
+
 try:
     import requests  # type: ignore
     _HAS_REQUESTS = True
 except ImportError:
     _HAS_REQUESTS = False
+
+_scraper_session = None
+
+def _get_scraper():
+    global _scraper_session
+    if _scraper_session is None and _HAS_CLOUDSCRAPER:
+        _scraper_session = cloudscraper.create_scraper(
+            browser={"browser": "chrome", "platform": "windows", "desktop": True}
+        )
+    return _scraper_session
 
 BROWSER_HEADERS = {
     "User-Agent": USER_AGENT,
@@ -161,6 +177,37 @@ def _raw_get(url: str, *, referer: Optional[str] = None, polite: bool = False) -
     if referer:
         headers["Referer"] = referer
         headers["Sec-Fetch-Site"] = "same-origin"
+
+    # Cloudscraper handles Cloudflare challenges and TLS fingerprinting (e.g. RealGM)
+    if _HAS_CLOUDSCRAPER:
+        for attempt in range(4):
+            try:
+                # Use a fresh desktop browser session each attempt to satisfy Cloudflare challenge verification
+                scraper = cloudscraper.create_scraper(
+                    browser={"browser": "firefox", "platform": "windows", "mobile": False}
+                )
+                response = scraper.get(url, timeout=HTTP_TIMEOUT)
+                if response.status_code == 200 and "Just a moment..." not in response.text:
+                    encoding = (
+                        response.encoding
+                        if response.encoding and response.encoding.lower() != "iso-8859-1"
+                        else (response.apparent_encoding or "utf-8")
+                    )
+                    return response.content.decode(encoding or "utf-8", errors="replace")
+                if response.status_code == 403 and attempt < 3:
+                    time.sleep(1.0 + attempt)
+                    continue
+                raise FetchError(url, status=response.status_code)
+            except FetchError:
+                if attempt < 3:
+                    time.sleep(1.0 + attempt)
+                    continue
+                raise
+            except Exception as exc:  # noqa: BLE001
+                if attempt < 3:
+                    time.sleep(1.0 + attempt)
+                    continue
+                raise FetchError(url, reason=type(exc).__name__) from exc
 
     if _HAS_REQUESTS:
         try:
@@ -1144,15 +1191,12 @@ def ingest_nznbl(check: bool = False, season: Optional[int] = None) -> AdapterRe
 TENNIS_YEARS_BACK = 3          # rolling Elo window
 _SURFACE_MAP = {"hard": "hard", "clay": "clay", "grass": "grass", "carpet": "hard"}
 
-# The same files served four ways. Some networks, DNS filters and security
-# suites block raw.githubusercontent.com outright and answer 404 for every
-# path on it, which looks exactly like "the file does not exist" -- so a
-# mirror list is the difference between working and mysteriously empty.
+# The same files served from an active mirror repository (raw GitHub + jsDelivr CDN).
+# JeffSackmann/tennis_atp went private/inaccessible, so Aneeshers/tennis-sackmann-archive
+# is used as the public mirror containing identical file formats and historical match data.
 SACKMANN_MIRRORS = [
-    "https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/{name}",
-    "https://cdn.jsdelivr.net/gh/JeffSackmann/tennis_atp@master/{name}",
-    "https://raw.githubusercontent.com/JeffSackmann/tennis_atp/main/{name}",
-    "https://github.com/JeffSackmann/tennis_atp/raw/master/{name}",
+    "https://raw.githubusercontent.com/Aneeshers/tennis-sackmann-archive/main/atp/{name}",
+    "https://cdn.jsdelivr.net/gh/Aneeshers/tennis-sackmann-archive@main/atp/{name}",
 ]
 
 
@@ -1232,11 +1276,10 @@ def ingest_tennis(check: bool = False, season: Optional[int] = None) -> AdapterR
 
     if not rows:
         raise RuntimeError(
-            f"All {attempted} tennis files failed across {len(SACKMANN_MIRRORS)} mirrors "
-            f"(raw.githubusercontent.com, jsDelivr, github.com). Files for past seasons "
-            f"definitely exist, so this is a network block, not missing data -- check "
+            f"All {attempted} tennis files failed across {len(SACKMANN_MIRRORS)} mirrors. "
+            f"Files for past seasons definitely exist, so this is a network block, not missing data -- check "
             f"whether a firewall, VPN, DNS filter or antivirus is intercepting these hosts. "
-            f"Test in a browser: https://cdn.jsdelivr.net/gh/JeffSackmann/tennis_atp@master/"
+            f"Test in a browser: https://cdn.jsdelivr.net/gh/Aneeshers/tennis-sackmann-archive@main/atp/"
             f"atp_matches_{years[0]}.csv"
         )
 
@@ -1263,7 +1306,7 @@ def ingest_tennis(check: bool = False, season: Optional[int] = None) -> AdapterR
         "players": players,
         "by_tier": tiers,
         "files": fetched,
-        "source": "https://github.com/JeffSackmann/tennis_atp",
+        "source": "https://github.com/Aneeshers/tennis-sackmann-archive",
         "license": "CC BY-NC-SA 4.0 (attribution required, non-commercial)",
     }, indent=2) + "\n", TENNIS_META)
 

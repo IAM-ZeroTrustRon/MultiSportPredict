@@ -23,7 +23,7 @@ WHY THIS SOURCE
     plainly. It is the same kind of source as football-data.co.uk, which is the
     only soccer feed that still works.
 
-WHY ORDER MATTERS MORE THAN IT LOOKS
+WHY ORDER MATTERS
     Elo is sequential: every match updates a rating that the next match reads.
     Feeding 2026 before 2025, or one tournament's matches out of order, produces
     ratings that are arithmetically fine and factually wrong -- and nothing
@@ -67,8 +67,8 @@ OUT_DIR = ROOT / "data" / "tennis"
 # before 2026-09-18, which surfaced as four identical HTTPErrors and a store
 # frozen 19 days out of date. Try https first and keep http as the fallback so
 # a reversal on their side does not break this again.
-BASE = "https://www.tennis-data.co.uk"
-BASE_FALLBACK = "http://www.tennis-data.co.uk"
+BASE = "https://stats.tennismylife.org/data"
+BASE_FALLBACK = "https://stats.tennismylife.org/data"
 UA = {"User-Agent": "Mozilla/5.0 (MultiSportPredict tennis ingest)"}
 
 SURFACES = {"hard", "clay", "grass", "carpet"}
