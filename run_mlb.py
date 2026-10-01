@@ -50,6 +50,7 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 PROBABLES = ROOT / "data" / "mlb_probables.json"
+LINEUPS = ROOT / "data" / "mlb_lineups.json"
 STORE = ROOT / "data" / "baseball_stats.json"
 TODAY = _dt.date.today().isoformat()
 
@@ -152,6 +153,31 @@ def find_game(a: str, b: str, games: List[Dict[str, Any]]) -> Optional[Dict[str,
         if {home, away} == {a, b}:
             return game
     return None
+
+
+def load_lineups() -> Dict[str, List[str]]:
+    """Today's key batters per club from data/mlb_lineups.json.
+
+    Returns {team_name: [up to 4 names]} for lineups announced TODAY only.
+    A stale file (yesterday's date) or a missing file yields {} -- the
+    embed then omits the Key Batters row rather than showing a stale order.
+    """
+    if not LINEUPS.exists():
+        return {}
+    try:
+        payload = json.loads(LINEUPS.read_text(encoding="utf-8-sig"))
+    except json.JSONDecodeError:
+        return {}
+    if payload.get("date") != TODAY:
+        return {}
+    out: Dict[str, List[str]] = {}
+    for team, record in (payload.get("teams") or {}).items():
+        if not isinstance(record, dict) or record.get("date") != TODAY:
+            continue
+        batters = [b for b in (record.get("key_batters") or []) if b]
+        if batters:
+            out[team] = batters[:4]
+    return out
 
 
 def pitcher_args(game: Optional[Dict[str, Any]]) -> Dict[str, Optional[float]]:
@@ -403,6 +429,12 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
 
     from universal_runner import run_baseball
     game = game or {}
+    lineups = load_lineups()
+    home_batters = lineups.get(home) or None
+    away_batters = lineups.get(away) or None
+    if home_batters or away_batters:
+        log(f"  Lineup     {away}: {', '.join(away_batters) if away_batters else 'not announced'}")
+        log(f"             {home}: {', '.join(home_batters) if home_batters else 'not announced'}")
     result = run_baseball(home, away, league=LEAGUE, markets=MARKETS,
                           market_total=total, store_to_db=True,
                           push_discord=push_discord,
@@ -411,7 +443,9 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
                           home_sp_limit=home_sp_limit,
                           away_sp_limit=away_sp_limit,
                           home_sp_name=game.get("home_pitcher"),
-                          away_sp_name=game.get("away_pitcher"), **arguments)
+                          away_sp_name=game.get("away_pitcher"),
+                          home_key_batters=home_batters,
+                          away_key_batters=away_batters, **arguments)
 
     tagged = record_market_odds(home, away, total, home_ml, away_ml)
     if tagged:
