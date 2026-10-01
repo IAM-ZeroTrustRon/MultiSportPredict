@@ -383,6 +383,46 @@ def extract_baseball(data: Dict[str, Any]) -> Dict[str, Any]:
     if f5_rl and f5_rl != "PASS":
         rows.append(market("📐 F5 Run Line", pick=clean(f5.get("run_line_rec"))))
 
+    # Starting pitchers + key batters ride on every baseball prediction
+    # (predict_match.run_baseball_prop_market). The canonical card is the
+    # market table above; these two rows name WHO the projection is about.
+    # Rule 1/3 apply: omit when unknown, never a stand-in. No inventory of
+    # fallback keys is kept here -- the predictor owns the canonical
+    # starting_pitchers/key_batters shape; the two legacy lookups below
+    # exist only so older stored payloads still render.
+    sp = data.get("starting_pitchers") or {}
+    home_sp = clean(sp.get("home") or data.get("home_sp_name"))
+    away_sp = clean(sp.get("away") or data.get("away_sp_name"))
+    home_era = dec(sp.get("home_era", data.get("home_sp_era")), 2)
+    away_era = dec(sp.get("away_era", data.get("away_sp_era")), 2)
+    if home_sp or away_sp:
+        bits = []
+        if away_sp or away_era:
+            bits.append(f"**{short_name(away_name)}** "
+                        f"{away_sp or 'TBD'}"
+                        f"{f' ({away_era} ERA)' if away_era else ''}")
+        if home_sp or home_era:
+            bits.append(f"**{short_name(home_name)}** "
+                        f"{home_sp or 'TBD'}"
+                        f"{f' ({home_era} ERA)' if home_era else ''}")
+        rows.append(market("⚾ Starting Pitchers",
+                           model="\n".join(bits) or None))
+
+    kb = data.get("key_batters") or {}
+    home_batters = [clean(b) for b in (kb.get("home")
+                                       or data.get("home_key_batters") or [])]
+    away_batters = [clean(b) for b in (kb.get("away")
+                                       or data.get("away_key_batters") or [])]
+    home_batters = [b for b in home_batters if b]
+    away_batters = [b for b in away_batters if b]
+    if home_batters or away_batters:
+        rows.append(market(
+            "🏏 Key Batters",
+            model=pair(away_name,
+                       ", ".join(away_batters) if away_batters else None,
+                       home_name,
+                       ", ".join(home_batters) if home_batters else None)))
+
     notes: List[str] = []
     source = clean(data.get("data_source")) or clean(data.get("_stats_source"))
     if source and "internal_baseline" in source:

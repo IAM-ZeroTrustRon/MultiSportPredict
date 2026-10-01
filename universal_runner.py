@@ -578,7 +578,10 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
                  home_pitcher: Optional[str] = None, away_pitcher: Optional[str] = None,
                  home_hitters: Optional[List[str]] = None, away_hitters: Optional[List[str]] = None,
                  home_ml: Optional[float] = None, away_ml: Optional[float] = None,
-                 over_price: Optional[float] = None, under_price: Optional[float] = None) -> Dict[str, Any]:
+                 over_price: Optional[float] = None, under_price: Optional[float] = None,
+                 home_sp_name: Optional[str] = None, away_sp_name: Optional[str] = None,
+                 home_key_batters: Optional[List[str]] = None,
+                 away_key_batters: Optional[List[str]] = None) -> Dict[str, Any]:
     from predict_match import run_baseball_game
 
     advanced_args = (home_pitcher, away_pitcher, home_hitters, away_hitters)
@@ -667,6 +670,16 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
     if all(seeded.values()):
         print(f"[OK] Loaded real team metrics for {home} and {away}")
 
+    # Starter names are display metadata: they ride to the prediction dict
+    # so the card can name them. The advanced path resolves home_pitcher /
+    # away_pitcher itself; here prefer the explicit sp_name (from the
+    # probables feed via run_mlb.py), falling back to home_pitcher alias.
+    resolved_home_sp = home_sp_name or home_pitcher
+    resolved_away_sp = away_sp_name or away_pitcher
+    # Key-batter lists ride along verbatim; advanced hitter lists double as
+    # the lineup when no separate key-batter feed is wired.
+    resolved_home_batters = home_key_batters or home_hitters
+    resolved_away_batters = away_key_batters or away_hitters
     result = run_baseball_game(
         home, away, league=league or "MLB",
         markets=markets or ["nrfi", "strikeouts", "home_runs"],
@@ -675,6 +688,9 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
         away_sp_overrides=away_sp_overrides,
         team_overrides=team_overrides or None,
         home_ml=home_ml, away_ml=away_ml,
+        home_sp_name=resolved_home_sp, away_sp_name=resolved_away_sp,
+        home_key_batters=resolved_home_batters,
+        away_key_batters=resolved_away_batters,
     )
     _display_full_result(result)
 

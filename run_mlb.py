@@ -402,13 +402,16 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
         return {"status": "dry-run", "home": home, "away": away}
 
     from universal_runner import run_baseball
+    game = game or {}
     result = run_baseball(home, away, league=LEAGUE, markets=MARKETS,
                           market_total=total, store_to_db=True,
                           push_discord=push_discord,
                           home_ml=home_ml, away_ml=away_ml,
                           over_price=over_price, under_price=under_price,
                           home_sp_limit=home_sp_limit,
-                          away_sp_limit=away_sp_limit, **arguments)
+                          away_sp_limit=away_sp_limit,
+                          home_sp_name=game.get("home_pitcher"),
+                          away_sp_name=game.get("away_pitcher"), **arguments)
 
     tagged = record_market_odds(home, away, total, home_ml, away_ml)
     if tagged:

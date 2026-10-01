@@ -417,6 +417,10 @@ def run_baseball_prop_market(
     home_sp_overrides: Optional[Dict[str, float]] = None,
     away_sp_overrides: Optional[Dict[str, float]] = None,
     team_overrides: Optional[Dict[str, float]] = None,
+    home_sp_name: Optional[str] = None,
+    away_sp_name: Optional[str] = None,
+    home_key_batters: Optional[List[str]] = None,
+    away_key_batters: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Generic baseball prop market predictions for MLB + KBO.
@@ -590,12 +594,27 @@ def run_baseball_prop_market(
     proj_away = away_stats["runs_per_game"] + (home_eff_era - 4.0) * 0.3
     total_proj = proj_home + proj_away
 
+    # Starting-pitcher identity + key batters travel with the prediction so the
+    # Discord card can name them. Names are omitted (not defaulted) when the
+    # feed did not supply them -- see embed_builder's "names are never
+    # invented" rule. ERA/K values here are the live starter numbers already
+    # merged into home_stats/away_stats above.
     result: Dict[str, Any] = {
         "sport": "baseball",
         "league": league_upper or "BASEBALL",
         "home": home_team,
         "away": away_team,
         "umpire": umpire_name,
+        "starting_pitchers": {
+            "home": (str(home_sp_name).strip() if home_sp_name and str(home_sp_name).strip() else None),
+            "away": (str(away_sp_name).strip() if away_sp_name and str(away_sp_name).strip() else None),
+            "home_era": round(float(home_stats.get("era")), 2) if home_stats.get("era") is not None else None,
+            "away_era": round(float(away_stats.get("era")), 2) if away_stats.get("era") is not None else None,
+        },
+        "key_batters": {
+            "home": [b for b in (home_key_batters or []) if b],
+            "away": [b for b in (away_key_batters or []) if b],
+        },
         "game_projection": {
             "home_runs": round(proj_home, 2),
             "away_runs": round(proj_away, 2),
@@ -1193,7 +1212,11 @@ def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
                       away_sp_overrides: Optional[Dict[str, float]] = None,
                       team_overrides: Optional[Dict[str, float]] = None,
                       home_ml: Optional[float] = None,
-                      away_ml: Optional[float] = None) -> Dict[str, Any]:
+                      away_ml: Optional[float] = None,
+                      home_sp_name: Optional[str] = None,
+                      away_sp_name: Optional[str] = None,
+                      home_key_batters: Optional[List[str]] = None,
+                      away_key_batters: Optional[List[str]] = None) -> Dict[str, Any]:
     """Run moneyline/run-line and prop-market baseball predictions together."""
     print(f"\n{'='*60}")
     print(f"BASEBALL ({league.upper()}) MATCHUP: {home_team} vs {away_team}")
@@ -1248,6 +1271,10 @@ def run_baseball_game(home_team: str, away_team: str, league: str = "MLB",
             home_sp_overrides=home_sp_overrides,
             away_sp_overrides=away_sp_overrides,
             team_overrides=team_overrides,
+            home_sp_name=home_sp_name,
+            away_sp_name=away_sp_name,
+            home_key_batters=home_key_batters,
+            away_key_batters=away_key_batters,
         ))
 
     result["_stats_source"] = (
