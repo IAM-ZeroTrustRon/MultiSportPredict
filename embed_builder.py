@@ -638,19 +638,36 @@ def extract_basketball(data: Dict[str, Any]) -> Dict[str, Any]:
     home_score, away_score = full_game.get("projected_home_score"), full_game.get("projected_away_score")
     if full_game.get("probability") is not None:
         model_spread = (num(home_score) - num(away_score)) if (home_score is not None and away_score is not None) else None
+        # euroleague_engine writes the market spread at market_info.lines.spread
+        # (older payloads used market_info.current_line); read both.
+        market_spread = market_info.get("current_line")
+        lines = market_info.get("lines") or {}
+        if market_spread is None and isinstance(lines, dict):
+            market_spread = lines.get("spread")
         rows.append(market(
             "Spread",
             model=signed(model_spread, 1) if model_spread is not None else pct(full_game.get("probability")),
-            market_value=signed(market_info.get("current_line"), 1),
+            market_value=signed(market_spread, 1),
             edge=signed(full_game.get("model_edge"), 1),
             pick=clean(full_game.get("lean")),
             extra=(f"{dec(home_score, 1)} - {dec(away_score, 1)}"
                    if home_score is not None and away_score is not None else None)))
 
     if full_game.get("projected_total") is not None:
-        rows.append(market("Total", model=dec(full_game.get("projected_total"), 1)))
+        # euroleague_engine writes the market total at market_info.total.
+        total_edge = None
+        if (market_info.get("total") is not None
+                and full_game.get("projected_total") is not None):
+            try:
+                total_edge = float(full_game["projected_total"]) - float(market_info["total"])
+            except (TypeError, ValueError):
+                total_edge = None
+        rows.append(market("Total", model=dec(full_game.get("projected_total"), 1),
+                           market_value=dec(market_info.get("total"), 1),
+                           edge=signed(total_edge, 1)))
 
-    for period, label in (("q1", "1st Quarter"), ("h1", "1st Half"), ("first_half", "1st Half")):
+    for period, label in (("q1", "1st Quarter"), ("halftime", "1st Half"),
+                          ("h1", "1st Half"), ("first_half", "1st Half")):
         block = data.get(period) or {}
         if block.get("probability") is not None:
             rows.append(market(
