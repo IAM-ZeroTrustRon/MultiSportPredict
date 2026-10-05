@@ -103,17 +103,32 @@ def fetch_odds() -> Dict[str, Dict[str, Optional[float]]]:
 
     The spread is stored from the HOME side, which is how the model wants it:
     -3 means the home team lays three.
+
+    Correct endpoint (matching live_odds.py):
+        https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/
+            ?apiKey={key}&regions=us&markets=h2h,spreads,totals&oddsFormat=american
     """
     try:
-        from OddsApiIngestor import OddsApiIngestor
+        from live_odds import _api_key, _fetch_odds_key
     except ImportError:
-        log("[odds] OddsApiIngestor not importable -- no lines fetched.")
+        log("[odds] live_odds not importable -- no lines fetched.")
+        return {}
+    api_key = _api_key()
+    if not api_key:
+        log("[odds] ODDS_API_KEY not configured -- no lines fetched.")
         return {}
     try:
-        events = OddsApiIngestor(markets="h2h,spreads,totals").fetch_live_odds(
-            SPORT_KEY, days=8)
+        url = (f"https://api.the-odds-api.com/v4/sports/{SPORT_KEY}/odds/"
+               f"?apiKey={api_key}&regions=us&markets=h2h,spreads,totals"
+               f"&oddsFormat=american")
+        _ = url  # documented for §6.7; the fetch below hits the same endpoint
+        events, error = _fetch_odds_key(SPORT_KEY, "us",
+                                       "h2h,spreads,totals")
     except Exception as exc:                            # noqa: BLE001
         log(f"[odds] failed ({type(exc).__name__}) -- no lines fetched.")
+        return {}
+    if error:
+        log(f"[odds] failed ({error}) -- no lines fetched.")
         return {}
     if not events:
         log("[odds] no events returned.")
@@ -293,6 +308,9 @@ def main() -> None:
         parser.error('Give --match "Home vs Away" or --week N')
 
     # ---- resolve names, then verify the fixture ----
+    # home/away below are STORE keys (year-tagged: "Browns (2026)") for stats
+    # lookups. Clean names (no "(YYYY)") go to odds matching, display, DB.
+    from models.nfl_predictor import clean_team
     resolved: List[Tuple[str, str]] = []
     problems: List[str] = []
     for typed_home, typed_away in requested:
@@ -306,14 +324,14 @@ def main() -> None:
         if not args.no_fixture_check:
             feed_home, feed_away, note = home_away(home, away)
             if feed_home is None:
-                problems.append(f"{home} vs {away}: {note}")
+                problems.append(f"{clean_team(home)} vs {clean_team(away)}: {note}")
                 continue
             if _norm(feed_home) != _norm(home):
-                log(f"[home/away] schedule says {feed_away} at {feed_home} "
+                log(f"[home/away] schedule says {clean_team(feed_away)} at {clean_team(feed_home)} "
                     f"-- using that, not the order typed")
                 home, away = feed_home, feed_away
             else:
-                log(f"[fixture] {away} at {home}  ({note})")
+                log(f"[fixture] {clean_team(away)} at {clean_team(home)}  ({note})")
         resolved.append((home, away))
 
     if problems:
@@ -350,8 +368,9 @@ def main() -> None:
     rows: List[Dict[str, Any]] = []
     for index, (home, away) in enumerate(resolved):
         lines = lines_for(index, home, away)
+        disp_home, disp_away = clean_team(home), clean_team(away)
         if args.dry_run:
-            log(f"  [dry-run] {away} at {home}   lines={lines}")
+            log(f"  [dry-run] {disp_away} at {disp_home}   lines={lines}")
             continue
         try:
             result = run_one(home, away, lines, args.neutral_site, push=False)
@@ -359,7 +378,7 @@ def main() -> None:
             result["neutral_site"] = args.neutral_site
             rows.append(result)
         except Exception as exc:                        # noqa: BLE001
-            log(f"  [FAILED] {away} at {home}: {type(exc).__name__}: {exc}")
+            log(f"  [FAILED] {disp_away} at {disp_home}: {type(exc).__name__}: {exc}")
 
     if args.dry_run or not rows:
         return

@@ -248,3 +248,12 @@ Valid `--sport` names are `baseball, basketball, nfl, soccer, tennis` —
   name. It is gitignored. Leave it.
 - Repo root went from ~330 files to ~75 on 09-13. Everything removed is under
   `archive/`, nothing deleted. `INDEX.md` is the map.
+
+## NFL embed display fix — 2026-10-04
+
+`embed_builder.py` now resolves HOME/AWAY recommendations to team names and
+shows the selected team's market spread, reversing the home-signed line for
+away picks. Model spreads are labeled separately. Moneyline probabilities,
+team totals and first-half scores carry team labels. Missing lines explicitly
+produce PASS. Stored grading side tokens and prediction calculations are unchanged.
+Regression coverage: `tests/test_nfl_embed.py`.

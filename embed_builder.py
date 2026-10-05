@@ -581,34 +581,60 @@ def extract_nfl(data: Dict[str, Any]) -> Dict[str, Any]:
     rows: List[Optional[Dict[str, Any]]] = []
     spread, ml = data.get("spread") or {}, data.get("moneyline") or {}
     total, half = data.get("total") or {}, data.get("halftime") or {}
+    home, away = names_from(data)
 
+    # Model and market spreads are HOME-signed; only the selected away line
+    # is inverted. Keep side tokens in the predictor for grading/storage.
+    line = num(spread.get("market_spread"))
+    pick = clean(spread.get("pick"))
+    side = home if pick == "HOME" else away if pick == "AWAY" else None
+    verdict = "PASS — Spread: no market line supplied" if line is None else None
+    if line is not None:
+        if side:
+            selected_line = -line if pick == "AWAY" else line
+            verdict = f"BET {side} {signed(selected_line, 1)}"
+        else:
+            verdict = "PASS — Spread"
     if spread.get("model_spread") is not None:
-        rows.append(market("Spread", model=signed(spread.get("model_spread"), 1),
-                           market_value=signed(spread.get("market_spread"), 1),
-                           edge=signed(spread.get("edge_points"), 1),
-                           pick=clean(spread.get("pick"))))
-    if ml.get("home_win_probability") is not None:
+        rows.append(market(
+            "Spread",
+            model=f"Model: {home} {signed(spread.get('model_spread'), 1)}",
+            market_value=f"{home} {signed(line, 1)}" if line is not None else None,
+            edge=signed(spread.get("edge_points"), 1) if line is not None else None,
+            verdict=verdict))
+
+    if ml.get("home_win_probability") is not None or ml.get("away_win_probability") is not None:
+        recommendation = clean(ml.get("recommendation"))
+        selected = home if recommendation == "BET HOME" else away if recommendation == "BET AWAY" else None
+        market_prob = num(ml.get("market_home_prob"))
+        if market_prob is not None and not 0 <= market_prob <= 1:
+            market_prob = None
+        verdict = (f"BET {selected} ML" if selected and market_prob is not None
+                   else "PASS — Moneyline" if market_prob is not None
+                   else "PASS — Moneyline: no market odds supplied")
         rows.append(market(
             "💰 Moneyline",
-            model=f"{pct(ml.get('home_win_probability'))} / "
-                  f"{pct(ml.get('away_win_probability'))}",
-            market_value=pct(ml.get("market_home_prob")),
-            edge=signed(ml.get("edge_pct"), 1),
-            pick=clean(ml.get("recommendation"))))
+            model=pair(away, pct(ml.get("away_win_probability")),
+                       home, pct(ml.get("home_win_probability"))),
+            market_value=pair(away, pct(1 - market_prob), home, pct(market_prob))
+                         if market_prob is not None and 0 <= market_prob <= 1 else None,
+            edge=signed(ml.get("edge_pct"), 1) if market_prob is not None else None,
+            verdict=verdict))
     if total.get("model_total") is not None:
         rows.append(market("Total", model=dec(total.get("model_total"), 1),
                            market_value=dec(total.get("market_total"), 1),
                            edge=signed(total.get("edge_points"), 1),
                            pick=clean(total.get("pick"))))
-    if total.get("home_team_total") is not None:
-        rows.append(market("🏟‍ Team totals",
-                           model=f"{dec(total.get('home_team_total'), 1)} / "
-                                 f"{dec(total.get('away_team_total'), 1)}"))
-    if half.get("home_1h_points") is not None:
-        rows.append(market("First half",
-                           model=f"{dec(half.get('home_1h_points'), 1)} - "
-                                 f"{dec(half.get('away_1h_points'), 1)}",
-                           extra=f"home ML {pct(half.get('home_1h_win_probability'))}"))
+    team_totals = pair(away, dec(total.get("away_team_total"), 1),
+                       home, dec(total.get("home_team_total"), 1))
+    if team_totals:
+        rows.append(market("🏟‍ Team totals", model=team_totals))
+    half_points = pair(away, dec(half.get("away_1h_points"), 1),
+                       home, dec(half.get("home_1h_points"), 1))
+    if half_points:
+        half_prob = pct(half.get("home_1h_win_probability"))
+        rows.append(market("First half", model=half_points,
+                           extra=f"{short_name(home)} ML {half_prob}" if half_prob else None))
 
     notes: List[str] = []
     if half.get("data_tier") == 3:

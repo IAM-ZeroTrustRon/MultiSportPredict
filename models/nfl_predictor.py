@@ -64,6 +64,7 @@ from __future__ import annotations
 import datetime as _dt
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -111,8 +112,27 @@ def _norm(name: str) -> str:
     return "".join(ch for ch in (name or "").lower() if ch.isalnum())
 
 
-def resolve_team(name: str, store: Dict[str, Dict[str, Any]]) -> str:
-    """Exact, then squashed, then unique substring. Ambiguity raises."""
+def clean_team(name: str) -> str:
+    """Strip a trailing year tag for display/storage/grading.
+
+    The stats store keys are year-tagged ("Buffalo Bills (2026)") but
+    ESPN, the odds feed, and grade_predictions.py all use clean names
+    ("Buffalo Bills"). A tagged name leaking into the DB never settles.
+    """
+    return re.sub(r"\s*\(\d{4}\)", "", name or "").strip()
+
+
+def resolve_team(name: str, store: Dict[str, Dict[str, Any]], season: str = "2026", current_season: str | None = None) -> str:
+    """Exact, then squashed, then unique substring. Ambiguity raises.
+
+    Year-tagged keys ("Buffalo Bills (2025)" vs "Buffalo Bills (2026)")
+    collapse to the active season instead of failing closed: a bare
+    "Buffalo Bills" means the team playing now, not a MissingTeam.
+    Cross-franchise ambiguity (different bases, e.g. "New York" matching
+    both Giants and Jets) still raises.
+    """
+    import re as _re
+    active = str(current_season or season or "2026")
     if name in store:
         return name
     flat = {_norm(k): k for k in store}
@@ -122,6 +142,19 @@ def resolve_team(name: str, store: Dict[str, Dict[str, Any]]) -> str:
     if len(hits) == 1:
         return hits[0]
     if len(hits) > 1:
+        # Same franchise across year tags -> prefer the active season.
+        tag = f"({active})"
+        season_hits = [h for h in hits if tag in h]
+        if len(season_hits) == 1:
+            return season_hits[0]
+        bases: dict[str, list[str]] = {}
+        for h in hits:
+            base = _re.sub(r"\s*\(\d{4}\)", "", h).strip()
+            bases.setdefault(base, []).append(h)
+        if len(bases) == 1:
+            cands = next(iter(bases.values()))
+            cur = [c for c in cands if active in c]
+            return cur[0] if cur else sorted(cands)[-1]
         raise MissingTeam(f"'{name}' matches {len(hits)}: {', '.join(sorted(hits))}")
     raise MissingTeam(
         f"'{name}' is not in {STATS_PATH.name}. Nothing was guessed. "
@@ -278,6 +311,12 @@ def predict_nfl_game(home_team: str, away_team: str, *,
     home_key = resolve_team(home_team, store)
     away_key = resolve_team(away_team, store)
     home_rec, away_rec = store[home_key], store[away_key]
+    # ESPN + the grader use clean names ("Buffalo Bills"); the stats store
+    # keys are year-tagged ("Buffalo Bills (2026)"). Tagged keys stay for
+    # every store/season lookup; CLEAN names go to display + DB + Discord
+    # so grade_predictions.py can settle against ESPN feeds.
+    home_clean = clean_team(home_key)
+    away_clean = clean_team(away_key)
     averages = league_averages(store)
 
     # A prior season gets regressed; a current season with real games does not.
@@ -335,7 +374,7 @@ def predict_nfl_game(home_team: str, away_team: str, *,
 
     # ---- moneyline ----
     moneyline: Dict[str, Any] = {
-        "home": home_key, "away": away_key,
+        "home": home_clean, "away": away_clean,
         "home_win_probability": round(home_win, 4),
         "away_win_probability": round(1 - home_win, 4),
     }
@@ -410,8 +449,9 @@ def predict_nfl_game(home_team: str, away_team: str, *,
 
     return {
         "sport": "nfl",
-        "match": f"{home_key} vs {away_key}",
-        "home": home_key, "away": away_key,
+        "match": f"{home_clean} vs {away_clean}",
+        "home": home_clean, "away": away_clean,
+        "home_key": home_key, "away_key": away_key,
         "model_type": "points_model_v1",
         "spread": spread_result,
         "moneyline": moneyline,
