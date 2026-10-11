@@ -1,0 +1,93 @@
+{
+  "sport": "soccer",
+  "league": "Ligue 1",
+  "home_team": "Lens",
+  "away_team": "Lyon",
+  "timestamp": "2026-10-09T11:33:37.239007",
+  "game": {
+    "projected_home_goals": 1.35,
+    "projected_away_goals": 1.77,
+    "projected_total_goals": 3.12,
+    "home_win_prob": 0.295,
+    "draw_prob": 0.235,
+    "away_win_prob": 0.47
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.419,
+      "market_line": 0.0,
+      "edge": -0.419,
+      "confidence": 32.8,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.124,
+      "market_total": 2.5,
+      "edge": 0.624,
+      "confidence": 35.7,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.628,
+      "confidence": 47.6,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.819,
+    "over_25_prob": 0.604,
+    "over_35_prob": 0.38
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.628,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.8,
+      "xg_against": 1.8,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.8,
+      "goals_against": 1.8,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.0,
+      "xg_against": 0.4,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.0,
+      "goals_against": 0.4,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.08,
+    "avg_goals_per_game": 2.6,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real",
+  "market_status": "user"
+}

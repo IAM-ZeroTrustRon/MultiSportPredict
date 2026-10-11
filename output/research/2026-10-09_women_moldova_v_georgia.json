@@ -1,0 +1,538 @@
+{
+  "inputs": {
+    "slug": "women_moldova_v_georgia",
+    "name": "Moldova (W) vs Georgia (W)",
+    "time": "10:00 AM ET",
+    "venue": "Stadionul Zimbru, Chisinau",
+    "teams": [
+      "Moldova W",
+      "Georgia W"
+    ],
+    "games": [
+      4,
+      4
+    ],
+    "gf": [
+      2,
+      4
+    ],
+    "ga": [
+      1,
+      10
+    ],
+    "confidence": "Very low - PASS",
+    "observations": "Senior women international friendly, not a qualifier; another friendly is scheduled October 12. Moldova four 2026 qualifiers: 0-1 Romania, 0-0 Cyprus, 0-0 Romania, 2-0 Cyprus. Georgia four qualifiers: 0-3 Greece, 0-1 Faroe Islands, 2-3 Faroe Islands, 2-3 Greece. The opponents differ, and these games ended in June. Moldova roster includes defenders with zero or one senior appearance, increasing rotation uncertainty. No confirmed complete Georgia injury list or final lineups. 2025 friendlies in Georgia finished 0-0 and 3-0 to Georgia; excluded from the current qualifier rates.",
+    "against": "Four old qualifiers against different opponents cannot establish current strength for a friendly. The market favors Georgia while the raw-goals scenario favors Moldova. That reversal is a warning about comparability. Kickoff has passed: this is a captured pre-match research scenario, not an in-play recommendation.",
+    "sources": [
+      [
+        "Official match announcement",
+        "https://www.fmf.md/noutate/19055/live-1700-fotbal-feminin-moldovageorgia"
+      ],
+      [
+        "Moldova official qualifier results",
+        "https://www.fmf.md/home/nationale/femenin/echipa-nationala-1583071678/competitii-echipa-nationala-1583071678"
+      ],
+      [
+        "UEFA qualifier ranking",
+        "https://editorial.uefa.com/resources/02a6-20d56b010275-0780b267a89d-1000/2026_weq_overall_league_rankings.pdf"
+      ],
+      [
+        "2025 friendly results",
+        "https://fmf.md/home/nationale/femenin/echipa-nationala-1583071678/meciuri-amicale-458-1583842693?lang=ru"
+      ],
+      [
+        "Odds comparison showing Roobet quotes",
+        "https://www.sportytrader.com/en/odds/moldova-georgia-8882568/"
+      ]
+    ],
+    "price_note": "Roobet prices displayed by Sportytrader, retrieved approximately 09:58 AM ET before kickoff. No bookmaker update timestamp; not live or executable odds confirmation.",
+    "markets": [
+      {
+        "kind": "ml",
+        "side": "home",
+        "decimal": 2.92,
+        "line": 0,
+        "book": "Roobet via Sportytrader"
+      },
+      {
+        "kind": "ml",
+        "side": "draw",
+        "decimal": 3.05,
+        "line": 0,
+        "book": "Roobet via Sportytrader"
+      },
+      {
+        "kind": "ml",
+        "side": "away",
+        "decimal": 2.32,
+        "line": 0,
+        "book": "Roobet via Sportytrader"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 1.04,
+        "line": 0.5,
+        "book": ""
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 7.4,
+        "line": 0.5,
+        "book": ""
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 1.95,
+        "line": 2.5,
+        "book": ""
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 1.73,
+        "line": 2.5,
+        "book": ""
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 3.3,
+        "line": 3.5,
+        "book": ""
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 1.26,
+        "line": 3.5,
+        "book": ""
+      },
+      {
+        "kind": "btts",
+        "side": "Yes",
+        "decimal": 1.73,
+        "line": 0,
+        "book": ""
+      },
+      {
+        "kind": "btts",
+        "side": "No",
+        "decimal": 1.96,
+        "line": 0,
+        "book": ""
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 2.1,
+        "line": 0,
+        "book": ""
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 1.61,
+        "line": 0,
+        "book": ""
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": null,
+        "line": -1.5,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": null,
+        "line": -1,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": null,
+        "line": -0.5,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": null,
+        "line": 0.5,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": null,
+        "line": 1,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": null,
+        "line": 1.5,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": null,
+        "line": -1.5,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": null,
+        "line": -1,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": null,
+        "line": -0.5,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": null,
+        "line": 0.5,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": null,
+        "line": 1,
+        "book": "Unpriced reference"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": null,
+        "line": 1.5,
+        "book": "Unpriced reference"
+      }
+    ]
+  },
+  "expected_goals": [
+    1.6500000000000001,
+    0.5625
+  ],
+  "probabilities": [
+    0.6399608107083756,
+    0.23713045029646349,
+    0.12290873899516089
+  ],
+  "markets": [
+    {
+      "kind": "ml",
+      "side": "home",
+      "decimal": 2.92,
+      "line": 0,
+      "book": "Roobet via Sportytrader",
+      "profit_probability": 0.6399608107083753,
+      "loss_probability": 0.3600391892916245,
+      "full_push_probability": 0.0,
+      "ev_percent": 86.86855672684567,
+      "neutral_venue_ev_percent": 70.8875830180353
+    },
+    {
+      "kind": "ml",
+      "side": "draw",
+      "decimal": 3.05,
+      "line": 0,
+      "book": "Roobet via Sportytrader",
+      "profit_probability": 0.23713045029646349,
+      "loss_probability": 0.7628695497035364,
+      "full_push_probability": 0.0,
+      "ev_percent": -27.67521265957864,
+      "neutral_venue_ev_percent": -20.534106446959573
+    },
+    {
+      "kind": "ml",
+      "side": "away",
+      "decimal": 2.32,
+      "line": 0,
+      "book": "Roobet via Sportytrader",
+      "profit_probability": 0.12290873899516087,
+      "loss_probability": 0.8770912610048387,
+      "full_push_probability": 0.0,
+      "ev_percent": -71.4851725531227,
+      "neutral_venue_ev_percent": -64.2198839794896
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 1.04,
+      "line": 0.5,
+      "book": "",
+      "profit_probability": 0.8905732605767509,
+      "loss_probability": 0.1094267394232489,
+      "full_push_probability": 0.0,
+      "ev_percent": -7.380380900017888,
+      "neutral_venue_ev_percent": -8.421028699738832
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 7.4,
+      "line": 0.5,
+      "book": "",
+      "profit_probability": 0.1094267394232489,
+      "loss_probability": 0.8905732605767509,
+      "full_push_probability": 0.0,
+      "ev_percent": -19.02421282679578,
+      "neutral_venue_ev_percent": -11.619603482627483
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 1.95,
+      "line": 2.5,
+      "book": "",
+      "profit_probability": 0.3806361059003939,
+      "loss_probability": 0.6193638940996063,
+      "full_push_probability": 0.0,
+      "ev_percent": -25.77595934942324,
+      "neutral_venue_ev_percent": -30.362628527149354
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 1.73,
+      "line": 2.5,
+      "book": "",
+      "profit_probability": 0.6193638940996063,
+      "loss_probability": 0.3806361059003939,
+      "full_push_probability": 0.0,
+      "ev_percent": 7.149953679231912,
+      "neutral_venue_ev_percent": 11.219152488188888
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 3.3,
+      "line": 3.5,
+      "book": "",
+      "profit_probability": 0.18311111679485914,
+      "loss_probability": 0.8168888832051405,
+      "full_push_probability": 0.0,
+      "ev_percent": -39.57333145769641,
+      "neutral_venue_ev_percent": -45.18452245978094
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 1.26,
+      "line": 3.5,
+      "book": "",
+      "profit_probability": 0.8168888832051405,
+      "loss_probability": 0.18311111679485914,
+      "full_push_probability": 0.0,
+      "ev_percent": 2.927999283847701,
+      "neutral_venue_ev_percent": 5.070454030098152
+    },
+    {
+      "kind": "btts",
+      "side": "Yes",
+      "decimal": 1.73,
+      "line": 0,
+      "book": "",
+      "profit_probability": 0.34759400607157204,
+      "loss_probability": 0.6524059939284284,
+      "full_push_probability": 0.0,
+      "ev_percent": -39.86623694961806,
+      "neutral_venue_ev_percent": -37.539841329321206
+    },
+    {
+      "kind": "btts",
+      "side": "No",
+      "decimal": 1.96,
+      "line": 0,
+      "book": "",
+      "profit_probability": 0.6524059939284284,
+      "loss_probability": 0.34759400607157204,
+      "full_push_probability": 0.0,
+      "ev_percent": 27.871574809971904,
+      "neutral_venue_ev_percent": 25.2358895985373
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 2.1,
+      "line": 0,
+      "book": "",
+      "profit_probability": 0.6399608107083753,
+      "loss_probability": 0.12290873899516087,
+      "full_push_probability": 0.23713045029646349,
+      "ev_percent": 58.10481527840526,
+      "neutral_venue_ev_percent": 48.95299555416507
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 1.61,
+      "line": 0,
+      "book": "",
+      "profit_probability": 0.12290873899516087,
+      "loss_probability": 0.6399608107083753,
+      "full_push_probability": 0.23713045029646349,
+      "ev_percent": -56.4986479921327,
+      "neutral_venue_ev_percent": -49.11544195000429
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": null,
+      "line": -1.5,
+      "book": "Unpriced reference",
+      "profit_probability": 0.3616068313939528,
+      "loss_probability": 0.6383931686060476,
+      "full_push_probability": 0.0,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": null,
+      "line": -1,
+      "book": "Unpriced reference",
+      "profit_probability": 0.3616068313939528,
+      "loss_probability": 0.3600391892916245,
+      "full_push_probability": 0.27835397931442285,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": null,
+      "line": -0.5,
+      "book": "Unpriced reference",
+      "profit_probability": 0.6399608107083753,
+      "loss_probability": 0.3600391892916245,
+      "full_push_probability": 0.0,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": null,
+      "line": 0.5,
+      "book": "Unpriced reference",
+      "profit_probability": 0.8770912610048387,
+      "loss_probability": 0.12290873899516087,
+      "full_push_probability": 0.0,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": null,
+      "line": 1,
+      "book": "Unpriced reference",
+      "profit_probability": 0.8770912610048387,
+      "loss_probability": 0.028015336956153103,
+      "full_push_probability": 0.09489340203900776,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": null,
+      "line": 1.5,
+      "book": "Unpriced reference",
+      "profit_probability": 0.9719846630438465,
+      "loss_probability": 0.028015336956153103,
+      "full_push_probability": 0.0,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": null,
+      "line": -1.5,
+      "book": "Unpriced reference",
+      "profit_probability": 0.028015336956153103,
+      "loss_probability": 0.9719846630438465,
+      "full_push_probability": 0.0,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": null,
+      "line": -1,
+      "book": "Unpriced reference",
+      "profit_probability": 0.028015336956153103,
+      "loss_probability": 0.8770912610048387,
+      "full_push_probability": 0.09489340203900776,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": null,
+      "line": -0.5,
+      "book": "Unpriced reference",
+      "profit_probability": 0.12290873899516087,
+      "loss_probability": 0.8770912610048387,
+      "full_push_probability": 0.0,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": null,
+      "line": 0.5,
+      "book": "Unpriced reference",
+      "profit_probability": 0.3600391892916245,
+      "loss_probability": 0.6399608107083753,
+      "full_push_probability": 0.0,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": null,
+      "line": 1,
+      "book": "Unpriced reference",
+      "profit_probability": 0.3600391892916245,
+      "loss_probability": 0.3616068313939528,
+      "full_push_probability": 0.27835397931442285,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": null,
+      "line": 1.5,
+      "book": "Unpriced reference",
+      "profit_probability": 0.6383931686060476,
+      "loss_probability": 0.3616068313939528,
+      "full_push_probability": 0.0,
+      "ev_percent": null,
+      "neutral_venue_ev_percent": null
+    }
+  ]
+}

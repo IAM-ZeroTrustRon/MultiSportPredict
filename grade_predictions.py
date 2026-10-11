@@ -363,18 +363,23 @@ def dedup_key(row: sqlite3.Row) -> Tuple[str, str, str, str]:
     2026). A matchup-pair-only key would settle every one of those meetings at
     a single night's score -- that is a fabricated result, not a grade.
     """
+    if "event_key" in row.keys() and row["event_key"] and row["market_type"] in {"spread", "total"}:
+        return (str(row["sport"] or ""), str(row["event_key"]))
     sport = row["sport"] or ""
     def strip_season(name: str) -> str:
         return normalise_team(DEDUP_TEAM_NOISE.sub("", name or ""), sport)
 
     home, away = strip_season(row["home_team"]), strip_season(row["away_team"])
     pair = f"{home}|{away}" if home <= away else f"{away}|{home}"
-    return (
+    key = (
         str(row["game_date"] or ""),
         (row["sport"] or "").strip().lower(),
         pair,
         (row["market_type"] or "").strip().lower(),
     )
+    if sport.lower() == "basketball" and "league" in row.keys():
+        return (*key, str(row["league"] or "").upper())
+    return key
 
 
 def is_excluded_tier(recommendation: Optional[str]) -> bool:
@@ -1125,12 +1130,49 @@ def fetch_soccer_results(start: str, end: str,
 fetch_soccer_results.wants_dates = True   # type: ignore[attr-defined]
 
 
+def fetch_basketball_results(start, end, dates=None):
+    """League-scoped exact local dates; college men/women cannot share scores."""
+    from concurrent.futures import ThreadPoolExecutor
+    from sports_feed import ROOT, fetch_json, parse_game
+    from ingest_basketball_espn import LEAGUES
+    wanted = set(dates or [start])
+    result = {}
+    for league in list(LEAGUES)+["KBL", "NZNBL", "BBL"]:
+        path = ROOT / f"data/basketball_{league.lower()}_games.json"
+        if path.exists():
+            for game in json.loads(path.read_text(encoding="utf-8")).get("games", []):
+                if game.get("completed") and game["date"] in wanted:
+                    result[(league, game["date"], normalise_team(game["home_team"], "basketball"),
+                            normalise_team(game["away_team"], "basketball"))] = (game["home_score"], game["away_score"])
+    days = sorted(wanted | {(_dt.date.fromisoformat(day)+_dt.timedelta(days=1)).isoformat() for day in wanted})
+    def load(task):
+        league, day = task
+        url = f"https://site.web.api.espn.com/apis/site/v2/sports/basketball/{LEAGUES[league]}/scoreboard?dates={day.replace('-', '')}&limit=400"
+        try:
+            payload = fetch_json(url, .25)
+        except Exception:
+            return []
+        return [(league, parse_game(event, league)) for event in payload.get("events", [])]
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        for rows in pool.map(load, [(league, day) for league in LEAGUES for day in days]):
+            for league, game in rows:
+                if game and game["completed"] and game["date"] in wanted:
+                    result[(league, game["date"], normalise_team(game["home_team"], "basketball"),
+                            normalise_team(game["away_team"], "basketball"))] = (game["home_score"], game["away_score"])
+    return result
+
+
+fetch_basketball_results.wants_dates = True
+fetch_basketball_results.league_scoped = True
+
+
 AUTO_SOURCES = {
     "mlb": fetch_mlb_results,
     "baseball": fetch_mlb_results,   # rows logged as 'baseball' that are MLB games
     "nfl": fetch_nfl_results,
     "ncaaf": fetch_ncaaf_results,
     "tennis": fetch_tennis_results,
+    "basketball": fetch_basketball_results,
     "soccer": fetch_soccer_results,
     "football": fetch_soccer_results,   # older rows logged as 'football'
 }
@@ -1261,11 +1303,16 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
         for row in sport_rows:
             key = (str(row["game_date"]), normalise_team(row["home_team"], sport_key),
                    normalise_team(row["away_team"], sport_key))
+            flipped_key = (key[0], key[2], key[1])
+            if getattr(fetcher, "league_scoped", False):
+                league = str(row["league"] or "").upper()
+                league = {"NZ NBL":"NZNBL", "BUNDESLIGA":"BBL"}.get(league, league)
+                key = (league, *key)
+                flipped_key = (league, *flipped_key)
             scores = results.get(key)
             if scores is None:
-                # Try the reversed orientation -- home/away is sometimes logged
-                # the other way round from how the feed reports it.
-                flipped = results.get((key[0], key[2], key[1]))
+                # Reverse orientation within the same league only.
+                flipped = results.get(flipped_key)
                 if flipped is not None:
                     scores = (flipped[1], flipped[0])
             if scores is None:

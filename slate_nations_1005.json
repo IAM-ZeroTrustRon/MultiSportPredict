@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-05",
+  "matches": [
+    {
+      "home": "France",
+      "away": "Belgium",
+      "league": "UEFA Nations League"
+    },
+    {
+      "home": "Italy",
+      "away": "Türkiye",
+      "league": "UEFA Nations League"
+    },
+    {
+      "home": "Bosnia-Herzegovina",
+      "away": "Poland",
+      "league": "UEFA Nations League"
+    },
+    {
+      "home": "Montenegro",
+      "away": "Armenia",
+      "league": "UEFA Nations League"
+    }
+  ]
+}

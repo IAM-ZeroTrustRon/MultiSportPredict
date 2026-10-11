@@ -1,0 +1,33 @@
+{
+  "sport": "basketball",
+  "league": "B.PREMIER",
+  "date": "2026-09-22",
+  "start_et": "1:00 AM ET",
+  "venue": "TOYOTA ARENA TOKYO",
+  "home": {
+    "name": "Alvark Tokyo",
+    "pts_for": 81.0,
+    "pts_against": 78.1,
+    "games": 62,
+    "source": "bleague-db 706 (incl. playoffs): 81.0 ppg; PA derived = DRtg 107.2 x est. 72.8 poss (81.0/ORtg 111.2). Top 3 scorers gone, new coach"
+  },
+  "away": {
+    "name": "Ryukyu Golden Kings",
+    "pts_for": 81.5,
+    "pts_against": 74.6,
+    "games": 67,
+    "source": "bleague-db 701 (incl. playoffs): 81.5 ppg; PA derived = DRtg 106.1 x est. 70.3 poss (81.5/ORtg 116.0). Lost Law, Kirk, Dotson; added Nwaba, Ravena"
+  },
+  "regress": 0.5,
+  "home_adv": 2.5,
+  "adjustments": [],
+  "market": {
+    "ml_home": -135,
+    "ml_away": null,
+    "total": 158.5,
+    "q1_spread_home": 0,
+    "q1_spread_home_price": -116,
+    "_source": "scores24: Alvark ML -135, Alvark 1Q ML -116 (book not named); total 158.5 is scores24's pick line, no price (-110 assumed). No away ML found."
+  },
+  "props": []
+}

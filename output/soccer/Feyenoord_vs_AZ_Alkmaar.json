@@ -1,0 +1,142 @@
+{
+  "sport": "soccer",
+  "league": "Eredivisie",
+  "home_team": "Feyenoord",
+  "away_team": "AZ Alkmaar",
+  "timestamp": "2026-10-09T23:58:19.451699",
+  "game": {
+    "projected_home_goals": 2.37,
+    "projected_away_goals": 2.21,
+    "projected_total_goals": 4.58,
+    "home_win_prob": 0.425,
+    "draw_prob": 0.203,
+    "away_win_prob": 0.372
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.162,
+      "market_line": 0.0,
+      "edge": 0.162,
+      "confidence": 28.1,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 4.576,
+      "market_total": 3.5,
+      "edge": 1.076,
+      "confidence": 43.4,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.814,
+      "confidence": 68.4,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.943,
+    "over_25_prob": 0.835,
+    "over_35_prob": 0.67
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.814,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 2.802,
+      "xg_against": 1.418,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 2.802,
+      "goals_against": 1.418,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.571,
+      "xg_against": 0.857,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.571,
+      "goals_against": 0.857,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.2,
+    "avg_goals_per_game": 3.25,
+    "home_advantage": 0.4,
+    "draw_rate": 0.24,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real",
+  "h1_home_ml": 115,
+  "h1_away_ml": 295,
+  "h1_draw_ml": 145,
+  "h1_spread_line": -0.5,
+  "h1_spread_home_price": 117,
+  "h1_spread_away_price": -162,
+  "corner_total_line": 9.5,
+  "corner_over_price": -200,
+  "corner_under_price": 133,
+  "btts_yes_price": -240,
+  "btts_no_price": 170,
+  "h1_btts_yes_price": 215,
+  "h1_btts_no_price": -385,
+  "auto_odds": {
+    "away_ml": 295,
+    "home_ml": -134,
+    "draw_ml": 265,
+    "total_line": 3.5,
+    "over_price": 104,
+    "under_price": -139,
+    "corner_total_line": 9.5,
+    "corner_over_price": -200,
+    "corner_under_price": 133,
+    "btts_yes_price": -240,
+    "btts_no_price": 170,
+    "h1_btts_yes_price": 215,
+    "h1_btts_no_price": -385,
+    "h1_away_ml": 295,
+    "h1_home_ml": 115,
+    "h1_draw_ml": 145,
+    "h1_spread_away_price": -162,
+    "h1_spread_line": -0.5,
+    "h1_spread_home_price": 117,
+    "status": "cached",
+    "captured_at": "2026-10-10T03:58:10+00:00"
+  },
+  "market_moneyline": {
+    "home_ml": -134,
+    "draw_ml": 265,
+    "away_ml": 295,
+    "source": "cached",
+    "captured_at": "2026-10-10T03:58:10+00:00"
+  },
+  "market_totals_prices": {
+    "over_price": 104,
+    "under_price": -139,
+    "source": "cached",
+    "captured_at": "2026-10-10T03:58:10+00:00"
+  },
+  "market_status": "cached"
+}

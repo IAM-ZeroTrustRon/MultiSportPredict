@@ -1,0 +1,38 @@
+{
+  "title": "RC Lens vs Lyon",
+  "description": "**RESEARCH CARD - not model output.** October 9, 2026, 2:45 PM ET. Stade Bollaert-Delelis.",
+  "fields": [
+    {
+      "name": "Market",
+      "value": "Pinnacle API snapshot: main markets 09:55:44 AM ET; alternative lines 09:59:01 AM ET and BTTS 09:58:34 AM ET. Captured prices, not a future live refresh."
+    },
+    {
+      "name": "Best bet",
+      "value": "PASS: no strong validated bet; largest calculated EVs are research candidates only."
+    },
+    {
+      "name": "Calculated scenario",
+      "value": "Home/draw/away 27.1%/23.8%/49.1%. Expected goals 1.21-1.71. Lyon -1 goals (Asian handicap) @ 4.210: +33.9% scenario EV; Lyon -0.75 goals (Asian handicap) @ 3.150: +30.3% scenario EV"
+    },
+    {
+      "name": "Why / observations",
+      "value": "Lyon: three wins, two draws, ten goals scored and two conceded in five league matches. Lens: one win, one draw, three losses, nine scored and nine conceded in five. Official league injury review lists Lens Abdallah Sima and Lyon Moussa Niakhate unavailable; Mohamed Ouedraogo sustained an ACL injury. Lens had returning internationals but availability must be checked against the final XI. Both clubs play in the same time zone. International-break recovery and national-team travel vary by player; they are reviewed but not assigned invented numeric adjustments."
+    },
+    {
+      "name": "Against",
+      "value": "Five matches are too few for stable defensive strength. Lyon injuries may weaken the two-goals-conceded baseline. Your stored xG fields are goal-derived proxies, not measured xG. The market expects substantially more goals than this simple goals model: that disagreement is a reason to investigate, not proof the book is wrong."
+    },
+    {
+      "name": "Check before betting",
+      "value": "Final XI, actual current price, opponent-adjusted form. Captured snapshot replay does not refresh odds."
+    },
+    {
+      "name": "Confidence",
+      "value": "Low"
+    },
+    {
+      "name": "Sharp data",
+      "value": "No verified betting splits. No calibrated EV uncertainty interval."
+    }
+  ]
+}

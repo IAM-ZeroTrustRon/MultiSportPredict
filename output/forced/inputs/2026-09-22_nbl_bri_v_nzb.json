@@ -1,0 +1,47 @@
+{
+  "sport": "basketball",
+  "league": "NBL27",
+  "date": "2026-09-22",
+  "start_et": "5:30 AM ET",
+  "venue": "Pat Rafter Arena, Brisbane (open-air)",
+  "home": {
+    "name": "Brisbane Bullets",
+    "pts_for": 82.1,
+    "pts_against": 96.8,
+    "games": 33,
+    "source": "2025-26 regular season, Wikipedia 2025-26 NBL season: 2710 PF / 3196 PA over 33 (6-27). Roster rebuilt; no NBL27 games yet"
+  },
+  "away": {
+    "name": "New Zealand Breakers",
+    "pts_for": 91.6,
+    "pts_against": 92.7,
+    "games": 33,
+    "source": "2025-26 regular season, Wikipedia: 3022 PF / 3058 PA over 33 (13-20). NBL27 R1: beat Illawarra 95-81"
+  },
+  "regress": 0.5,
+  "adjustments": [
+    {
+      "side": "away",
+      "points": -1.5,
+      "reason": "ESTIMATE: played Sun 20 Sep in Auckland, flew to Brisbane, ~2 days rest; Brisbane ~10 days rest"
+    }
+  ],
+  "market": {
+    "spread_home": -2.5,
+    "spread_home_price": -109,
+    "spread_away_price": -105,
+    "total": 187.5,
+    "over_price": -105,
+    "under_price": -105,
+    "ml_home": -143,
+    "ml_away": 115,
+    "h1_spread_home": 0,
+    "h1_spread_away_price": 115,
+    "_source": "oddspedia: spread FanDuel/BetMGM, total BetMGM/DraftKings, ML BetMGM; NZ half-time ML +115 Stake via freetips (entered as 1H spread 0)"
+  },
+  "props": [],
+  "_excluded": [
+    "PJC 10+ assists +140: only 1 NBL27 game (13 ast); 2025-26 per-game not found (11.7 per 48 only)",
+    "Vasiljevic 3+ threes -143: only 1 NBL27 game (6 threes), no prior per-game data found"
+  ]
+}

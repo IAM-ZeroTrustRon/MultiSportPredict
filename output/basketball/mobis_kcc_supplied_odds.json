@@ -1,0 +1,198 @@
+{
+  "sport": "basketball",
+  "league": "KBL",
+  "home_team": "Mobis Phoebus",
+  "away_team": "KCC Egis",
+  "timestamp": "2026-10-05T03:43:58.725115+00:00",
+  "expected_pace": 74.18,
+  "team_metrics": {
+    "home": {
+      "league": "KBL",
+      "season": 2026,
+      "ortg": 102.87,
+      "source": "basketball.realgm.com/league/63",
+      "updated": "2026-09-30",
+      "games": 54,
+      "drtg": 108.162,
+      "pace": 72.45,
+      "baseline_net": -5.292,
+      "three_pt_pct": 0.325,
+      "orb_pct": 0.277
+    },
+    "away": {
+      "league": "KBL",
+      "season": 2026,
+      "ortg": 110.294,
+      "source": "basketball.realgm.com/league/63",
+      "updated": "2026-09-30",
+      "games": 66,
+      "drtg": 110.702,
+      "pace": 75.658,
+      "baseline_net": -0.408,
+      "three_pt_pct": 0.356,
+      "orb_pct": 0.334
+    }
+  },
+  "q1": {
+    "projected_home_points": 20.31,
+    "projected_away_points": 19.85,
+    "projected_total_points": 40.16,
+    "projected_spread": 0.46,
+    "home_moneyline_probability": 0.5331,
+    "away_moneyline_probability": 0.4669,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 5.5,
+    "projected_home_score": 20.31,
+    "projected_away_score": 19.85,
+    "projected_total": 40.16,
+    "probability": 0.5331,
+    "away_probability": 0.4669,
+    "model_edge": null,
+    "lean": "Mobis Phoebus"
+  },
+  "halftime": {
+    "projected_home_points": 41.01,
+    "projected_away_points": 40.11,
+    "projected_total_points": 81.12,
+    "projected_spread": 0.9,
+    "home_moneyline_probability": 0.5461,
+    "away_moneyline_probability": 0.4539,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 7.8,
+    "projected_home_score": 41.01,
+    "projected_away_score": 40.11,
+    "projected_total": 81.12,
+    "probability": 0.5461,
+    "away_probability": 0.4539,
+    "model_edge": null,
+    "lean": "Mobis Phoebus"
+  },
+  "full_game": {
+    "projected_home_points": 82.72,
+    "projected_away_points": 81.03,
+    "projected_total_points": 163.75,
+    "projected_spread": 1.69,
+    "home_moneyline_probability": 0.561,
+    "away_moneyline_probability": 0.439,
+    "market_spread": 5.5,
+    "spread_edge": -3.81,
+    "sigma": 11.0,
+    "projected_home_score": 82.72,
+    "projected_away_score": 81.03,
+    "projected_total": 163.75,
+    "probability": 0.561,
+    "away_probability": 0.439,
+    "model_edge": -3.81,
+    "lean": "Mobis Phoebus"
+  },
+  "market_info": {
+    "lines": {
+      "spread": 5.5
+    },
+    "total": 171.5
+  },
+  "notes": "First-listed team assumed home. Full-game model; no in-play score/time adjustment. Period projections use estimated ratios. Prices supplied by user, not independently refreshed.",
+  "segments": {
+    "1q": {
+      "projected_home_points": 20.31,
+      "projected_away_points": 19.85,
+      "projected_total_points": 40.16,
+      "projected_spread": 0.46,
+      "home_moneyline_probability": 0.5331,
+      "away_moneyline_probability": 0.4669,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 5.5,
+      "projected_home_score": 20.31,
+      "projected_away_score": 19.85,
+      "projected_total": 40.16,
+      "probability": 0.5331,
+      "away_probability": 0.4669,
+      "model_edge": null,
+      "lean": "Mobis Phoebus"
+    },
+    "ht": {
+      "projected_home_points": 41.01,
+      "projected_away_points": 40.11,
+      "projected_total_points": 81.12,
+      "projected_spread": 0.9,
+      "home_moneyline_probability": 0.5461,
+      "away_moneyline_probability": 0.4539,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 7.8,
+      "projected_home_score": 41.01,
+      "projected_away_score": 40.11,
+      "projected_total": 81.12,
+      "probability": 0.5461,
+      "away_probability": 0.4539,
+      "model_edge": null,
+      "lean": "Mobis Phoebus"
+    },
+    "fg": {
+      "projected_home_points": 82.72,
+      "projected_away_points": 81.03,
+      "projected_total_points": 163.75,
+      "projected_spread": 1.69,
+      "home_moneyline_probability": 0.561,
+      "away_moneyline_probability": 0.439,
+      "market_spread": 5.5,
+      "spread_edge": -3.81,
+      "sigma": 11.0,
+      "projected_home_score": 82.72,
+      "projected_away_score": 81.03,
+      "projected_total": 163.75,
+      "probability": 0.561,
+      "away_probability": 0.439,
+      "model_edge": -3.81,
+      "lean": "Mobis Phoebus"
+    }
+  },
+  "supplied_market": {
+    "home": "Mobis Phoebus",
+    "away": "KCC Egis",
+    "home_key": "Ulsan Mobis Phoebus",
+    "away_key": "Jeonju KCC Egis",
+    "spread": -5.5,
+    "home_spread_price": -120,
+    "away_spread_price": -110,
+    "home_ml": -280,
+    "away_ml": 198,
+    "total": 171.5,
+    "over_price": -112,
+    "under_price": -118,
+    "filename": "mobis_kcc_supplied_odds.json"
+  },
+  "price_analysis": {
+    "Mobis Phoebus -5.5": {
+      "price": -120,
+      "model_probability": 0.36453472486002203,
+      "model_ev": -0.33168633775662626
+    },
+    "KCC Egis +5.5": {
+      "price": -110,
+      "model_probability": 0.635465275139978,
+      "model_ev": 0.21316097981268523
+    },
+    "Mobis Phoebus ML": {
+      "price": -280,
+      "model_probability": 0.561,
+      "model_ev": -0.23864285714285705
+    },
+    "KCC Egis ML": {
+      "price": 198,
+      "model_probability": 0.439,
+      "model_ev": 0.30821999999999994
+    }
+  },
+  "total_analysis": {
+    "projection": 163.75,
+    "market_total": 171.5,
+    "edge_points": -7.75,
+    "lean": "UNDER",
+    "probability": null,
+    "ev": null
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "sport": "soccer",
+  "league": "Erovnuli Liga",
+  "date": "2026-09-21",
+  "start_et": "1:00 PM ET",
+  "venue": "Tbilisi",
+  "home": {
+    "name": "FC Spaeri",
+    "pts_for": 1.269,
+    "pts_against": 1.5,
+    "games": 26,
+    "source": "Wikipedia 2026 Erovnuli Liga table, 19 Sep: 26 GP, GF 33, GA 39"
+  },
+  "away": {
+    "name": "Dila Gori",
+    "pts_for": 1.308,
+    "pts_against": 1.115,
+    "games": 26,
+    "source": "Wikipedia 2026 Erovnuli Liga table, 19 Sep: 26 GP, GF 34, GA 29"
+  },
+  "regress": 0.0,
+  "adjustments": [],
+  "market": {
+    "ml_away": 120,
+    "dc_x2": -345,
+    "total": 2.5,
+    "over_price": -116,
+    "_source": "Dila +120 Bovada; X2 -345 and Over 2.5 1.86 via Scores24 (book not named). No home/draw/BTTS prices found."
+  }
+}

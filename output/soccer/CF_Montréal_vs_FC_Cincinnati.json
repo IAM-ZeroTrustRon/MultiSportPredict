@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "MLS",
+  "home_team": "CF Montr\u00e9al",
+  "away_team": "FC Cincinnati",
+  "timestamp": "2026-09-26T12:51:49.052966",
+  "game": {
+    "projected_home_goals": 1.54,
+    "projected_away_goals": 1.8,
+    "projected_total_goals": 3.34,
+    "home_win_prob": 0.332,
+    "draw_prob": 0.23,
+    "away_win_prob": 0.437
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.26,
+      "market_line": 0.0,
+      "edge": -0.26,
+      "confidence": 29.9,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.339,
+      "market_total": 2.5,
+      "edge": 0.839,
+      "confidence": 39.4,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.731,
+      "confidence": 61.0,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.846,
+    "over_25_prob": 0.648,
+    "over_35_prob": 0.428
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.731,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.192,
+      "xg_against": 2.038,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.192,
+      "goals_against": 2.038,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.16,
+      "xg_against": 2.44,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.16,
+      "goals_against": 2.44,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

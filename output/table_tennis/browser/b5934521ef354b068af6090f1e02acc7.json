@@ -1,0 +1,49 @@
+{
+  "text": "Top Events\nUpcoming\nBack\nTable Tennis\nCzechia\nCzech Liga Pro\nCzechia,\nCzech Liga Pro\n\nHolovatiuk, Yurii\n\nVS\nSaturday, 10 October 10:30\n\nBriza, Frantisek\n\nAll\nResults\nTotals\n2 Way\n1\n1.40\n2\n2.75\nTotal\nOver (73.5)\n1.76\nUnder (73.5)\n1.96\nOver (74.5)\n1.84\nUnder (74.5)\n1.86\nOver (75.5)\n1.93\nUnder (75.5)\n1.78\nMenu\nLive\nCASINO\nMy Bets\n",
+  "url": "https://mystake.com/us/sportsbook/prematch/match/77161081",
+  "markets": [
+    {
+      "title": "2 Way",
+      "selections": [
+        {
+          "name": "1",
+          "price": "1.40"
+        },
+        {
+          "name": "2",
+          "price": "2.75"
+        }
+      ]
+    },
+    {
+      "title": "Total",
+      "selections": [
+        {
+          "name": "Over (73.5)",
+          "price": "1.76"
+        },
+        {
+          "name": "Under (73.5)",
+          "price": "1.96"
+        },
+        {
+          "name": "Over (74.5)",
+          "price": "1.84"
+        },
+        {
+          "name": "Under (74.5)",
+          "price": "1.86"
+        },
+        {
+          "name": "Over (75.5)",
+          "price": "1.93"
+        },
+        {
+          "name": "Under (75.5)",
+          "price": "1.78"
+        }
+      ]
+    }
+  ],
+  "captured_utc": "2026-10-10T12:57:25.830469+00:00"
+}

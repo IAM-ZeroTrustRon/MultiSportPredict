@@ -1,0 +1,838 @@
+{
+  "inputs": {
+    "slug": "ligue1_lens_v_lyon",
+    "name": "RC Lens vs Lyon",
+    "time": "2:45 PM ET",
+    "venue": "Stade Bollaert-Delelis",
+    "teams": [
+      "Lens",
+      "Lyon"
+    ],
+    "games": [
+      5,
+      5
+    ],
+    "gf": [
+      9,
+      10
+    ],
+    "ga": [
+      9,
+      2
+    ],
+    "confidence": "Low",
+    "observations": "Lyon: three wins, two draws, ten goals scored and two conceded in five league matches. Lens: one win, one draw, three losses, nine scored and nine conceded in five. Official league injury review lists Lens Abdallah Sima and Lyon Moussa Niakhate unavailable; Mohamed Ouedraogo sustained an ACL injury. Lens had returning internationals but availability must be checked against the final XI. Both clubs play in the same time zone. International-break recovery and national-team travel vary by player; they are reviewed but not assigned invented numeric adjustments.",
+    "against": "Five matches are too few for stable defensive strength. Lyon injuries may weaken the two-goals-conceded baseline. Your stored xG fields are goal-derived proxies, not measured xG. The market expects substantially more goals than this simple goals model: that disagreement is a reason to investigate, not proof the book is wrong.",
+    "sources": [
+      [
+        "Official fixture",
+        "https://ligue1.com/fr/articles/l1_article_5905-ou-et-quand-regarder-lens-lyon-j6-l1-2627"
+      ],
+      [
+        "Official team preview",
+        "https://www.rclens.fr/fr/rc-lens-olympique-lyonnais"
+      ],
+      [
+        "Official injury review",
+        "https://ligue1.com/fr/articles/l1_article_5908-treve-le-point-sur-les-blesses-et-les-retours-octobre-2026"
+      ],
+      [
+        "Odds feed",
+        "https://the-odds-api.com/"
+      ]
+    ],
+    "price_note": "Pinnacle API snapshot: main markets 09:55:44 AM ET; alternative lines 09:59:01 AM ET and BTTS 09:58:34 AM ET. Captured prices, not a future live refresh.",
+    "markets": [
+      {
+        "kind": "ml",
+        "side": "away",
+        "decimal": 2.63,
+        "line": 0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "ml",
+        "side": "home",
+        "decimal": 2.67,
+        "line": 0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "ml",
+        "side": "draw",
+        "decimal": 3.66,
+        "line": 0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 1.9523809523809523,
+        "line": -0.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 1.970873786407767,
+        "line": 0.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 1.8849557522123894,
+        "line": 3.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 2.02,
+        "line": 3.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 1.2551020408163265,
+        "line": 1.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 1.390625,
+        "line": 0.75,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 1.53475935828877,
+        "line": 0.5,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 1.6849315068493151,
+        "line": 0.25,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 2.29,
+        "line": -0.25,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 2.63,
+        "line": -0.5,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 3.15,
+        "line": -0.75,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "away",
+        "decimal": 4.21,
+        "line": -1.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 4.279999999999999,
+        "line": -1.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 3.2,
+        "line": -0.75,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 2.66,
+        "line": -0.5,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 2.3200000000000003,
+        "line": -0.25,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 1.704225352112676,
+        "line": 0.25,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 1.5464480874316942,
+        "line": 0.5,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 1.4,
+        "line": 0.75,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "spread",
+        "side": "home",
+        "decimal": 1.2604166666666667,
+        "line": 1.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 1.234192037470726,
+        "line": 2.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 1.4,
+        "line": 2.25,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 1.5714285714285714,
+        "line": 2.5,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 1.6944444444444444,
+        "line": 2.75,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 2.12,
+        "line": 3.25,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 2.3600000000000003,
+        "line": 3.5,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 2.7199999999999998,
+        "line": 3.75,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Over",
+        "decimal": 3.36,
+        "line": 4.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 4.42,
+        "line": 2.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 3.11,
+        "line": 2.25,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 2.5300000000000002,
+        "line": 2.5,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 2.2800000000000002,
+        "line": 2.75,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 1.7936507936507935,
+        "line": 3.25,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 1.6451612903225805,
+        "line": 3.5,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 1.4975124378109452,
+        "line": 3.75,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "total",
+        "side": "Under",
+        "decimal": 1.3546099290780143,
+        "line": 4.0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "btts",
+        "side": "Yes",
+        "decimal": 1.4672897196261683,
+        "line": 0,
+        "book": "Pinnacle"
+      },
+      {
+        "kind": "btts",
+        "side": "No",
+        "decimal": 2.84,
+        "line": 0,
+        "book": "Pinnacle"
+      }
+    ]
+  },
+  "expected_goals": [
+    1.2100000000000002,
+    1.71
+  ],
+  "probabilities": [
+    0.27060888112393416,
+    0.23839045761007954,
+    0.49100066126598624
+  ],
+  "markets": [
+    {
+      "kind": "ml",
+      "side": "away",
+      "decimal": 2.63,
+      "line": 0,
+      "book": "Pinnacle",
+      "profit_probability": 0.49100066126598607,
+      "loss_probability": 0.5089993387340132,
+      "full_push_probability": 0.0,
+      "ev_percent": 29.13317391295438,
+      "neutral_venue_ev_percent": 47.358289963820525
+    },
+    {
+      "kind": "ml",
+      "side": "home",
+      "decimal": 2.67,
+      "line": 0,
+      "book": "Pinnacle",
+      "profit_probability": 0.27060888112393394,
+      "loss_probability": 0.7293911188760652,
+      "full_push_probability": 0.0,
+      "ev_percent": -27.74742873990958,
+      "neutral_venue_ev_percent": -42.04218329040536
+    },
+    {
+      "kind": "ml",
+      "side": "draw",
+      "decimal": 3.66,
+      "line": 0,
+      "book": "Pinnacle",
+      "profit_probability": 0.2383904576100796,
+      "loss_probability": 0.7616095423899193,
+      "full_push_probability": 0.0,
+      "ev_percent": -12.749092514710888,
+      "neutral_venue_ev_percent": -18.516744744116917
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 1.9523809523809523,
+      "line": -0.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.49100066126598607,
+      "loss_probability": 0.27060888112393394,
+      "full_push_probability": 0.2383904576100796,
+      "ev_percent": 19.7010796272243,
+      "neutral_venue_ev_percent": 31.654636397584902
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 1.970873786407767,
+      "line": 0.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.27060888112393394,
+      "loss_probability": 0.49100066126598607,
+      "full_push_probability": 0.2383904576100796,
+      "ev_percent": -22.82735922136228,
+      "neutral_venue_ev_percent": -34.95496469098587
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 1.8849557522123894,
+      "line": 3.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.33485122360348535,
+      "loss_probability": 0.4413501499162733,
+      "full_push_probability": 0.22379862648024104,
+      "ev_percent": -14.502163345301163,
+      "neutral_venue_ev_percent": -11.100591190757926
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 2.02,
+      "line": 3.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.4413501499162733,
+      "loss_probability": 0.33485122360348535,
+      "full_push_probability": 0.22379862648024104,
+      "ev_percent": 11.532592931111326,
+      "neutral_venue_ev_percent": 7.888577153161156
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 1.2551020408163265,
+      "line": 1.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.7293911188760652,
+      "loss_probability": 0.11009237427913393,
+      "full_push_probability": 0.16051650684480015,
+      "ev_percent": 7.597678869945423,
+      "neutral_venue_ev_percent": 11.844911329300878
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 1.390625,
+      "line": 0.75,
+      "book": "Pinnacle",
+      "profit_probability": 0.7293911188760652,
+      "loss_probability": 0.27060888112393394,
+      "full_push_probability": 0.0,
+      "ev_percent": 9.456777810942912,
+      "neutral_venue_ev_percent": 15.665770535802414
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 1.53475935828877,
+      "line": 0.5,
+      "book": "Pinnacle",
+      "profit_probability": 0.7293911188760652,
+      "loss_probability": 0.27060888112393394,
+      "full_push_probability": 0.0,
+      "ev_percent": 11.943984554775886,
+      "neutral_venue_ev_percent": 20.160841603770034
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 1.6849315068493151,
+      "line": 0.25,
+      "book": "Pinnacle",
+      "profit_probability": 0.7293911188760652,
+      "loss_probability": 0.27060888112393394,
+      "full_push_probability": 0.0,
+      "ev_percent": 14.73335093356727,
+      "neutral_venue_ev_percent": 24.293884252230853
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 2.29,
+      "line": -0.25,
+      "book": "Pinnacle",
+      "profit_probability": 0.49100066126598607,
+      "loss_probability": 0.5089993387340132,
+      "full_push_probability": 0.0,
+      "ev_percent": 24.358674310414806,
+      "neutral_venue_ev_percent": 39.439761075884775
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 2.63,
+      "line": -0.5,
+      "book": "Pinnacle",
+      "profit_probability": 0.49100066126598607,
+      "loss_probability": 0.5089993387340132,
+      "full_push_probability": 0.0,
+      "ev_percent": 29.13317391295438,
+      "neutral_venue_ev_percent": 47.358289963820525
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 3.15,
+      "line": -0.75,
+      "book": "Pinnacle",
+      "profit_probability": 0.49100066126598607,
+      "loss_probability": 0.5089993387340132,
+      "full_push_probability": 0.0,
+      "ev_percent": 30.279301794037423,
+      "neutral_venue_ev_percent": 51.27953983831186
+    },
+    {
+      "kind": "spread",
+      "side": "away",
+      "decimal": 4.21,
+      "line": -1.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.2641550193613512,
+      "loss_probability": 0.5089993387340132,
+      "full_push_probability": 0.22684564190463485,
+      "ev_percent": 33.893827341592484,
+      "neutral_venue_ev_percent": 60.594461406514874
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 4.279999999999999,
+      "line": -1.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.11009237427913393,
+      "loss_probability": 0.7293911188760652,
+      "full_push_probability": 0.16051650684480015,
+      "ev_percent": -36.82881312405062,
+      "neutral_venue_ev_percent": -51.63383202430656
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 3.2,
+      "line": -0.75,
+      "book": "Pinnacle",
+      "profit_probability": 0.27060888112393394,
+      "loss_probability": 0.7293911188760652,
+      "full_push_probability": 0.0,
+      "ev_percent": -31.061973793269075,
+      "neutral_venue_ev_percent": -45.47464163015601
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 2.66,
+      "line": -0.5,
+      "book": "Pinnacle",
+      "profit_probability": 0.27060888112393394,
+      "loss_probability": 0.7293911188760652,
+      "full_push_probability": 0.0,
+      "ev_percent": -28.018037621033503,
+      "neutral_venue_ev_percent": -42.25925376497311
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 2.3200000000000003,
+      "line": -0.25,
+      "book": "Pinnacle",
+      "profit_probability": 0.27060888112393394,
+      "loss_probability": 0.7293911188760652,
+      "full_push_probability": 0.0,
+      "ev_percent": -25.299216698743255,
+      "neutral_venue_ev_percent": -38.50805765220584
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 1.704225352112676,
+      "line": 0.25,
+      "book": "Pinnacle",
+      "profit_probability": 0.5089993387340132,
+      "loss_probability": 0.49100066126598607,
+      "full_push_probability": 0.0,
+      "ev_percent": -21.649072469628646,
+      "neutral_venue_ev_percent": -32.903965438031804
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 1.5464480874316942,
+      "line": 0.5,
+      "book": "Pinnacle",
+      "profit_probability": 0.5089993387340132,
+      "loss_probability": 0.49100066126598607,
+      "full_push_probability": 0.0,
+      "ev_percent": -21.285894611078728,
+      "neutral_venue_ev_percent": -32.00231889247897
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 1.4,
+      "line": 0.75,
+      "book": "Pinnacle",
+      "profit_probability": 0.5089993387340132,
+      "loss_probability": 0.49100066126598607,
+      "full_push_probability": 0.0,
+      "ev_percent": -17.39781048200636,
+      "neutral_venue_ev_percent": -26.714126656614273
+    },
+    {
+      "kind": "spread",
+      "side": "home",
+      "decimal": 1.2604166666666667,
+      "line": 1.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.5089993387340132,
+      "loss_probability": 0.2641550193613512,
+      "full_push_probability": 0.22684564190463485,
+      "ev_percent": -13.160310823270233,
+      "neutral_venue_ev_percent": -21.124089590744802
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 1.234192037470726,
+      "line": 2.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.5586498500837253,
+      "loss_probability": 0.21142005421739557,
+      "full_push_probability": 0.22993009569887773,
+      "ev_percent": -8.05887075935721,
+      "neutral_venue_ev_percent": -6.406398333722713
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 1.4,
+      "line": 2.25,
+      "book": "Pinnacle",
+      "profit_probability": 0.5586498500837253,
+      "loss_probability": 0.4413501499162733,
+      "full_push_probability": 0.0,
+      "ev_percent": -10.292516203334388,
+      "neutral_venue_ev_percent": -8.044520974988721
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 1.5714285714285714,
+      "line": 2.5,
+      "book": "Pinnacle",
+      "profit_probability": 0.5586498500837253,
+      "loss_probability": 0.4413501499162733,
+      "full_push_probability": 0.0,
+      "ev_percent": -12.212166415414389,
+      "neutral_venue_ev_percent": -9.358441319932567
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 1.6944444444444444,
+      "line": 2.75,
+      "book": "Pinnacle",
+      "profit_probability": 0.5586498500837253,
+      "loss_probability": 0.4413501499162733,
+      "full_push_probability": 0.0,
+      "ev_percent": -13.110672155265824,
+      "neutral_venue_ev_percent": -10.041993178971687
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 2.12,
+      "line": 3.25,
+      "book": "Pinnacle",
+      "profit_probability": 0.33485122360348535,
+      "loss_probability": 0.6651487763965145,
+      "full_push_probability": 0.0,
+      "ev_percent": -17.821609272049006,
+      "neutral_venue_ev_percent": -14.011070039063645
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 2.3600000000000003,
+      "line": 3.5,
+      "book": "Pinnacle",
+      "profit_probability": 0.33485122360348535,
+      "loss_probability": 0.6651487763965145,
+      "full_push_probability": 0.0,
+      "ev_percent": -20.975111229577376,
+      "neutral_venue_ev_percent": -16.746725752606554
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 2.7199999999999998,
+      "line": 3.75,
+      "book": "Pinnacle",
+      "profit_probability": 0.33485122360348535,
+      "loss_probability": 0.6651487763965145,
+      "full_push_probability": 0.0,
+      "ev_percent": -22.970544950281454,
+      "neutral_venue_ev_percent": -18.49777034253939
+    },
+    {
+      "kind": "total",
+      "side": "Over",
+      "decimal": 3.36,
+      "line": 4.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.17147822627290987,
+      "loss_probability": 0.6651487763965145,
+      "full_push_probability": 0.16337299733057595,
+      "ev_percent": -26.04601623924473,
+      "neutral_venue_ev_percent": -21.125314585833337
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 4.42,
+      "line": 2.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.21142005421739557,
+      "loss_probability": 0.5586498500837253,
+      "full_push_probability": 0.22993009569887773,
+      "ev_percent": 16.440673533976597,
+      "neutral_venue_ev_percent": 10.427717639922195
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 3.11,
+      "line": 2.25,
+      "book": "Pinnacle",
+      "profit_probability": 0.4413501499162733,
+      "loss_probability": 0.5586498500837253,
+      "full_push_probability": 0.0,
+      "ev_percent": 13.002271527729379,
+      "neutral_venue_ev_percent": 7.975704522804904
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 2.5300000000000002,
+      "line": 2.5,
+      "book": "Pinnacle",
+      "profit_probability": 0.4413501499162733,
+      "loss_probability": 0.5586498500837253,
+      "full_push_probability": 0.0,
+      "ev_percent": 11.661587928817168,
+      "neutral_venue_ev_percent": 7.067090525091412
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 2.2800000000000002,
+      "line": 2.75,
+      "book": "Pinnacle",
+      "profit_probability": 0.4413501499162733,
+      "loss_probability": 0.5586498500837253,
+      "full_push_probability": 0.0,
+      "ev_percent": 11.817765504922386,
+      "neutral_venue_ev_percent": 7.689428879689704
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 1.7936507936507935,
+      "line": 3.25,
+      "book": "Pinnacle",
+      "profit_probability": 0.6651487763965145,
+      "loss_probability": 0.33485122360348535,
+      "full_push_probability": 0.0,
+      "ev_percent": 10.423565191746176,
+      "neutral_venue_ev_percent": 7.200251176202264
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 1.6451612903225805,
+      "line": 3.5,
+      "book": "Pinnacle",
+      "profit_probability": 0.6651487763965145,
+      "loss_probability": 0.33485122360348535,
+      "full_push_probability": 0.0,
+      "ev_percent": 9.427701923297507,
+      "neutral_venue_ev_percent": 6.4800849286896485
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 1.4975124378109452,
+      "line": 3.75,
+      "book": "Pinnacle",
+      "profit_probability": 0.6651487763965145,
+      "loss_probability": 0.33485122360348535,
+      "full_push_probability": 0.0,
+      "ev_percent": 7.775506431379954,
+      "neutral_venue_ev_percent": 5.325348147003213
+    },
+    {
+      "kind": "total",
+      "side": "Under",
+      "decimal": 1.3546099290780143,
+      "line": 4.0,
+      "book": "Pinnacle",
+      "profit_probability": 0.6651487763965145,
+      "loss_probability": 0.17147822627290987,
+      "full_push_probability": 0.16337299733057595,
+      "ev_percent": 6.439013415138624,
+      "neutral_venue_ev_percent": 4.477809870186832
+    },
+    {
+      "kind": "btts",
+      "side": "Yes",
+      "decimal": 1.4672897196261683,
+      "line": 0,
+      "book": "Pinnacle",
+      "profit_probability": 0.5748706152533455,
+      "loss_probability": 0.42512938474665335,
+      "full_push_probability": 0.0,
+      "ev_percent": -15.649825612359445,
+      "neutral_venue_ev_percent": -16.753704322240708
+    },
+    {
+      "kind": "btts",
+      "side": "No",
+      "decimal": 2.84,
+      "line": 0,
+      "book": "Pinnacle",
+      "profit_probability": 0.42512938474665335,
+      "loss_probability": 0.5748706152533455,
+      "full_push_probability": 0.0,
+      "ev_percent": 20.736745268049546,
+      "neutral_venue_ev_percent": 22.873348213009617
+    }
+  ]
+}

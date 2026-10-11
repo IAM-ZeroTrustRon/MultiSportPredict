@@ -1,0 +1,50 @@
+{
+  "title": "NBL27 R1 | Tasmania JackJumpers vs SE Melbourne Phoenix",
+  "description": "**RESEARCH CARD - not model output.** The model has no Australian NBL engine yet.\nMon 21 Sep - 5:30am ET - MyState Bank Arena, Hobart",
+  "color": 2845872,
+  "fields": [
+    {
+      "name": "Market",
+      "inline": false,
+      "value": "Line: TAS +3.5 / PHX -3.5\nTotal: 185.5\n1Q (bet365): TAS +0.5 +100 | O/U 47.5 -112/-118\n1Q team totals: TAS 23.5 | PHX 24.5 (O -105 / U -125)"
+    },
+    {
+      "name": "Best bet",
+      "inline": false,
+      "value": "**PHX 1Q team total UNDER 24.5 (-125)**\nBreak-even 55.6%. Projection: PHX ~22."
+    },
+    {
+      "name": "Leans",
+      "inline": false,
+      "value": "- TAS +3.5 (full game)\n- Under 185.5 (full game)\n- 1Q Under 47.5 (-118) - pick this OR the PHX team under, not both\n- TAS 1Q +0.5 (+100) - small"
+    },
+    {
+      "name": "Why",
+      "inline": false,
+      "value": "- PHX played Sat in Perth, now Hobart ~48h later\n- PHX lost the 1Q 19-24 in Perth on fresh legs\n- Last season: TAS won the slow games (170, 171 pts), PHX won the fast ones (205, 224)\n- Roth held PHX to 81 and 84 in his two wins"
+    },
+    {
+      "name": "Check before betting",
+      "inline": false,
+      "value": "- Josh Bannan (TAS, ribs) - TEST\n- Nathan Sobey (PHX, back) - TBC\n- Bryce Hamilton (TAS) - OUT (ACL)"
+    },
+    {
+      "name": "Against",
+      "inline": false,
+      "value": "TAS 6-10 at home last season, 0-2 in preseason. Majok Deng scored 36 (20 in the 1Q) vs PHX last meeting."
+    },
+    {
+      "name": "Confidence",
+      "inline": true,
+      "value": "Low - Round 1, one game of data"
+    },
+    {
+      "name": "Sharp data",
+      "inline": true,
+      "value": "None exists for this league"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - research, not a model pick"
+  }
+}

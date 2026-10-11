@@ -1,0 +1,20 @@
+{
+  "title": "Danish 1st Division | Hobro IK @ HB Koge",
+  "description": "**FORCED RUN - model math on web-sourced inputs, guards off.**\n2026-09-21 1:00 PM ET Capelli Sport Stadion, Koge",
+  "color": 14510880,
+  "fields": [
+    {
+      "name": "Projection",
+      "inline": false,
+      "value": "HB Koge 1.17 - Hobro IK 1.41\nTotal 2.58 | Home win 31.3% | Draw 26.3% | Away 42.4%\nLikely: 1-1 (12.5%), 0-1 (10.7%), 1-0 (8.9%)"
+    },
+    {
+      "name": "Plays (edge, pct pts)",
+      "inline": false,
+      "value": "**LEAN** 1X2 away -> AWAY (Hobro IK) (+5.4)\n**LEAN** Draw no bet away -> AWAY (Hobro IK) (+4.3)"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - FORCED RUN, not stored, not graded"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "sport": "basketball",
+  "league": "EuroLeague",
+  "home_team": "Hapoel Tel Aviv",
+  "away_team": "Real Madrid",
+  "neutral_site": "Sofia (neutral, HCA=0)",
+  "team_metrics": {
+    "home": {
+      "ortg": 110.798,
+      "drtg": 112.041,
+      "pace": 74.27
+    },
+    "away": {
+      "ortg": 108.403,
+      "drtg": 111.255,
+      "pace": 75.78
+    }
+  },
+  "full_game": {
+    "projected_home_score": 88.54,
+    "projected_away_score": 87.91,
+    "projected_total": 176.45,
+    "probability": 0.5228,
+    "away_probability": 0.4772,
+    "model_edge": 2.13,
+    "lean": "Hapoel Tel Aviv"
+  },
+  "market_info": {
+    "lines": {
+      "spread": -1.5
+    },
+    "total": 178.5
+  },
+  "q1": {
+    "probability": 0.5109,
+    "lean": "Hapoel Tel Aviv"
+  },
+  "halftime": {
+    "probability": 0.5159,
+    "lean": "Hapoel Tel Aviv"
+  },
+  "notes": "NEUTRAL SITE Sofia: HCA zeroed via swapped-average. Homecourt model would show Hapoel -4.1/64.6%; neutral is Hapoel -0.6/52.3%. Market Hapoel -1.5/total 178.5 user-supplied. Sharp 1Q/1H/props are user notes, not model outputs."
+}

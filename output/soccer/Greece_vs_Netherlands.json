@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "UEFA Nations League",
+  "home_team": "Greece",
+  "away_team": "Netherlands",
+  "timestamp": "2026-10-01T11:20:04.416106",
+  "game": {
+    "projected_home_goals": 1.22,
+    "projected_away_goals": 1.93,
+    "projected_total_goals": 3.15,
+    "home_win_prob": 0.242,
+    "draw_prob": 0.225,
+    "away_win_prob": 0.534
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.711,
+      "market_line": 0.0,
+      "edge": -0.711,
+      "confidence": 38.0,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.154,
+      "market_total": 2.5,
+      "edge": 0.654,
+      "confidence": 36.2,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.646,
+      "confidence": 50.3,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.823,
+    "over_25_prob": 0.61,
+    "over_35_prob": 0.387
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.646,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.6,
+      "xg_against": 1.4,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.6,
+      "goals_against": 1.4,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.75,
+      "xg_against": 0.667,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.75,
+      "goals_against": 0.667,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

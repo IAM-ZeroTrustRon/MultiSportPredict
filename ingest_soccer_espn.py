@@ -67,6 +67,7 @@ LEAGUES: Dict[str, Dict[str, str]] = {
     "eredivisie":     {"slug": "ned.1", "name": "Eredivisie"},
     "eerste_divisie": {"slug": "ned.2", "name": "Eerste Divisie"},
     "mls":            {"slug": "usa.1", "name": "MLS"},
+    "nations":        {"slug": "uefa.nations", "name": "UEFA Nations League"},
     "champions":      {"slug": "uefa.champions", "name": "UEFA Champions League"},
     "brasileirao":    {"slug": "bra.1", "name": "Brasileirao"},
     "argentina":      {"slug": "arg.1", "name": "Liga Profesional Argentina"},
@@ -269,7 +270,8 @@ def merge_store(records: Dict[str, Dict[str, Any]], path: Path) -> None:
             backup = path.with_suffix(".corrupt.json")
             path.replace(backup)
             log(f"    [warn] {path.name} was not valid JSON; moved to {backup.name}")
-    existing.update(records)
+    from soccer_store import merge_records
+    existing = merge_records(existing, records)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(existing, indent=2, ensure_ascii=False) + "\n",
@@ -293,7 +295,8 @@ def ingest_league(key: str, check: bool, want_fixtures: bool,
 
     payload = get_json(STANDINGS_URL.format(slug=slug), params or None,
                        save_as=f"espn_standings_{slug}")
-    season_used = season or payload.get("season") or TODAY.year
+    from soccer_store import season_key
+    season_used = season_key(season or payload.get("season") or TODAY.year)
     records = parse_standings(payload, name, season_used)
 
     if not records:

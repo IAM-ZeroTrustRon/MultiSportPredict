@@ -10,6 +10,7 @@ run_mlb.py - Run any MLB matchup through the model and push to Discord
     python run_mlb.py --dry-run
     python run_mlb.py --list-teams
     python run_mlb.py --today            every game on today's schedule
+    python run_mlb.py --league KBO --date 2026-10-08
 
 WHY THIS EXISTS INSTEAD OF ANOTHER HARDCODED SLATE
     run_tonight.py has one specific evening's games baked in. This takes any
@@ -39,6 +40,9 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import requests
+from bs4 import BeautifulSoup
+
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
@@ -52,10 +56,24 @@ if hasattr(sys.stderr, "reconfigure"):
 PROBABLES = ROOT / "data" / "mlb_probables.json"
 LINEUPS = ROOT / "data" / "mlb_lineups.json"
 STORE = ROOT / "data" / "baseball_stats.json"
-TODAY = _dt.date.today().isoformat()
+SLATE_DATE = _dt.date.today().isoformat()
 
 DEFAULT_TOTAL = 8.5          # placeholder; see the note printed after a run
+KBO_DEFAULT_TOTAL = 9.5      # placeholder; KBO market totals are not in the MLB odds feed
 MARKETS = ["nrfi", "strikeouts", "home_runs"]
+KBO_SCHEDULE_URL = "https://mykbostats.com/games"
+KBO_SLUG_TEAMS = {
+    "doosan": "Doosan Bears",
+    "hanwha": "Hanwha Eagles",
+    "kia": "KIA Tigers",
+    "kiwoom": "Kiwoom Heroes",
+    "kt": "KT Wiz",
+    "lg": "LG Twins",
+    "lotte": "Lotte Giants",
+    "nc": "NC Dinos",
+    "samsung": "Samsung Lions",
+    "ssg": "SSG Landers",
+}
 
 # Which league the store lookup and the runner use. KBO rows live in the
 # same baseball_stats.json as MLB and are told apart by this field, so a
@@ -138,12 +156,57 @@ def parse_match(text: str) -> Tuple[str, str]:
 # SCHEDULE
 # ==========================================================================
 
-def load_probables() -> Tuple[List[Dict[str, Any]], Optional[str]]:
+def load_probables(date_str: str = SLATE_DATE) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     if not PROBABLES.exists():
         return [], None
     payload = json.loads(PROBABLES.read_text(encoding="utf-8-sig"))
-    games = [g for g in payload.get("games", []) if g.get("game_date") == TODAY]
+    games = [g for g in payload.get("games", []) if g.get("game_date") == date_str]
     return games, payload.get("generated")
+
+
+def load_kbo_schedule(date_str: str = SLATE_DATE) -> List[Dict[str, Any]]:
+    """Fetch KBO games from MyKBO Stats and keep only the requested game date."""
+    response = requests.get(
+        KBO_SCHEDULE_URL,
+        params={"date": date_str},
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                          "AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
+            "Referer": "https://mykbostats.com/",
+        },
+        timeout=20,
+    )
+    response.raise_for_status()
+
+    games: List[Dict[str, Any]] = []
+    soup = BeautifulSoup(response.text, "html.parser")
+    for anchor in soup.select('a[id^="game-line-"][href]'):
+        match = re.search(
+            r"/games/\d+-([a-z]+)-vs-([a-z]+)-(\d{8})(?:$|[?#])",
+            anchor.get("href", ""),
+            re.IGNORECASE,
+        )
+        if not match:
+            continue
+
+        away_slug, home_slug, game_day = match.groups()
+        if game_day != date_str.replace("-", ""):
+            continue
+
+        away = KBO_SLUG_TEAMS.get(away_slug.lower())
+        home = KBO_SLUG_TEAMS.get(home_slug.lower())
+        if not away or not home:
+            raise RuntimeError(
+                f"Unrecognized KBO team in MyKBO schedule link: {anchor.get('href')}"
+            )
+        games.append({
+            "game_date": date_str,
+            "away_team": away,
+            "home_team": home,
+            "status": "scheduled",
+            "source": "mykbostats.com",
+        })
+    return games
 
 
 def find_game(a: str, b: str, games: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
@@ -168,11 +231,11 @@ def load_lineups() -> Dict[str, List[str]]:
         payload = json.loads(LINEUPS.read_text(encoding="utf-8-sig"))
     except json.JSONDecodeError:
         return {}
-    if payload.get("date") != TODAY:
+    if payload.get("date") != SLATE_DATE:
         return {}
     out: Dict[str, List[str]] = {}
     for team, record in (payload.get("teams") or {}).items():
-        if not isinstance(record, dict) or record.get("date") != TODAY:
+        if not isinstance(record, dict) or record.get("date") != SLATE_DATE:
             continue
         batters = [b for b in (record.get("key_batters") or []) if b]
         if batters:
@@ -253,7 +316,32 @@ def fetch_espn_mlb_odds() -> Dict[str, Tuple[float, float]]:
     return out
 
 
+def fetch_live_markets(home: str, away: str) -> Dict[str, Any]:
+    """Full live market (moneyline + run line + total + prices) for one game.
+
+    Thin wrapper over live_odds.get_mlb_odds() so run_one() has the same
+    market dict shape as universal_runner without re-implementing fetch,
+    cache, or matching. Returns {} when no priced fixture exists; callers
+    label that UNLISTED (simulation only) instead of falling back to 8.5
+    silently.
+    """
+    from live_odds import get_mlb_odds
+    fetched = get_mlb_odds(home, away)
+    if fetched.get("status") not in ("live", "cached"):
+        return {}
+    return dict(fetched)
+
+
 def fetch_live_odds() -> Tuple[Dict[str, float], Dict[str, Tuple[float, float]]]:
+    """Return (live totals, live moneylines) for every game on the board.
+
+    Single path: delegates per-matchup to live_odds.get_mlb_odds() so this
+    runner and universal_runner.run_baseball() share one cached fetcher,
+    one matching rule, and one h2h+spreads+totals market set. Callers that
+    need the full market (run line, O/U prices) call fetch_live_markets().
+    """
+    from live_odds import get_mlb_odds
+
     key = os.environ.get("ODDS_API_KEY", "").strip()
     if not key:
         env = ROOT / ".env"
@@ -261,54 +349,26 @@ def fetch_live_odds() -> Tuple[Dict[str, float], Dict[str, Tuple[float, float]]]
             for raw in env.read_text(encoding="utf-8-sig", errors="replace").splitlines():
                 if raw.strip().startswith("ODDS_API_KEY"):
                     key = raw.split("=", 1)[1].strip().strip('"').strip("'")
+                    os.environ["ODDS_API_KEY"] = key
                     break
     if not key:
         log("[odds] ODDS_API_KEY not found in env or .env -- trying ESPN for "
             "moneylines; the total will use the line you pass or the default.")
         return {}, fetch_espn_mlb_odds()
     try:
-        import requests
-        response = requests.get(
-            "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds",
-            params={"apiKey": key, "regions": "us", "markets": "totals,h2h",
-                    "oddsFormat": "american"}, timeout=30)
-        remaining = response.headers.get("x-requests-remaining")
-        if remaining:
-            log(f"[odds] quota remaining: {remaining}")
-        if response.status_code != 200:
-            # Say which failure it is. A rotated or exhausted key is the most
-            # common reason a whole slate pushes with no moneyline, and a bare
-            # "HTTP 401" does not tell you to go fix .env.
-            hint = {401: "key rejected -- ODDS_API_KEY in .env is wrong or was rotated",
-                    429: "quota exhausted for this key"}.get(response.status_code, "")
-            log(f"[odds] The Odds API HTTP {response.status_code}"
-                + (f" ({hint})" if hint else "") + " -- trying ESPN.")
-            return {}, fetch_espn_mlb_odds()
+        teams = load_mlb_teams()
         totals: Dict[str, float] = {}
         moneylines: Dict[str, Tuple[float, float]] = {}
-        for event in response.json():
-            home, away = event.get("home_team"), event.get("away_team")
-            key = _okey(home, away)
-            for book in event.get("bookmakers", []):
-                for market in book.get("markets", []):
-                    kind = market.get("key")
-                    if kind == "totals" and key not in totals:
-                        for outcome in market.get("outcomes", []):
-                            if outcome.get("point") is not None:
-                                totals[key] = float(outcome["point"])
-                                break
-                    elif kind == "h2h" and key not in moneylines:
-                        # The side price. Without it the model has nothing to
-                        # measure its win probability against, so every game
-                        # comes back PASS at about 50 confidence -- which reads
-                        # as "the model has no opinion" when in fact it has one
-                        # and no price to compare it to.
-                        prices = {o.get("name"): o.get("price")
-                                  for o in market.get("outcomes", [])}
-                        if prices.get(home) is not None and prices.get(away) is not None:
-                            moneylines[key] = (float(prices[home]), float(prices[away]))
-                if key in totals and key in moneylines:
-                    break
+        for home, away in iter_matchups(teams):
+            fetched = get_mlb_odds(home, away)
+            if fetched.get("status") not in ("live", "cached"):
+                continue
+            okey = _okey(home, away)
+            if fetched.get("total_line") is not None and okey not in totals:
+                totals[okey] = float(fetched["total_line"])
+            if okey not in moneylines and (fetched.get("home_ml") is not None
+                                           and fetched.get("away_ml") is not None):
+                moneylines[okey] = (float(fetched["home_ml"]), float(fetched["away_ml"]))
         if not moneylines:
             moneylines = fetch_espn_mlb_odds()
         log(f"[odds] totals for {len(totals)} game(s), "
@@ -392,7 +452,10 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
             home_sp_limit: Optional[int] = None,
             away_sp_limit: Optional[int] = None,
             over_price: Optional[int] = None,
-            under_price: Optional[int] = None) -> Dict[str, Any]:
+            under_price: Optional[int] = None,
+            runline: Optional[float] = None,
+            runline_home_price: Optional[int] = None,
+            runline_away_price: Optional[int] = None) -> Dict[str, Any]:
     rule()
     log(f"MLB:  {away}  @  {home}")
     rule("-")
@@ -404,12 +467,12 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
         log(f"             {game.get('home_pitcher') or 'TBD'} "
             f"(ERA {arguments['home_sp_era']}, K/9 {arguments['home_sp_k']})")
     else:
-        log("  [warn] Not found on today's schedule. Home/away is the order you")
+        log(f"  [warn] Not found on the {SLATE_DATE} schedule. Home/away is the order you")
         log("         typed, and no starter data is available -- the model will")
         log("         use its defaults for the pitchers.")
-        # Verify the fixture exists on today's schedule
+        # Verify the fixture exists on the selected date.
         from fixture_guard import verify_fixture
-        is_valid, msg, _ = verify_fixture(LEAGUE.lower(), home, away, TODAY)
+        is_valid, msg, _ = verify_fixture(LEAGUE.lower(), home, away, SLATE_DATE)
         if not is_valid:
             log(f"  [ERROR] {msg}")
             return {"status": "fixture_not_found", "home": home, "away": away}
@@ -419,6 +482,12 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
             f"  |  {home} {home_sp_limit or 'none'}")
 
     log(f"  Total      {total}  [{total_source}]")
+    if runline is not None:
+        log(f"  Run line   {runline:+g}  "
+            f"(H {runline_home_price if runline_home_price is not None else 'n/a'} / "
+            f"A {runline_away_price if runline_away_price is not None else 'n/a'})")
+    if total_source == "DEFAULT placeholder":
+        log("  [SIMULATION ONLY] no live total -- default used, no EV.")
     if home_ml is not None or away_ml is not None:
         def fmt(value: Optional[int]) -> str:
             return "n/a" if value is None else (f"+{value}" if value > 0 else str(value))
@@ -440,6 +509,11 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
                           push_discord=push_discord,
                           home_ml=home_ml, away_ml=away_ml,
                           over_price=over_price, under_price=under_price,
+                          runline=runline,
+                          runline_home_price=runline_home_price,
+                          runline_away_price=runline_away_price,
+                          market_total_given=(total_source in ("the line you gave",) or "live" in total_source),
+                          auto_odds=False,  # already bound above; avoid a second fetch
                           home_sp_limit=home_sp_limit,
                           away_sp_limit=away_sp_limit,
                           home_sp_name=game.get("home_pitcher"),
@@ -452,7 +526,13 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
         log(f"  [odds] real prices attached to {tagged} stored row(s)")
     return {"status": "ok", "home": home, "away": away, "result": result,
             "game": game, "total": total, "total_source": total_source,
-            "home_ml": home_ml, "away_ml": away_ml}
+            "home_ml": home_ml, "away_ml": away_ml,
+            "over_price": over_price, "under_price": under_price,
+            "runline": runline, "runline_home_price": runline_home_price,
+            "runline_away_price": runline_away_price,
+            "market_status": (result.get("market_status")
+                              or ("UNLISTED (Simulation Only - No EV)"
+                                  if total_source == "DEFAULT placeholder" else "user"))}
 
 
 # ==========================================================================
@@ -621,7 +701,7 @@ def market_lines(outcome: Dict[str, Any]) -> List[Tuple[str, str, str, str]]:
 def render_report(outcomes: List[Dict[str, Any]], default_total: float) -> None:
     log("")
     rule("=", 96)
-    log(f"⚾  MLB SLATE  —  {TODAY}  —  {len(outcomes)} game(s)")
+    log(f"⚾  {LEAGUE} SLATE  —  {SLATE_DATE}  —  {len(outcomes)} game(s)")
     rule("=", 96)
     log(f"   Badges:  {BADGE_STRONG} = max conviction   {BADGE_BET} = playable   "
         f"{BADGE_LEAN} = marginal   {BADGE_PASS} = no play   {BADGE_NODATA} = missing input")
@@ -679,7 +759,9 @@ def main() -> None:
     parser.add_argument("--match", action="append", metavar='"TEAM vs TEAM"',
                         help="Repeatable. Order does not matter.")
     parser.add_argument("--today", action="store_true",
-                        help="Run every game on today's schedule.")
+                        help="Run every game on the selected date's schedule.")
+    parser.add_argument("--date", metavar="YYYY-MM-DD",
+                        help="Schedule date (defaults to today); runs the full slate.")
     parser.add_argument("--total", type=float, action="append", metavar="N",
                         help="Market total. Repeat to give one per --match, or "
                              "pass once to use the same for all.")
@@ -708,6 +790,12 @@ def main() -> None:
                              "(default: on; uses quota).")
     parser.add_argument("--no-odds", dest="odds", action="store_false",
                         help="Skip the odds API (no market, no CLV).")
+    parser.add_argument("--runline", type=float, action="append", metavar="N",
+                        help="Run line (usually +/-1.5). Pairs with --match.")
+    parser.add_argument("--runline-home-price", type=int, action="append", metavar="ODDS",
+                        help="Price on the home run line. Pairs with --match.")
+    parser.add_argument("--runline-away-price", type=int, action="append", metavar="ODDS",
+                        help="Price on the away run line. Pairs with --match.")
     parser.add_argument("--teams", metavar="NAMES",
                         help="With --today: keep only games involving these "
                              "teams. Comma separated, partial names fine, e.g. "
@@ -719,16 +807,23 @@ def main() -> None:
     parser.add_argument("--list-teams", action="store_true")
     args = parser.parse_args()
 
-    global LEAGUE
+    global LEAGUE, SLATE_DATE
     LEAGUE = args.league.strip().upper()
+    if LEAGUE not in {"MLB", "KBO"}:
+        parser.error("--league must be MLB or KBO.")
+    if args.date:
+        try:
+            SLATE_DATE = _dt.date.fromisoformat(args.date).isoformat()
+        except ValueError:
+            parser.error("--date must use YYYY-MM-DD.")
 
     teams = load_mlb_teams()
     if not teams:
         rule()
-        log("No MLB teams in data/baseball_stats.json.")
+        log(f"No {LEAGUE} teams in data/baseball_stats.json.")
         rule()
         log("\nPull them first:")
-        log("    venv/Scripts/python.exe ingest_all_sports.py --only mlb")
+        log(f"    venv/Scripts/python.exe ingest_all_sports.py --only {LEAGUE.lower()}")
         sys.exit(1)
 
     if args.list_teams:
@@ -739,26 +834,36 @@ def main() -> None:
                 f"{record.get('runs_allowed')} RA/g  ERA {record.get('era')}")
         return
 
-    games, generated = load_probables()
-    if generated and not str(generated).startswith(TODAY):
-        log(f"[warn] mlb_probables.json is from {generated}, not today.")
-        log("       Refresh it so starters and orientation are current:")
-        log("       venv/Scripts/python.exe ingest_all_sports.py --only mlb-probables\n")
-    elif not games:
-        log("[warn] No games for today in mlb_probables.json. Refresh it:")
-        log("       venv/Scripts/python.exe ingest_all_sports.py --only mlb-probables\n")
+    if LEAGUE == "KBO":
+        try:
+            games = load_kbo_schedule(SLATE_DATE)
+        except requests.RequestException as exc:
+            log(f"[error] Could not fetch the KBO schedule: {exc}")
+            sys.exit(1)
+        generated = SLATE_DATE
+        if not games:
+            log(f"[KBO schedule] MyKBO Stats lists no games for {SLATE_DATE}.")
+    else:
+        games, generated = load_probables(SLATE_DATE)
+        if generated and not str(generated).startswith(SLATE_DATE):
+            log(f"[warn] mlb_probables.json is from {generated}, not {SLATE_DATE}.")
+            log("       Refresh it so starters and orientation are current:")
+            log("       venv/Scripts/python.exe ingest_all_sports.py --only mlb-probables\n")
+        elif not games:
+            log(f"[warn] No games for {SLATE_DATE} in mlb_probables.json. Refresh it:")
+            log("       venv/Scripts/python.exe ingest_all_sports.py --only mlb-probables\n")
 
     # ---- work out what to run -------------------------------------------
     pairs: List[Tuple[str, str, Optional[Dict[str, Any]]]] = []
     problems: List[str] = []
 
-    if args.today:
+    if args.today or args.date:
         for game in games:
             home, away = game.get("home_team"), game.get("away_team")
             if home in teams and away in teams:
                 pairs.append((home, away, game))
         if not pairs:
-            log("Nothing on today's schedule to run.")
+            log(f"Nothing on {SLATE_DATE}'s schedule to run.")
             sys.exit(1)
     else:
         requested = args.match or []
@@ -816,10 +921,15 @@ def main() -> None:
     if push_discord and not os.environ.get("DISCORD_WEBHOOK_URL"):
         log("[warn] DISCORD_WEBHOOK_URL not set -- will predict but not push.")
 
-    live_totals, live_mls = fetch_live_odds() if args.odds else ({}, {})
+    default_total = KBO_DEFAULT_TOTAL if LEAGUE == "KBO" else DEFAULT_TOTAL
+    if LEAGUE == "KBO" and args.odds:
+        log("[odds] The MLB odds feed does not cover KBO; skipping live odds.")
+    live_totals, live_mls = (
+        fetch_live_odds() if args.odds and LEAGUE == "MLB" else ({}, {})
+    )
 
     rule()
-    log(f"MLB  -  {len(pairs)} game(s)   Discord: {'ON' if push_discord else 'OFF'}")
+    log(f"{LEAGUE}  -  {len(pairs)} game(s)   Discord: {'ON' if push_discord else 'OFF'}")
     rule()
 
     try:
@@ -849,9 +959,9 @@ def main() -> None:
         missing = [w for w in wanted
                    if not any(w in p[0].lower() or w in p[1].lower() for p in kept)]
         if missing:
-            log(f"[teams] not on today's schedule: {', '.join(missing)}")
+            log(f"[teams] not on {SLATE_DATE}'s schedule: {', '.join(missing)}")
         if not kept:
-            log("[teams] filter matched no game on today's schedule -- nothing run.")
+            log(f"[teams] filter matched no game on {SLATE_DATE}'s schedule -- nothing run.")
             sys.exit(1)
         log(f"[teams] {len(kept)} of {len(pairs)} game(s) kept: "
             + "; ".join(f"{a} @ {h}" for h, a, _ in kept))
@@ -862,6 +972,9 @@ def main() -> None:
     away_mls = pair_values(args.away_ml, len(pairs), "away-ml")
     over_prices = pair_values(args.over_price, len(pairs), "over-price")
     under_prices = pair_values(args.under_price, len(pairs), "under-price")
+    runlines = pair_values(args.runline, len(pairs), "runline")
+    rl_home = pair_values(args.runline_home_price, len(pairs), "runline-home-price")
+    rl_away = pair_values(args.runline_away_price, len(pairs), "runline-away-price")
     # pair_values requires one value or exactly N. On a multi-game slate where
     # only one starter is capped, 0 is the way to say "no cap on this one".
     home_limits = [v or None for v in
@@ -877,8 +990,40 @@ def main() -> None:
         elif totals[index] is not None:
             total, source = float(totals[index]), "the line you gave"
         else:
-            total, source = DEFAULT_TOTAL, "DEFAULT placeholder"
+            # Tennis parity: one per-game auto-fetch before falling back to
+            # the placeholder, so a bare --match still prices when the feed
+            # has the fixture (Oct = offseason, so this usually stays empty).
+            auto0 = fetch_live_markets(home, away) if args.odds and LEAGUE == "MLB" else {}
+            if auto0.get("total_line") is not None:
+                total, source = float(auto0["total_line"]), f"live odds ({auto0.get('status')})"
+                live_totals[key] = total
+            else:
+                total, source = default_total, "DEFAULT placeholder"
         home_ml, away_ml = home_mls[index], away_mls[index]
+        over_price, under_price = over_prices[index], under_prices[index]
+        runline, rl_hp, rl_ap = runlines[index], rl_home[index], rl_away[index]
+        if args.odds and LEAGUE == "MLB" and (
+                home_ml is None or away_ml is None or over_price is None
+                or runline is None):
+            auto1 = fetch_live_markets(home, away)
+            if auto1.get("status") in ("live", "cached"):
+                if home_ml is None:
+                    home_ml = auto1.get("home_ml")
+                if away_ml is None:
+                    away_ml = auto1.get("away_ml")
+                if over_price is None:
+                    over_price = auto1.get("over_price")
+                if under_price is None:
+                    under_price = auto1.get("under_price")
+                if runline is None and auto1.get("runline") is not None:
+                    runline = float(auto1["runline"])
+                if rl_hp is None:
+                    rl_hp = auto1.get("runline_home_price")
+                if rl_ap is None:
+                    rl_ap = auto1.get("runline_away_price")
+                if home_ml is not None:
+                    log(f"  [odds] moneyline {home_ml:+g} / {away_ml:+g} "
+                        f"({auto1.get('status')})")
         if home_ml is None and away_ml is None:
             found = live_mls.get(key)
             if found is None:
@@ -900,18 +1045,21 @@ def main() -> None:
                                     home_ml=home_ml, away_ml=away_ml,
                                     home_sp_limit=home_limits[index],
                                     away_sp_limit=away_limits[index],
-                                    over_price=over_prices[index],
-                                    under_price=under_prices[index]))
+                                    over_price=over_price,
+                                    under_price=under_price,
+                                    runline=runline,
+                                    runline_home_price=rl_hp,
+                                    runline_away_price=rl_ap))
         except Exception as exc:  # noqa: BLE001
             log(f"  [FAILED] {type(exc).__name__}: {exc}")
             outcomes.append({"status": "failed", "home": home, "away": away,
                              "error": f"{type(exc).__name__}: {exc}"})
 
-    render_report(outcomes, DEFAULT_TOTAL)
+    render_report(outcomes, default_total)
 
     if any(o["status"] == "ok" for o in outcomes):
         if not live_totals and not args.total:
-            log(f"\nThe total ({DEFAULT_TOTAL}) was a placeholder. An edge measured")
+            log(f"\nThe total ({default_total}) was a placeholder. An edge measured")
             log("against a made-up line is just the gap between that guess and the")
             log("book. Use --odds or --total for a real number.")
         log("\nStored to multisport_history.db. Grade tomorrow once they are final:")

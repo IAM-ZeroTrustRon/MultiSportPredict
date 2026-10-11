@@ -53,7 +53,7 @@ class EuroleaguePredictor:
         if missing:
             raise ValueError(f"Missing EuroLeague metrics for '{team}': {', '.join(missing)}")
         for key in ("ortg", "drtg", "pace"):
-            if float(stats[key]) <= 0:
+            if not math.isfinite(float(stats[key])) or float(stats[key]) <= 0:
                 raise ValueError(f"EuroLeague metric '{key}' for '{team}' must be positive")
 
     @staticmethod
@@ -108,7 +108,7 @@ class EuroleaguePredictor:
             differential = home_points - away_points
             model_probability = self._normal_cdf(differential, config["sigma"])
             line = self._market_line(name)
-            edge = differential - line if line is not None else None
+            edge = differential + line if line is not None else None
             segment_result = {
                 "projected_home_points": round(home_points, 2),
                 "projected_away_points": round(away_points, 2),
@@ -143,8 +143,62 @@ class EuroleaguePredictor:
             "halftime": segments["halftime"],
             "full_game": segments["full_game"],
             "market_info": {"lines": self.market_lines},
-            "notes": "EuroLeague 40-minute model using seeded ORtg/DRtg/pace and historical segment splits.",
+            "notes": "40-minute model using stored/supplied ORtg/DRtg/pace and assumed segment splits.",
         }
+        from models.score_ratings import market_probability, price_market
+        full = segments["full_game"]
+        result["markets"] = []
+        line = self._market_line("full_game")
+        total_line = self.market_lines.get("total")
+        specs = list(self.market_lines.get("alternatives") or [])
+        if line is not None:
+            specs.append({"kind": "spread", "line": line,
+                "price_a": self.market_lines.get("spread_home_price"), "price_b": self.market_lines.get("spread_away_price")})
+        if total_line is not None:
+            specs.append({"kind": "total", "line": float(total_line),
+                "price_a": self.market_lines.get("over_price"), "price_b": self.market_lines.get("under_price")})
+        for spec in specs:
+            kind = spec["kind"]
+            mean = full["projected_spread"] if kind == "spread" else full["projected_total"]
+            sigma = full["sigma"] if kind == "spread" else float(self.league.get("total_sd", 16.0))
+            result["markets"].append(price_market(kind, spec["line"], market_probability(mean, sigma, spec["line"], kind == "spread"), spec.get("price_a"), spec.get("price_b")))
+        # Segment markets (Q1/H1): price spread + total + moneyline per segment
+        # when the caller supplied auto-fetched lines. Tennis parity -- every
+        # segment the feed prices gets an EV, not just the full game.
+        seg_extra = self.market_lines.get("segment_markets") or {}
+        for seg_name, seg_key in (("q1", "q1"), ("halftime", "h1")):
+            seg = segments[seg_name]
+            sline = self._market_line(seg_name)
+            if sline is not None:
+                seg["market_spread"] = sline
+                seg["spread_edge"] = round(seg["projected_spread"] + sline, 2)
+                seg["model_edge"] = seg["spread_edge"]
+                result["markets"].append(price_market(
+                    f"{seg_key}_spread", sline,
+                    market_probability(seg["projected_spread"], seg["sigma"], sline, True),
+                    seg_extra.get(f"{seg_key}_spread_home_price"),
+                    seg_extra.get(f"{seg_key}_spread_away_price")))
+            stotal = self.market_lines.get(f"{seg_key}_total")
+            if stotal is not None:
+                seg["market_total"] = float(stotal)
+                seg["total_edge"] = round(seg["projected_total"] - float(stotal), 2)
+                result["markets"].append(price_market(
+                    f"{seg_key}_total", float(stotal),
+                    market_probability(seg["projected_total"], seg["sigma"] * 1.45, float(stotal), False),
+                    seg_extra.get(f"{seg_key}_over_price"),
+                    seg_extra.get(f"{seg_key}_under_price")))
+            hml = seg_extra.get(f"{seg_key}_home_ml")
+            aml = seg_extra.get(f"{seg_key}_away_ml")
+            if hml is not None or aml is not None:
+                p = seg["home_moneyline_probability"]
+                result["markets"].append(price_market(
+                    f"{seg_key}_moneyline", 0.5, (p, 1 - p, 0), hml, aml))
+        fml_h, fml_a = self.market_lines.get("home_ml"), self.market_lines.get("away_ml")
+        if fml_h is not None or fml_a is not None:
+            p = full["home_moneyline_probability"]
+            result["markets"].append(price_market(
+                "moneyline", 0.5, (p, 1 - p, 0), fml_h, fml_a))
+        result["notes"] += " Spread is home-signed. Segment/total uncertainties are model assumptions unless fitted inputs are supplied; no calibrated confidence is claimed."
         result["segments"] = {"1q": segments["q1"], "ht": segments["halftime"], "fg": segments["full_game"]}
         return result
 
@@ -152,25 +206,35 @@ class EuroleaguePredictor:
 ROOT = Path(__file__).resolve().parent
 EUROLEAGUE_STORE = ROOT / "data" / "euroleague_stats.json"
 HOOPS_STORE = ROOT / "data" / "basketball_stats.json"
+BLEAGUE_STORE = ROOT / "data" / "bleague_stats.json"
 
 # CLI --league values that map onto the same underlying store slice.
+# NOTE: Australian NBL ("NBL": Brisbane, Illawarra, ...) and New Zealand
+# NBL ("NZ NBL": Wellington, Canterbury, ...) are DIFFERENT leagues with
+# different teams. Do not merge them -- a cross-league fallback would
+# dress foreign averages up as a prediction.
 LEAGUE_ALIASES = {
     "euroleague": "EuroLeague",
     "euro league": "EuroLeague",
     "el": "EuroLeague",
     "kbl": "KBL",
-    "nbl": "NZ NBL",
-    "nbl27": "NZ NBL",
+    "bbl": "BBL",
+    "bundesliga": "BBL",
+    "german bbl": "BBL",
+    "nbl": "NBL",
+    "australian nbl": "NBL",
+    "aus nbl": "NBL",
+    "nbl27": "NBL",
     "nznbl": "NZ NBL",
     "nz nbl": "NZ NBL",
     "nz-nbl": "NZ NBL",
     "new zealand nbl": "NZ NBL",
-    "australian nbl": "NZ NBL",
-    "bleague": "B.LEAGUE",
-    "b league": "B.LEAGUE",
-    "b.premier": "B.LEAGUE",
-    "b premier": "B.LEAGUE",
-    "japan b league": "B.LEAGUE",
+    "bleague": "B League",
+    "b league": "B League",
+    "b.league": "B League",
+    "b.premier": "B League",
+    "b premier": "B League",
+    "japan b league": "B League",
 }
 
 
@@ -235,21 +299,38 @@ def lookup_team_stats(team: str, league: str):
                 f"overrides or seed the store. "
                 f"Known: {', '.join(known)}")
         return hit
-    if flat in ("kbl", "nznbl"):
-        tag = "KBL" if flat == "kbl" else "NZ NBL"
+    if flat == "bleague":
+        store = _load_store(BLEAGUE_STORE)
+        teams = store.get("teams") if isinstance(store.get("teams"), dict) else store
+        hit = _find_team(teams, team)
+        if hit is None:
+            whole = _load_store(HOOPS_STORE)
+            hit = _find_team(_league_slice(whole, "B League"), team)
+        if hit is None:
+            known = sorted(n for n in teams if not n.startswith("_"))[:10]
+            raise SystemExit(
+                f"[STRICT-FAIL] '{team}' is not in {BLEAGUE_STORE.name} "
+                f"for league '{league}'. Pass --home/away-ortg/drtg/pace "
+                f"overrides or seed the store. Known: {', '.join(known)}")
+        return hit
+    if flat in ("kbl", "nznbl", "nbl"):
+        tag = {"kbl": "KBL", "nznbl": "NZ NBL", "nbl": "NBL"}[flat]
         sliced = _league_slice(_load_store(HOOPS_STORE), tag)
         hit = _find_team(sliced, team)
         if hit is None:
             known = sorted(sliced)[:10]
             raise SystemExit(
                 f"[STRICT-FAIL] '{team}' is not in {HOOPS_STORE.name} "
-                f"under '{tag}'. No EuroLeague fallback is applied. Pass "
+                f"under '{tag}'. No cross-league fallback is applied. Pass "
                 f"overrides or seed the store. Known: {', '.join(known)}")
         return hit
+    sliced = _league_slice(_load_store(HOOPS_STORE), canon)
+    hit = _find_team(sliced, team)
+    if hit is not None:
+        return hit
     raise SystemExit(
-        f"[STRICT-FAIL] League '{league}' has no team-metrics store "
-        f"(EuroLeague + KBL/NZ NBL only; no B-League data yet). Re-run "
-        f"with --home-ortg/--home-drtg/--home-pace and "
+        f"[STRICT-FAIL] League '{league}' has no team-metrics store. "
+        f"Re-run with --home-ortg/--home-drtg/--home-pace and "
         f"--away-ortg/--away-drtg/--away-pace.")
 
 
@@ -260,8 +341,15 @@ def _league_baseline(league: str, home_stats, away_stats) -> Dict[str, Any]:
         base = _load_store(EUROLEAGUE_STORE).get("_league_baseline")
         if isinstance(base, dict):
             return dict(base)
-    if flat in ("kbl", "nznbl"):
-        tag = "KBL" if flat == "kbl" else "NZ NBL"
+    if flat == "bleague":
+        base = _load_store(BLEAGUE_STORE).get("_league_baseline")
+        if isinstance(base, dict):
+            out = {"pace": 71.0, "ortg": 108.5, "drtg": 108.5,
+                   "q1_ratio": 0.245, "ht_ratio": 0.495}
+            out.update(base)
+            return out
+    if flat in ("kbl", "nznbl", "nbl"):
+        tag = {"kbl": "KBL", "nznbl": "NZ NBL", "nbl": "NBL"}[flat]
         rows = _league_slice(_load_store(HOOPS_STORE), tag)
         paces = [float(r["pace"]) for r in rows.values() if r.get("pace")]
         ortgs = [float(r["ortg"]) for r in rows.values() if r.get("ortg")]
@@ -271,7 +359,8 @@ def _league_baseline(league: str, home_stats, away_stats) -> Dict[str, Any]:
                     "ortg": avg, "drtg": avg,
                     "q1_ratio": 0.245, "ht_ratio": 0.495}
     pace = round((float(home_stats["pace"]) + float(away_stats["pace"])) / 2.0, 2)
-    return {"pace": pace, "ortg": 112.0, "drtg": 112.0,
+    avg = sum(float(r[k]) for r in (home_stats, away_stats) for k in ("ortg", "drtg"))/4
+    return {"pace": pace, "ortg": avg, "drtg": avg,
             "q1_ratio": 0.245, "ht_ratio": 0.495}
 
 
@@ -288,6 +377,18 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--away-ortg", type=float, default=None)
     p.add_argument("--away-drtg", type=float, default=None)
     p.add_argument("--away-pace", type=float, default=None)
+    p.add_argument("--game-date", default=None)
+    p.add_argument("--push-discord", action="store_true")
+    p.add_argument("--store-to-db", action="store_true")
+    for flag in ("home-ml", "away-ml", "spread-home-price", "spread-away-price", "over-price", "under-price"):
+        p.add_argument("--"+flag, type=float)
+    for flag in ("q1-spread", "q1-total", "h1-spread", "h1-total"):
+        p.add_argument("--"+flag, type=float, default=None,
+                       help=f"Auto-fetched {flag} line (no manual entry needed).")
+    p.add_argument("--segment-markets", type=str, default=None,
+                   help="JSON with Q1/H1 moneyline + spread/total prices from auto-fetch.")
+    p.add_argument("--alt-total", action="append", nargs=3, metavar=("LINE", "OVER_ODDS", "UNDER_ODDS"))
+    p.add_argument("--alt-spread", action="append", nargs=3, metavar=("HOME_LINE", "HOME_ODDS", "AWAY_ODDS"))
     p.add_argument("--output-json", type=Path, default=None)
     return p
 
@@ -303,7 +404,7 @@ def _override_stats(prefix: str, args) -> Optional[Dict[str, float]]:
             f"{', '.join(f'--{prefix}-{m}' for m in missing)}. "
             f"Supply all three of --{prefix}-ortg/drtg/pace or none.")
     for k, v in vals.items():
-        if v <= 0:
+        if not math.isfinite(v) or v <= 0:
             raise SystemExit(f"[STRICT-FAIL] --{prefix}-{k} must be positive.")
     return {"ortg": float(vals["ortg"]), "drtg": float(vals["drtg"]),
             "pace": float(vals["pace"])}
@@ -327,6 +428,38 @@ def run_cli(args=None) -> Dict[str, Any]:
     market_lines: Dict[str, float] = {}
     if ns.market_spread is not None:
         market_lines["spread"] = float(ns.market_spread)
+    market_lines["total"] = ns.market_total
+    for key in ("spread_home_price", "spread_away_price", "over_price", "under_price"):
+        market_lines[key] = getattr(ns, key)
+    if getattr(ns, "q1_spread", None) is not None:
+        market_lines["q1"] = float(ns.q1_spread)
+    if getattr(ns, "q1_total", None) is not None:
+        market_lines["q1_total"] = float(ns.q1_total)
+    if getattr(ns, "h1_spread", None) is not None:
+        market_lines["halftime"] = float(ns.h1_spread)
+    if getattr(ns, "h1_total", None) is not None:
+        market_lines["h1_total"] = float(ns.h1_total)
+    if getattr(ns, "segment_markets", None):
+        try:
+            market_lines["segment_markets"] = json.loads(ns.segment_markets)
+        except (ValueError, TypeError):
+            pass
+    if getattr(ns, "home_ml", None) is not None:
+        market_lines["home_ml"] = float(ns.home_ml)
+    if getattr(ns, "away_ml", None) is not None:
+        market_lines["away_ml"] = float(ns.away_ml)
+    market_lines["alternatives"] = []
+    for flag, kind in (("alt_total", "total"), ("alt_spread", "spread")):
+        for line, a, b in getattr(ns, flag) or []:
+            market_lines["alternatives"].append({"kind": kind, "line": float(line),
+                "price_a": None if a.lower()=="none" else float(a), "price_b": None if b.lower()=="none" else float(b)})
+    from data_guard import check_records
+    for name, metrics, override in ((home_name, home_stats, home_over), (away_name, away_stats, away_over)):
+        if override is None:
+            issues = check_records({name: metrics}, "basketball")
+            errors = [p.message for p in issues if p.severity == "error"]
+            if errors:
+                raise SystemExit("[STRICT-FAIL] " + "; ".join(errors))
     baseline = _league_baseline(league, home_stats, away_stats)
     predictor = EuroleaguePredictor(
         home_name, away_name, home_stats, away_stats,
@@ -335,11 +468,31 @@ def run_cli(args=None) -> Dict[str, Any]:
     result["league"] = league
     result["market_info"]["total"] = (float(ns.market_total)
                                       if ns.market_total is not None else None)
-    result["notes"] = (
-        f"{league} model using seeded ORtg/DRtg/pace and segment splits. "
+    result["notes"] += (
+        f" {league} model using stored or supplied ORtg/DRtg/pace and assumed segment splits. "
         f"Strict-fail lookup: unlisted teams stop the run unless "
         f"--home/away-ortg/drtg/pace overrides are supplied.")
 
+    if ns.home_ml is not None or ns.away_ml is not None:
+        from models.score_ratings import price_market
+        p = result["full_game"]["home_moneyline_probability"]
+        result["markets"].append(price_market("moneyline", 0.5, (p, 1-p, 0), ns.home_ml, ns.away_ml))
+    for item in result["markets"]:
+        print(f"{item['kind']} {item['line']}: {item['prob_a']:.1%}/{item['prob_b']:.1%}, push {item['push_prob']:.1%}; {item['recommendation']}")
+    if ns.store_to_db:
+        if not ns.game_date:
+            raise SystemExit("--store-to-db requires --game-date YYYY-MM-DD for international basketball")
+        from run_ncaaf import store
+        projected = result["full_game"]
+        store({"sport": "basketball", "league": league, "game_date": ns.game_date,
+            "game_id": f"{league}:{ns.game_date}:{home_name}:{away_name}",
+            "home_team": home_name, "away_team": away_name, "markets": result["markets"],
+            "projection": {"home_points": projected["projected_home_points"], "away_points": projected["projected_away_points"]},
+            "model_result": result})
+    if ns.push_discord:
+        from universal_runner import _push_full_result
+        if not _push_full_result("basketball", home_name, away_name, result):
+            raise SystemExit("Discord push failed")
     if ns.output_json is not None:
         out = ns.output_json
         try:

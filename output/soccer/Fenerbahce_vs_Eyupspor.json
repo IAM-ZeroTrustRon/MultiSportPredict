@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "Turkish Super Lig",
+  "home_team": "Fenerbahce",
+  "away_team": "Eyupspor",
+  "timestamp": "2026-09-20T11:14:09.651182",
+  "game": {
+    "projected_home_goals": 1.51,
+    "projected_away_goals": 0.58,
+    "projected_total_goals": 2.09,
+    "home_win_prob": 0.599,
+    "draw_prob": 0.259,
+    "away_win_prob": 0.142
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.931,
+      "market_line": 0.0,
+      "edge": 0.931,
+      "confidence": 41.7,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 2.091,
+      "market_total": 2.5,
+      "edge": -0.409,
+      "confidence": 31.9,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.399,
+      "confidence": 43.3,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.618,
+    "over_25_prob": 0.348,
+    "over_35_prob": 0.16
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.399,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.6,
+      "xg_against": 1.2,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.6,
+      "goals_against": 1.2,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 0.4,
+      "xg_against": 1.6,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 0.4,
+      "goals_against": 1.6,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

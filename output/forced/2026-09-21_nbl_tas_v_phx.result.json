@@ -1,0 +1,123 @@
+{
+  "home": "Tasmania JackJumpers",
+  "away": "SE Melbourne Phoenix",
+  "proj_home": 91.3,
+  "proj_away": 92.6,
+  "margin": -1.3,
+  "total": 183.9,
+  "p_home_win": 0.45851854308844286,
+  "league_avg": 92.0,
+  "league_avg_source": "mean of the two teams' supplied for/against",
+  "hfa": 2.0,
+  "adjustments": [
+    "inputs regressed 30% toward average",
+    "away -2.0: ESTIMATE: Perth Sat -> Hobart Mon, ~48h, cross-country flight. Not a measured number."
+  ],
+  "markets": [
+    {
+      "market": "Game spread",
+      "line": "home +3.5",
+      "pick": "HOME (Tasmania JackJumpers)",
+      "prob": 0.5743656881558967,
+      "fair": "-135",
+      "edge": 5.0556164346372885,
+      "call": "LEAN"
+    },
+    {
+      "market": "Game total",
+      "line": "185.5",
+      "pick": "UNDER",
+      "prob": 0.5363238145917175,
+      "fair": "-116",
+      "edge": 1.2523814591717475,
+      "call": "PASS",
+      "proj": 183.9
+    },
+    {
+      "market": "Game moneyline",
+      "line": "+123/-152",
+      "pick": "HOME (Tasmania JackJumpers)",
+      "prob": 0.45851854308844286,
+      "fair": "+118 home",
+      "edge": 3.209374276354776,
+      "call": "LEAN"
+    },
+    {
+      "market": "1Q spread",
+      "line": "home +0.5",
+      "pick": "HOME (Tasmania JackJumpers)",
+      "prob": 0.5124649174343769,
+      "fair": "-105",
+      "edge": 1.2464917434376943,
+      "call": "PASS"
+    },
+    {
+      "market": "1Q total",
+      "line": "47.5",
+      "pick": "UNDER",
+      "prob": 0.5706154136539963,
+      "fair": "-133",
+      "edge": 2.9331009984271517,
+      "call": "PASS",
+      "proj": 46.0
+    },
+    {
+      "market": "1Q Tasmania JackJumpers team total",
+      "line": "23.5",
+      "pick": "UNDER",
+      "prob": 0.5438847179339762,
+      "fair": "-119",
+      "edge": -2.876485471559642,
+      "call": "PASS",
+      "proj": 22.8
+    },
+    {
+      "market": "1Q SE Melbourne Phoenix team total",
+      "line": "24.5",
+      "pick": "UNDER",
+      "prob": 0.5888588090559009,
+      "fair": "-143",
+      "edge": 3.3303253500345353,
+      "call": "LEAN",
+      "proj": 23.2
+    }
+  ],
+  "props": [
+    {
+      "player": "Skylar Mays",
+      "stat": "points",
+      "line": 16.5,
+      "avg": 16.0,
+      "games": 1,
+      "proj": 16.4,
+      "sd": 5.7,
+      "sd_default": true,
+      "pick": "UNDER",
+      "prob": 0.5057857620732029,
+      "edge": -1.802376173632092,
+      "call": "PASS"
+    },
+    {
+      "player": "Dash Daniels",
+      "stat": "PRA",
+      "line": 17.5,
+      "avg": 36.0,
+      "games": 1,
+      "proj": 20.6,
+      "sd": 7.2,
+      "sd_default": true,
+      "pick": "OVER",
+      "prob": 0.6656719133070671,
+      "edge": 14.186238949754326,
+      "call": "BET"
+    }
+  ],
+  "thin_samples": [],
+  "settings": {
+    "margin_sd": 12.0,
+    "total_sd": 17.0,
+    "hfa": 2.0,
+    "h1": 0.49,
+    "q1": 0.25
+  }
+}

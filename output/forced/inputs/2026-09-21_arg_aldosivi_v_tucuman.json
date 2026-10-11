@@ -1,0 +1,36 @@
+{
+  "sport": "soccer",
+  "league": "Liga Profesional Argentina",
+  "date": "2026-09-21",
+  "start_et": "1:30 PM ET",
+  "venue": "Estadio Jose Maria Minella, Mar del Plata",
+  "home": {
+    "name": "Aldosivi",
+    "pts_for": 1.222,
+    "pts_against": 1.778,
+    "games": 9,
+    "source": "Clausura 2026 after R9 (Unitel/Wikipedia): 1-2-6, GF 11, GA 16; matches store (ESPN 1.222/1.778)"
+  },
+  "away": {
+    "name": "Atletico Tucuman",
+    "pts_for": 0.778,
+    "pts_against": 0.556,
+    "games": 9,
+    "source": "Clausura 2026 after R9 (Unitel/Wikipedia): 3-4-2, GF 7, GA 5; matches store (ESPN 0.778/0.556)"
+  },
+  "regress": 0.0,
+  "adjustments": [],
+  "_not_adjusted": "Tucuman Copa game Sep 16 (5 days rest, penalties, no extra time) - judged too small to price.",
+  "market": {
+    "ml_home": 230,
+    "ml_draw": 185,
+    "ml_away": 140,
+    "dnb_away": -152,
+    "total": 2.5,
+    "over_price": 170,
+    "under_price": -244,
+    "btts_yes": 120,
+    "btts_no": -161,
+    "_source": "1X2 Bet365 3.30/2.85/2.40 via Wincomparator; O/U 2.70/1.41 and BTTS 2.20/1.62 Wincomparator (book not named); DNB -152 Sportsgambler."
+  }
+}

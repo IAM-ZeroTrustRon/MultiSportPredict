@@ -1,0 +1,50 @@
+{
+  "title": "Erovnuli Liga | FC Spaeri vs Dila Gori",
+  "description": "**RESEARCH CARD - not model output.** Round 27.\nMon 21 Sep - 1:00pm ET - Tbilisi",
+  "color": 3066993,
+  "fields": [
+    {
+      "name": "Market",
+      "inline": false,
+      "value": "Dila ML +120 (Bovada)\nDila X2 -345\nOver 2.5: 1.86\n(no other named prices found)"
+    },
+    {
+      "name": "Best bet",
+      "inline": false,
+      "value": "**None.** Small BTTS Yes only at -125 or better."
+    },
+    {
+      "name": "Leans",
+      "inline": false,
+      "value": "- Side: PASS (Dila needs 45.5% at +120, quick check 35.6%)\n- BTTS Yes: small, only at -125 or better\n- Over 2.5: pass"
+    },
+    {
+      "name": "Why",
+      "inline": false,
+      "value": "- Dila 5th (37 pts), Spaeri 9th (25) - but season goals are close: 34-29 vs 33-39\n- Dila won last 5 H2H (3-1 in June)\n- Over 2.5 in 10 of Dila's last 11; Spaeri conceded in 14 of 15"
+    },
+    {
+      "name": "Check before betting",
+      "inline": false,
+      "value": "- No injury news found for either side\n- 'Dila strong on Under 1.5' claim is out of date"
+    },
+    {
+      "name": "Against",
+      "inline": false,
+      "value": "Spaeri home games avg 1.67 total goals; Dila away 1.27. Recent trend and season split disagree."
+    },
+    {
+      "name": "Confidence",
+      "inline": true,
+      "value": "Low"
+    },
+    {
+      "name": "Sharp data",
+      "inline": true,
+      "value": "None exists for this league"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - research, not a model pick"
+  }
+}

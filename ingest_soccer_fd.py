@@ -322,7 +322,8 @@ def merge_store(records: Dict[str, Dict[str, Any]], path: Path) -> None:
             backup = path.with_suffix(".corrupt.json")
             path.replace(backup)
             log(f"    [warn] {path.name} was not valid JSON; moved to {backup.name}")
-    existing.update(records)
+    from soccer_store import merge_records
+    existing = merge_records(existing, records)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(existing, indent=2, ensure_ascii=False) + "\n",

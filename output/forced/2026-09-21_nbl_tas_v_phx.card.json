@@ -1,0 +1,25 @@
+{
+  "title": "Australian NBL | SE Melbourne Phoenix @ Tasmania JackJumpers",
+  "description": "**FORCED RUN - model math on web-sourced inputs, guards off.**\n2026-09-21 5:30 AM ET MyState Bank Arena, Hobart",
+  "color": 14510880,
+  "fields": [
+    {
+      "name": "Projection",
+      "inline": false,
+      "value": "Tasmania JackJumpers 91.3 - SE Melbourne Phoenix 92.6\nTotal 183.9 | Home win 45.9%"
+    },
+    {
+      "name": "Plays (edge, pct pts)",
+      "inline": false,
+      "value": "**BET** Dash Daniels PRA 17.5 -> OVER (+14.2)\n**LEAN** Game spread home +3.5 -> HOME (Tasmania JackJumpers) (+5.1)\n**LEAN** 1Q SE Melbourne Phoenix team total 24.5 -> UNDER (+3.3)\n**LEAN** Game moneyline +123/-152 -> HOME (Tasmania JackJumpers) (+3.2)"
+    },
+    {
+      "name": "Adjustments",
+      "inline": false,
+      "value": "inputs regressed 30% toward average\naway -2.0: ESTIMATE: Perth Sat -> Hobart Mon, ~48h, cross-country flight. Not a measured number."
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - FORCED RUN, not stored, not graded"
+  }
+}

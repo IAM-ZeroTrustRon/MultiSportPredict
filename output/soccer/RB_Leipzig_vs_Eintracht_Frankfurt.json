@@ -1,0 +1,123 @@
+{
+  "sport": "soccer",
+  "league": "Bundesliga",
+  "home_team": "RB Leipzig",
+  "away_team": "Eintracht Frankfurt",
+  "timestamp": "2026-10-10T11:06:45.938516",
+  "game": {
+    "projected_home_goals": 2.47,
+    "projected_away_goals": 1.85,
+    "projected_total_goals": 4.33,
+    "home_win_prob": 0.504,
+    "draw_prob": 0.201,
+    "away_win_prob": 0.295
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.618,
+      "market_line": 0.0,
+      "edge": 0.618,
+      "confidence": 36.3,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 4.327,
+      "market_total": 2.5,
+      "edge": 1.827,
+      "confidence": 54.3,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.811,
+      "confidence": 68.2,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.93,
+    "over_25_prob": 0.806,
+    "over_35_prob": 0.628
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.811,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 2.25,
+      "xg_against": 1.25,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 2.25,
+      "goals_against": 1.25,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 2.25,
+      "xg_against": 2.5,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 2.25,
+      "goals_against": 2.5,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.15,
+    "avg_goals_per_game": 3.1,
+    "home_advantage": 0.3,
+    "draw_rate": 0.23,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real",
+  "h1_home_ml": -105,
+  "h1_away_ml": 310,
+  "h1_draw_ml": 185,
+  "corner_total_line": 12.5,
+  "corner_over_price": 235,
+  "corner_under_price": -350,
+  "btts_yes_price": -290,
+  "btts_no_price": 220,
+  "auto_odds": {
+    "away_ml": 330,
+    "home_ml": -170,
+    "draw_ml": 350,
+    "corner_total_line": 12.5,
+    "corner_over_price": 235,
+    "corner_under_price": -350,
+    "btts_yes_price": -290,
+    "btts_no_price": 220,
+    "h1_away_ml": 310,
+    "h1_home_ml": -105,
+    "h1_draw_ml": 185,
+    "status": "live",
+    "captured_at": "2026-10-10T15:06:30+00:00"
+  },
+  "market_moneyline": {
+    "home_ml": -170,
+    "draw_ml": 350,
+    "away_ml": 330,
+    "source": "live",
+    "captured_at": "2026-10-10T15:06:30+00:00"
+  },
+  "market_status": "live"
+}

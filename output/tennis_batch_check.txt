@@ -1,0 +1,328 @@
+================================================================================================
+Shanghai  R2   Frances Tiafoe  vs  Yannick Hanfmann   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Frances Tiafoe           69-41 overall   rank 12    clay 18-11  grass 10-4  hard 41-26
+  Yannick Hanfmann         36-31 overall   rank 54    clay 17-13  grass 4-6  hard 15-12
+[tennis_predictor] Elo built from 10131 real matches (matches.csv).
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Frances Tiafoe vs Yannick Hanfmann 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ PASS — Moneyline market efficient  │               69.0% / 31.0% │ heuristic score 78; not accuracy   │
+│              │ @ 68.3% market                     │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       46.6% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=47%; no      │                             │ projection -- P(covers)=60%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       58.8% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 58.8% / 41.2% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 46.6% / 53.4% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 39.7% / 60.3% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 53.6% / 46.4% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Frances Tiafoe -250 / Yannick Hanfmann +202   no-vig 68.3% for Frances Tiafoe
+  games_total +22.5: OVER 58.8% / UNDER 41.2%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 46.6% / UNDER 53.4%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Frances Tiafoe 39.7% / Yannick Hanfmann 60.3%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Frances Tiafoe 53.6% / Yannick Hanfmann 46.4%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+================================================================================================
+Shanghai  R2   Jakub Mensik  vs  Miomir Kecmanovic   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Jakub Mensik             67-39 overall   rank 15    clay 14-8  grass 5-5  hard 48-26
+  Miomir Kecmanovic        41-52 overall   rank 61    clay 5-13  grass 4-6  hard 32-33
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Jakub Mensik vs Miomir Kecmanovic 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ PASS — Moneyline market efficient  │               71.5% / 28.5% │ heuristic score 82; not accuracy   │
+│              │ @ 72.7% market                     │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       45.6% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=46%; no      │                             │ projection -- P(covers)=58%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       57.2% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 57.2% / 42.8% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 45.6% / 54.4% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 42.0% / 58.0% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 57.2% / 42.8% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Jakub Mensik -335 / Miomir Kecmanovic +245   no-vig 72.7% for Jakub Mensik
+  games_total +22.5: OVER 57.2% / UNDER 42.8%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 45.6% / UNDER 54.4%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Jakub Mensik 42.0% / Miomir Kecmanovic 58.0%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Jakub Mensik 57.2% / Miomir Kecmanovic 42.8%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+================================================================================================
+Shanghai  R2   Novak Djokovic  vs  Hubert Hurkacz   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Novak Djokovic           58-18 overall   rank 5     clay 11-5  grass 10-2  hard 37-11
+  Hubert Hurkacz           41-30 overall   rank 46    clay 11-8  grass 5-3  hard 25-19
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Novak Djokovic vs Hubert Hurkacz 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ PASS — Moneyline market efficient  │               69.9% / 30.1% │ heuristic score 80; not accuracy   │
+│              │ @ 64.2% market                     │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       46.3% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=46%; no      │                             │ projection -- P(covers)=60%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       60.4% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 60.4% / 39.6% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 46.3% / 53.7% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 40.5% / 59.5% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 54.0% / 46.0% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Novak Djokovic -210 / Hubert Hurkacz +165   no-vig 64.2% for Novak Djokovic
+  games_total +22.5: OVER 60.4% / UNDER 39.6%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 46.3% / UNDER 53.7%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Novak Djokovic 40.5% / Hubert Hurkacz 59.5%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Novak Djokovic 54.0% / Hubert Hurkacz 46.0%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+================================================================================================
+Shanghai  R2   Alexander Bublik  vs  Tomas Machac   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Alexander Bublik         65-42 overall   rank 21    clay 24-13  grass 10-4  hard 31-25
+  Tomas Machac             38-33 overall   rank 58    clay 8-10  grass 3-2  hard 27-21
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Alexander Bublik vs Tomas Machac 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ LEAN Tomas Machac Moneyline @      │               58.0% / 42.0% │ heuristic score 62; not accuracy   │
+│              │ 38.0% market — uncalibrated model  │                             │                                    │
+│              │ EV edge                            │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       49.4% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=49%; no      │                             │ projection -- P(covers)=69%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       62.5% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 62.5% / 37.5% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 49.4% / 50.6% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 30.6% / 69.4% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 43.2% / 56.8% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Alexander Bublik -184 / Tomas Machac +152   no-vig 62.0% for Alexander Bublik
+  games_total +22.5: OVER 62.5% / UNDER 37.5%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 49.4% / UNDER 50.6%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Alexander Bublik 30.6% / Tomas Machac 69.4%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Alexander Bublik 43.2% / Tomas Machac 56.8%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+================================================================================================
+Shanghai  R2   Francisco Cerundolo  vs  Roman Safiullin   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Francisco Cerundolo      73-44 overall   rank 22    clay 34-18  grass 5-3  hard 34-23
+  Roman Safiullin          15-24 overall   rank 102   clay 0-4  grass 4-5  hard 11-15
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Francisco Cerundolo vs Roman Safiullin 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ LEAN Francisco Cerundolo Moneyline │               67.8% / 32.2% │ heuristic score 77; not accuracy   │
+│              │ @ 50.0% market — uncalibrated      │                             │                                    │
+│              │ model EV edge                      │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       47.1% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=47%; no      │                             │ projection -- P(covers)=62%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       58.4% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 58.4% / 41.6% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 47.1% / 52.9% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 38.5% / 61.5% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 52.8% / 47.2% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Francisco Cerundolo -110 / Roman Safiullin -110   no-vig 50.0% for Francisco Cerundolo
+  games_total +22.5: OVER 58.4% / UNDER 41.6%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 47.1% / UNDER 52.9%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Francisco Cerundolo 38.5% / Roman Safiullin 61.5%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Francisco Cerundolo 52.8% / Roman Safiullin 47.2%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+================================================================================================
+Shanghai  R2   Matteo Berrettini  vs  Brandon Nakashima   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Matteo Berrettini        40-32 overall   rank 43    clay 13-11  grass 2-2  hard 25-19
+  Brandon Nakashima        65-48 overall   rank 16    clay 10-12  grass 10-5  hard 45-31
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Matteo Berrettini vs Brandon Nakashima 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ PASS — Moneyline market efficient  │               38.2% / 61.8% │ heuristic score 68; not accuracy   │
+│              │ @ 41.1% market                     │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       48.7% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=49%; no      │                             │ projection -- P(covers)=66%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       65.0% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 65.0% / 35.0% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 48.7% / 51.3% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 17.7% / 82.3% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 23.1% / 76.9% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Matteo Berrettini +132 / Brandon Nakashima -162   no-vig 41.1% for Matteo Berrettini
+  games_total +22.5: OVER 65.0% / UNDER 35.0%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 48.7% / UNDER 51.3%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Matteo Berrettini 17.7% / Brandon Nakashima 82.3%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Matteo Berrettini 23.1% / Brandon Nakashima 76.9%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+================================================================================================
+Shanghai  R2   Quentin Halys  vs  Alexander Blockx   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Quentin Halys            35-44 overall   rank 49    clay 12-7  grass 4-7  hard 19-30
+  Alexander Blockx         26-19 overall   rank 34    clay 15-6  grass 0-2  hard 11-11
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Quentin Halys vs Alexander Blockx 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ LEAN Alexander Blockx Moneyline @  │               39.9% / 60.1% │ heuristic score 65; not accuracy   │
+│              │ 51.0% market — uncalibrated model  │                             │                                    │
+│              │ EV edge                            │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       49.1% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=49%; no      │                             │ projection -- P(covers)=68%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       62.5% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 62.5% / 37.5% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 49.1% / 50.9% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 18.7% / 81.3% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 25.6% / 74.4% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Quentin Halys -106 / Alexander Blockx -115   no-vig 49.0% for Quentin Halys
+  games_total +22.5: OVER 62.5% / UNDER 37.5%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 49.1% / UNDER 50.9%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Quentin Halys 18.7% / Alexander Blockx 81.3%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Quentin Halys 25.6% / Alexander Blockx 74.4%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+================================================================================================
+Shanghai  R2   Arthur Gea  vs  Ugo Humbert   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Arthur Gea               13-7 overall   rank 87    clay 0-2  hard 13-5
+  Ugo Humbert              51-42 overall   rank 30    clay 7-10  grass 12-8  hard 32-24
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Arthur Gea vs Ugo Humbert 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ PASS — Moneyline market efficient  │               58.8% / 41.2% │ heuristic score 63; not accuracy   │
+│              │ @ 53.0% market                     │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       49.3% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=49%; no      │                             │ projection -- P(covers)=69%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       61.4% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 61.4% / 38.6% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 49.3% / 50.7% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 31.3% / 68.7% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 43.9% / 56.1% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Arthur Gea -128 / Ugo Humbert +101   no-vig 53.0% for Arthur Gea
+  games_total +22.5: OVER 61.4% / UNDER 38.6%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 49.3% / UNDER 50.7%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Arthur Gea 31.3% / Ugo Humbert 68.7%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Arthur Gea 43.9% / Ugo Humbert 56.1%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+================================================================================================
+Shanghai  R2   Alex de Minaur  vs  Alex Molcan   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Alex de Minaur           92-43 overall   rank 7     clay 17-11  grass 11-5  hard 64-27
+  Alex Molcan              16-10 overall   rank 94    clay 11-5  grass 1-2  hard 4-3
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Alex de Minaur vs Alex Molcan 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ PASS — Moneyline market efficient  │               73.4% / 26.6% │ heuristic score 85; not accuracy   │
+│              │ @ 69.7% market                     │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       44.8% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=45%; no      │                             │ projection -- P(covers)=56%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       57.1% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 57.1% / 42.9% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 44.8% / 55.2% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 43.8% / 56.2% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 59.7% / 40.3% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Alex de Minaur -271 / Alex Molcan +215   no-vig 69.7% for Alex de Minaur
+  games_total +22.5: OVER 57.1% / UNDER 42.9%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 44.8% / UNDER 55.2%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Alex de Minaur 43.8% / Alex Molcan 56.2%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Alex de Minaur 59.7% / Alex Molcan 40.3%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+================================================================================================
+Shanghai  R2   Alejandro Davidovich Fokina  vs  Jenson Brooksby   (hard, best of 3)
+------------------------------------------------------------------------------------------------
+  Alejandro Davidovich Fokina 71-42 overall   rank 20    clay 14-11  grass 14-5  hard 43-26
+  Jenson Brooksby          36-37 overall   rank 74    clay 6-6  grass 9-7  hard 21-24
+Fixture date: 2026-10-09 (matched odds event)
+
+TENNIS | Alejandro Davidovich Fokina vs Jenson Brooksby 
+                                                    Recommendations                                                     
+┌──────────────┬────────────────────────────────────┬─────────────────────────────┬────────────────────────────────────┐
+│ Market       │ Recommendation                     │                 Probability │ Edge / Confidence                  │
+├──────────────┼────────────────────────────────────┼─────────────────────────────┼────────────────────────────────────┤
+│ 💰 Moneyline │ PASS — Moneyline market efficient  │               65.4% / 34.6% │ heuristic score 73; not accuracy   │
+│              │ @ 66.4% market                     │                             │                                    │
+│ Sets         │ MODEL ONLY - UNDER 2.5 Sets        │                       47.8% │ MODEL ONLY - Underdog +1.5 Sets    │
+│              │ projection -- P(over)=48%; no      │                             │ projection -- P(covers)=64%; no    │
+│              │ price                              │                             │ price                              │
+│ Total games  │ MODEL ONLY - no priced total       │                       59.9% │                                    │
+│              │ supplied                           │                             │                                    │
+│ Games Total  │ MODEL ONLY — uncalibrated          │          O/U: 59.9% / 40.1% │ Prices None / None; push 0.0%      │
+│ Sets Total   │ MODEL ONLY — uncalibrated          │          O/U: 47.8% / 52.2% │ Prices None / None; push 0.0%      │
+│ Sets Spread  │ MODEL ONLY — uncalibrated          │ First/Second: 36.5% / 63.5% │ Prices None / None; push 0.0%      │
+│ Games Spread │ MODEL ONLY — uncalibrated          │ First/Second: 50.2% / 49.8% │ Prices None / None; push 0.0%      │
+└──────────────┴────────────────────────────────────┴─────────────────────────────┴────────────────────────────────────┘
+[OK] Tennis prediction stored to multisport_history.db
+  odds auto-fetched (cached, captured 2026-10-09T04:06:46+00:00): Alejandro Davidovich Fokina -230 / Jenson Brooksby +184   no-vig 66.4% for Alejandro Davidovich Fokina
+  games_total +22.5: OVER 59.9% / UNDER 40.1%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_total +2.5: OVER 47.8% / UNDER 52.2%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  sets_spread -1.5: Alejandro Davidovich Fokina 36.5% / Jenson Brooksby 63.5%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+  games_spread -2.5: Alejandro Davidovich Fokina 50.2% / Jenson Brooksby 49.8%, push 0.0% | prices None / None | EV None / None | MODEL ONLY — uncalibrated
+
+==============================================================================================================
+📋  REVIEW  —  model vs market (vig removed).  Nothing has been pushed.
+==============================================================================================================
+   #  🎾 MATCH                                       🏆 TOURN         🏟️ SURF  🤖 MODEL📊 NO-VIG  ⚡ EDGE    HEUR  🎯 REC
+  --------------------------------------------------------------------------------------------------------------
+   1  Frances Tiafoe vs Yannick Hanfmann            Shanghai        🟦 hard     69.0%   68.3%   +0.7%     78%  PASS — priced model EV below 5%
+   2  Jakub Mensik vs Miomir Kecmanovic             Shanghai        🟦 hard     71.5%   72.7%   -1.1%     82%  PASS — priced model EV below 5%
+   3  Novak Djokovic vs Hubert Hurkacz              Shanghai        🟦 hard     69.9%   64.2%   +5.7%     80%  PASS — priced model EV below 5%
+   4  Alexander Bublik vs Tomas Machac              Shanghai        🟦 hard     58.0%   62.0%   -4.0%     62%  LEAN Tomas Machac ML — uncalibrated model EV
+   5  Francisco Cerundolo vs Roman Safiullin        Shanghai        🟦 hard     67.8%   50.0%  +17.8%     77%  LEAN Francisco Cerundolo ML — uncalibrated model EV
+   6  Matteo Berrettini vs Brandon Nakashima        Shanghai        🟦 hard     38.2%   41.1%   -2.9%     68%  PASS — priced model EV below 5%
+   7  Quentin Halys vs Alexander Blockx             Shanghai        🟦 hard     39.9%   49.0%   -9.2%     65%  LEAN Alexander Blockx ML — uncalibrated model EV
+   8  Arthur Gea vs Ugo Humbert                     Shanghai        🟦 hard     58.8%   53.0%   +5.8%     63%  PASS — priced model EV below 5%
+   9  Alex de Minaur vs Alex Molcan                 Shanghai        🟦 hard     73.4%   69.7%   +3.7%     85%  PASS — priced model EV below 5%
+  10  Alejandro Davidovich Fokina vs Jenson Brooks  Shanghai        🟦 hard     65.4%   66.4%   -1.0%     73%  PASS — priced model EV below 5%
+--------------------------------------------------------------------------------------------------------------
+  💡  Push the ones you want:
+      venv/Scripts/python.exe run_tennis.py --push 1
+
+  Small edges may be estimation noise; this model is not calibrated to betting outcomes.
+  Elo estimates strength. Use --context for sourced injury/travel/venue observations.
+  Numeric context effects are scenarios; unknown conditions are not guessed.
+==============================================================================================================

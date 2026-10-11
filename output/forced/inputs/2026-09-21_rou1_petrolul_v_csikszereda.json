@@ -1,0 +1,40 @@
+{
+  "sport": "soccer",
+  "league": "Romania SuperLiga",
+  "date": "2026-09-21",
+  "start_et": "2:00 PM ET",
+  "venue": "Stadionul Ilie Oana, Ploiesti",
+  "home": {
+    "name": "Petrolul Ploiesti",
+    "pts_for": 1.222,
+    "pts_against": 1.333,
+    "games": 9,
+    "source": "MightyTips/Sportsgambler table before R10: 5-1-3, GF 11, GA 12"
+  },
+  "away": {
+    "name": "FK Csikszereda",
+    "pts_for": 0.667,
+    "pts_against": 2.333,
+    "games": 9,
+    "source": "superliga.ro: 0-1-8, GF 6, GA 21"
+  },
+  "regress": 0.0,
+  "adjustments": [
+    {
+      "side": "home",
+      "points": -0.1,
+      "reason": "ESTIMATE: Nlundulu suspended (3 of Petrolul's 11 goals), per fcpetrolul.ro"
+    }
+  ],
+  "market": {
+    "ml_home": -120,
+    "ml_draw": 235,
+    "ml_away": 330,
+    "total": 2.5,
+    "over_price": 100,
+    "under_price": -130,
+    "btts_yes": -118,
+    "btts_no": -118,
+    "_source": "Home 1.83 Superbet (Fanatik); draw 3.35 / away 4.30 Wincomparator mid-range; O/U 2.00/1.77, BTTS 1.85/1.85 Wincomparator."
+  }
+}

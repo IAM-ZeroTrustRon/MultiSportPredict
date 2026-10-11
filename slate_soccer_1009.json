@@ -1,0 +1,7 @@
+{
+  "matches": [
+    {"home": "Lens", "away": "Lyon", "league": "Ligue 1", "total": 2.5},
+    {"home": "Borussia Dortmund", "away": "Werder Bremen", "league": "Bundesliga", "total": 3.0},
+    {"home": "Malaga", "away": "Espanyol", "league": "La Liga", "total": 2.5}
+  ]
+}

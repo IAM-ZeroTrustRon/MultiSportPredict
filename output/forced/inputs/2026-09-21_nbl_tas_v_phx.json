@@ -1,0 +1,35 @@
+{
+  "sport": "basketball",
+  "league": "Australian NBL",
+  "date": "2026-09-21",
+  "start_et": "5:30 AM ET",
+  "venue": "MyState Bank Arena, Hobart",
+  "home": {"name": "Tasmania JackJumpers", "pts_for": 87.4, "pts_against": 87.0, "games": 33,
+           "source": "2025-26 regular season, Wikipedia game log; 2 scores corrected from NBL/AAP; one game still unverified (+/-0.5)"},
+  "away": {"name": "SE Melbourne Phoenix", "pts_for": 100.7, "pts_against": 92.8, "games": 33,
+           "source": "2025-26 regular season, Wikipedia game log; checks to known 22-11 record"},
+  "league_avg_pts": null,
+  "regress": 0.3,
+  "adjustments": [
+    {"side": "away", "points": -2.0,
+     "reason": "ESTIMATE: Perth Sat -> Hobart Mon, ~48h, cross-country flight. Not a measured number."}
+  ],
+  "market": {
+    "spread_home": 3.5, "spread_home_price": -110, "spread_away_price": -110,
+    "total": 185.5,
+    "ml_home": 123, "ml_away": -152,
+    "q1_spread_home": 0.5, "q1_spread_home_price": 100, "q1_spread_away_price": -134,
+    "q1_total": 47.5, "q1_over_price": -112, "q1_under_price": -118,
+    "q1_home_total": 23.5, "q1_home_over_price": 100, "q1_home_under_price": -134,
+    "q1_away_total": 24.5, "q1_away_over_price": -105, "q1_away_under_price": -125
+  },
+  "props": [
+    {"player": "Skylar Mays", "team": "away", "stat": "points", "avg": 16.0, "games": 1,
+     "line": 16.5, "over": -110, "under": -110,
+     "source": "R1 vs Perth 16 pts (basketball.com.au); line Dabble via Before You Bet, no per-pick price"},
+    {"player": "Dash Daniels", "team": "away", "stat": "PRA", "avg": 36.0, "games": 1,
+     "line": 17.5, "over": -110, "under": -110,
+     "source": "R1 vs Perth 24 pts + 12 reb (AAP); assists not found, so PRA is at least 36; line Dabble"}
+  ],
+  "_excluded": "David Johnson PRA 23.5: no 2026 data (missed preseason) - cannot be modelled"
+}

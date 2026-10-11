@@ -1,0 +1,174 @@
+{
+  "generated": "2026-09-26",
+  "date": "2026-09-26",
+  "matches": [
+    {
+      "home": "Atlanta United FC",
+      "away": "New York City FC",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761830"
+    },
+    {
+      "home": "CF Montr\u00e9al",
+      "away": "FC Cincinnati",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761831"
+    },
+    {
+      "home": "Charlotte FC",
+      "away": "Chicago Fire FC",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761832"
+    },
+    {
+      "home": "Philadelphia Union",
+      "away": "Orlando City SC",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761834"
+    },
+    {
+      "home": "Red Bull New York",
+      "away": "St. Louis CITY SC",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761833"
+    },
+    {
+      "home": "Austin FC",
+      "away": "San Diego FC",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761839"
+    },
+    {
+      "home": "FC Dallas",
+      "away": "LAFC",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761835"
+    },
+    {
+      "home": "Houston Dynamo FC",
+      "away": "Sporting Kansas City",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761836"
+    },
+    {
+      "home": "Nashville SC",
+      "away": "Toronto FC",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761838"
+    },
+    {
+      "home": "Seattle Sounders FC",
+      "away": "Minnesota United FC",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761837"
+    },
+    {
+      "home": "Real Salt Lake",
+      "away": "New England Revolution",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761840"
+    },
+    {
+      "home": "LA Galaxy",
+      "away": "Colorado Rapids",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761841"
+    },
+    {
+      "home": "San Jose Earthquakes",
+      "away": "Portland Timbers",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761843"
+    },
+    {
+      "home": "Vancouver Whitecaps",
+      "away": "D.C. United",
+      "league": "MLS",
+      "status": "Scheduled",
+      "event_id": "761842"
+    },
+    {
+      "home": "Cruz Azul",
+      "away": "Toluca",
+      "league": "Liga MX",
+      "status": "Scheduled",
+      "event_id": "401876959"
+    },
+    {
+      "home": "Guadalajara",
+      "away": "Quer\u00e9taro",
+      "league": "Liga MX",
+      "status": "Scheduled",
+      "event_id": "401876962"
+    },
+    {
+      "home": "Santos",
+      "away": "Pachuca",
+      "league": "Liga MX",
+      "status": "Scheduled",
+      "event_id": "401876961"
+    },
+    {
+      "home": "Tigres UANL",
+      "away": "Puebla",
+      "league": "Liga MX",
+      "status": "Scheduled",
+      "event_id": "401876960"
+    },
+    {
+      "home": "Heracles Almelo",
+      "away": "Vitesse",
+      "league": "Eerste Divisie",
+      "status": "Scheduled",
+      "event_id": "401875919"
+    },
+    {
+      "home": "FC Emmen",
+      "away": "TOP Oss",
+      "league": "Eerste Divisie",
+      "status": "Scheduled",
+      "event_id": "401875918"
+    },
+    {
+      "home": "FC Volendam",
+      "away": "VVV-Venlo",
+      "league": "Eerste Divisie",
+      "status": "Scheduled",
+      "event_id": "401875917"
+    },
+    {
+      "home": "MVV Maastricht",
+      "away": "Helmond Sport",
+      "league": "Eerste Divisie",
+      "status": "Scheduled",
+      "event_id": "401875916"
+    },
+    {
+      "home": "NAC Breda",
+      "away": "FC Eindhoven",
+      "league": "Eerste Divisie",
+      "status": "Scheduled",
+      "event_id": "401875915"
+    },
+    {
+      "home": "Roda JC Kerkrade",
+      "away": "RKC Waalwijk",
+      "league": "Eerste Divisie",
+      "status": "Scheduled",
+      "event_id": "401875914"
+    }
+  ]
+}

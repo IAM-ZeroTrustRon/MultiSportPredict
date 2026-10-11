@@ -1,0 +1,26 @@
+{
+  "players": {
+    "Thiago Seyboth Wild": {
+      "source": "https://www.tennisexplorer.com/match-detail/?id=3343965",
+      "as_of": "2026-10-09",
+      "elo_adjustment": 0,
+      "injury_status": "unknown",
+      "current_rank": "Current/Highest rank - singles: 136. / 58.",
+      "historical_retirement_notes": "04.09.2026 - 08.09.2026 Como challenger retired; 10.02.2026 - 15.04.2026 Buenos Aires retired; 09.07.2024 - 16.07.2024 Braunschweig challenger retired",
+      "travel_status": "Actual departure, arrival and acclimatization unknown.",
+      "venue_notes": "Antofagasta challenger, clay; recent results establish participation, not arrival time.",
+      "recent_results_notes": "Sourced clay record: 50/82 wins; latest ten 9-1. Last result 2026-10-07."
+    },
+    "Felipe Meligeni Alves": {
+      "source": "https://www.tennisexplorer.com/match-detail/?id=3343965",
+      "as_of": "2026-10-09",
+      "elo_adjustment": 0,
+      "injury_status": "unknown",
+      "current_rank": "Current/Highest rank - singles: 453. / 117.",
+      "historical_retirement_notes": "02.04.2026 - 22.06.2026 Sao Leopoldo challenger retired; 09.07.2025 - 20.01.2026 Iasi challenger retired; 13.05.2025 - 20.05.2025 Oeiras 2 challenger retired",
+      "travel_status": "Actual departure, arrival and acclimatization unknown.",
+      "venue_notes": "Antofagasta challenger, clay; recent results establish participation, not arrival time.",
+      "recent_results_notes": "Sourced clay record: 28/48 wins; latest ten 6-4. Last result 2026-10-07."
+    }
+  }
+}

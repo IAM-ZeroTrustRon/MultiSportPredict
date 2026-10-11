@@ -1,0 +1,38 @@
+{
+  "title": "Moldova (W) vs Georgia (W)",
+  "description": "**RESEARCH CARD - not model output.** October 9, 2026, 10:00 AM ET. Stadionul Zimbru, Chisinau.",
+  "fields": [
+    {
+      "name": "Market",
+      "value": "Roobet prices displayed by Sportytrader, retrieved approximately 09:58 AM ET before kickoff. No bookmaker update timestamp; not live or executable odds confirmation."
+    },
+    {
+      "name": "Best bet",
+      "value": "PASS: no strong validated bet; largest calculated EVs are research candidates only."
+    },
+    {
+      "name": "Calculated scenario",
+      "value": "Home/draw/away 64.0%/23.7%/12.3%. Expected goals 1.65-0.56. Moldova W win @ 2.920: +86.9% scenario EV; Moldova W +0 goals (Asian handicap) @ 2.100: +58.1% scenario EV"
+    },
+    {
+      "name": "Why / observations",
+      "value": "Senior women international friendly, not a qualifier; another friendly is scheduled October 12. Moldova four 2026 qualifiers: 0-1 Romania, 0-0 Cyprus, 0-0 Romania, 2-0 Cyprus. Georgia four qualifiers: 0-3 Greece, 0-1 Faroe Islands, 2-3 Faroe Islands, 2-3 Greece. The opponents differ, and these games ended in June. Moldova roster includes defenders with zero or one senior appearance, increasing rotation uncertainty. No confirmed complete Georgia injury list or final lineups. 2025 friendlies in Georgia finished 0-0 and 3-0 to Georgia; excluded from the current qualifier rates."
+    },
+    {
+      "name": "Against",
+      "value": "Four old qualifiers against different opponents cannot establish current strength for a friendly. The market favors Georgia while the raw-goals scenario favors Moldova. That reversal is a warning about comparability. Kickoff has passed: this is a captured pre-match research scenario, not an in-play recommendation."
+    },
+    {
+      "name": "Check before betting",
+      "value": "Final XI, actual current price, opponent-adjusted form. Captured snapshot replay does not refresh odds."
+    },
+    {
+      "name": "Confidence",
+      "value": "Very low - PASS"
+    },
+    {
+      "name": "Sharp data",
+      "value": "No verified betting splits. No calibrated EV uncertainty interval."
+    }
+  ]
+}

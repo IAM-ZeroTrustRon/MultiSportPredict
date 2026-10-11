@@ -1,0 +1,109 @@
+{
+  "as_of": "2026-10-09",
+  "leagues": {
+    "NCAAF": {
+      "updated": "2026-10-08",
+      "fixtures": 1569,
+      "eligible_completed": 1086,
+      "validation": {
+        "method": "chronological 80/20 holdout, whole dates separated",
+        "games": 225,
+        "winner_accuracy": 0.7111111111111111,
+        "margin_rmse": 18.474780468179627,
+        "total_rmse": 16.08154197270086,
+        "note": "Historical holdout, not proof of a current betting edge"
+      }
+    },
+    "NBA": {
+      "updated": "2026-10-08",
+      "fixtures": 3840,
+      "eligible_completed": 2631,
+      "validation": {
+        "method": "chronological 80/20 holdout, whole dates separated",
+        "games": 527,
+        "winner_accuracy": 0.6527514231499051,
+        "margin_rmse": 16.51972035226045,
+        "total_rmse": 19.09024092656154,
+        "note": "Historical holdout, not proof of a current betting edge"
+      }
+    },
+    "WNBA": {
+      "updated": "2026-10-08",
+      "fixtures": 663,
+      "eligible_completed": 656,
+      "validation": {
+        "method": "chronological 80/20 holdout, whole dates separated",
+        "games": 132,
+        "winner_accuracy": 0.7045454545454546,
+        "margin_rmse": 13.097649272805686,
+        "total_rmse": 16.401367040167482,
+        "note": "Historical holdout, not proof of a current betting edge"
+      }
+    },
+    "NCAAB": {
+      "updated": "2026-10-09",
+      "fixtures": 10994,
+      "eligible_completed": 5633,
+      "validation": {
+        "method": "chronological 80/20 holdout, whole dates separated",
+        "games": 1159,
+        "winner_accuracy": 0.6755823986194995,
+        "margin_rmse": 11.422023126634418,
+        "total_rmse": 16.65053752803325,
+        "note": "Historical holdout, not proof of a current betting edge"
+      }
+    },
+    "NCAAW": {
+      "updated": "2026-10-09",
+      "fixtures": 10863,
+      "eligible_completed": 5566,
+      "validation": {
+        "method": "chronological 80/20 holdout, whole dates separated",
+        "games": 1149,
+        "winner_accuracy": 0.720626631853786,
+        "margin_rmse": 12.840517711731412,
+        "total_rmse": 16.242993299338313,
+        "note": "Historical holdout, not proof of a current betting edge"
+      }
+    },
+    "KBL": {
+      "updated": "2026-10-09",
+      "fixtures": 540,
+      "eligible_completed": 280,
+      "validation": {
+        "method": "chronological 80/20 holdout, whole dates separated",
+        "games": 56,
+        "winner_accuracy": 0.6428571428571429,
+        "margin_rmse": 11.91610306708877,
+        "total_rmse": 18.311220570487286,
+        "note": "Historical holdout, not proof of a current betting edge"
+      }
+    },
+    "BBL": {
+      "updated": "2026-10-09",
+      "fixtures": 643,
+      "eligible_completed": 372,
+      "validation": {
+        "method": "chronological 80/20 holdout, whole dates separated",
+        "games": 71,
+        "winner_accuracy": 0.6619718309859155,
+        "margin_rmse": 15.802198678429816,
+        "total_rmse": 16.919930305191727,
+        "note": "Historical holdout, not proof of a current betting edge"
+      }
+    },
+    "NZNBL": {
+      "updated": "2026-10-09",
+      "fixtures": 115,
+      "eligible_completed": 115,
+      "validation": {
+        "method": "chronological 80/20 holdout, whole dates separated",
+        "games": 24,
+        "winner_accuracy": 0.7083333333333334,
+        "margin_rmse": 20.423734936501045,
+        "total_rmse": 17.901906279615304,
+        "note": "Historical holdout, not proof of a current betting edge"
+      }
+    }
+  }
+}

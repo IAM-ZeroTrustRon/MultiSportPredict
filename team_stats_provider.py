@@ -166,11 +166,13 @@ def get_soccer_team_stats(team: str, league: Optional[str] = None) -> Optional[D
 
     if GLOBAL_SOCCER_STATS_PATH.exists():
         global_store = _load_store(GLOBAL_SOCCER_STATS_PATH, _SOCCER_TEMPLATE)
-        stats = _lookup(global_store, team)
+        from soccer_store import competition_view
+        stats = _lookup(competition_view(global_store, league), team)
 
     if stats is None:
         manual_store = _load_store(SOCCER_STATS_PATH, _SOCCER_TEMPLATE)
-        stats = _lookup(manual_store, team)
+        from soccer_store import competition_view
+        stats = _lookup(competition_view(manual_store, league), team)
         # Fail closed: manual records must have games and season to be trusted
         if stats and ("games" not in stats or "season" not in stats):
             return None

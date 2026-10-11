@@ -1,0 +1,30 @@
+{
+  "title": "UPDATE | Erovnuli Liga | FC Spaeri vs Dila Gori",
+  "description": "**RESEARCH CARD (UPDATE 12:20pm ET) - not model output.** 1:00pm ET, Tbilisi",
+  "color": 3066993,
+  "fields": [
+    {
+      "name": "What changed",
+      "inline": false,
+      "value": "Nothing. No lineups posted yet, no injury news, no price movement (Dila +120, X2 -345)."
+    },
+    {
+      "name": "Call",
+      "inline": false,
+      "value": "**PASS** on side and total. BTTS Yes only at -125 or better (no price found)."
+    },
+    {
+      "name": "Confidence",
+      "inline": true,
+      "value": "Low"
+    },
+    {
+      "name": "Sharp data",
+      "inline": true,
+      "value": "None exists for this league"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - research, not a model pick"
+  }
+}

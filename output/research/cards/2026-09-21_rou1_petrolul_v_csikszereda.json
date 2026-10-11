@@ -1,0 +1,50 @@
+{
+  "title": "SuperLiga | Petrolul Ploiesti vs FK Csikszereda",
+  "description": "**RESEARCH CARD - not model output.** Round 10.\nMon 21 Sep - 2:00pm ET - Stadionul Ilie Oana, Ploiesti",
+  "color": 3066993,
+  "fields": [
+    {
+      "name": "Market",
+      "inline": false,
+      "value": "PET 1.70-1.85 | X 3.25-3.45 | CSI 4.20-4.40 (Wincomparator)\nNo-vig: 51-57% PET\nPolymarket: 65 / 23 / 15\nO/U 2.5: Over 1.95-2.00 / Under 1.75-1.80"
+    },
+    {
+      "name": "Best bet",
+      "inline": false,
+      "value": "**Petrolul ML at 1.80 or better** (break-even 55.6%)\nQuick check: 62%"
+    },
+    {
+      "name": "Leans",
+      "inline": false,
+      "value": "- Petrolul ML (best of today's four)\n- Over 2.5 at 1.95+ (small; check 54.4%)\n- AH -1 +238: pass - no source has this line"
+    },
+    {
+      "name": "Why",
+      "inline": false,
+      "value": "- Csikszereda LAST: 0-1-8, 6-21\n- 0 for 5 away (3-13)\n- Petrolul won 2-0 in April; 5W 2D in last 7 H2H\n- Petrolul lost only to Rapid at home"
+    },
+    {
+      "name": "Check before betting",
+      "inline": false,
+      "value": "- Nlundulu (joint top scorer) SUSPENDED\n- Jerdea OUT (ankle)\n- 'Over 2.5 +187' in the notes is wrong - it's ~2.00"
+    },
+    {
+      "name": "Against",
+      "inline": false,
+      "value": "Petrolul scores little (11 in 9) and just lost its top scorer. 2 of last 3 H2H were 1-1."
+    },
+    {
+      "name": "Confidence",
+      "inline": true,
+      "value": "Low-medium"
+    },
+    {
+      "name": "Sharp data",
+      "inline": true,
+      "value": "None exists for this league"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - research, not a model pick"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "sport": "soccer",
+  "league": "Premier League",
+  "home_team": "Chelsea",
+  "away_team": "Bournemouth",
+  "timestamp": "2026-10-09T23:58:21.719374",
+  "game": {
+    "projected_home_goals": 1.88,
+    "projected_away_goals": 1.59,
+    "projected_total_goals": 3.46,
+    "home_win_prob": 0.444,
+    "draw_prob": 0.226,
+    "away_win_prob": 0.33
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.29,
+      "market_line": -0.5,
+      "edge": 0.79,
+      "confidence": 39.3,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.465,
+      "market_total": 3.5,
+      "edge": -0.035,
+      "confidence": 25.1,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.717,
+      "confidence": 59.5,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.86,
+    "over_25_prob": 0.673,
+    "over_35_prob": 0.456
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.717,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 2.0,
+      "xg_against": 2.4,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 2.0,
+      "goals_against": 2.4,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.315,
+      "xg_against": 1.496,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 1.315,
+      "goals_against": 1.496,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.1,
+    "avg_goals_per_game": 2.85,
+    "home_advantage": 0.35,
+    "draw_rate": 0.25,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real",
+  "market_moneyline": {
+    "home_ml": -143,
+    "draw_ml": 310,
+    "away_ml": 340,
+    "source": "user",
+    "captured_at": null
+  },
+  "market_totals_prices": {
+    "over_price": 117,
+    "under_price": -156,
+    "source": "user",
+    "captured_at": null
+  },
+  "market_spread_prices": {
+    "spread_line": -0.5,
+    "spread_home_price": -148,
+    "spread_away_price": 112,
+    "source": "user",
+    "captured_at": null
+  },
+  "market_status": "user"
+}

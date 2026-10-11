@@ -15,13 +15,10 @@ WHAT IT WRITES
     data/tennis/players.json   per-player summary: matches, surface splits,
                                last match date, best ranking seen
 
-WHY THIS SOURCE
-    Jeff Sackmann's tennis_atp repository -- the usual answer -- is no longer
-    publicly reachable, and the GitHub API returns 403 from here. FBref-style
-    scrapers are behind Cloudflare. tennis-data.co.uk publishes one archive per
-    season per tour, covers ATP from 2000 and WTA from 2007, and answers
-    plainly. It is the same kind of source as football-data.co.uk, which is the
-    only soccer feed that still works.
+SOURCES
+    ATP season history: TennisMyLife CSV, supplemented by recent ESPN completed
+    singles with known surfaces. WTA: official tournament calendar/match API;
+    tennis-data.co.uk workbooks are a fallback. Failed tours retain prior rows.
 
 WHY ORDER MATTERS
     Elo is sequential: every match updates a rating that the next match reads.
@@ -37,10 +34,8 @@ WHAT IS DROPPED, AND WHY
     retires at 2-6 0-3 did lose that match on court.
 
 NAMES
-    This feed spells players "Alcaraz C.", not "Carlos Alcaraz". Names are
-    stored exactly as the feed writes them, because a name you can trace back
-    to a source is worth more than one this script improved on its own.
-    run_tennis.py does the translation, and refuses when it is ambiguous.
+    Primary feeds provide full player names. Legacy abbreviated names resolve
+    only when the match is unambiguous. No synthetic seed results are appended.
 """
 
 from __future__ import annotations
@@ -63,12 +58,9 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 ROOT = Path(__file__).resolve().parent
 OUT_DIR = ROOT / "data" / "tennis"
 
-# The site answered plain http until 2026-08-30 and began refusing it some time
-# before 2026-09-18, which surfaced as four identical HTTPErrors and a store
-# frozen 19 days out of date. Try https first and keep http as the fallback so
-# a reversal on their side does not break this again.
-BASE = "https://stats.tennismylife.org/data"
-BASE_FALLBACK = "https://stats.tennismylife.org/data"
+# ATP uses CSV; WTA workbook URLs are fallback sources.
+BASE = "https://www.tennis-data.co.uk"
+BASE_FALLBACK = "https://tennis-data.co.uk"
 UA = {"User-Agent": "Mozilla/5.0 (MultiSportPredict tennis ingest)"}
 
 SURFACES = {"hard", "clay", "grass", "carpet"}
@@ -101,10 +93,12 @@ def archive_urls(tour: str, year: int) -> List[str]:
     The .zip spellings stay as fallbacks because older seasons were published
     that way and a 300 costs one wasted request, not a wrong answer.
     """
-    directory = f"{year}w" if tour == "wta" else f"{year}"
-    names = [f"{year}.xlsx", f"{year}.xls", f"{year}.zip", f"{directory}.zip"]
-    return ([f"{BASE}/{directory}/{n}" for n in names]
-            + [f"{BASE_FALLBACK}/{directory}/{n}" for n in names])
+    directory = f"{year}w" if tour == "wta" else str(year)
+    urls = ([f"https://stats.tennismylife.org/data/{year}.csv"]
+            if tour == "atp" else [])
+    for base in (BASE, BASE_FALLBACK):
+        urls.extend(f"{base}/{directory}/{year}.{ext}" for ext in ("xlsx", "xls", "zip"))
+    return list(dict.fromkeys(urls))
 
 
 def fetch(url: str, timeout: int = 180, attempts: int = 3) -> bytes:
@@ -300,6 +294,11 @@ def as_date(value: Any) -> Optional[str]:
     text = str(value).strip()
     if not text:
         return None
+    if re.fullmatch(r"\d{8}", text):
+        try:
+            return _dt.datetime.strptime(text, "%Y%m%d").date().isoformat()
+        except ValueError:
+            return None
     # pandas hands back '2026-08-24 00:00:00'; the stdlib path hands back a serial.
     match = re.match(r"^(\d{4})-(\d{2})-(\d{2})", text)
     if match:
@@ -320,7 +319,8 @@ def as_int(value: Any) -> Optional[int]:
 
 class Match:
     __slots__ = ("winner", "loser", "surface", "date", "tour",
-                 "tournament", "round_name", "wrank", "lrank", "comment")
+                 "tournament", "round_name", "wrank", "lrank", "comment",
+                 "source", "match_id", "w_svpt", "w_svwon", "l_svpt", "l_svwon")
 
     def __init__(self, **kwargs: Any) -> None:
         for key in self.__slots__:
@@ -336,10 +336,10 @@ def parse_rows(records: Iterable[Dict[str, Any]], tour: str) -> Tuple[List[Match
         dropped[reason] = dropped.get(reason, 0) + 1
 
     for record in records:
-        winner = pick(record, "Winner")
-        loser = pick(record, "Loser")
+        winner = pick(record, "Winner", "winner_name")
+        loser = pick(record, "Loser", "loser_name")
         surface = pick(record, "Surface")
-        date = as_date(pick(record, "Date"))
+        date = as_date(pick(record, "Date", "tourney_date"))
 
         if not winner or not loser:
             drop("no winner/loser")
@@ -350,24 +350,26 @@ def parse_rows(records: Iterable[Dict[str, Any]], tour: str) -> Tuple[List[Match
 
         surface_text = str(surface or "").strip().lower()
         if surface_text not in SURFACES:
-            # Elo's own loader silently rewrites an unknown surface to "hard".
-            # Counting it here means the summary shows how often that happened
-            # instead of it disappearing into the ratings.
-            drop(f"unknown surface {surface_text or '(blank)'!r} -> hard")
-            surface_text = "hard"
+            drop(f"unknown surface {surface_text or '(blank)'!r}")
+            continue
 
-        comment = str(pick(record, "Comment") or "").strip()
-        if comment.lower().startswith("walkover"):
+        comment = str(pick(record, "Comment", "score") or "").strip()
+        if (comment.lower().startswith("walkover") or comment.upper() in {"W/O", "WO", "WALKOVER"}):
             drop("walkover")
             continue
 
         matches.append(Match(
             winner=str(winner).strip(), loser=str(loser).strip(),
             surface=surface_text, date=date, tour=tour,
-            tournament=str(pick(record, "Tournament") or "").strip(),
+            tournament=str(pick(record, "Tournament", "tourney_name") or "").strip(),
             round_name=str(pick(record, "Round") or "").strip(),
-            wrank=as_int(pick(record, "WRank")), lrank=as_int(pick(record, "LRank")),
+            wrank=as_int(pick(record, "WRank", "winner_rank")), lrank=as_int(pick(record, "LRank", "loser_rank")),
             comment=comment,
+            source=str(pick(record, "source") or ("TennisMyLife" if tour == "atp" else "WTA official API")),
+            match_id=pick(record, "match_id"),
+            w_svpt=as_int(pick(record, "w_svpt")), l_svpt=as_int(pick(record, "l_svpt")),
+            w_svwon=((as_int(pick(record, "w_1stWon")) or 0)+(as_int(pick(record, "w_2ndWon")) or 0)) if pick(record, "w_svpt") else None,
+            l_svwon=((as_int(pick(record, "l_1stWon")) or 0)+(as_int(pick(record, "l_2ndWon")) or 0)) if pick(record, "l_svpt") else None,
         ))
     return matches, dropped
 
@@ -386,7 +388,7 @@ def build_players(matches: List[Match]) -> Dict[str, Any]:
                 "by_surface": {}, "first_seen": None, "last_seen": None,
                 "best_rank": None, "last_rank": None,
                 "data_tier": 1,
-                "source": "tennis-data.co.uk season archives",
+                "source": "TennisMyLife + ESPN ATP" if tour == "atp" else "WTA official API",
             }
         return players[name]
 
@@ -485,29 +487,41 @@ def main() -> None:
         for year in sorted(args.years):
             label = f"{tour.upper()} {year}"
             blob, url, problems = None, "", []
-            for candidate in archive_urls(tour, year):
+            official_records = None
+            if tour == "wta":
+                try:
+                    from tennis_sources import wta_season_rows
+                    official_records = wta_season_rows(year)
+                    blob = b"official WTA converted rows"
+                    url = "WTA official API"
+                except Exception as exc:
+                    log(f"  WTA official {year} failed: {type(exc).__name__}: {exc}")
+            for candidate in ([] if blob is not None else archive_urls(tour, year)):
                 try:
                     blob, url = fetch(candidate), candidate
                     break
                 except Exception as exc:                # noqa: BLE001
                     # Show the scheme and the status, not just "HTTPError".
-                    scheme = candidate.split("://", 1)[0]
                     detail = getattr(exc, "msp_detail", None) or type(exc).__name__
                     problems.append(
-                        f"{scheme}:{candidate.rsplit('/', 1)[-1]}: {detail}")
+                        f"{candidate}: {detail}")
             if blob is None:
                 log(f"  {label:<12} FAILED to download: {'; '.join(problems)}")
                 failures.append(f"{label}")
                 continue
 
             try:
-                records = read_archive(blob, url)
+                records = official_records if official_records is not None else read_archive(blob, url)
                 matches, dropped = parse_rows(records, tour)
             except Exception as exc:                    # noqa: BLE001
                 log(f"  {label:<12} FAILED to parse: {type(exc).__name__}: {exc}")
                 failures.append(f"{label} (parse)")
                 continue
 
+            if not matches:
+                failures.append(label)
+                log(f"  {label}: no valid matches; preserving existing tour history")
+                continue
             span = (f"{min(m.date for m in matches)} .. {max(m.date for m in matches)}"
                     if matches else "no dated rows")
             log(f"  {label:<12} {len(matches):>5} matches   {span}")
@@ -524,11 +538,50 @@ def main() -> None:
         rule()
         sys.exit(1)
 
+    # Replace a tour only when every requested season loaded. Retain unrequested
+    # tours too: --tours atp must never erase the WTA store.
+    old_players = {}
+    failed_tours = {f.split()[0].lower() for f in failures}
+    replace_tours = set(args.tours) - failed_tours
+    everything = [m for m in everything if m.tour in replace_tours]
+    old_players_path = OUT_DIR / "players.json"
+    old_matches_path = OUT_DIR / "matches.csv"
+    if old_players_path.exists() and old_matches_path.exists():
+        old_players = json.loads(old_players_path.read_text(encoding="utf-8-sig"))
+        with old_matches_path.open(encoding="utf-8-sig", newline="") as handle:
+            for row in csv.DictReader(handle):
+                tour = old_players.get(row["winner_name"], {}).get("tour")
+                if tour and tour not in replace_tours:
+                    everything.append(Match(winner=row["winner_name"], loser=row["loser_name"],
+                        surface=row["surface"], date=row["tournament_date"], tour=tour,
+                        tournament=row.get("tournament", ""), round_name=row.get("round", ""), comment="",
+                        source=row.get("source"), match_id=row.get("match_id"),
+                        w_svpt=as_int(row.get("w_svpt")), w_svwon=as_int(row.get("w_svwon")),
+                        l_svpt=as_int(row.get("l_svpt")), l_svwon=as_int(row.get("l_svwon"))))
+    if not replace_tours:
+        log("No complete tour refresh; existing store is unchanged.")
+        sys.exit(1)
+
+    if "atp" in replace_tours and int(_dt.date.today().year) in args.years:
+        try:
+            from tennis_sources import atp_recent_rows
+            recent, unknown = atp_recent_rows()
+            supplemental, _ = parse_rows(recent, "atp")
+            identities = {(m.winner, m.loser, m.tournament.lower()) for m in supplemental}
+            everything = [m for m in everything if (m.winner, m.loser, m.tournament.lower()) not in identities]
+            everything.extend(supplemental)
+            log(f"  ATP recent ESPN: {len(supplemental)} completed matches; unknown surfaces skipped: {sorted(unknown)}")
+        except Exception as exc:
+            log(f"  ATP recent supplement unavailable: {exc}; archive cutoff remains visible")
+
     # Sequential ratings need chronological input. See the module docstring.
-    everything.sort(key=lambda m: (m.date, m.tour, m.tournament, m.winner))
+    everything.sort(key=lambda m: (m.date, m.tour, m.tournament))
 
     players = build_players(everything)
-    thin = sum(1 for r in players.values() if not r["enough_matches"])
+    for name, record in old_players.items():
+        if record.get("tour") not in replace_tours:
+            players[name] = record
+    thin = sum(1 for r in players.values() if not r.get("enough_matches", False))
 
     log("")
     rule("-")
@@ -544,14 +597,19 @@ def main() -> None:
 
     if args.check:
         log("\n--check: nothing was written.")
+        if failures:
+            sys.exit(1)
         return
 
     buffer = io.StringIO()
     writer = csv.writer(buffer, lineterminator="\n")
-    writer.writerow(["winner_name", "loser_name", "surface", "tournament_date"])
+    writer.writerow(["winner_name", "loser_name", "surface", "tournament_date", "tour", "tournament", "round", "source", "match_id", "w_svpt", "w_svwon", "l_svpt", "l_svwon"])
     for match in everything:
-        writer.writerow([match.winner, match.loser, match.surface, match.date])
+        writer.writerow([match.winner, match.loser, match.surface, match.date, match.tour, match.tournament, match.round_name, match.source, match.match_id, match.w_svpt, match.w_svwon, match.l_svpt, match.l_svwon])
     write_atomic(OUT_DIR / "matches.csv", buffer.getvalue())
+
+    from tennis_context import serve_profiles
+    write_atomic(OUT_DIR / "serve_return.json", json.dumps(serve_profiles(everything), indent=2))
 
     write_atomic(OUT_DIR / "players.json",
                  json.dumps(players, indent=2, ensure_ascii=False, sort_keys=True))
@@ -565,7 +623,8 @@ def main() -> None:
 
     if failures:
         log("\nSeasons that did not load: " + ", ".join(failures))
-        log("The store was built from the ones that did. Re-run to fill the gaps.")
+        log("Failed tours retained their existing history. Refresh is incomplete.")
+        sys.exit(1)
 
     log("\nNext:")
     log("    venv/Scripts/python.exe ingest_tennis.py --list Alcaraz")

@@ -42,10 +42,7 @@ try:
         print(f"[tennis_predictor] Elo built from {_ELO_MATCHES} real matches "
               f"({_ELO_CSV.name}).")
     else:
-        _ELO_MATCHES = _ELO_ENGINE.load_match_history()
-        print("[tennis_predictor] WARNING: data/tennis/matches.csv is missing, so Elo "
-              "is running on built-in seed matches only -- every rating is frozen at "
-              "whenever those were written. Fix: python ingest_tennis.py")
+        _ELO_MATCHES = 0
     HAS_ELO = True
 except ImportError:
     HAS_ELO = False
@@ -159,15 +156,15 @@ def _set_rec(p_over_35: float, best_of_5: bool) -> str:
         return f"OVER {line} Sets -- P(over)={p_over_35:.0%}"
     elif p_over_35 <= 0.40:
         return f"UNDER {line} Sets -- P({sweep_sets} sets)={1-p_over_35:.0%}"
-    return f"LEAN OVER {line} Sets -- P(over)={p_over_35:.0%}"
+    return f"{'OVER' if p_over_35 >= .5 else 'UNDER'} {line} Sets projection -- P(over)={p_over_35:.0%}; no price"
 
 
 def _spread_rec(p_fav_spread: float, fav_name: str) -> str:
     if p_fav_spread >= 0.52:
         return f"{fav_name} -1.5 Sets -- P={p_fav_spread:.0%}"
     elif p_fav_spread >= 0.46:
-        return f"LEAN {fav_name} -1.5 Sets -- P={p_fav_spread:.0%}"
-    return f"TAKE Underdog +1.5 Sets -- P(fav covers)={p_fav_spread:.0%} only"
+        return f"{fav_name} -1.5 Sets projection -- P={p_fav_spread:.0%}; no price"
+    return f"Underdog +1.5 Sets projection -- P(covers)={1-p_fav_spread:.0%}; no price"
 
 
 # ============================================================================
@@ -259,6 +256,8 @@ def predict_tennis_match(
     market_home_odds: Optional[str] = None,
     market_away_odds: Optional[str] = None,
     elo_engine: Optional[TennisElo] = None,
+    custom_markets: Optional[list] = None,
+    player_context: Optional[dict] = None,
 ) -> Dict[str, Any]:
     """Predict tennis match outcome using Elo ratings.
 
@@ -279,11 +278,38 @@ def predict_tennis_match(
                         moneyline, sets, total_games, dominance_ratio,
                         set_distribution, recommendation, notes.
     """
+    if not HAS_ELO or (elo_engine is None and _ELO_MATCHES == 0):
+        raise ValueError("No real tennis history loaded. Run ingest_tennis.py.")
     engine = elo_engine or _ELO_ENGINE
+    from run_tennis import resolve
+    for label, name in (("home", home_player), ("away", away_player)):
+        resolved, reason = resolve(name, engine.ratings)
+        if resolved is None:
+            raise ValueError(f"Unknown or ambiguous {label} player {name!r}: {reason}")
+        if label == "home":
+            home_player = resolved
+        else:
+            away_player = resolved
+    if home_player == away_player:
+        raise ValueError("A player cannot play themselves")
 
     # Get win probability from Elo
     home_prob = engine.expected_win_prob(home_player, away_player, surface)
+    from tennis_context import apply_context, matchup_holds, workload_observations
+    home_prob, context_audit = apply_context(home_player, away_player, home_prob, player_context)
+    context_audit["workload"] = workload_observations(home_player, away_player)
+    holds = matchup_holds(home_player, away_player, surface)
     away_prob = 1.0 - home_prob
+
+    from models.tennis_markets import evaluate_markets
+    default_markets = [dict(kind="games_total", line=40.5 if best_of_5 else 22.5),
+                       dict(kind="sets_total", line=3.5 if best_of_5 else 2.5),
+                       dict(kind="sets_spread", line=-1.5), dict(kind="games_spread", line=-2.5)]
+    supplied = list(custom_markets or [])
+    present = {m["kind"] for m in supplied}
+    # Always display every supported market family. Missing book lines are explicitly unpriced.
+    supplied += [m for m in default_markets if m["kind"] not in present]
+    alternative_markets = evaluate_markets(home_prob, best_of_5, supplied, holds)
 
     # Determine favorite
     if home_prob >= away_prob:
@@ -294,7 +320,13 @@ def predict_tennis_match(
         fav_prob, dog_prob = away_prob, home_prob
 
     # Set distribution
-    sd = engine.set_distribution(home_prob, best_of_5=best_of_5)
+    from models.tennis_markets import score_distribution
+    sd = {}
+    scores = score_distribution(home_prob, best_of_5,
+        holds["home_hold"] if holds else 0.75, holds["away_hold"] if holds else 0.75)
+    for (sa, sb, ga, gb), weight in scores.items():
+        key = f"{sa}-{sb}"
+        sd[key] = sd.get(key, 0)+weight
     if best_of_5:
         p_over_35 = round(1.0 - sd["3-0"] - sd["0-3"], 3)
         p_fav_spread = round(
@@ -316,11 +348,26 @@ def predict_tennis_match(
 
     # Market data
     edge_rec = _recommendation(home_prob, market_prob, home_player, away_player)
+    priced_moneyline = None
+    if market_home_odds is not None and market_away_odds is not None:
+        from models.score_ratings import price_market
+        priced_moneyline = price_market("moneyline", .5, (home_prob, away_prob, 0),
+                                       float(market_home_odds), float(market_away_odds))
+        pick = priced_moneyline["pick"]
+        edge_rec["action"] = "LEAN" if pick else "PASS"
+        edge_rec["side"] = (home_player if pick == "HOME" else away_player) if pick else None
+        edge_rec["strength"] = "uncalibrated model EV" if pick else None
+        edge_rec["recommendation"] = (f"LEAN {edge_rec['side']} ML — uncalibrated model EV" if pick
+                                      else "PASS — priced model EV below 5%")
+    if context_audit["scenario"]:
+        edge_rec["recommendation"] = "PASS — context scenario, not a calibrated bet"
+        edge_rec["action"] = "PASS"
+        edge_rec["side"] = None
     market_note = ""
     if market_prob is not None:
-        edge_vs_market = (fav_prob - market_prob) * 100
+        edge_vs_market = (home_prob - market_prob) * 100
         market_note = (
-            f"Market prices {fav_name} at {market_prob:.1%} "
+            f"Market prices {home_player} at {market_prob:.1%} "
             f"({market_home_odds or 'N/A'}/{market_away_odds or 'N/A'}). "
             f"Model edge vs market: {edge_vs_market:+.1f}%"
         )
@@ -342,6 +389,10 @@ def predict_tennis_match(
     ]
     if market_note:
         notes.append(market_note)
+    if context_audit["observations"]:
+        notes.append(context_audit["note"])
+    for name, work in context_audit["workload"].items():
+        notes.append(f"{name}: {work['matches_last_7_days']} recorded matches in 7 days; last recorded play {work['last_recorded_match']}; arrival/injury unknown unless sourced context supplied")
 
     return {
         "match": f"{home_player} vs {away_player}",
@@ -359,6 +410,7 @@ def predict_tennis_match(
             "confidence": edge_rec["confidence"],
             **edge_rec,
         },
+        "moneyline_ev": priced_moneyline,
         "market_home_odds": market_home_odds,
         "market_away_odds": market_away_odds,
         # The actual real-vs-model comparison hinges on this, not the odds
@@ -369,12 +421,21 @@ def predict_tennis_match(
         "market_prob": market_prob,
         "sets": {
             "over_35_prob": p_over_35,
-            "recommendation_sets_ou": _set_rec(p_over_35, best_of_5),
+            "recommendation_sets_ou": "MODEL ONLY - " + _set_rec(p_over_35, best_of_5),
             "fav_spread_prob": p_fav_spread,
-            "recommendation_spread": _spread_rec(p_fav_spread, fav_name),
+            "recommendation_spread": "MODEL ONLY - " + _spread_rec(p_fav_spread, fav_name),
         },
-        "total_games": _total_games_projection(sd, home_prob, best_of_5),
+        "total_games": {
+            "line": 40.5 if best_of_5 else 22.5,
+            "over_prob": sum(w for (sa, sb, ga, gb), w in scores.items() if ga+gb > (40.5 if best_of_5 else 22.5)),
+            "projected_games": sum((ga+gb)*w for (sa, sb, ga, gb), w in scores.items()),
+            "recommendation": "MODEL ONLY - no priced total supplied",
+            "note": "Scoring distribution anchored to Elo; not independently calibrated"},
         "set_distribution": sd,
+        "alternative_markets": alternative_markets,
+        "serve_return_inputs": holds,
+        "context_audit": context_audit,
+        "sport": "tennis", "home_team": home_player, "away_team": away_player,
         "dominance_ratio": {
             home_player: dr_home,
             away_player: dr_away,
@@ -389,6 +450,7 @@ def predict_tennis_match(
         },
         "recommendation": edge_rec["recommendation"],
         "confidence": edge_rec["confidence"],
+        "confidence_basis": "Heuristic derived from probability, not measured accuracy",
         "edge_pct": edge_rec["edge_pct"],
         "notes": notes,
     }

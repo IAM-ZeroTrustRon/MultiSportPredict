@@ -95,7 +95,8 @@ def main() -> int:
     results = []
     for test in tests:
         try:
-            results.append(bool(test()))
+            test()
+            results.append(True)
         except Exception as exc:  # noqa: BLE001
             print(f"[FAIL] {test.__name__} crashed: {exc}")
             results.append(False)

@@ -1,0 +1,89 @@
+{
+  "embeds": [
+    {
+      "title": "🏓 Czech Liga Pro | Holovatiuk, Yurii vs Briza, Frantisek",
+      "description": "📅 Start: <t:1791642600:f> • Captured phase: scheduled\n**Market-anchored estimate; independent trained edge unavailable.**\nMethod: MARKET-ANCHORED SCORING REFERENCE\nSaved UTC: 2026-10-10T12:58:49.995085+00:00",
+      "color": 3447003,
+      "fields": [
+        {
+          "name": "📊 Match projection",
+          "value": "**Holovatiuk, Yurii** — 66.3% to win\n**Briza, Frantisek** — 33.7% to win\nExpected points **76.54** | Games **4.08**\nExpected A point margin **+3.53**",
+          "inline": false
+        },
+        {
+          "name": "🔎 EV review",
+          "value": "Highest calculated EV: Over 73.5 (Match total points), -0.2%. No positive-EV priced selection.\nDecimal odds • Win excludes pushes • EV = expected return per unit",
+          "inline": false
+        },
+        {
+          "name": "💰 Match winner • PRICED",
+          "value": "Briza, Frantisek | Odds 2.75 | Win 33.7% | EV -7.2% • MyStake\nHolovatiuk, Yurii | Odds 1.40 | Win 66.3% | EV -7.2% • MyStake",
+          "inline": false
+        },
+        {
+          "name": "🎯 Match total points • PRICED",
+          "value": "Over 73.5 | Odds 1.76 | Win 56.7% | EV -0.2% • MyStake\nOver 74.5 | Odds 1.84 | Win 54.1% | EV -0.5% • MyStake\nOver 75.5 | Odds 1.93 | Win 51.5% | EV -0.6% • MyStake\nUnder 75.5 | Odds 1.78 | Win 48.5% | EV -13.7% • MyStake\nUnder 74.5 | Odds 1.86 | Win 45.9% | EV -14.6% • MyStake\nUnder 73.5 | Odds 1.96 | Win 43.3% | EV -15.1% • MyStake",
+          "inline": false
+        },
+        {
+          "name": "🧮 Model reference • NO PRICES / NO EV",
+          "value": "A = Holovatiuk, Yurii\nB = Briza, Frantisek",
+          "inline": false
+        },
+        {
+          "name": "💰 Match winner • projection",
+          "value": "A wins: 66.3% | B wins: 33.7%",
+          "inline": false
+        },
+        {
+          "name": "🔢 Match total games • projection",
+          "value": "Over 3.5: 72.6% | Under 3.5: 27.4%\nOver 4.5: 35.2% | Under 4.5: 64.8%",
+          "inline": false
+        },
+        {
+          "name": "⚖️ Game handicap • projection",
+          "value": "A -1.5: 45.6% | B +1.5: 54.4%\nA +1.5: 80.7% | B -1.5: 19.3%",
+          "inline": false
+        },
+        {
+          "name": "🎯 Match total points • projection",
+          "value": "Over 65.5: 72.5% | Under 65.5: 27.5%\nOver 69.5: 66.4% | Under 69.5: 33.6%\nOver 73.5: 56.7% | Under 73.5: 43.3%\nOver 77.5: 46.9% | Under 77.5: 53.1%\nOver 81.5: 39.9% | Under 81.5: 60.1%",
+          "inline": false
+        },
+        {
+          "name": "📏 Point handicap • projection",
+          "value": "A -5.5: 48.9% | B +5.5: 51.1%\nA -2.5: 59.9% | B +2.5: 40.1%\nA +2.5: 73.3% | B -2.5: 26.7%\nA +5.5: 80.9% | B -5.5: 19.1%",
+          "inline": false
+        },
+        {
+          "name": "🏓 First game winner • projection",
+          "value": "A wins: 58.9% | B wins: 41.1%",
+          "inline": false
+        },
+        {
+          "name": "🔢 First game total points • projection",
+          "value": "Over 17.5: 65.9% | Under 17.5: 34.1%\nOver 18.5: 51.1% | Under 18.5: 48.9%\nOver 19.5: 34.6% | Under 19.5: 65.4%\nOver 20.5: 17.2% | Under 20.5: 82.8%",
+          "inline": false
+        },
+        {
+          "name": "📏 First game point handicap • projection",
+          "value": "A -3.5: 30.6% | B +3.5: 69.4%\nA -1.5: 58.9% | B +1.5: 41.1%\nA +1.5: 58.9% | B -1.5: 41.1%\nA +3.5: 81.7% | B -3.5: 18.3%",
+          "inline": false
+        },
+        {
+          "name": "📚 History coverage",
+          "value": "Prior matches: A 0 | B 0 | H2H 0\nRest: A unknown | B unknown",
+          "inline": false
+        },
+        {
+          "name": "🕒 Captured odds (UTC)",
+          "value": "2026-10-10T12:57:25.830469+00:00\nUpstream price age may be unknown. Saved prices are not refreshed by push.",
+          "inline": false
+        }
+      ],
+      "footer": {
+        "text": "tt_ae4708ed150641bbab07de865a265979 • Captured report; not a live refresh"
+      }
+    }
+  ]
+}

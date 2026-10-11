@@ -111,7 +111,7 @@ def fmt_pct(value: Optional[float]) -> str:
 # TEAM RESOLUTION
 # ==========================================================================
 
-def load_all_soccer_teams() -> Dict[str, Dict[str, Any]]:
+def load_all_soccer_teams(league: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
     """Both stores, auto first -- same precedence get_soccer_team_stats uses."""
     teams: Dict[str, Dict[str, Any]] = {}
     for path in (ROOT / "data" / "team_stats" / "soccer_stats.json",
@@ -122,7 +122,8 @@ def load_all_soccer_teams() -> Dict[str, Dict[str, Any]]:
             store = json.loads(path.read_text(encoding="utf-8-sig"))
         except json.JSONDecodeError:
             continue
-        for name, record in store.items():
+        from soccer_store import competition_view
+        for name, record in competition_view(store, league).items():
             if not name.startswith("_") and isinstance(record, dict):
                 teams[name] = record
     return teams
@@ -136,7 +137,11 @@ _NOISE = re.compile(r"\b(fc|sbv|afc|jk|sc|cf|ac|united|city|club)\b", re.I)
 
 
 def _norm_league(value: Optional[str]) -> str:
-    return re.sub(r"\s+", " ", (value or "").strip().lower())
+    try:
+        from soccer_store import league_key
+        return league_key(value)
+    except ImportError:
+        return re.sub(r"\s+", " ", (value or "").strip().lower())
 
 
 def resolve(typed: str, teams: Dict[str, Dict[str, Any]],
@@ -241,6 +246,9 @@ def extract_model(result: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+NO_ODDS = False
+
+
 def run_slate(matches: List[Dict[str, Any]], dry_run: bool) -> List[Dict[str, Any]]:
     teams = load_all_soccer_teams()
     if not teams:
@@ -254,19 +262,29 @@ def run_slate(matches: List[Dict[str, Any]], dry_run: bool) -> List[Dict[str, An
     for index, match in enumerate(matches, start=1):
         typed_home, typed_away = match["home"], match["away"]
         match_league = match.get("league")
+        teams = load_all_soccer_teams(match_league)
         home, how_home = resolve(typed_home, teams, match_league)
         away, how_away = resolve(typed_away, teams, match_league)
 
         odds_given = any(match.get(k) is not None for k in ("home_ml", "draw_ml", "away_ml"))
-        total_given = match.get("total") is not None
+        # Accept both "total" (canonical) and "market_total" (older slate files).
+        raw_total = match.get("total", match.get("market_total"))
+        total_given = raw_total is not None
+        raw_line = match.get("market_line", match.get("spread_line", match.get("handicap")))
+        line_given = raw_line is not None
         entry: Dict[str, Any] = {
             "n": index, "league": match.get("league", ""),
             "typed_home": typed_home, "typed_away": typed_away,
             "home": home, "away": away,
             "home_ml": match.get("home_ml"), "draw_ml": match.get("draw_ml"),
             "away_ml": match.get("away_ml"),
-            "total": match.get("total", 2.5),
+            "total": raw_total if raw_total is not None else 2.5,
             "total_given": total_given,
+            "market_line": float(raw_line) if raw_line is not None else 0.0,
+            "market_line_given": line_given,
+            "over_price": match.get("over_price"), "under_price": match.get("under_price"),
+            "spread_home_price": match.get("spread_home_price"),
+            "spread_away_price": match.get("spread_away_price"),
         }
 
         missing = [t for t, r in ((typed_home, home), (typed_away, away)) if r is None]
@@ -305,20 +323,46 @@ def run_slate(matches: List[Dict[str, Any]], dry_run: bool) -> List[Dict[str, An
         # settles for "no market, model probability only" when a real price
         # was fetchable. A slate-supplied price always wins -- this only
         # fills the gap, matching universal_runner.run_soccer()'s own rule.
-        if not dry_run and not odds_given:
+        # Fetches h2h + totals + spreads in one cached call per league/day.
+        if not dry_run and not NO_ODDS and not (odds_given and total_given and line_given
+                                                and entry.get("over_price") is not None
+                                                and entry.get("spread_home_price") is not None):
             from live_odds import get_soccer_odds
             fetched = get_soccer_odds(match.get("league"), home, away)
             if fetched.get("status") in ("live", "cached"):
                 if fetched.get("home_ml") is not None:
-                    entry["home_ml"] = fetched.get("home_ml")
-                    entry["draw_ml"] = fetched.get("draw_ml")
-                    entry["away_ml"] = fetched.get("away_ml")
+                    if entry.get("home_ml") is None:
+                        entry["home_ml"] = fetched.get("home_ml")
+                    if entry.get("draw_ml") is None:
+                        entry["draw_ml"] = fetched.get("draw_ml")
+                    if entry.get("away_ml") is None:
+                        entry["away_ml"] = fetched.get("away_ml")
                     entry["odds_captured_at"] = fetched.get("captured_at")
+                    entry["market_source"] = fetched.get("status")
                 if not total_given and fetched.get("total_line") is not None:
                     entry["total"] = fetched["total_line"]
                     total_given = True
+                    entry["total_given"] = True
+                    entry["market_source"] = fetched.get("status")
+                if entry.get("over_price") is None and fetched.get("over_price") is not None:
+                    entry["over_price"] = fetched.get("over_price")
+                if entry.get("under_price") is None and fetched.get("under_price") is not None:
+                    entry["under_price"] = fetched.get("under_price")
+                if not line_given and fetched.get("spread_line") is not None:
+                    entry["market_line"] = float(fetched["spread_line"])
+                    line_given = True
+                    entry["market_line_given"] = True
+                    entry["market_source"] = fetched.get("status")
+                if entry.get("spread_home_price") is None and fetched.get("spread_home_price") is not None:
+                    entry["spread_home_price"] = fetched.get("spread_home_price")
+                if entry.get("spread_away_price") is None and fetched.get("spread_away_price") is not None:
+                    entry["spread_away_price"] = fetched.get("spread_away_price")
             else:
                 entry["odds_unavailable_reason"] = fetched.get("reason")
+                entry["market_source"] = "none"
+                if fetched.get("status") in ("unknown_league", "not_covered", "no_fixture",
+                                             "no_bookmaker", "in_play"):
+                    entry["market_status"] = "UNLISTED (Simulation Only - No EV)"
 
         market = no_vig(entry.get("home_ml"), entry.get("draw_ml"), entry.get("away_ml"))
         entry["mkt_home"], entry["mkt_draw"], entry["mkt_away"] = market
@@ -331,11 +375,37 @@ def run_slate(matches: List[Dict[str, Any]], dry_run: bool) -> List[Dict[str, An
         try:
             from universal_runner import run_soccer
             result = run_soccer(home, away, league=match.get("league"),
-                                market_line=0.0, market_total=entry["total"],
+                                market_line=entry.get("market_line", 0.0),
+                                market_total=entry["total"],
                                 store_to_db=True, push_discord=False,
-                                market_total_given=total_given)
+                                market_total_given=total_given,
+                                market_line_given=line_given,
+                                home_ml=entry.get("home_ml"),
+                                draw_ml=entry.get("draw_ml"),
+                                away_ml=entry.get("away_ml"),
+                                over_price=entry.get("over_price"),
+                                under_price=entry.get("under_price"),
+                                spread_home_price=entry.get("spread_home_price"),
+                                spread_away_price=entry.get("spread_away_price"))
             entry["status"] = "ok"
             entry["model"] = extract_model(result)
+            # run_soccer re-binds live lines internally when the slate was
+            # bare -- copy back anything it found so the review row and the
+            # saved JSON carry the same three markets the model used.
+            for key in ("market_moneyline", "market_totals_prices",
+                        "market_spread_prices", "market_status", "market_note",
+                        "auto_odds"):
+                if result.get(key) is not None:
+                    entry[key] = result[key]
+            if isinstance(result.get("auto_odds"), dict):
+                auto = result["auto_odds"]
+                if auto.get("status") in ("live", "cached"):
+                    entry["market_source"] = auto.get("status")
+                    entry["odds_captured_at"] = auto.get("captured_at")
+                    if not total_given and auto.get("total_line") is not None:
+                        entry["total"] = auto["total_line"]
+                    if not line_given and auto.get("spread_line") is not None:
+                        entry["market_line"] = float(auto["spread_line"])
             entry["raw"] = result
         except Exception as exc:  # noqa: BLE001
             entry["status"] = "failed"
@@ -398,9 +468,17 @@ def print_review(rows: List[Dict[str, Any]]) -> None:
 
         total_text = ""
         if model.get("proj_total") is not None:
-            total_text = f"{model['proj_total']:.2f} vs {row['total']}"
+            # Show the market line the model actually used: a slate total
+            # overridden by auto-fetch must not print the stale slate value.
+            used_total = row.get("total")
+            auto = row.get("auto_odds") if isinstance(row.get("auto_odds"), dict) else {}
+            if auto.get("status") in ("live", "cached") and auto.get("total_line") is not None:
+                used_total = auto["total_line"]
+            total_text = f"{model['proj_total']:.2f} vs {used_total}"
             if model.get("total_rec"):
                 total_text += f" {str(model['total_rec'])[:12]}"
+            if row.get("market_status") == "UNLISTED (Simulation Only - No EV)":
+                total_text += " [SIM]"
 
         log(f"  {row['n']:>2}  {label:<34}{league_label:<18}{name:<7}"
             f"{fmt_pct(model_p):>7}{fmt_pct(market_p):>8}{edge_text:>7}"
@@ -495,6 +573,8 @@ def main() -> None:
     parser.add_argument("--push", nargs="+", type=int, metavar="N",
                         help="Push these numbered matches to Discord.")
     parser.add_argument("--push-all", action="store_true")
+    parser.add_argument("--no-odds", action="store_true",
+                        help="Skip the Odds API auto-fetch (projection only, labelled UNLISTED).")
     args = parser.parse_args()
 
     if args.push or args.push_all:
@@ -516,6 +596,11 @@ def main() -> None:
 
     rule()
     log(f"SOCCER BATCH  -  {len(matches)} match(es)  -  Discord: OFF")
+
+    global NO_ODDS
+    NO_ODDS = bool(args.no_odds)
+    if NO_ODDS:
+        log("Odds auto-fetch OFF (--no-odds) -- projections only, labelled UNLISTED.")
     rule()
 
     rows = run_slate(matches, args.dry_run)

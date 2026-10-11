@@ -1,0 +1,45 @@
+{
+  "home": "Alvark Tokyo",
+  "away": "Ryukyu Golden Kings",
+  "proj_home": 80.3,
+  "proj_away": 79.8,
+  "margin": 0.5,
+  "total": 160.1,
+  "p_home_win": 0.5166177864903634,
+  "league_avg": 78.8,
+  "league_avg_source": "mean of the two teams' supplied for/against",
+  "hfa": 2.5,
+  "adjustments": [
+    "inputs regressed 50% toward average"
+  ],
+  "markets": [
+    {
+      "market": "Game total",
+      "line": "158.5",
+      "pick": "OVER",
+      "prob": 0.5374921488600097,
+      "fair": "-116",
+      "edge": 1.369214886000969,
+      "call": "PASS",
+      "proj": 160.1
+    },
+    {
+      "market": "1Q spread",
+      "line": "home +0",
+      "pick": "HOME (Alvark Tokyo)",
+      "prob": 0.5083106963251719,
+      "fair": "-103",
+      "edge": -2.8726340711865195,
+      "call": "PASS"
+    }
+  ],
+  "props": [],
+  "thin_samples": [],
+  "settings": {
+    "margin_sd": 12.0,
+    "total_sd": 17.0,
+    "hfa": 2.0,
+    "h1": 0.49,
+    "q1": 0.25
+  }
+}

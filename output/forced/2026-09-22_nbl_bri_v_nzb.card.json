@@ -1,0 +1,25 @@
+{
+  "title": "NBL27 | New Zealand Breakers @ Brisbane Bullets",
+  "description": "**FORCED RUN - model math on web-sourced inputs, guards off.**\n2026-09-22 5:30 AM ET Pat Rafter Arena, Brisbane (open-air)",
+  "color": 14510880,
+  "fields": [
+    {
+      "name": "Projection",
+      "inline": false,
+      "value": "Brisbane Bullets 89.4 - New Zealand Breakers 92.7\nTotal 182.1 | Home win 39.2%"
+    },
+    {
+      "name": "Plays (edge, pct pts)",
+      "inline": false,
+      "value": "**BET** Game spread home -2.5 -> AWAY (New Zealand Breakers) (+17.3)\n**BET** Game moneyline -143/+115 -> AWAY (New Zealand Breakers) (+16.7)\n**BET** Game total 187.5 -> UNDER (+11.2)\n**BET** 1H spread home +0 -> AWAY (New Zealand Breakers) (+11.1)"
+    },
+    {
+      "name": "Adjustments",
+      "inline": false,
+      "value": "inputs regressed 50% toward average\naway -1.5: ESTIMATE: played Sun 20 Sep in Auckland, flew to Brisbane, ~2 days rest; Brisbane ~10 days rest"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - FORCED RUN, not stored, not graded"
+  }
+}

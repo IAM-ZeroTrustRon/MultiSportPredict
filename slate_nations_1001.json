@@ -1,0 +1,30 @@
+{
+  "generated": "2026-10-01",
+  "date": "2026-10-01",
+  "matches": [
+    {
+      "home": "Wales",
+      "away": "Norway",
+      "league": "UEFA Nations League",
+      "market_total": 2.5
+    },
+    {
+      "home": "Denmark",
+      "away": "Portugal",
+      "league": "UEFA Nations League",
+      "market_total": 2.5
+    },
+    {
+      "home": "Greece",
+      "away": "Netherlands",
+      "league": "UEFA Nations League",
+      "market_total": 2.5
+    },
+    {
+      "home": "Republic of Ireland",
+      "away": "Austria",
+      "league": "UEFA Nations League",
+      "market_total": 2.5
+    }
+  ]
+}

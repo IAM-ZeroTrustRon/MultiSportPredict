@@ -1,0 +1,839 @@
+{
+  "id": "17694e68f399fdf9c5030021ec9bb595",
+  "sport_key": "soccer_france_ligue_one",
+  "sport_title": "Ligue 1 - France",
+  "commence_time": "2026-10-09T18:45:00Z",
+  "home_team": "RC Lens",
+  "away_team": "Lyon",
+  "bookmakers": [
+    {
+      "key": "pinnacle",
+      "title": "Pinnacle",
+      "last_update": "2026-10-09T13:55:44Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:44Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 163
+            },
+            {
+              "name": "RC Lens",
+              "price": 167
+            },
+            {
+              "name": "Draw",
+              "price": 266
+            }
+          ]
+        },
+        {
+          "key": "spreads",
+          "last_update": "2026-10-09T13:55:44Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": -105,
+              "point": -0.0
+            },
+            {
+              "name": "RC Lens",
+              "price": -103,
+              "point": 0.0
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:55:44Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -113,
+              "point": 3.0
+            },
+            {
+              "name": "Under",
+              "price": 102,
+              "point": 3.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "winamax_fr",
+      "title": "Winamax (FR)",
+      "last_update": "2026-10-09T13:54:57Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:54:56Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 145
+            },
+            {
+              "name": "RC Lens",
+              "price": 150
+            },
+            {
+              "name": "Draw",
+              "price": 270
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "winamax_de",
+      "title": "Winamax (DE)",
+      "last_update": "2026-10-09T13:55:26Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:26Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 145
+            },
+            {
+              "name": "RC Lens",
+              "price": 155
+            },
+            {
+              "name": "Draw",
+              "price": 275
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "codere_it",
+      "title": "Codere (IT)",
+      "last_update": "2026-10-09T13:55:25Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:25Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 155
+            },
+            {
+              "name": "RC Lens",
+              "price": 160
+            },
+            {
+              "name": "Draw",
+              "price": 270
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:55:25Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": 121,
+              "point": 3.5
+            },
+            {
+              "name": "Under",
+              "price": -175,
+              "point": 3.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "onexbet",
+      "title": "1xBet",
+      "last_update": "2026-10-09T13:52:42Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:52:42Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 169
+            },
+            {
+              "name": "RC Lens",
+              "price": 166
+            },
+            {
+              "name": "Draw",
+              "price": 272
+            }
+          ]
+        },
+        {
+          "key": "spreads",
+          "last_update": "2026-10-09T13:52:42Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": -102,
+              "point": 0.0
+            },
+            {
+              "name": "RC Lens",
+              "price": -104,
+              "point": 0.0
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:52:42Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": 136,
+              "point": 3.5
+            },
+            {
+              "name": "Under",
+              "price": -145,
+              "point": 3.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "unibet_fr",
+      "title": "Unibet (FR)",
+      "last_update": "2026-10-09T13:54:54Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:54:53Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 145
+            },
+            {
+              "name": "RC Lens",
+              "price": 150
+            },
+            {
+              "name": "Draw",
+              "price": 270
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "betclic_fr",
+      "title": "Betclic (FR)",
+      "last_update": "2026-10-09T13:54:49Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:54:49Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 150
+            },
+            {
+              "name": "RC Lens",
+              "price": 155
+            },
+            {
+              "name": "Draw",
+              "price": 265
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "coolbet",
+      "title": "Coolbet",
+      "last_update": "2026-10-09T13:54:04Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:54:04Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 165
+            },
+            {
+              "name": "RC Lens",
+              "price": 162
+            },
+            {
+              "name": "Draw",
+              "price": 265
+            }
+          ]
+        },
+        {
+          "key": "spreads",
+          "last_update": "2026-10-09T13:54:04Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": -369,
+              "point": 1.0
+            },
+            {
+              "name": "RC Lens",
+              "price": 310,
+              "point": -1.0
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:54:04Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -115,
+              "point": 3.0
+            },
+            {
+              "name": "Under",
+              "price": 102,
+              "point": 3.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "sport888",
+      "title": "888sport",
+      "last_update": "2026-10-09T13:54:55Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:54:55Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 150
+            },
+            {
+              "name": "RC Lens",
+              "price": 150
+            },
+            {
+              "name": "Draw",
+              "price": 240
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "williamhill",
+      "title": "William Hill",
+      "last_update": "2026-10-09T13:55:44Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:44Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 150
+            },
+            {
+              "name": "RC Lens",
+              "price": 150
+            },
+            {
+              "name": "Draw",
+              "price": 240
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:55:44Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -188,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 150,
+              "point": 2.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tipico_de",
+      "title": "Tipico",
+      "last_update": "2026-10-09T13:55:25Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:25Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 150
+            },
+            {
+              "name": "RC Lens",
+              "price": 155
+            },
+            {
+              "name": "Draw",
+              "price": 260
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:55:25Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": 120,
+              "point": 3.5
+            },
+            {
+              "name": "Under",
+              "price": -167,
+              "point": 3.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nordicbet",
+      "title": "Nordic Bet",
+      "last_update": "2026-10-09T13:54:54Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:54:54Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 162
+            },
+            {
+              "name": "RC Lens",
+              "price": 162
+            },
+            {
+              "name": "Draw",
+              "price": 245
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:54:54Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -192,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 148,
+              "point": 2.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "betsson",
+      "title": "Betsson",
+      "last_update": "2026-10-09T13:54:53Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:54:53Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 158
+            },
+            {
+              "name": "RC Lens",
+              "price": 158
+            },
+            {
+              "name": "Draw",
+              "price": 245
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:54:53Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -185,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 152,
+              "point": 2.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "everygame",
+      "title": "Everygame",
+      "last_update": "2026-10-09T13:52:10Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:52:10Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 160
+            },
+            {
+              "name": "RC Lens",
+              "price": 160
+            },
+            {
+              "name": "Draw",
+              "price": 260
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "unibet_nl",
+      "title": "Unibet (NL)",
+      "last_update": "2026-10-09T13:55:26Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:26Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 155
+            },
+            {
+              "name": "RC Lens",
+              "price": 160
+            },
+            {
+              "name": "Draw",
+              "price": 265
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:55:26Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -195,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 148,
+              "point": 2.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "unibet_se",
+      "title": "Unibet (SE)",
+      "last_update": "2026-10-09T13:55:44Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:44Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 163
+            },
+            {
+              "name": "RC Lens",
+              "price": 165
+            },
+            {
+              "name": "Draw",
+              "price": 275
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:55:44Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -186,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 150,
+              "point": 2.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "leovegas_se",
+      "title": "LeoVegas (SE)",
+      "last_update": "2026-10-09T13:55:28Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:28Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 163
+            },
+            {
+              "name": "RC Lens",
+              "price": 165
+            },
+            {
+              "name": "Draw",
+              "price": 275
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:55:28Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -195,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 148,
+              "point": 2.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "pmu_fr",
+      "title": "PMU (FR)",
+      "last_update": "2026-10-09T13:55:44Z",
+      "markets": [
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:55:44Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -230,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 133,
+              "point": 2.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "betfair_ex_eu",
+      "title": "Betfair",
+      "last_update": "2026-10-09T13:55:09Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:09Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 170
+            },
+            {
+              "name": "RC Lens",
+              "price": 170
+            },
+            {
+              "name": "Draw",
+              "price": 280
+            }
+          ]
+        },
+        {
+          "key": "h2h_lay",
+          "last_update": "2026-10-09T13:55:09Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 172
+            },
+            {
+              "name": "RC Lens",
+              "price": 172
+            },
+            {
+              "name": "Draw",
+              "price": 285
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "gtbets",
+      "title": "GTbets",
+      "last_update": "2026-10-09T13:54:37Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:54:37Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 164
+            },
+            {
+              "name": "RC Lens",
+              "price": 152
+            },
+            {
+              "name": "Draw",
+              "price": 269
+            }
+          ]
+        },
+        {
+          "key": "spreads",
+          "last_update": "2026-10-09T13:54:37Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": -185,
+              "point": 0.5
+            },
+            {
+              "name": "RC Lens",
+              "price": 151,
+              "point": -0.5
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:54:37Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": 124,
+              "point": 3.5
+            },
+            {
+              "name": "Under",
+              "price": -170,
+              "point": 3.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "betonlineag",
+      "title": "BetOnline.ag",
+      "last_update": "2026-10-09T13:55:27Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-10-09T13:55:26Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": 168
+            },
+            {
+              "name": "RC Lens",
+              "price": 155
+            },
+            {
+              "name": "Draw",
+              "price": 271
+            }
+          ]
+        },
+        {
+          "key": "spreads",
+          "last_update": "2026-10-09T13:55:26Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": -102,
+              "point": 0.0
+            },
+            {
+              "name": "RC Lens",
+              "price": -113,
+              "point": 0.0
+            }
+          ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-10-09T13:55:26Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -120,
+              "point": 3.0
+            },
+            {
+              "name": "Under",
+              "price": 100,
+              "point": 3.0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

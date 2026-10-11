@@ -1,0 +1,137 @@
+{
+  "sport": "basketball",
+  "league": "BBL",
+  "home_team": "Jena",
+  "away_team": "Vechta",
+  "timestamp": "2026-10-01T01:49:47.431524+00:00",
+  "expected_pace": 73.4,
+  "team_metrics": {
+    "home": {
+      "ortg": 107.5,
+      "drtg": 114.5,
+      "pace": 72.8
+    },
+    "away": {
+      "ortg": 114.2,
+      "drtg": 109.5,
+      "pace": 74.0
+    }
+  },
+  "q1": {
+    "projected_home_points": 20.41,
+    "projected_away_points": 20.56,
+    "projected_total_points": 40.97,
+    "projected_spread": -0.15,
+    "home_moneyline_probability": 0.489,
+    "away_moneyline_probability": 0.511,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 5.5,
+    "projected_home_score": 20.41,
+    "projected_away_score": 20.56,
+    "projected_total": 40.97,
+    "probability": 0.489,
+    "away_probability": 0.511,
+    "model_edge": null,
+    "lean": "Vechta"
+  },
+  "halftime": {
+    "projected_home_points": 41.22,
+    "projected_away_points": 41.54,
+    "projected_total_points": 82.76,
+    "projected_spread": -0.33,
+    "home_moneyline_probability": 0.4834,
+    "away_moneyline_probability": 0.5166,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 7.8,
+    "projected_home_score": 41.22,
+    "projected_away_score": 41.54,
+    "projected_total": 82.76,
+    "probability": 0.4834,
+    "away_probability": 0.5166,
+    "model_edge": null,
+    "lean": "Vechta"
+  },
+  "full_game": {
+    "projected_home_points": 83.13,
+    "projected_away_points": 83.93,
+    "projected_total_points": 167.06,
+    "projected_spread": -0.79,
+    "home_moneyline_probability": 0.4712,
+    "away_moneyline_probability": 0.5288,
+    "market_spread": 4.5,
+    "spread_edge": -5.29,
+    "sigma": 11.0,
+    "projected_home_score": 83.13,
+    "projected_away_score": 83.93,
+    "projected_total": 167.06,
+    "probability": 0.4712,
+    "away_probability": 0.5288,
+    "model_edge": -5.29,
+    "lean": "Vechta"
+  },
+  "market_info": {
+    "lines": {
+      "spread": 4.5
+    },
+    "total": 171.5
+  },
+  "notes": "BBL model using seeded ORtg/DRtg/pace and segment splits. Strict-fail lookup: unlisted teams stop the run unless --home/away-ortg/drtg/pace overrides are supplied.",
+  "segments": {
+    "1q": {
+      "projected_home_points": 20.41,
+      "projected_away_points": 20.56,
+      "projected_total_points": 40.97,
+      "projected_spread": -0.15,
+      "home_moneyline_probability": 0.489,
+      "away_moneyline_probability": 0.511,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 5.5,
+      "projected_home_score": 20.41,
+      "projected_away_score": 20.56,
+      "projected_total": 40.97,
+      "probability": 0.489,
+      "away_probability": 0.511,
+      "model_edge": null,
+      "lean": "Vechta"
+    },
+    "ht": {
+      "projected_home_points": 41.22,
+      "projected_away_points": 41.54,
+      "projected_total_points": 82.76,
+      "projected_spread": -0.33,
+      "home_moneyline_probability": 0.4834,
+      "away_moneyline_probability": 0.5166,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 7.8,
+      "projected_home_score": 41.22,
+      "projected_away_score": 41.54,
+      "projected_total": 82.76,
+      "probability": 0.4834,
+      "away_probability": 0.5166,
+      "model_edge": null,
+      "lean": "Vechta"
+    },
+    "fg": {
+      "projected_home_points": 83.13,
+      "projected_away_points": 83.93,
+      "projected_total_points": 167.06,
+      "projected_spread": -0.79,
+      "home_moneyline_probability": 0.4712,
+      "away_moneyline_probability": 0.5288,
+      "market_spread": 4.5,
+      "spread_edge": -5.29,
+      "sigma": 11.0,
+      "projected_home_score": 83.13,
+      "projected_away_score": 83.93,
+      "projected_total": 167.06,
+      "probability": 0.4712,
+      "away_probability": 0.5288,
+      "model_edge": -5.29,
+      "lean": "Vechta"
+    }
+  }
+}

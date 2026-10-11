@@ -14,8 +14,8 @@ WHAT IT WRITES
 
 RESULTS ONLY -- NOT A PREDICTOR
     This ingests finished games so grading has something to settle against.
-    It does not build team stats, does not feed a model, and there is no
-    NCAAF predictor in this project. Building one is a separate decision.
+    The dedicated score model is built by ingest_ncaaf_model.py and run by
+    run_ncaaf.py; this script refreshes settlement results only.
     grade_predictions.py's AUTO_SOURCES["ncaaf"] used to alias
     fetch_nfl_results -- the NFL endpoint, which returns zero or wrong games
     for NCAAF fixtures. This ingest, plus the matching fetch_ncaaf_results()

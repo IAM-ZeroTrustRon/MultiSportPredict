@@ -1,0 +1,173 @@
+{
+  "sport": "basketball",
+  "league": "SBL",
+  "home_team": "Boras Basket",
+  "away_team": "BC Lulea",
+  "timestamp": "2026-10-09T15:38:27.090978+00:00",
+  "expected_pace": 76.75,
+  "team_metrics": {
+    "home": {
+      "ortg": 110.5,
+      "drtg": 104.2,
+      "pace": 76.5
+    },
+    "away": {
+      "ortg": 107.8,
+      "drtg": 106.1,
+      "pace": 77.0
+    }
+  },
+  "q1": {
+    "projected_home_points": 21.26,
+    "projected_away_points": 19.93,
+    "projected_total_points": 41.2,
+    "projected_spread": 1.33,
+    "home_moneyline_probability": 0.5957,
+    "away_moneyline_probability": 0.4043,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 5.5,
+    "projected_home_score": 21.26,
+    "projected_away_score": 19.93,
+    "projected_total": 41.2,
+    "probability": 0.5957,
+    "away_probability": 0.4043,
+    "model_edge": null,
+    "lean": "Boras Basket"
+  },
+  "halftime": {
+    "projected_home_points": 42.94,
+    "projected_away_points": 40.27,
+    "projected_total_points": 83.21,
+    "projected_spread": 2.67,
+    "home_moneyline_probability": 0.6341,
+    "away_moneyline_probability": 0.3659,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 7.8,
+    "projected_home_score": 42.94,
+    "projected_away_score": 40.27,
+    "projected_total": 83.21,
+    "probability": 0.6341,
+    "away_probability": 0.3659,
+    "model_edge": null,
+    "lean": "Boras Basket"
+  },
+  "full_game": {
+    "projected_home_points": 86.62,
+    "projected_away_points": 81.35,
+    "projected_total_points": 167.97,
+    "projected_spread": 5.27,
+    "home_moneyline_probability": 0.6839,
+    "away_moneyline_probability": 0.3161,
+    "market_spread": -5.5,
+    "spread_edge": -0.23,
+    "sigma": 11.0,
+    "projected_home_score": 86.62,
+    "projected_away_score": 81.35,
+    "projected_total": 167.97,
+    "probability": 0.6839,
+    "away_probability": 0.3161,
+    "model_edge": -0.23,
+    "lean": "Boras Basket"
+  },
+  "market_info": {
+    "lines": {
+      "spread": -5.5,
+      "total": 168.5,
+      "spread_home_price": null,
+      "spread_away_price": null,
+      "over_price": null,
+      "under_price": null,
+      "alternatives": []
+    },
+    "total": 168.5
+  },
+  "notes": "40-minute model using stored/supplied ORtg/DRtg/pace and assumed segment splits. Spread is home-signed. Segment/total uncertainties are model assumptions unless fitted inputs are supplied; no calibrated confidence is claimed. SBL model using stored or supplied ORtg/DRtg/pace and assumed segment splits. Strict-fail lookup: unlisted teams stop the run unless --home/away-ortg/drtg/pace overrides are supplied.",
+  "markets": [
+    {
+      "kind": "spread",
+      "line": -5.5,
+      "prob_a": 0.491659087356749,
+      "prob_b": 0.508340912643251,
+      "push_prob": 0.0,
+      "price_a": null,
+      "price_b": null,
+      "ev_a": null,
+      "ev_b": null,
+      "pick": null,
+      "recommendation": "PASS \u2014 no priced model value",
+      "note": "Uncalibrated model EV; LEAN threshold 5%, not an established betting record"
+    },
+    {
+      "kind": "total",
+      "line": 168.5,
+      "prob_a": 0.48678745328476636,
+      "prob_b": 0.5132125467152336,
+      "push_prob": 0.0,
+      "price_a": null,
+      "price_b": null,
+      "ev_a": null,
+      "ev_b": null,
+      "pick": null,
+      "recommendation": "PASS \u2014 no priced model value",
+      "note": "Uncalibrated model EV; LEAN threshold 5%, not an established betting record"
+    }
+  ],
+  "segments": {
+    "1q": {
+      "projected_home_points": 21.26,
+      "projected_away_points": 19.93,
+      "projected_total_points": 41.2,
+      "projected_spread": 1.33,
+      "home_moneyline_probability": 0.5957,
+      "away_moneyline_probability": 0.4043,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 5.5,
+      "projected_home_score": 21.26,
+      "projected_away_score": 19.93,
+      "projected_total": 41.2,
+      "probability": 0.5957,
+      "away_probability": 0.4043,
+      "model_edge": null,
+      "lean": "Boras Basket"
+    },
+    "ht": {
+      "projected_home_points": 42.94,
+      "projected_away_points": 40.27,
+      "projected_total_points": 83.21,
+      "projected_spread": 2.67,
+      "home_moneyline_probability": 0.6341,
+      "away_moneyline_probability": 0.3659,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 7.8,
+      "projected_home_score": 42.94,
+      "projected_away_score": 40.27,
+      "projected_total": 83.21,
+      "probability": 0.6341,
+      "away_probability": 0.3659,
+      "model_edge": null,
+      "lean": "Boras Basket"
+    },
+    "fg": {
+      "projected_home_points": 86.62,
+      "projected_away_points": 81.35,
+      "projected_total_points": 167.97,
+      "projected_spread": 5.27,
+      "home_moneyline_probability": 0.6839,
+      "away_moneyline_probability": 0.3161,
+      "market_spread": -5.5,
+      "spread_edge": -0.23,
+      "sigma": 11.0,
+      "projected_home_score": 86.62,
+      "projected_away_score": 81.35,
+      "projected_total": 167.97,
+      "probability": 0.6839,
+      "away_probability": 0.3161,
+      "model_edge": -0.23,
+      "lean": "Boras Basket"
+    }
+  }
+}

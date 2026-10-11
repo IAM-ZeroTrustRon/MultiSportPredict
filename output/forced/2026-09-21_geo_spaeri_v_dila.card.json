@@ -1,0 +1,20 @@
+{
+  "title": "Erovnuli Liga | Dila Gori @ FC Spaeri",
+  "description": "**FORCED RUN - model math on web-sourced inputs, guards off.**\n2026-09-21 1:00 PM ET Tbilisi",
+  "color": 14510880,
+  "fields": [
+    {
+      "name": "Projection",
+      "inline": false,
+      "value": "FC Spaeri 1.31 - Dila Gori 1.26\nTotal 2.57 | Home win 37.9% | Draw 26.5% | Away 35.6%\nLikely: 1-1 (12.6%), 1-0 (10.0%), 0-1 (9.6%)"
+    },
+    {
+      "name": "Plays (edge, pct pts)",
+      "inline": false,
+      "value": "No edges - PASS"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - FORCED RUN, not stored, not graded"
+  }
+}

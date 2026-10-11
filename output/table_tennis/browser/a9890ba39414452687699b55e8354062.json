@@ -1,0 +1,49 @@
+{
+  "text": "Top Events\nUpcoming\nBack\nTable Tennis\nCzechia\nCzech Liga Pro\nCzechia,\nCzech Liga Pro\n\nVaclavik, Miroslav\n\nVS\nSaturday, 10 October 10:00\n\nHavrda, Leos\n\nAll\nResults\nTotals\n2 Way\n1\n1.41\n2\n2.71\nTotal\nOver (73.5)\n1.77\nUnder (73.5)\n1.95\nOver (74.5)\n1.85\nUnder (74.5)\n1.86\nOver (75.5)\n1.94\nUnder (75.5)\n1.78\nMenu\nLive\nCASINO\nMy Bets\n",
+  "url": "https://mystake.com/us/sportsbook/prematch/match/77161814",
+  "markets": [
+    {
+      "title": "2 Way",
+      "selections": [
+        {
+          "name": "1",
+          "price": "1.41"
+        },
+        {
+          "name": "2",
+          "price": "2.71"
+        }
+      ]
+    },
+    {
+      "title": "Total",
+      "selections": [
+        {
+          "name": "Over (73.5)",
+          "price": "1.77"
+        },
+        {
+          "name": "Under (73.5)",
+          "price": "1.95"
+        },
+        {
+          "name": "Over (74.5)",
+          "price": "1.85"
+        },
+        {
+          "name": "Under (74.5)",
+          "price": "1.86"
+        },
+        {
+          "name": "Over (75.5)",
+          "price": "1.94"
+        },
+        {
+          "name": "Under (75.5)",
+          "price": "1.78"
+        }
+      ]
+    }
+  ],
+  "captured_utc": "2026-10-10T12:57:25.827463+00:00"
+}

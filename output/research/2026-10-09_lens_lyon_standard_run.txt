@@ -1,0 +1,47 @@
+
+============================================================
+SOCCER (Ligue 1) MATCHUP: Lens vs Lyon
+============================================================
+
+[SoccerPredictor_Ligue 1] Predicting: Lens vs Lyon
+Projected: Lens 1.35 - Lyon 1.77
+Corner Projection: 10.9
+  Over 8.5: 76.2% | Over 9.5: 65.3% | Over 10.5: 53.3%
+
+Match Outcome:
+  Lens Win: 29.5%
+  Draw: 23.5%
+  Lyon Win: 47.0%
+
+Results saved to: output\soccer\Lens_vs_Lyon.json
+
+SOCCER | Lens vs Lyon Ligue 1
+                                                    Recommendations                                                     
+┌─────────────────────────────┬─────────────────────────────┬───────────────────┬──────────────────────────────────────┐
+│ Market                      │ Recommendation              │       Probability │ Edge / Confidence                    │
+├─────────────────────────────┼─────────────────────────────┼───────────────────┼──────────────────────────────────────┤
+│ side                        │ PASS                        │               N/A │ Edge -0.419 | Conf 32.8%             │
+│ total                       │ PASS                        │               N/A │ Edge 0.124 | Conf 26.7%              │
+│ btts                        │ PASS                        │             62.8% │ Edge N/A | Conf 47.6%                │
+│ Goals Over 1.5              │ Model probability           │             81.9% │                                      │
+│ Goals Over 2.5              │ Model probability           │             60.4% │                                      │
+│ Goals Over 3.5              │ Model probability           │             38.0% │                                      │
+│ Corners Over 8.5            │ Model probability           │             76.2% │                                      │
+│ Corners Over 9.5            │ Model probability           │             65.3% │                                      │
+│ Corners Over 10.5           │ Model probability           │             53.3% │                                      │
+└─────────────────────────────┴─────────────────────────────┴───────────────────┴──────────────────────────────────────┘
+                                                  Projection & Context                                                  
+┌───────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Metric                │ Value                                                                                        │
+├───────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Projected Home Goals  │ 1.350                                                                                        │
+│ Projected Away Goals  │ 1.770                                                                                        │
+│ Projected Total Goals │ 3.120                                                                                        │
+│ Home Win Prob         │ 0.295                                                                                        │
+│ Draw Prob             │ 0.235                                                                                        │
+│ Away Win Prob         │ 0.470                                                                                        │
+│ Goals Analysis        │ {"over_15_prob":0.819,"over_25_prob":0.604,"over_35_prob":0.38}                              │
+│ Corners Analysis      │ {"projection":10.9,"over_85_prob":0.762,"over_95_prob":0.653,"over_105_prob":0.533}          │
+│ Team Metrics          │ {"home":{"xg_for":1.8,"xg_against":1.8,"shots":13.0,"sot":4.5,"goals_for":1.8,"goals_agains… │
+│ Live Market           │ {"source":"odds_api","status":"cached","league_key":"soccer_france_ligue_one","captured_at"… │
+└───────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────┘

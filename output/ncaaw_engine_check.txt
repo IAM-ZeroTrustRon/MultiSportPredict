@@ -1,0 +1,470 @@
+No live odds requested
+
+NCAAW 2026-11-02 | Washington State Cougars @ California Golden Bears
+Projected points: 75.6–59.9; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 88.9%, B 11.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Holy Cross Crusaders @ Boston College Eagles
+Projected points: 62.6–69.0; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 30.9%, B 69.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Bellarmine Knights @ Louisville Cardinals
+Projected points: 89.8–45.0; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 100.0%, B 0.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Oklahoma Sooners @ North Carolina Tar Heels
+Projected points: 71.6–72.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 46.9%, B 53.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | South Carolina Upstate Spartans @ Wake Forest Demon Deacons
+Projected points: 67.3–56.9; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 79.0%, B 21.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Bucknell Bison @ Florida Gators
+Projected points: 69.6–52.7; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 90.6%, B 9.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Wichita State Shockers @ Kansas State Wildcats
+Projected points: 73.8–58.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 88.4%, B 11.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Southern Jaguars @ Oklahoma State Cowgirls
+Projected points: 74.1–57.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 89.8%, B 10.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Brown Bears @ Siena Saints
+Projected points: 63.7–65.0; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 46.0%, B 54.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Radford Highlanders @ Clemson Tigers
+Projected points: 67.9–57.3; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 79.5%, B 20.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Niagara Purple Eagles @ Fordham Rams
+Projected points: 70.7–55.3; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 88.5%, B 11.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Cornell Big Red @ UConn Huskies
+Projected points: 84.0–43.1; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 99.9%, B 0.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Creighton Bluejays @ South Dakota State Jackrabbits
+Projected points: 76.1–61.2; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 87.7%, B 12.3%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Duquesne Dukes @ Tennessee Lady Volunteers
+Projected points: 77.6–59.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 92.0%, B 8.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | SE Louisiana Lady Lions @ LSU Tigers
+Projected points: 94.0–52.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 99.9%, B 0.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | West Georgia Wolves @ Georgia Lady Bulldogs
+Projected points: 77.9–63.4; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 87.1%, B 12.9%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Queens University Royals @ Alabama Crimson Tide
+Projected points: 75.3–51.4; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 96.9%, B 3.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Long Island University Sharks @ Rutgers Scarlet Knights
+Projected points: 64.7–67.3; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 41.9%, B 58.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Xavier Musketeers @ Purdue Fort Wayne Mastodons
+Projected points: 71.5–59.0; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 83.5%, B 16.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Stanford Cardinal @ Arizona Wildcats
+Projected points: 65.7–73.1; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 28.2%, B 71.8%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Richmond Spiders @ Charlotte 49ers
+Projected points: 61.3–70.1; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 24.7%, B 75.3%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Merrimack Warriors @ Florida State Seminoles
+Projected points: 72.2–70.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 55.1%, B 44.9%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Hofstra Pride @ Georgia Tech Yellow Jackets
+Projected points: 64.9–53.9; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 80.5%, B 19.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Florida Atlantic Owls @ Miami Hurricanes
+Projected points: 73.7–59.9; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 85.9%, B 14.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Wofford Terriers @ NC State Wolfpack
+Projected points: 75.2–59.4; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 89.0%, B 11.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Rider Broncs @ NJIT Highlanders
+Projected points: 67.8–54.7; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 84.6%, B 15.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | UAlbany Great Danes @ Northeastern Huskies
+Projected points: 60.0–61.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 44.6%, B 55.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Houston Christian Huskies @ Rice Owls
+Projected points: 71.9–53.1; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 92.9%, B 7.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Furman Paladins @ South Florida Bulls
+Projected points: 72.2–60.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 81.9%, B 18.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Harvard Crimson @ Minnesota Golden Gophers
+Projected points: 66.5–57.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 75.1%, B 24.9%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Belmont Bruins @ Princeton Tigers
+Projected points: 72.1–61.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 78.9%, B 21.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Maryland Eastern Shore Hawks @ Virginia Cavaliers
+Projected points: 73.3–58.3; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 87.8%, B 12.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | North Carolina Central Eagles @ Virginia Tech Hokies
+Projected points: 76.2–55.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 94.4%, B 5.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Texas Southern Tigers @ Tulane Green Wave
+Projected points: 72.2–60.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 81.4%, B 18.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Lipscomb Bisons @ Vanderbilt Commodores
+Projected points: 80.5–56.3; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 97.0%, B 3.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Jackson State Lady Tigers @ Arizona State Sun Devils
+Projected points: 67.3–50.4; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 90.6%, B 9.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Marist Red Foxes @ Drexel Dragons
+Projected points: 67.2–55.4; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 82.0%, B 18.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Navy Midshipmen @ Mount St. Mary's Mountaineers
+Projected points: 60.2–65.7; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 33.5%, B 66.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Seattle U Redhawks @ New Mexico Lobos
+Projected points: 76.1–55.3; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 94.8%, B 5.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | San Diego Toreros @ New Mexico State Aggies
+Projected points: 61.6–59.3; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 57.1%, B 42.9%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Santa Clara Broncos @ Wyoming Cowgirls
+Projected points: 65.1–71.1; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 32.1%, B 67.9%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Nevada Wolf Pack @ Loyola Marymount Lions
+Projected points: 70.3–58.7; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 81.8%, B 18.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Grambling Lady Tigers @ Iowa State Cyclones
+Projected points: 78.1–60.9; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 91.0%, B 9.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Eastern Kentucky Colonels @ UT Martin Skyhawks
+Projected points: 59.7–65.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 32.4%, B 67.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Fairleigh Dickinson Knights @ Baylor Bears
+Projected points: 65.2–58.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 70.0%, B 30.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Austin Peay Governors @ Campbell Fighting Camels
+Projected points: 58.2–56.3; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 55.8%, B 44.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Alabama State Lady Hornets @ Auburn Tigers
+Projected points: 64.3–55.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 74.4%, B 25.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | UL Monroe Warhawks @ Ohio Bobcats
+Projected points: 74.4–70.7; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 61.4%, B 38.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Marshall Thundering Herd @ Massachusetts Minutewomen
+Projected points: 67.5–64.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 58.3%, B 41.7%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | James Madison Dukes @ Miami (OH) RedHawks
+Projected points: 64.2–64.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 48.1%, B 51.9%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Georgia Southern Eagles @ Bowling Green Falcons
+Projected points: 63.6–66.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 40.3%, B 59.7%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Coastal Carolina Chanticleers @ Western Michigan Broncos
+Projected points: 62.2–65.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 38.8%, B 61.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Arkansas State Red Wolves @ Ball State Cardinals
+Projected points: 75.6–71.2; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 63.2%, B 36.8%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | App State Mountaineers @ Eastern Michigan Eagles
+Projected points: 65.4–61.4; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 62.4%, B 37.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | St. Thomas Tommies @ Northern Iowa Panthers
+Projected points: 67.3–58.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 75.1%, B 24.9%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | North Dakota State Bison @ Gonzaga Bulldogs
+Projected points: 71.2–70.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 52.0%, B 48.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Maryland Terrapins @ South Carolina Gamecocks
+Projected points: 79.5–66.7; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 84.2%, B 15.8%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Lehigh Mountain Hawks @ UCLA Bruins
+Projected points: 81.9–51.9; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 99.0%, B 1.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Hawai'i Rainbow Wahine @ Oregon Ducks
+Projected points: 67.7–59.1; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 74.8%, B 25.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Delaware State Hornets @ Georgetown Hoyas
+Projected points: 66.8–52.7; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 86.3%, B 13.7%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Davidson Wildcats @ Columbia Lions
+Projected points: 68.4–57.7; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 79.7%, B 20.3%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Boston University Terriers @ Dartmouth Big Green
+Projected points: 60.1–62.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 42.1%, B 57.9%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Chicago State Cougars @ Illinois State Redbirds
+Projected points: 77.2–61.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 89.0%, B 11.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Indiana State Sycamores @ Northern Illinois Huskies
+Projected points: 74.5–70.4; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 62.6%, B 37.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Murray State Racers @ Southern Indiana Screaming Eagles
+Projected points: 74.4–74.4; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 49.9%, B 50.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Denver Pioneers @ Air Force Falcons
+Projected points: 66.3–58.2; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 73.6%, B 26.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | LSU New Orleans Privateers @ Arkansas Razorbacks
+Projected points: 80.7–65.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 88.0%, B 12.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Tennessee Tech Golden Eagles @ Butler Bulldogs
+Projected points: 65.9–61.2; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 64.2%, B 35.8%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | USC Trojans @ UNLV Lady Rebels
+Projected points: 65.0–68.7; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 38.7%, B 61.3%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Temple Owls @ George Mason Patriots
+Projected points: 71.5–60.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 80.4%, B 19.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Saint Louis Billikens @ Middle Tennessee Blue Raiders
+Projected points: 67.5–57.1; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 79.2%, B 20.8%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Lafayette Leopards @ St. John's Red Storm
+Projected points: 65.0–56.0; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 75.7%, B 24.3%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Towson Tigers @ Iowa Hawkeyes
+Projected points: 77.3–59.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 91.7%, B 8.3%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | San José State Spartans @ Nebraska Cornhuskers
+Projected points: 81.4–56.2; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 97.5%, B 2.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | IU Indianapolis Jaguars @ Purdue Boilermakers
+Projected points: 73.1–65.1; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 73.5%, B 26.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Cal State Fullerton Titans @ San Diego State Aztecs
+Projected points: 73.7–63.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 78.7%, B 21.3%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Pepperdine Waves @ Portland State Vikings
+Projected points: 66.1–73.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 28.4%, B 71.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Alcorn State Lady Braves @ Ole Miss Rebels
+Projected points: 73.4–51.0; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 96.0%, B 4.0%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Hampton Lady Pirates @ Houston Cougars
+Projected points: 67.8–63.0; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 64.4%, B 35.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Arkansas-Pine Bluff Golden Lions @ Texas A&M Aggies
+Projected points: 71.8–58.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 85.1%, B 14.9%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Binghamton Bearcats @ Monmouth Hawks
+Projected points: 64.7–60.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 62.6%, B 37.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Presbyterian Blue Hose @ UNC Greensboro Spartans
+Projected points: 68.7–51.1; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 91.5%, B 8.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | UIC Flames @ Ohio State Buckeyes
+Projected points: 79.0–60.2; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 92.9%, B 7.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Cleveland State Vikings @ Penn State Lady Lions
+Projected points: 72.7–73.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 46.4%, B 53.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Troy Trojans @ Kent State Golden Flashes
+Projected points: 71.1–74.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 39.4%, B 60.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | UC San Diego Tritons @ Washington Huskies
+Projected points: 71.6–61.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 78.4%, B 21.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Lindenwood Lions @ Colorado State Rams
+Projected points: 66.1–61.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 63.7%, B 36.3%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Morehead State Eagles @ Kentucky Wildcats
+Projected points: 74.5–55.0; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 93.6%, B 6.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Louisiana Tech Lady Techsters @ Toledo Rockets
+Projected points: 61.6–64.4; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 41.5%, B 58.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Southeast Missouri State Redhawks @ Missouri State Lady Bears
+Projected points: 70.0–59.6; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 79.3%, B 20.7%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Howard Bison @ Missouri Tigers
+Projected points: 70.6–70.2; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 51.5%, B 48.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | South Alabama Jaguars @ Akron Zips
+Projected points: 69.5–72.8; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 39.8%, B 60.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Georgia State Panthers @ Buffalo Bulls
+Projected points: 69.1–70.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 45.4%, B 54.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NCAAW 2026-11-02 | Old Dominion Monarchs @ Central Michigan Chippewas
+Projected points: 72.8–66.5; holdout 1149 games; RMSE margin 12.840517711731412
+  moneyline 0.5: A 68.7%, B 31.3%, push 0.0%; EV None / None; PASS — no priced model value

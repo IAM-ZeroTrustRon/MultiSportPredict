@@ -1,0 +1,101 @@
+{
+  "home": "Petrolul Ploiesti",
+  "away": "FK Csikszereda",
+  "proj_home": 1.86,
+  "proj_away": 0.9,
+  "margin": 0.96,
+  "total": 2.76,
+  "p_home_win": 0.5985625472138062,
+  "p_draw": 0.22324170802941715,
+  "p_away_win": 0.17819511234962276,
+  "p_btts": 0.5006092499788427,
+  "likely_scores": [
+    "1-0 (11.8%)",
+    "2-0 (10.9%)",
+    "1-1 (10.6%)"
+  ],
+  "league_avg": 1.39,
+  "league_avg_source": "mean of the two teams' supplied for/against",
+  "hfa": "x1.1 home / x0.9 away",
+  "adjustments": [
+    "home -0.10 goals: ESTIMATE: Nlundulu suspended (3 of Petrolul's 11 goals), per fcpetrolul.ro"
+  ],
+  "markets": [
+    {
+      "market": "1X2",
+      "line": "home",
+      "pick": "HOME (Petrolul Ploiesti)",
+      "prob": 0.5985625472138062,
+      "fair": "-149",
+      "edge": 5.310800175926078,
+      "call": "LEAN",
+      "price": -120
+    },
+    {
+      "market": "1X2",
+      "line": "draw",
+      "pick": "DRAW",
+      "prob": 0.22324170802941715,
+      "fair": "+348",
+      "edge": -7.526575465714999,
+      "call": "PASS",
+      "price": 235
+    },
+    {
+      "market": "1X2",
+      "line": "away",
+      "pick": "AWAY (FK Csikszereda)",
+      "prob": 0.17819511234962276,
+      "fair": "+461",
+      "edge": -5.436302718526095,
+      "call": "PASS",
+      "price": 330
+    },
+    {
+      "market": "Total",
+      "line": "2.5",
+      "pick": "OVER",
+      "prob": 0.5198108211696256,
+      "fair": "-108",
+      "edge": 1.9810821169625625,
+      "call": "PASS",
+      "price": 100
+    },
+    {
+      "market": "Total",
+      "line": "2.5",
+      "pick": "UNDER",
+      "prob": 0.4801891788303744,
+      "fair": "+108",
+      "edge": -8.50282124739734,
+      "call": "PASS",
+      "price": -130
+    },
+    {
+      "market": "BTTS",
+      "line": "yes",
+      "pick": "YES",
+      "prob": 0.5006092499788427,
+      "fair": "-100",
+      "edge": -4.067515369088204,
+      "call": "PASS",
+      "price": -118
+    },
+    {
+      "market": "BTTS",
+      "line": "no",
+      "pick": "NO",
+      "prob": 0.4993907500211573,
+      "fair": "+100",
+      "edge": -4.189365364856745,
+      "call": "PASS",
+      "price": -118
+    }
+  ],
+  "props": [],
+  "thin_samples": [],
+  "settings": {
+    "home_mult": 1.1,
+    "away_mult": 0.9
+  }
+}

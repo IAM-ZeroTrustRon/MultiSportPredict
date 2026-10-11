@@ -53,6 +53,10 @@ def init_db(db_path: Optional[Path] = None) -> None:
     if "league" not in existing_columns:
         cur.execute("ALTER TABLE predictions ADD COLUMN league TEXT")
 
+    for name in ("game_date", "event_key"):
+        if name not in existing_columns:
+            cur.execute(f"ALTER TABLE predictions ADD COLUMN {name} TEXT")
+
     # Index for faster queries
     cur.execute("""
         CREATE INDEX IF NOT EXISTS idx_predictions_sport 
@@ -113,6 +117,8 @@ def store_prediction(
     conn = sqlite3.connect(path)
     cur = conn.cursor()
 
+    game_date = raw_json.get("game_date")
+    event_key = raw_json.get("event_key")
     today = datetime.now().date().isoformat()
     existing = cur.execute("""
         SELECT id FROM predictions
@@ -120,6 +126,9 @@ def store_prediction(
           AND date(timestamp) = ? AND result_outcome IS NULL
         ORDER BY id DESC LIMIT 1
     """, (sport, home_team, away_team, market_type, today)).fetchone()
+
+    if event_key:
+        existing = cur.execute("SELECT id FROM predictions WHERE sport=? AND event_key=? AND result_outcome IS NULL ORDER BY id DESC LIMIT 1", (sport, event_key)).fetchone()
 
     if existing:
         row_id = existing[0]
@@ -148,6 +157,9 @@ def store_prediction(
         ))
         row_id = cur.lastrowid
 
+    if game_date or event_key:
+        cur.execute("UPDATE predictions SET game_date=COALESCE(?,game_date), event_key=COALESCE(?,event_key) WHERE id=?",
+                    (game_date, event_key, row_id))
     conn.commit()
     conn.close()
 
@@ -403,3 +415,219 @@ def delete_old_predictions(
     conn.close()
     
     return deleted
+
+
+def table_tennis_win_cover_gap(records, min_matches=20, gap_pp=15.0):
+    """Compare win/point-cover rates on the SAME settled matches.
+
+    Each record has match_won (bool), point_margin and the player's signed
+    point_handicap. Pushes are excluded from both denominators. This is a
+    descriptive screening flag, not a test that the rates should be equal.
+    """
+    from table_tennis.contracts import number
+    if isinstance(min_matches, bool) or not isinstance(min_matches,int) or min_matches<1:
+        raise ValueError('min_matches must be a positive integer')
+    gap_pp=number(gap_pp)
+    if not 0<gap_pp<=100:raise ValueError('gap_pp must be in (0, 100]')
+    records=list(records)
+    wins=covers=pushes=won_no_cover=lost_cover=0
+    for r in records:
+        if not isinstance(r.get('match_won'),bool):raise ValueError('match_won must be boolean')
+        margin=number(r['point_margin']);line=number(r['point_handicap'])
+        if margin!=int(margin) or line*2!=round(line*2):raise ValueError('Integer point margin and integer/half handicap required')
+        settled=margin+line
+        if settled==0:pushes+=1;continue
+        won=r['match_won'];covered=settled>0
+        wins+=won;covers+=covered
+        won_no_cover+=won and not covered;lost_cover+=not won and covered
+    n=len(records)-pushes
+    wr=wins/n if n else None;cr=covers/n if n else None
+    gap=(wr-cr)*100 if n else None
+    enough=n>=min_matches
+    return dict(matches=len(records),settled_matches=n,pushes=pushes,
+        match_wins=wins,point_covers=covers,match_win_percentage=wr*100 if n else None,
+        point_cover_percentage=cr*100 if n else None,gap_percentage_points=gap,
+        won_without_cover=won_no_cover,lost_but_covered=lost_cover,
+        flagged=enough and abs(gap)>=gap_pp,
+        status='DESCRIPTIVE GAP' if enough and abs(gap)>=gap_pp else ('NO LARGE GAP' if enough else 'INSUFFICIENT MATCHED HISTORY'),
+        minimum_matches=min_matches,threshold_percentage_points=gap_pp,
+        interpretation='Win and cover rates need not be equal. This is not EV or proof of mispricing.')
+
+
+class TableTennisStore:
+    """Czech-only collection in the canonical database, isolated from bet rows.
+
+    Results, source corrections, quotes and immutable forecasts are retained
+    separately so collecting/training never invents bets in the main ledger.
+    """
+    def __init__(self, db_path=None):
+        self.path = Path(db_path) if db_path is not None else Path(__file__).resolve().parents[1] / 'multisport_history.db'
+        if str(self.path).startswith('\\\\'):
+            raise ValueError('Database writes require a local disk')
+        with self._connection() as conn:
+            conn.executescript('''
+                CREATE TABLE IF NOT EXISTS tt_events (
+                    event_id TEXT PRIMARY KEY, start_utc TEXT NOT NULL,
+                    status TEXT NOT NULL, player_a_id TEXT NOT NULL,
+                    player_b_id TEXT NOT NULL, payload TEXT NOT NULL,
+                    version INTEGER NOT NULL, updated_utc TEXT NOT NULL);
+                CREATE INDEX IF NOT EXISTS tt_events_start ON tt_events(start_utc,status);
+                CREATE TABLE IF NOT EXISTS tt_event_versions (
+                    event_id TEXT NOT NULL, version INTEGER NOT NULL,
+                    received_utc TEXT NOT NULL, payload TEXT NOT NULL,
+                    PRIMARY KEY(event_id,version));
+                CREATE TABLE IF NOT EXISTS tt_quotes (
+                    quote_id TEXT PRIMARY KEY, event_id TEXT NOT NULL,
+                    quoted_utc TEXT NOT NULL, market TEXT NOT NULL,
+                    payload TEXT NOT NULL);
+                CREATE INDEX IF NOT EXISTS tt_quotes_event ON tt_quotes(event_id,quoted_utc);
+                CREATE TABLE IF NOT EXISTS tt_runs (
+                    run_id TEXT PRIMARY KEY, event_id TEXT NOT NULL,
+                    created_utc TEXT NOT NULL, payload TEXT NOT NULL);
+                CREATE INDEX IF NOT EXISTS tt_runs_event ON tt_runs(event_id,created_utc);
+                CREATE TABLE IF NOT EXISTS tt_grades (
+                    run_id TEXT NOT NULL, selection_id TEXT NOT NULL,
+                    event_version INTEGER NOT NULL, payload TEXT NOT NULL,
+                    PRIMARY KEY(run_id,selection_id));
+            ''')
+
+    def _connection(self):
+        # sqlite's context manager commits but does not close; explicitly close.
+        from contextlib import contextmanager
+        @contextmanager
+        def opened():
+            conn = sqlite3.connect(str(self.path), timeout=30)
+            try:
+                with conn:
+                    yield conn
+            finally:
+                conn.close()
+        return opened()
+
+    def upsert_event(self, event):
+        from table_tennis.contracts import validate_event
+        event = validate_event(event)
+        raw = json.dumps(event, sort_keys=True, allow_nan=False)
+        with self._connection() as conn:
+            row = conn.execute('SELECT payload,version FROM tt_events WHERE event_id=?', (event['event_id'],)).fetchone()
+            version = 1
+            if row:
+                old = json.loads(row[0])
+                if (old['player_a_id'], old['player_b_id']) != (event['player_a_id'], event['player_b_id']):
+                    raise ValueError('Provider event changed player identity; explicit reconciliation required')
+                comparable = lambda x: {k:v for k,v in x.items() if k != 'retrieved_utc'}
+                if comparable(old) == comparable(event):
+                    conn.execute('UPDATE tt_events SET updated_utc=? WHERE event_id=?', (event['retrieved_utc'],event['event_id']))
+                    return 'duplicate'
+                version = row[1]+1
+            conn.execute('INSERT INTO tt_event_versions VALUES(?,?,?,?)', (event['event_id'],version,event['retrieved_utc'],raw))
+            conn.execute('INSERT OR REPLACE INTO tt_events VALUES(?,?,?,?,?,?,?,?)',
+                         (event['event_id'],event['start_utc'],event['status'],event['player_a_id'],event['player_b_id'],raw,version,event['retrieved_utc']))
+        return 'corrected' if row else 'inserted'
+
+    def event(self, event_id):
+        with self._connection() as conn:
+            row = conn.execute('SELECT payload,version FROM tt_events WHERE event_id=?',(event_id,)).fetchone()
+        if not row:
+            raise ValueError('Event is not in the Czech store; refresh or import a verified event')
+        out = json.loads(row[0]);out['store_version']=row[1]
+        return out
+
+    def events(self, finished_only=False):
+        with self._connection() as conn:
+            query = 'SELECT payload,version FROM tt_events'
+            if finished_only:query += " WHERE status='finished'"
+            query += ' ORDER BY start_utc,event_id'
+            rows=conn.execute(query).fetchall()
+        return [dict(json.loads(r[0]),store_version=r[1]) for r in rows]
+
+    def add_quote(self, quote):
+        import hashlib
+        from table_tennis.contracts import validate_quote
+        q=validate_quote(quote)
+        self.event(q['event_id'])
+        identity={k:v for k,v in q.items() if k!='retrieved_utc'}
+        key=hashlib.sha256(json.dumps(identity,sort_keys=True,allow_nan=False).encode()).hexdigest()
+        with self._connection() as conn:
+            conn.execute('INSERT OR IGNORE INTO tt_quotes VALUES(?,?,?,?,?)',
+                         (key,q['event_id'],q['quoted_utc'],q['market'],json.dumps(q,allow_nan=False)))
+        return key
+
+    def quotes(self, event_id):
+        with self._connection() as conn:
+            rows=conn.execute('SELECT payload FROM tt_quotes WHERE event_id=? ORDER BY quoted_utc DESC',(event_id,)).fetchall()
+        return [json.loads(r[0]) for r in rows]
+
+    def quotes_by_event(self):
+        grouped = {}
+        with self._connection() as conn:
+            for event_id, raw in conn.execute('SELECT event_id,payload FROM tt_quotes ORDER BY quoted_utc DESC'):
+                grouped.setdefault(event_id, []).append(json.loads(raw))
+        return grouped
+
+    def player_point_cover_gap(self, player_id, point_handicap, bookmaker, as_of=None,
+                               min_matches=20, gap_pp=15.0, limit=100):
+        """One closing prematch quote per event at this exact player handicap.
+
+        Alternative lines and repeated captures are never independent samples.
+        Unknown quote freshness and missing point results are not substituted.
+        """
+        from table_tennis.contracts import timestamp,utcnow,number
+        from datetime import timedelta
+        line=number(point_handicap);cutoff=timestamp(as_of or utcnow())
+        if line*2!=round(line*2):raise ValueError('Use an integer or half point handicap')
+        if not bookmaker:raise ValueError('A single bookmaker is required')
+        if isinstance(limit,bool) or not isinstance(limit,int) or limit<1:raise ValueError('limit must be a positive integer')
+        # Restrict player/time in SQL rather than re-reading all league history.
+        with self._connection() as conn:
+            rows=conn.execute("""SELECT payload FROM tt_events WHERE status='finished'
+                AND (player_a_id=? OR player_b_id=?) AND start_utc<?
+                ORDER BY start_utc DESC,event_id""",(player_id,player_id,cutoff.isoformat())).fetchall()
+        records=[]
+        for row in rows:
+            e=json.loads(row[0]);start=timestamp(e['start_utc'])
+            available=timestamp(e['end_utc']) if e.get('end_utc') else start.replace(hour=0,minute=0,second=0,microsecond=0)+timedelta(days=1)
+            if available>=cutoff:continue
+            side=0 if e['player_a_id']==player_id else 1
+            chosen=None
+            for q in self.quotes(e['event_id']):
+                if q['market']!='points_spread' or q['bookmaker']!=bookmaker or q['is_live']:continue
+                signed=q['line'] if side==0 else -q['line']
+                if signed!=line:continue
+                age=(start-timestamp(q['quoted_utc'])).total_seconds()
+                if 0<age<=3600:chosen=q;break
+            if chosen is None:continue
+            scores=e['game_scores'];margin=sum(s[side]-s[1-side] for s in scores)
+            records.append(dict(event_id=e['event_id'],match_won=sum(s[side]>s[1-side] for s in scores)==3,
+                                point_margin=margin,point_handicap=line))
+            if len(records)==limit:break
+        result=table_tennis_win_cover_gap(records,min_matches,gap_pp)
+        result.update(player_id=player_id,point_handicap=line,bookmaker=bookmaker,
+                      as_of=cutoff.isoformat(),event_ids=[r['event_id'] for r in records])
+        return result
+
+    def save_run(self, report):
+        with self._connection() as conn:
+            conn.execute('INSERT INTO tt_runs VALUES(?,?,?,?)',(report['run_id'],report['event']['event_id'],report['created_utc'],json.dumps(report,allow_nan=False)))
+
+    def run(self, run_id):
+        with self._connection() as conn:
+            row=conn.execute('SELECT payload FROM tt_runs WHERE run_id=?',(run_id,)).fetchone()
+        if not row:raise ValueError('Saved run ID was not found')
+        return json.loads(row[0])
+
+    def runs(self):
+        with self._connection() as conn:
+            return [json.loads(r[0]) for r in conn.execute('SELECT payload FROM tt_runs ORDER BY created_utc')]
+
+    def save_grade(self, run_id, selection_id, event_version, grade):
+        with self._connection() as conn:
+            conn.execute('INSERT OR REPLACE INTO tt_grades VALUES(?,?,?,?)',
+                         (run_id,selection_id,event_version,json.dumps(grade,allow_nan=False)))
+
+    def stats(self):
+        with self._connection() as conn:
+            out={t:conn.execute('SELECT COUNT(*) FROM '+t).fetchone()[0] for t in ('tt_events','tt_quotes','tt_runs','tt_grades')}
+            out['finished']=conn.execute("SELECT COUNT(*) FROM tt_events WHERE status='finished'").fetchone()[0]
+            out['range']=conn.execute("SELECT MIN(start_utc),MAX(start_utc) FROM tt_events WHERE status='finished'").fetchone()
+        return out

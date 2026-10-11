@@ -1,0 +1,50 @@
+{
+  "title": "Liga Profesional | Aldosivi vs Atletico Tucuman",
+  "description": "**RESEARCH CARD - not model output.** Clausura R10.\nMon 21 Sep - 1:30pm ET - Estadio Minella, Mar del Plata",
+  "color": 3066993,
+  "fields": [
+    {
+      "name": "Market",
+      "inline": false,
+      "value": "Bet365: ALD 3.30 | X 2.85 | TUC 2.40\nNo-vig: 28.3% / 32.8% / 38.9%\nO/U 2.5: Over 2.70 / Under 1.41 (Under 65.7% no-vig)"
+    },
+    {
+      "name": "Best bet",
+      "inline": false,
+      "value": "**PASS** - market and quick check agree within 3 pts on every outcome."
+    },
+    {
+      "name": "Leans",
+      "inline": false,
+      "value": "- None. Tucuman +150 (2.50) is break-even at best (need 40.0%, check 39.6%)\n- Under 2.5 at 1.41 is already priced in"
+    },
+    {
+      "name": "Why",
+      "inline": false,
+      "value": "- ALD last in Zona B, 1-2-6, 11-16\n- TUC 3-4-2, 7-5, won last 2 away\n- ALD games avg 3.0 goals, TUC games 1.33"
+    },
+    {
+      "name": "Check before betting",
+      "inline": false,
+      "value": "- Fatigue angle is weaker than claimed: TUC Copa game was Sep 16 (5 days), 1-1 then penalties, NO extra time\n- No injuries listed"
+    },
+    {
+      "name": "Against",
+      "inline": false,
+      "value": "New ALD coach Sanguinetti won his debut 3-1, ending a 23-game winless run."
+    },
+    {
+      "name": "Confidence",
+      "inline": true,
+      "value": "Low - no edge found"
+    },
+    {
+      "name": "Sharp data",
+      "inline": true,
+      "value": "None exists for this league"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - research, not a model pick"
+  }
+}

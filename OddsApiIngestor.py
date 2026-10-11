@@ -93,7 +93,8 @@ class OddsApiIngestor:
             print(f"[ERROR] Request timeout fetching {sport_key}")
             return None
         except requests.exceptions.RequestException as e:
-            print(f"[ERROR] Failed to communicate with Odds API: {e}")
+            status = getattr(getattr(e, "response", None), "status_code", None)
+            print(f"[ERROR] Odds API request failed ({type(e).__name__}, HTTP {status or 'unavailable'})")
             return None
         except (json.JSONDecodeError, ValueError) as e:
             print(f"[ERROR] Invalid JSON response: {e}")

@@ -3,21 +3,21 @@
   "league": "MLB",
   "home_team": "Test Home",
   "away_team": "Test Away",
-  "timestamp": "2026-09-08T09:24:56.513160",
+  "timestamp": "2026-10-10T20:32:51.534902",
   "game": {
-    "projected_home_runs": 4.88,
-    "projected_away_runs": 3.62,
-    "projected_total_runs": 8.5,
-    "projected_run_differential": 1.26,
-    "home_win_probability": 0.6748,
-    "away_win_probability": 0.3252,
+    "projected_home_runs": 4.33,
+    "projected_away_runs": 3.57,
+    "projected_total_runs": 7.9,
+    "projected_run_differential": 0.76,
+    "home_win_probability": 0.6177,
+    "away_win_probability": 0.3823,
     "confidence": {
       "total": {
-        "score": 23.1,
+        "score": 33.9,
         "recommendation": "PASS"
       },
       "side": {
-        "score": 46.3,
+        "score": 38.1,
         "recommendation": "PASS"
       }
     }

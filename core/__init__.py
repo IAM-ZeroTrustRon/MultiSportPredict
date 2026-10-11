@@ -23,6 +23,12 @@ from core.schemas import (
     create_base_prediction,
     add_confidence_to_prediction,
 )
+from core.market_handicapper import (
+    devig_market,
+    calculate_ev,
+    kelly_stake_fraction,
+    calculate_clv,
+)
 
 __all__ = [
     # Confidence engine
@@ -45,4 +51,9 @@ __all__ = [
     "schema_mlb",
     "create_base_prediction",
     "add_confidence_to_prediction",
+    # Market handicapper (top-down +EV)
+    "devig_market",
+    "calculate_ev",
+    "kelly_stake_fraction",
+    "calculate_clv",
 ]

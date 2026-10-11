@@ -1,0 +1,316 @@
+Bookmaker fanduel; event 59f8c98dee8ce77cc17c5b4958e4f325
+
+NCAAF 2026-10-10 | Georgia Bulldogs @ Alabama Crimson Tide
+Projected points: 30.6–25.9; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 60.0%, B 40.0%, push 0.0%; EV 0.09958511786490509 / -0.1995474013071692; LEAN HOME
+  spread -1.5: A 56.8%, B 43.2%, push 0.0%; EV 0.06658768943357463 / -0.16080696961109447; LEAN HOME
+  total 51.5: A 62.0%, B 38.0%, push 0.0%; EV 0.21055278893076995 / -0.2896385667067713; LEAN OVER
+Bookmaker fanduel; event 0dd06b09349f56ce8dfc2d61d5fcd042
+
+NCAAF 2026-10-10 | Tennessee Volunteers @ Arkansas Razorbacks
+Projected points: 28.8–30.5; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 46.4%, B 53.6%, push 0.0%; EV 1.4109127179542151 / -0.37116069237694505; LEAN HOME
+  spread 13.5: A 73.8%, B 26.2%, push 0.0%; EV 0.4093148409160787 / -0.5002239318251696; LEAN HOME
+  total 51.5: A 68.5%, B 31.5%, push 0.0%; EV 0.33798561182685033 / -0.41166596763483126; LEAN OVER
+Bookmaker draftkings; event 9383cbbbb905d9ee50a3341f6945eae7
+
+NCAAF 2026-10-10 | South Carolina Gamecocks @ Florida Gators
+Projected points: 31.4–24.0; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 65.5%, B 34.5%, push 0.0%; EV -0.2055175239510802 / 0.5865419066355007; LEAN AWAY
+  spread -11.5: A 41.2%, B 58.8%, push 0.0%; EV -0.20619853651913944 / 0.11268551219703893; LEAN AWAY
+  total 59.5: A 39.7%, B 60.3%, push 0.0%; EV -0.22424463335589934 / 0.1267156987490743; LEAN UNDER
+Bookmaker draftkings; event bdfaffbf5873812f3e04de2cbd273aa6
+
+NCAAF 2026-10-10 | LSU Tigers @ Kentucky Wildcats
+Projected points: 24.8–24.2; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 51.3%, B 48.7%, push 0.0%; EV 0.9242785031078302 / -0.3720223643539976; LEAN HOME
+  spread 8.5: A 68.9%, B 31.1%, push 0.0%; EV 0.32628427540946625 / -0.41065439430696854; LEAN HOME
+  total 51.5: A 44.0%, B 56.0%, push 0.0%; EV -0.17736135392608104 / 0.09330205620409127; LEAN UNDER
+Bookmaker draftkings; event 9e243e91f8f94e6431da5cc5c3cc8fda
+
+NCAAF 2026-10-10 | Texas A&M Aggies @ Missouri Tigers
+Projected points: 28.0–23.3; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 60.0%, B 40.0%, push 0.0%; EV -0.056514847636728927 / -0.020979123911827213; PASS — no priced model value
+  spread -3.5: A 52.6%, B 47.4%, push 0.0%; EV 0.02705510250416554 / -0.1139244512844767; PASS — no priced model value
+  total 48.5: A 57.0%, B 43.0%, push 0.0%; EV 0.08866234718520016 / -0.1795714380942911; LEAN OVER
+Bookmaker fanduel; event 82b83ec87fc2be5faa2e9f26ac50edef
+
+NCAAF 2026-10-10 | Texas Longhorns @ Oklahoma Sooners
+Projected points: 20.6–23.5; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 43.8%, B 56.2%, push 0.0%; EV 0.5767380381312931 / -0.2676745424212593; LEAN HOME
+  spread 7.5: A 59.8%, B 40.2%, push 0.0%; EV 0.14223233490805093 / -0.23314142581714187; LEAN HOME
+  total 39.5: A 61.1%, B 38.9%, push 0.0%; EV 0.1660405199419106 / -0.25694961085100154; LEAN OVER
+Bookmaker fanduel; event d9b77825d169fdd683f8efa7c1948a8e
+
+NCAAF 2026-10-10 | Ole Miss Rebels @ Vanderbilt Commodores
+Projected points: 32.6–28.5; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 58.9%, B 41.1%, push 0.0%; EV 1.267205873474541 / -0.4762502979296649; LEAN HOME
+  spread 9.5: A 77.0%, B 23.0%, push 0.0%; EV 0.49577397068645745 / -0.5676263307380174; LEAN HOME
+  total 54.5: A 66.0%, B 34.0%, push 0.0%; EV 0.2590964185934523 / -0.35000550950254317; LEAN OVER
+Bookmaker fanduel; event 7dd6e0d9f2657c834974c28b286ff58d
+
+NCAAF 2026-10-10 | Hawai'i Rainbow Warriors @ Arizona State Sun Devils
+Projected points: 28.8–22.5; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 63.3%, B 36.7%, push 0.0%; EV -0.3272589752617393 / 2.521586976482539; LEAN AWAY
+  spread -20.5: A 22.2%, B 77.8%, push 0.0%; EV -0.5857737598164106 / 0.5198058200519103; LEAN AWAY
+  total 49.5: A 54.5%, B 45.5%, push 0.0%; EV 0.017994329537838083 / -0.11070725664914877; PASS — no priced model value
+Bookmaker fanduel; event 5d7901b0ad44ffe1b92e18fc8d511a7e
+
+NCAAF 2026-10-10 | Arizona Wildcats @ West Virginia Mountaineers
+Projected points: 26.2–29.4; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 43.2%, B 56.8%, push 0.0%; EV -0.005842407614970124 / -0.06829527215877268; PASS — no priced model value
+  spread 3.5: A 50.7%, B 49.3%, push 0.0%; EV -0.07683416563381434 / -0.01465073687094276; PASS — no priced model value
+  total 60.5: A 38.0%, B 62.0%, push 0.0%; EV -0.2737172527435122 / 0.18280816183442128; LEAN UNDER
+Bookmaker fanduel; event 690e2edaba34c383d2ebfa8f8394f973
+
+NCAAF 2026-10-10 | UCF Knights @ Oklahoma State Cowboys
+Projected points: 24.2–23.2; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 52.2%, B 47.8%, push 0.0%; EV -0.35072493429932866 / 0.9838401484515837; LEAN AWAY
+  spread -10.5: A 30.4%, B 69.6%, push 0.0%; EV -0.41901752325558705 / 0.3281084323464961; LEAN AWAY
+  total 53.5: A 35.4%, B 64.6%, push 0.0%; EV -0.31247434289190973 / 0.21308840036450694; LEAN UNDER
+Bookmaker fanduel; event 373204ebaf557738961c85f37a72fe10
+
+NCAAF 2026-10-10 | Houston Cougars @ Kansas State Wildcats
+Projected points: 29.9–24.9; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 60.7%, B 39.3%, push 0.0%; EV 0.04624217188800206 / -0.15428593445029504; PASS — no priced model value
+  spread -2.5: A 55.4%, B 44.6%, push 0.0%; EV 0.05747658503781655 / -0.1483856759469075; LEAN HOME
+  total 55.5: A 48.4%, B 51.6%, push 0.0%; EV -0.05524610359904347 / -0.035114282555741005; PASS — no priced model value
+Bookmaker fanduel; event 616eba68e65fe65023aa2335e81096c8
+
+NCAAF 2026-10-10 | Kansas Jayhawks @ Utah Utes
+Projected points: 34.7–19.4; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 79.5%, B 20.5%, push 0.0%; EV -0.10570770993265163 / 0.31247052761686267; LEAN AWAY
+  spread -15.5: A 49.5%, B 50.5%, push 0.0%; EV -0.05573774787829355 / -0.035171343030797386; PASS — no priced model value
+  total 50.5: A 59.0%, B 41.0%, push 0.0%; EV 0.10243180973258798 / -0.19888504604410906; LEAN OVER
+Bookmaker fanduel; event 43457c08aa50a7e0038aa06eb3437680
+
+NCAAF 2026-10-10 | Duke Blue Devils @ Georgia Tech Yellow Jackets
+Projected points: 28.8–27.0; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 54.0%, B 46.0%, push 0.0%; EV 0.6746925315961074 / -0.3633862424002464; LEAN HOME
+  spread 6.5: A 67.4%, B 32.6%, push 0.0%; EV 0.34876994757996066 / -0.40748741132275107; LEAN HOME
+  total 43.5: A 77.7%, B 22.3%, push 0.0%; EV 0.5177208538641875 / -0.5837772333397258; LEAN OVER
+Bookmaker fanduel; event b067027cbaeaf86e6c9bb26becb97c94
+
+NCAAF 2026-10-10 | North Carolina Tar Heels @ Pittsburgh Panthers
+Projected points: 31.2–18.9; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 74.7%, B 25.3%, push 0.0%; EV 0.19743550379402686 / -0.3985068377403914; LEAN HOME
+  spread -3.5: A 68.3%, B 31.7%, push 0.0%; EV 0.3340280517769623 / -0.40787627863690035; LEAN HOME
+  total 47.5: A 56.5%, B 43.5%, push 0.0%; EV 0.09873364253194683 / -0.1841114779081367; LEAN OVER
+Bookmaker draftkings; event 496f20b5a45e727fdc2d07915ab0f865
+
+NCAAF 2026-10-10 | Stanford Cardinal @ Notre Dame Fighting Irish
+Projected points: 40.0–14.5; holdout 225 games; RMSE margin 18.474780468179627
+  spread -39.5: A 22.4%, B 77.6%, push 0.0%; EV -0.562392487556431 / 0.4505200596643236; LEAN AWAY
+  total 54.5: A 50.0%, B 50.0%, push 0.0%; EV -0.04545454545454547 / -0.04545454545454547; PASS — no priced model value
+Bookmaker fanduel; event f7b49f43b10f581d991954dae86b9aa5
+
+NCAAF 2026-10-10 | Syracuse Orange @ Virginia Cavaliers
+Projected points: 32.1–17.6; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 78.4%, B 21.6%, push 0.0%; EV 0.0013937910192103609 / -0.1780580567701735; PASS — no priced model value
+  spread -8.5: A 62.8%, B 37.2%, push 0.0%; EV 0.15958309052739078 / -0.26964908941316823; LEAN HOME
+  total 50.5: A 48.1%, B 51.9%, push 0.0%; EV -0.08186508692768946 / -0.009044003981401483; PASS — no priced model value
+Bookmaker fanduel; event 9f633922d2cc5fa338aa22d1fcb83099
+
+NCAAF 2026-10-10 | Virginia Tech Hokies @ California Golden Bears
+Projected points: 28.8–25.1; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 57.9%, B 42.1%, push 0.0%; EV 1.2580340213966668 / -0.46671190438524224; LEAN HOME
+  spread 9.5: A 76.2%, B 23.8%, push 0.0%; EV 0.4874882447503241 / -0.5548270254608088; LEAN HOME
+  total 53.5: A 51.2%, B 48.8%, push 0.0%; EV -0.005672495710406011 / -0.0832620127450669; PASS — no priced model value
+Bookmaker fanduel; event 416ce0307b7b9d97f5365a29c1729339
+
+NCAAF 2026-10-10 | Wake Forest Demon Deacons @ NC State Wolfpack
+Projected points: 28.9–27.0; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 54.1%, B 45.9%, push 0.0%; EV 0.28777224488327524 / -0.2711282899616518; LEAN HOME
+  spread 3.5: A 61.5%, B 38.5%, push 0.0%; EV 0.154339468528152 / -0.2516535037433928; LEAN HOME
+  total 59.5: A 41.3%, B 58.7%, push 0.0%; EV -0.21111098120588795 / 0.12020189029679695; LEAN UNDER
+Bookmaker fanduel; event 92f26a40bba178c47bbade8c9af0ada3
+
+NCAAF 2026-10-10 | Illinois Fighting Illini @ Michigan State Spartans
+Projected points: 27.2–23.9; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 57.2%, B 42.8%, push 0.0%; EV 0.22408118037418157 / -0.25959219506337755; LEAN HOME
+  spread 2.5: A 62.4%, B 37.6%, push 0.0%; EV 0.21864766586168305 / -0.2973900766416753; LEAN HOME
+  total 48.5: A 56.4%, B 43.6%, push 0.0%; EV 0.10047129552149092 / -0.1842264897729654; LEAN OVER
+Bookmaker fanduel; event 3e691b53c660a64495a44816768176e8
+
+NCAAF 2026-10-10 | Indiana Hoosiers @ Nebraska Cornhuskers
+Projected points: 24.6–30.3; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 38.0%, B 62.0%, push 0.0%; EV 0.3297211138438999 / -0.1830696256192458; LEAN HOME
+  spread 7.5: A 54.0%, B 46.0%, push 0.0%; EV 0.030107732609213844 / -0.12101682351830478; PASS — no priced model value
+  total 47.5: A 67.8%, B 32.2%, push 0.0%; EV 0.2935055654687365 / -0.38441465637782746; LEAN OVER
+Bookmaker fanduel; event 71ed0e11bb0f2e5149ac4821fcde4599
+
+NCAAF 2026-10-10 | Ball State Cardinals @ Northwestern Wildcats
+Projected points: 33.4–14.4; holdout 225 games; RMSE margin 18.474780468179627
+  spread -35.5: A 18.6%, B 81.4%, push 0.0%; EV -0.6471232809439925 / 0.5668843445523781; LEAN AWAY
+  total 52.5: A 38.7%, B 61.3%, push 0.0%; EV -0.25543790562343366 / 0.16107942510105333; LEAN UNDER
+Bookmaker draftkings; event 031164b8d704599d8023a3e104f9a6c0
+
+NCAAF 2026-10-10 | Maryland Terrapins @ Ohio State Buckeyes
+Projected points: 36.9–13.4; holdout 225 games; RMSE margin 18.474780468179627
+  spread -32.5: A 31.3%, B 68.7%, push 0.0%; EV -0.402681309059293 / 0.31177221815020206; LEAN AWAY
+  total 56.5: A 34.8%, B 65.2%, push 0.0%; EV -0.3347239844960106 / 0.24381489358691966; LEAN UNDER
+Bookmaker fanduel; event 3ad908e99942c191b72d855b6f1b508f
+
+NCAAF 2026-10-10 | UCLA Bruins @ Oregon Ducks
+Projected points: 34.7–22.3; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 74.9%, B 25.1%, push 0.0%; EV -0.08951321374847696 / 0.1279759287941381; LEAN AWAY
+  spread -11.5: A 52.0%, B 48.0%, push 0.0%; EV -0.006394327675450784 / -0.08451476323364016; PASS — no priced model value
+  total 59.5: A 43.8%, B 56.2%, push 0.0%; EV -0.15633479989368637 / 0.0636779523680393; LEAN UNDER
+Bookmaker draftkings; event 4462f1fa168ab2a5a25fe2807ebec8ac
+
+NCAAF 2026-10-10 | USC Trojans @ Penn State Nittany Lions
+Projected points: 30.8–25.3; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 61.7%, B 38.3%, push 0.0%; EV 0.12234705276117552 / -0.22590634091200046; LEAN HOME
+  spread -1.5: A 58.6%, B 41.4%, push 0.0%; EV 0.1276679875739467 / -0.21544841361148193; LEAN HOME
+  total 54.5: A 54.0%, B 46.0%, push 0.0%; EV 0.021348748245837268 / -0.11326609185600212; PASS — no priced model value
+Bookmaker fanduel; event 234d9123fdc010716a5a844efaf7ab43
+
+NCAAF 2026-10-10 | Minnesota Golden Gophers @ Purdue Boilermakers
+Projected points: 26.2–24.8; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 53.2%, B 46.8%, push 0.0%; EV 0.12753210124811076 / -0.18249264887376054; LEAN HOME
+  spread 2.5: A 58.5%, B 41.5%, push 0.0%; EV 0.11700695063479266 / -0.20791604154388366; LEAN HOME
+  total 50.5: A 51.2%, B 48.8%, push 0.0%; EV -0.04298465794242523 / -0.047027095858574786; PASS — no priced model value
+Bookmaker fanduel; event c4db3412210ed8e1045807c73f69b377
+
+NCAAF 2026-10-10 | Boise State Broncos @ Fresno State Bulldogs
+Projected points: 26.0–22.6; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 57.5%, B 42.5%, push 0.0%; EV 0.8098085087936108 / -0.41399233987381606; LEAN HOME
+  spread 6.5: A 70.5%, B 29.5%, push 0.0%; EV 0.41011885984156216 / -0.46330486428207707; LEAN HOME
+  total 48.5: A 50.2%, B 49.8%, push 0.0%; EV -0.03226490863304987 / -0.05826161795749013; PASS — no priced model value
+Bookmaker fanduel; event 6e4d435e9afc8a6db1162d2057d74acb
+
+NCAAF 2026-10-10 | San Diego State Aztecs @ Oregon State Beavers
+Projected points: 25.3–22.3; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 56.4%, B 43.6%, push 0.0%; EV -0.36400879692783916 / 1.7485673046629562; LEAN AWAY
+  spread -14.5: A 26.7%, B 73.3%, push 0.0%; EV -0.5013241131595325 / 0.43161532525962254; LEAN AWAY
+  total 53.5: A 35.7%, B 64.3%, push 0.0%; EV -0.3128639373978848 / 0.21751943297827836; LEAN UNDER
+Bookmaker fanduel; event 80fbdc19285ed9bab284269273562eb9
+
+NCAAF 2026-10-10 | UConn Huskies @ Temple Owls
+Projected points: 31.0–27.1; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 58.3%, B 41.7%, push 0.0%; EV -0.07739220141110775 / 0.008138712924115832; PASS — no priced model value
+  spread -3.5: A 50.9%, B 49.1%, push 0.0%; EV -0.02900220141104487 / -0.06190688949804607; PASS — no priced model value
+  total 54.5: A 58.8%, B 41.2%, push 0.0%; EV 0.12343301135637902 / -0.21434210226546996; LEAN OVER
+Bookmaker draftkings; event 3350fb5023fd4b47b86d34fcc5f47c17
+
+NCAAF 2026-10-10 | Tulane Green Wave @ Army Black Knights
+Projected points: 25.8–19.6; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 63.0%, B 37.0%, push 0.0%; EV 0.008719749136407051 / -0.11080431599979157; PASS — no priced model value
+  spread -3.0: A 55.6%, B 42.2%, push 2.1%; EV 0.06121156641738379 / -0.15388657108031772; LEAN HOME
+  total 48.5: A 42.4%, B 57.6%, push 0.0%; EV -0.17190717488071983 / 0.07659828093031806; LEAN UNDER
+Bookmaker draftkings; event 2168132b20b82bf78e08f1787b6f83cc
+
+NCAAF 2026-10-10 | Charlotte 49ers @ North Texas Mean Green
+Projected points: 42.1–18.9; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 89.5%, B 10.5%, push 0.0%; EV -0.08501449382616093 / 0.8882986956345729; LEAN AWAY
+  spread -28.5: A 38.8%, B 61.2%, push 0.0%; EV -0.26602909639361316 / 0.17913233008322904; LEAN AWAY
+  total 57.5: A 58.6%, B 41.4%, push 0.0%; EV 0.0947472935759876 / -0.1908601305007268; LEAN OVER
+Bookmaker draftkings; event f513c11a62ce92d74d70cf446e92e197
+
+NCAAF 2026-10-10 | Rice Owls @ East Carolina Pirates
+Projected points: 32.6–17.1; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 80.0%, B 20.0%, push 0.0%; EV 0.010659499968942249 / -0.20042174990165051; PASS — no priced model value
+  spread -10.0: A 60.8%, B 37.1%, push 2.1%; EV 0.19213534320877051 / -0.27695683024393314; LEAN HOME
+  total 47.5: A 55.4%, B 44.6%, push 0.0%; EV 0.08181054391384934 / -0.16635728648378156; LEAN OVER
+Bookmaker draftkings; event 7cc5cec6dac13487c15b70d0f4411ca6
+
+NCAAF 2026-10-10 | UAB Blazers @ Memphis Tigers
+Projected points: 35.8–20.2; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 79.9%, B 20.1%, push 0.0%; EV -0.0677800630306637 / 0.08515343459907199; LEAN AWAY
+  spread -14.0: A 52.2%, B 45.7%, push 2.1%; EV 0.009478843457739528 / -0.09922323605455974; PASS — no priced model value
+  total 53.5: A 56.2%, B 43.8%, push 0.0%; EV 0.08178925115293456 / -0.1703574302196768; LEAN OVER
+Bookmaker fanduel; event 979fefd620ed804180ef3fed873d61c2
+
+NCAAF 2026-10-10 | Tulsa Golden Hurricane @ Navy Midshipmen
+Projected points: 30.5–20.1; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 71.3%, B 28.7%, push 0.0%; EV 0.2451263081711924 / -0.39160462233022353; LEAN HOME
+  spread -2.5: A 66.5%, B 33.5%, push 0.0%; EV 0.2814856892174825 / -0.3666250146086658; LEAN HOME
+  total 48.5: A 55.0%, B 45.0%, push 0.0%; EV 0.04938097917962081 / -0.14029007008871175; PASS — no priced model value
+Bookmaker fanduel; event b009edde78bdd184c039f774c1795f95
+
+NCAAF 2026-10-10 | Air Force Falcons @ Northern Illinois Huskies
+Projected points: 26.0–25.9; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 50.3%, B 49.7%, push 0.0%; EV 0.7339201521737367 / -0.3421292775981599; LEAN HOME
+  spread 7.5: A 66.0%, B 34.0%, push 0.0%; EV 0.23831739359837378 / -0.33859309078047123; LEAN HOME
+  total 46.5: A 63.2%, B 36.8%, push 0.0%; EV 0.20706794057930933 / -0.2979770314884003; LEAN OVER
+Bookmaker draftkings; event a3ce49a66d513b6bd1772b8696863ee1
+
+NCAAF 2026-10-10 | Nevada Wolf Pack @ UTEP Miners
+Projected points: 25.6–28.2; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 44.4%, B 55.6%, push 0.0%; EV 0.7552861949153069 / -0.29620991904457095; LEAN HOME
+  spread 10.0: A 64.6%, B 33.5%, push 2.0%; EV 0.24172663988836474 / -0.33567358360481936; LEAN HOME
+  total 49.5: A 60.5%, B 39.5%, push 0.0%; EV 0.18036445871300744 / -0.2607307595099107; LEAN OVER
+Bookmaker fanduel; event 4f3a6620c44a51f7b649892be381e0eb
+
+NCAAF 2026-10-10 | North Dakota State Bison @ UNLV Rebels
+Projected points: 27.5–24.6; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 56.4%, B 43.6%, push 0.0%; EV 0.2740060145177332 / -0.27669281456237993; LEAN HOME
+  spread 3.5: A 63.7%, B 36.3%, push 0.0%; EV 0.16713567188096234 / -0.28036402345786654; LEAN HOME
+  total 48.5: A 58.8%, B 41.2%, push 0.0%; EV 0.15382248200314974 / -0.2392598584237044; LEAN OVER
+Bookmaker draftkings; event d5c5d566d388f445ead9c2dc63caaed1
+
+NCAAF 2026-10-10 | Eastern Michigan Eagles @ Akron Zips
+Projected points: 27.3–25.2; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 54.5%, B 45.5%, push 0.0%; EV 0.6899669948815662 / -0.3688524433203309; LEAN HOME
+  spread 6.5: A 67.9%, B 32.1%, push 0.0%; EV 0.34438258406122163 / -0.40668279657599116; LEAN HOME
+  total 51.5: A 52.5%, B 47.5%, push 0.0%; EV -0.029609593851860516 / -0.059823067140990005; PASS — no priced model value
+Bookmaker draftkings; event 5a88faaeb5fcbb11e975498eca213c27
+
+NCAAF 2026-10-10 | Sacramento State Hornets @ Bowling Green Falcons
+Projected points: 27.5–20.3; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 65.1%, B 34.9%, push 0.0%; EV -0.13012758284815465 / 0.18554087171294043; LEAN AWAY
+  spread -7.5: A 49.4%, B 50.6%, push 0.0%; EV -0.05779422339300139 / -0.03311486751608955; PASS — no priced model value
+  total 43.5: A 60.5%, B 39.5%, push 0.0%; EV 0.1173721548507981 / -0.21738094455044188; LEAN OVER
+Bookmaker draftkings; event e2a6fcdae461277e7cc041ff631d1b0c
+
+NCAAF 2026-10-10 | Buffalo Bulls @ Toledo Rockets
+Projected points: 33.4–19.0; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 78.2%, B 21.8%, push 0.0%; EV -0.16866764500719014 / 1.175695482420613; LEAN AWAY
+  spread -20.5: A 37.2%, B 62.8%, push 0.0%; EV -0.3046579192736753 / 0.22623745058147926; LEAN AWAY
+  total 55.5: A 42.4%, B 57.6%, push 0.0%; EV -0.1898039398796435 / 0.09889484897055256; LEAN UNDER
+Bookmaker draftkings; event 6c0ea3fe653989dd0d695482738232c3
+
+NCAAF 2026-10-10 | Central Michigan Chippewas @ Ohio Bobcats
+Projected points: 28.8–20.3; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 67.7%, B 32.3%, push 0.0%; EV 0.13460637532905045 / -0.2767125223753501; LEAN HOME
+  spread -3.0: A 60.7%, B 37.3%, push 2.1%; EV 0.18896348112341022 / -0.2738370305114665; LEAN HOME
+  total 46.5: A 56.4%, B 43.6%, push 0.0%; EV 0.08697293247387616 / -0.1754521060234318; LEAN OVER
+Bookmaker draftkings; event 6050a18b694eb1d661ee7fa571b7ddbb
+
+NCAAF 2026-10-10 | Kent State Golden Flashes @ Western Michigan Broncos
+Projected points: 30.9–15.5; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 79.6%, B 20.4%, push 0.0%; EV -0.06520707513689655 / 0.0693983082511207; LEAN AWAY
+  spread -13.5: A 54.0%, B 46.0%, push 0.0%; EV -0.010769558367342225 / -0.0791604817810812; PASS — no priced model value
+  total 43.5: A 57.1%, B 42.9%, push 0.0%; EV 0.0900591887996125 / -0.18096827970870344; LEAN OVER
+No uniquely matched odds event; prices remain absent
+
+NCAAF 2026-10-10 | Miami (OH) RedHawks @ Massachusetts Minutemen
+Projected points: 25.4–25.4; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 50.0%, B 50.0%, push 0.0%; EV None / None; PASS — no priced model value
+No uniquely matched odds event; prices remain absent
+
+NCAAF 2026-10-10 | Old Dominion Monarchs @ App State Mountaineers
+Projected points: 28.1–25.2; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 56.3%, B 43.7%, push 0.0%; EV None / None; PASS — no priced model value
+Bookmaker draftkings; event 21a7dc0df1a77eb87cc985e844095cf0
+
+NCAAF 2026-10-10 | Coastal Carolina Chanticleers @ Marshall Thundering Herd
+Projected points: 32.2–23.6; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 68.0%, B 32.0%, push 0.0%; EV 0.05838841085733354 / -0.20098137459214316; LEAN HOME
+  spread -4.0: A 58.9%, B 39.0%, push 2.1%; EV 0.15582398560959287 / -0.24124354016013355; LEAN HOME
+  total 58.5: A 43.4%, B 56.6%, push 0.0%; EV -0.18879759306925548 / 0.10524488401362997; LEAN UNDER
+Bookmaker draftkings; event 2876b41c9c5327639fda141d7027eadb
+
+NCAAF 2026-10-10 | James Madison Dukes @ Georgia Southern Eagles
+Projected points: 24.2–30.8; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 36.0%, B 64.0%, push 0.0%; EV 0.2604978005653852 / -0.15373649606618242; LEAN HOME
+  spread 7.5: A 51.9%, B 48.1%, push 0.0%; EV -0.030184575214770082 / -0.06039418114337963; PASS — no priced model value
+  total 51.5: A 58.6%, B 41.4%, push 0.0%; EV 0.09519981795110616 / -0.19133270025237337; LEAN OVER
+Bookmaker draftkings; event 837b4ddbdcd5e8e3a68a7c954208ff40
+
+NCAAF 2026-10-10 | Louisiana Ragin' Cajuns @ Louisiana Tech Bulldogs
+Projected points: 29.6–23.1; holdout 225 games; RMSE margin 18.474780468179627
+  moneyline 0.5: A 63.7%, B 36.3%, push 0.0%; EV 0.06710737161292024 / -0.1864815961174005; LEAN HOME
+  spread -3.0: A 56.4%, B 41.5%, push 2.1%; EV 0.10725830125367469 / -0.19348474658766007; LEAN HOME
+  total 46.5: A 65.1%, B 34.9%, push 0.0%; EV 0.21763355899575643 / -0.31918986282724066; LEAN OVER
+Saved 46 matches to ncaaf_ncaaf_review.json; Discord OFF

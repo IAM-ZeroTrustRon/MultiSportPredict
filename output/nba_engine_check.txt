@@ -1,0 +1,55 @@
+No live odds requested
+
+NBA 2026-10-21 | Minnesota Timberwolves @ Miami Heat
+Projected points: 114.8–115.7; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 47.9%, B 52.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Golden State Warriors @ Los Angeles Lakers
+Projected points: 113.9–111.1; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 56.6%, B 43.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Atlanta Hawks @ Orlando Magic
+Projected points: 114.2–113.2; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 52.3%, B 47.7%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Milwaukee Bucks @ Washington Wizards
+Projected points: 113.4–119.5; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 35.7%, B 64.3%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Charlotte Hornets @ Brooklyn Nets
+Projected points: 103.8–111.2; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 32.6%, B 67.4%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Chicago Bulls @ Toronto Raptors
+Projected points: 120.2–114.3; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 63.8%, B 36.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Utah Jazz @ Memphis Grizzlies
+Projected points: 126.4–119.2; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 66.8%, B 33.2%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Indiana Pacers @ New Orleans Pelicans
+Projected points: 117.7–118.6; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 47.9%, B 52.1%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Dallas Mavericks @ Houston Rockets
+Projected points: 117.3–108.5; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 70.4%, B 29.6%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Phoenix Suns @ Portland Trail Blazers
+Projected points: 112.5–111.5; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 52.5%, B 47.5%, push 0.0%; EV None / None; PASS — no priced model value
+No live odds requested
+
+NBA 2026-10-21 | Sacramento Kings @ LA Clippers
+Projected points: 118.0–108.5; holdout 527 games; RMSE margin 16.51972035226045
+  moneyline 0.5: A 71.7%, B 28.3%, push 0.0%; EV None / None; PASS — no priced model value

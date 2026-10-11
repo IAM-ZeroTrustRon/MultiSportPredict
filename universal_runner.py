@@ -132,7 +132,34 @@ def get_team_stats(sport: str, home: str, away: str,
         print(f"[WARN] team_stats_provider not available ({exc}); using placeholder fallback.")
         return None, None
 
-    if sport in ("soccer", "football"):
+    if sport == "ncaaf" or (sport in ("basketball", "nba", "wnba", "ncaab", "ncaaw") and
+                             str(args.league or sport).upper() in {"NBA", "WNBA", "NCAAB", "NCAAW"}):
+        from run_ncaaf import main as run_score, push as push_score
+        score_sport = "ncaaf" if sport == "ncaaf" else "basketball"
+        score_args = ["--league", "NCAAF" if sport == "ncaaf" else str(args.league or sport).upper(),
+                      "--match", f"{home} vs {away}"]
+        if args.game_date:
+            score_args += ["--date", args.game_date]
+        if args.live_odds:
+            score_args.append("--odds")
+        else:
+            if args.home_ml is not None or args.away_ml is not None:
+                score_args += ["--moneyline", str(args.home_ml) if args.home_ml is not None else "none",
+                               str(args.away_ml) if args.away_ml is not None else "none"]
+            if args.market_line is not None:
+                score_args += ["--spread", str(args.market_line), "none", "none"]
+            if args.market_total is not None:
+                score_args += ["--total", str(args.market_total),
+                               str(args.over_price) if args.over_price is not None else "none",
+                               str(args.under_price) if args.under_price is not None else "none"]
+        if not args.store_to_db:
+            score_args.append("--dry-run")
+        results = run_score(score_sport, score_args)
+        if args.push_discord:
+            for result in results:
+                if not push_score(result):
+                    raise SystemExit("Discord push failed")
+    elif sport in ("soccer", "football"):
         hs = get_soccer_team_stats(home, league)
         aws = get_soccer_team_stats(away, league)
         return hs, aws
@@ -210,6 +237,33 @@ def _store_prediction(
 
 def _display_full_result(result: Dict[str, Any]) -> None:
     """Display model output as compact, readable Rich tables."""
+    if result.get("sport") == "tennis":
+        from run_tennis import format_tennis_review
+
+        moneyline = result.get("moneyline") or {}
+        auto = result.get("auto_odds") or {}
+        home_price = result.get("market_home_odds")
+        away_price = result.get("market_away_odds")
+        market_source = ("live" if auto.get("status") in ("live", "cached")
+                         else "user" if home_price is not None and away_price is not None
+                         else None)
+        review = {
+            "p1": result.get("home_team") or moneyline.get("home"),
+            "p2": result.get("away_team") or moneyline.get("away"),
+            "tournament": result.get("tournament"),
+            "surface": result.get("surface"),
+            "best_of_5": result.get("best_of_5"),
+            "model_prob": moneyline.get("home_win_prob"),
+            "market_prob": result.get("market_prob"),
+            "p1_ml": home_price,
+            "p2_ml": away_price,
+            "market_source": market_source,
+            "custom_markets": [],
+            "alternative_markets": result.get("alternative_markets") or [],
+        }
+        print("\n".join(format_tennis_review(review)))
+        return
+
     market_rows: List[tuple[str, str, str, str]] = []
     support_rows: List[tuple[str, str]] = []
     predictions = result.get("predictions", {})
@@ -272,6 +326,15 @@ def _display_full_result(result: Dict[str, Any]) -> None:
         # substitute it for display only, without touching the stored dict.
         add_market("moneyline", {**baseball_ml, "confidence": baseball_ml.get("ml_confidence")})
 
+    if result.get("sport") == "tennis":
+        from embed_builder import extract_tennis
+        market_rows.clear()
+        for item in extract_tennis(result)["markets"]:
+            if item:
+                market_rows.append((str(item.get("label", item.get("name", "Market"))),
+                    str(item.get("verdict") or item.get("pick") or "MODEL ONLY"),
+                    str(item.get("model") or "N/A"), str(item.get("extra") or item.get("edge") or "")))
+
     game = result.get("game", result.get("game_projection", {}))
     if isinstance(game, dict):
         for key, value in game.items():
@@ -331,32 +394,24 @@ def _push_full_result(sport: str, home: str, away: str, result: Dict[str, Any]) 
 
 def _fetch_live_soccer_market(home: str, away: str, league: Optional[str]) -> Dict[str, Any]:
     """Fetch a matched live soccer market without inventing missing odds."""
-    league_keys = {
-        "epl": "soccer_epl",
-        "premier league": "soccer_epl",
-        "la liga": "soccer_spain_la_liga",
-        "serie a": "soccer_italy_serie_a",
-        "bundesliga": "soccer_germany_bundesliga",
-        "ligue 1": "soccer_france_ligue_one",
-    }
-    league_key = league_keys.get((league or "epl").strip().lower(), league or "soccer_epl")
-    try:
-        from OddsApiIngestor import OddsApiIngestor
+    from live_odds import get_soccer_odds, resolve_soccer_league
 
-        ingestor = OddsApiIngestor()
-        match = ingestor.fetch_specific_match(league_key, home, away)
-        if not match:
-            return {"source": "odds_api", "status": "event_not_found", "league_key": league_key}
-        return {
-            "source": "odds_api",
-            "status": "live",
-            "league_key": league_key,
-            "market": ingestor.extract_market_lines(match),
-        }
-    except ValueError as exc:
-        return {"source": "odds_api", "status": "not_configured", "detail": str(exc)}
-    except Exception as exc:  # noqa: BLE001
-        return {"source": "odds_api", "status": "error", "detail": str(exc)}
+    # Single resolver: league_keys map removed so this cannot drift from
+    # SOCCER_LEAGUES again. resolve_soccer_league is the one mapping.
+    _config, _canonical, _status = resolve_soccer_league(league or "Premier League")
+    fetched = get_soccer_odds(league or "Premier League", home, away)
+    status = fetched.get("status", "error")
+    result = {"source": "odds_api", "status": status,
+              "league_key": (_config or {}).get("key") if _config else None,
+              "league_canonical": _canonical,
+              "captured_at": fetched.get("captured_at")}
+    if status in ("live", "cached"):
+        result["market"] = {k: v for k, v in fetched.items()
+                            if k not in ("status", "captured_at")}
+    else:
+        result["detail"] = fetched.get("reason", "No priced fixture available")
+    return result
+
 
 
 # ============================================================================
@@ -366,18 +421,26 @@ def _fetch_live_soccer_market(home: str, away: str, league: Optional[str]) -> Di
 def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
                market_total: float, store_to_db: bool,
                push_discord: bool, live_odds: bool = False,
-               auto_odds: bool = True, market_total_given: bool = False) -> Dict[str, Any]:
+               auto_odds: bool = True, market_total_given: bool = False,
+               market_line_given: bool = False,
+               home_ml: Optional[float] = None, draw_ml: Optional[float] = None,
+               away_ml: Optional[float] = None,
+               over_price: Optional[float] = None,
+               under_price: Optional[float] = None,
+               spread_home_price: Optional[float] = None,
+               spread_away_price: Optional[float] = None) -> Dict[str, Any]:
     """
     auto_odds: try live_odds.get_soccer_odds() BEFORE predicting, so the
     prediction itself (not just an attached "live_market" afterthought) is
-    built against a real total when one is fetchable. This is the fix for
+    built against real lines when they are fetchable. This is the fix for
     "PASS, model probability only" runs that used to need a second, manual
     re-run once someone typed a price in -- see live_odds.py.
 
     market_total_given: True when the CALLER explicitly supplied a real
     market_total (CLI flag or slate file), not the bare 2.5 default. A real
     caller-supplied number always wins over an auto-fetch; auto-fetch only
-    fills the gap when nothing was actually given.
+    fills the gap when nothing was actually given. Same rule applies to
+    market_line_given and the price kwargs.
     """
     from predict_match import run_soccer_game
 
@@ -387,17 +450,97 @@ def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
         raise ValueError(f"Stats missing for '{home}' or '{away}'. Seed stats in team_stats_provider.py before running.")
 
     fetched_market: Dict[str, Any] = {}
-    if auto_odds and not market_total_given:
+    result_extra: Dict[str, Any] = {}
+    market_source = "user"
+    market_note: Optional[str] = None
+    if auto_odds and not (market_total_given and market_line_given
+                          and home_ml is not None and away_ml is not None):
         from live_odds import get_soccer_odds
-        fetched_market = get_soccer_odds(league, home, away)
-        if fetched_market.get("status") in ("live", "cached") and fetched_market.get("total_line") is not None:
-            market_total = float(fetched_market["total_line"])
+        fetched_market = get_soccer_odds(league or "Premier League", home, away)
+        if fetched_market.get("status") in ("live", "cached"):
+            if not market_total_given and fetched_market.get("total_line") is not None:
+                market_total = float(fetched_market["total_line"])
+            if not market_line_given and fetched_market.get("spread_line") is not None:
+                market_line = float(fetched_market["spread_line"])
+            if home_ml is None and fetched_market.get("home_ml") is not None:
+                home_ml = fetched_market["home_ml"]
+            if draw_ml is None and fetched_market.get("draw_ml") is not None:
+                draw_ml = fetched_market["draw_ml"]
+            if away_ml is None and fetched_market.get("away_ml") is not None:
+                away_ml = fetched_market["away_ml"]
+            if over_price is None and fetched_market.get("over_price") is not None:
+                over_price = fetched_market["over_price"]
+            if under_price is None and fetched_market.get("under_price") is not None:
+                under_price = fetched_market["under_price"]
+            if spread_home_price is None and fetched_market.get("spread_home_price") is not None:
+                spread_home_price = fetched_market["spread_home_price"]
+            if spread_away_price is None and fetched_market.get("spread_away_price") is not None:
+                spread_away_price = fetched_market["spread_away_price"]
+            market_source = fetched_market["status"]
+            # H1 / corners / team-totals / BTTS ride along for the review
+            # table + embed + clean summary; absent stays None, never guessed.
+            for extra_key in (
+                    "h1_home_ml", "h1_away_ml", "h1_draw_ml",
+                    "h1_spread_line", "h1_spread_home_price", "h1_spread_away_price",
+                    "h1_total_line", "h1_over_price", "h1_under_price",
+                    "corner_total_line", "corner_over_price", "corner_under_price",
+                    "corner_spread_line",
+                    "team_total_home_line", "team_total_home_over_price",
+                    "team_total_home_under_price", "team_total_away_line",
+                    "team_total_away_over_price", "team_total_away_under_price",
+                    "btts_yes_price", "btts_no_price",
+                    "h1_btts_yes_price", "h1_btts_no_price"):
+                if fetched_market.get(extra_key) is not None:
+                    result_extra[extra_key] = fetched_market[extra_key]
+        else:
+            market_note = str(fetched_market.get("reason", "no market"))
+            market_source = "none"
+    elif market_total_given or market_line_given or home_ml is not None:
+        market_source = "user"
 
     result = run_soccer_game(home, away, league=league or "Premier League",
                              market_line=market_line, market_total=market_total,
                              home_stats=hs, away_stats=aws)
+    # Preserve the extended quotes collected before prediction on the same
+    # result sent to the saved JSON, review, database and Discord formatter.
+    # Missing values were excluded above; zero Asian handicaps remain valid.
+    result.update(result_extra)
+    # run_soccer_game() writes output/soccer/*.json itself on return, before
+    # this wrapper attaches the auto-odds fields below. Merge them into the
+    # same file so the stored JSON carries the three markets the model used.
+    odds_status = (fetched_market or {}).get("status")
     if fetched_market:
         result["auto_odds"] = fetched_market
+    if home_ml is not None or draw_ml is not None or away_ml is not None:
+        result["market_moneyline"] = {"home_ml": home_ml, "draw_ml": draw_ml,
+                                      "away_ml": away_ml, "source": market_source,
+                                      "captured_at": (fetched_market or {}).get("captured_at")}
+    if over_price is not None or under_price is not None:
+        result["market_totals_prices"] = {"over_price": over_price,
+                                          "under_price": under_price,
+                                          "source": market_source,
+                                          "captured_at": (fetched_market or {}).get("captured_at")}
+    if spread_home_price is not None or spread_away_price is not None:
+        result["market_spread_prices"] = {"spread_line": market_line,
+                                          "spread_home_price": spread_home_price,
+                                          "spread_away_price": spread_away_price,
+                                          "source": market_source,
+                                          "captured_at": (fetched_market or {}).get("captured_at")}
+    if market_source == "none" or odds_status in ("unknown_league", "not_covered", "no_fixture"):
+        result["market_status"] = "UNLISTED (Simulation Only - No EV)"
+        result["market_note"] = market_note or (fetched_market or {}).get("reason", "no market")
+    else:
+        result["market_status"] = market_source
+        if market_note:
+            result["market_note"] = market_note
+    try:
+        out_path = Path("output") / "soccer" / f"{home.replace(' ', '_')}_vs_{away.replace(' ', '_')}.json"
+        if out_path.exists():
+            stored = json.loads(out_path.read_text(encoding="utf-8-sig"))
+            stored.update({k: v for k, v in result.items() if k not in stored or stored[k] != v})
+            out_path.write_text(json.dumps(stored, indent=2, default=str) + "\n", encoding="utf-8")
+    except (OSError, ValueError):
+        pass
 
     # Wire extra_markets — halftime, team corners, BTTS enrichment
     try:
@@ -482,90 +625,84 @@ def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
     return result
 
 
-def run_basketball(home: str, away: str, league: Optional[str], market_line: float,
-                   store_to_db: bool, push_discord: bool) -> Dict[str, Any]:
-    normalized_league = (league or "EuroLeague").strip().lower()
-    if normalized_league in {"euroleague", "kbl", "nznbl"}:
-        from euroleague_engine import EuroleaguePredictor
-        from team_stats_provider import get_basketball_team_stats, get_euroleague_league_baseline, get_euroleague_team_stats
-
-        if normalized_league == "euroleague":
-            hs = get_euroleague_team_stats(home)
-            aws = get_euroleague_team_stats(away)
-            baseline = get_euroleague_league_baseline()
-        else:
-            hs = get_basketball_team_stats(home, normalized_league)
-            aws = get_basketball_team_stats(away, normalized_league)
-            baseline = {"pace": 72.0, "ortg": 112.0, "drtg": 112.0}
-        if hs is None or aws is None:
-            raise ValueError(f"Missing seeded stats for '{home}' or '{away}'. Please seed data.")
-        result = EuroleaguePredictor(
-            home_team=home,
-            away_team=away,
-            home_stats=hs,
-            away_stats=aws,
-            league_baseline=baseline,
-            market_lines={"full_game": market_line},
-        ).predict()
-        _display_full_result(result)
-        full_game = result["full_game"]
-        if store_to_db:
-            _store_prediction(
-                sport="basketball",
-                home=home,
-                away=away,
-                market_type="spread",
-                model_value=float(full_game["probability"]),
-                market_value=market_line,
-                edge=float(full_game["model_edge"] or 0.0),
-                confidence=float(full_game["probability"]) * 100.0,
-                recommendation=str(full_game["lean"]),
-                raw_json=result,
-                league=league,
-            )
-            print("[OK] EuroLeague prediction stored to multisport_history.db")
-        if push_discord:
-            status = _push_full_result("basketball", home, away, result)
-            print(f"[{ 'OK' if status else 'FAILED' }] Full basketball result pushed to Discord")
-        return result
-
-    from predict_match import run_basketball_game
-    from team_stats_provider import get_basketball_team_stats
-
-    hs = get_basketball_team_stats(home, league)
-    aws = get_basketball_team_stats(away, league)
-    if hs is None or aws is None:
-        raise ValueError(f"Missing seeded stats for '{home}' or '{away}'. Please seed data.")
-    result = run_basketball_game(home, away, league=league or "EuroLeague",
-                                 market_line=market_line, home_stats=hs, away_stats=aws)
-    _display_full_result(result)
-
-    full_game = result.get("full_game", {})
-    model_prob = float(full_game.get("probability", 0.5))
-    edge = float(full_game.get("model_edge", 0.0))
-    conf = float(full_game.get("confidence", 50.0)) or 50.0
-    rec = full_game.get("lean", "PASS")
-
+def run_basketball(home: str, away: str, league: Optional[str], market_line: Optional[float],
+                   store_to_db: bool, push_discord: bool, market_total: Optional[float] = None,
+                   home_ml: Optional[float] = None, away_ml: Optional[float] = None,
+                   over_price: Optional[float] = None, under_price: Optional[float] = None,
+                   game_date: Optional[str] = None, auto_odds: bool = True,
+                   q1_spread: Optional[float] = None, q1_total: Optional[float] = None,
+                   h1_spread: Optional[float] = None, h1_total: Optional[float] = None) -> Dict[str, Any]:
+    """Basketball branch. auto_odds mirrors tennis: try
+    live_odds.get_basketball_odds() BEFORE predicting so a bare call prices
+    FG + H1 + Q1 moneyline/spread/total from the feed. Manual CLI values
+    always win; a missing segment or an unlisted league (SBL) runs as
+    UNLISTED (Simulation Only - No EV) instead of demanding 8 manual flags.
+    """
+    fetched: Dict[str, Any] = {}
+    if auto_odds and market_line is None and market_total is None \
+            and home_ml is None and away_ml is None:
+        from live_odds import get_basketball_odds
+        fetched = get_basketball_odds(home, away, league or "EuroLeague")
+        if fetched.get("status") in ("live", "cached"):
+            if fetched.get("spread_line") is not None:
+                market_line = float(fetched["spread_line"])
+            if fetched.get("total_line") is not None:
+                market_total = float(fetched["total_line"])
+            if fetched.get("home_ml") is not None:
+                home_ml = fetched["home_ml"]
+            if fetched.get("away_ml") is not None:
+                away_ml = fetched["away_ml"]
+            if fetched.get("over_price") is not None:
+                over_price = fetched["over_price"]
+            if fetched.get("under_price") is not None:
+                under_price = fetched["under_price"]
+            if fetched.get("q1_spread_line") is not None:
+                q1_spread = float(fetched["q1_spread_line"])
+            if fetched.get("q1_total_line") is not None:
+                q1_total = float(fetched["q1_total_line"])
+            if fetched.get("h1_spread_line") is not None:
+                h1_spread = float(fetched["h1_spread_line"])
+            if fetched.get("h1_total_line") is not None:
+                h1_total = float(fetched["h1_total_line"])
+    from euroleague_engine import run_cli
+    command = ["--home", home, "--away", away, "--league", league or "EuroLeague"]
+    for flag, value in (("--market-spread", market_line), ("--market-total", market_total),
+                        ("--home-ml", home_ml), ("--away-ml", away_ml),
+                        ("--over-price", over_price), ("--under-price", under_price),
+                        ("--q1-spread", q1_spread), ("--q1-total", q1_total),
+                        ("--h1-spread", h1_spread), ("--h1-total", h1_total)):
+        if value is not None:
+            command.extend([flag, str(value)])
+    # Pass through segment moneylines as JSON so the engine can price Q1/H1
+    # ML EV without new scalar flags.
+    if fetched.get("status") in ("live", "cached"):
+        seg_ml = {k: fetched[k] for k in (
+            "q1_home_ml", "q1_away_ml", "h1_home_ml", "h1_away_ml",
+            "q1_spread_home_price", "q1_spread_away_price",
+            "h1_spread_home_price", "h1_spread_away_price",
+            "q1_over_price", "q1_under_price",
+            "h1_over_price", "h1_under_price",
+            "spread_home_price", "spread_away_price") if fetched.get(k) is not None}
+        if seg_ml:
+            import json as _json
+            command.extend(["--segment-markets", _json.dumps(seg_ml)])
     if store_to_db:
-        _store_prediction(
-            sport="basketball",
-            home=home,
-            away=away,
-            market_type="spread",
-            model_value=model_prob,
-            market_value=market_line,
-            edge=edge,
-            confidence=conf,
-            recommendation=rec,
-            raw_json=result,
-            league=league,
-        )
-        print(f"[OK] Basketball prediction stored to multisport_history.db")
-
+        if not game_date:
+            raise SystemExit("Basketball storage requires --game-date YYYY-MM-DD; use run_basketball.py for verified NBA/WNBA/NCAAB fixtures")
+        command.extend(["--store-to-db", "--game-date", game_date])
     if push_discord:
-        status = _push_full_result("basketball", home, away, result)
-        print(f"[{ 'OK' if status else 'FAILED' }] Full basketball result pushed to Discord")
-
+        command.append("--push-discord")
+    result = run_cli(command)
+    if fetched:
+        result["auto_odds"] = fetched
+        status = fetched.get("status")
+        if status in ("unknown_league", "not_covered", "no_fixture",
+                      "no_bookmaker", "in_play", "error"):
+            result["market_status"] = "UNLISTED (Simulation Only - No EV)"
+            result["market_note"] = fetched.get("reason", "no market")
+        else:
+            result["market_status"] = status
+    _display_full_result(result)
     return result
 
 
@@ -581,8 +718,51 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
                  over_price: Optional[float] = None, under_price: Optional[float] = None,
                  home_sp_name: Optional[str] = None, away_sp_name: Optional[str] = None,
                  home_key_batters: Optional[List[str]] = None,
-                 away_key_batters: Optional[List[str]] = None) -> Dict[str, Any]:
+                 away_key_batters: Optional[List[str]] = None,
+                 runline: Optional[float] = None,
+                 runline_home_price: Optional[float] = None,
+                 runline_away_price: Optional[float] = None,
+                 market_total_given: bool = False,
+                 auto_odds: bool = True) -> Dict[str, Any]:
+    """Baseball branch. auto_odds mirrors the tennis default: try
+    live_odds.get_mlb_odds() BEFORE predicting so a bare
+    `--match "A vs B"` still prices moneyline + run line + total from the
+    feed. Manual CLI values always win; a missing market falls back to the
+    caller default, labelled simulation-only rather than a real price.
+    """
     from predict_match import run_baseball_game
+
+    market_source = "user" if market_total_given or home_ml is not None else "default"
+    market_note: Optional[str] = None
+    fetched: Dict[str, Any] = {}
+    league_norm = (league or "MLB").strip().upper()
+    if auto_odds and league_norm == "MLB" and not (
+            market_total_given and home_ml is not None and away_ml is not None
+            and over_price is not None and runline is not None):
+        from live_odds import get_mlb_odds
+        fetched = get_mlb_odds(home, away)
+        if fetched.get("status") in ("live", "cached"):
+            if not market_total_given and fetched.get("total_line") is not None:
+                market_total = float(fetched["total_line"])
+            if home_ml is None and fetched.get("home_ml") is not None:
+                home_ml = fetched["home_ml"]
+            if away_ml is None and fetched.get("away_ml") is not None:
+                away_ml = fetched["away_ml"]
+            if over_price is None and fetched.get("over_price") is not None:
+                over_price = fetched["over_price"]
+            if under_price is None and fetched.get("under_price") is not None:
+                under_price = fetched["under_price"]
+            if runline is None and fetched.get("runline") is not None:
+                runline = float(fetched["runline"])
+            if runline_home_price is None and fetched.get("runline_home_price") is not None:
+                runline_home_price = fetched["runline_home_price"]
+            if runline_away_price is None and fetched.get("runline_away_price") is not None:
+                runline_away_price = fetched["runline_away_price"]
+            market_source = fetched["status"]
+        else:
+            market_note = str(fetched.get("reason", "no market"))
+            market_source = "none"
+
 
     advanced_args = (home_pitcher, away_pitcher, home_hitters, away_hitters)
     if any(value is not None for value in advanced_args):
@@ -692,6 +872,21 @@ def run_baseball(home: str, away: str, league: Optional[str], markets: Optional[
         home_key_batters=resolved_home_batters,
         away_key_batters=resolved_away_batters,
     )
+    if fetched:
+        result["auto_odds"] = fetched
+    result["market_status"] = ("UNLISTED (Simulation Only - No EV)"
+                               if market_source == "none" else market_source)
+    if market_note:
+        result["market_note"] = market_note
+    if runline is not None:
+        result["market_runline"] = {"runline": runline,
+                                    "runline_home_price": runline_home_price,
+                                    "runline_away_price": runline_away_price,
+                                    "source": market_source}
+    if over_price is not None or under_price is not None:
+        result["market_totals_prices"] = {"over_price": over_price,
+                                          "under_price": under_price,
+                                          "source": market_source}
     _display_full_result(result)
 
     summary = result.get("summary", {})
@@ -779,7 +974,7 @@ def run_nfl(home: str, away: str, *,
     push. That is not repeated here -- the side goes into `pick` at prediction
     time, when it is still known.
     """
-    from models.nfl_predictor import predict_nfl_game, describe
+    from models.nfl_predictor import predict_nfl_game, describe, clean_team
 
     result = predict_nfl_game(
         home, away,
@@ -787,6 +982,15 @@ def run_nfl(home: str, away: str, *,
         market_home_ml=market_home_ml, market_away_ml=market_away_ml,
         neutral_site=neutral_site,
     )
+    # Belt-and-braces: the predictor already returns clean names, but any
+    # caller passing a year-tagged string must never let "(YYYY)" reach the
+    # DB, Discord, or the grader -- ESPN feeds carry no such suffix.
+    result["home"] = clean_team(result.get("home", home))
+    result["away"] = clean_team(result.get("away", away))
+    moneyline = result.get("moneyline") or {}
+    moneyline["home"] = result["home"]
+    moneyline["away"] = result["away"]
+    result["match"] = f"{result['home']} vs {result['away']}"
 
     print()
     print(describe(result))
@@ -856,7 +1060,10 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
                store_to_db: bool, push_discord: bool,
                market_prob: Optional[float] = None,
                tour: Optional[str] = None, auto_odds: bool = True,
-               home_ml: Optional[float] = None, away_ml: Optional[float] = None) -> Dict[str, Any]:
+               home_ml: Optional[float] = None, away_ml: Optional[float] = None,
+               custom_markets: Optional[List[Dict[str, Any]]] = None,
+               player_context: Optional[Dict[str, Any]] = None,
+               game_date: Optional[str] = None) -> Dict[str, Any]:
     """Tennis branch: call the real predictor directly (bypass predict_match.py).
 
     market_prob is the de-vigged probability the book gives `home`. Without it
@@ -876,19 +1083,32 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
     from models.tennis_predictor import predict_tennis_match
 
     auto_odds_result: Dict[str, Any] = {}
-    if market_prob is None and auto_odds and tour:
+    if auto_odds and tour:
         from live_odds import get_tennis_odds
         auto_odds_result = get_tennis_odds(tour, home, away)
         if auto_odds_result.get("status") in ("live", "cached"):
-            home_ml = auto_odds_result.get("home_ml")
-            away_ml = auto_odds_result.get("away_ml")
-            if home_ml is not None and away_ml is not None:
+            if home_ml is None and away_ml is None:
+                home_ml = auto_odds_result.get("home_ml")
+                away_ml = auto_odds_result.get("away_ml")
+            if market_prob is None and home_ml is not None and away_ml is not None:
                 home_p = (-home_ml) / ((-home_ml) + 100.0) if home_ml < 0 else 100.0 / (home_ml + 100.0)
                 away_p = (-away_ml) / ((-away_ml) + 100.0) if away_ml < 0 else 100.0 / (away_ml + 100.0)
                 total = home_p + away_p
                 if total > 0:
                     market_prob = home_p / total
 
+    manual_markets = list(custom_markets or [])
+    overridden_kinds = {m["kind"] for m in manual_markets if not m.get("line_origin", "").startswith("live")}
+    automatic_markets = [m for m in auto_odds_result.get("custom_markets", [])
+                         if m["kind"] not in overridden_kinds]
+    custom_markets = manual_markets + automatic_markets
+    if auto_odds_result.get("status") in ("live", "cached"):
+        covered = {m["kind"] for m in custom_markets}
+        missing = sorted({"games_total", "games_spread", "sets_total", "sets_spread"} - covered)
+        if missing:
+            print("No priced tennis lines for: " + ", ".join(missing) + ". Supply manual flags if available at your book.")
+    if auto_odds_result.get("additional_markets_error"):
+        print(f"Additional tennis lines unavailable: {auto_odds_result['additional_markets_error']}; main lines retained.")
     result = predict_tennis_match(
         home_player=home,
         away_player=away,
@@ -897,9 +1117,31 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
         tournament=tournament,
         round_name=round_name,
         market_prob=market_prob,
+        market_home_odds=str(home_ml) if home_ml is not None else None,
+        market_away_odds=str(away_ml) if away_ml is not None else None,
+        custom_markets=custom_markets, player_context=player_context,
     )
+    result["surface"] = surface
+    result["best_of_5"] = best_of_5
+    result["custom_markets"] = custom_markets
     if auto_odds_result:
         result["auto_odds"] = auto_odds_result
+    from sports_feed import EASTERN
+    import datetime as fixture_dt
+    commence = auto_odds_result.get("commence_time")
+    verified_date = None
+    if commence:
+        verified_date = fixture_dt.datetime.fromisoformat(commence.replace("Z", "+00:00")).astimezone(EASTERN).date().isoformat()
+    if game_date:
+        fixture_dt.date.fromisoformat(game_date)
+        if verified_date and game_date != verified_date:
+            raise ValueError(f"Supplied date {game_date} disagrees with odds fixture {verified_date}")
+    result["game_date"] = game_date or verified_date
+    result["fixture_status"] = "matched odds event" if verified_date else "unverified player pairing"
+    if result["game_date"]:
+        result["event_key"] = f"tennis:{result['game_date']}:{home}:{away}:moneyline"
+    if result["game_date"]:
+        print(f"Fixture date: {result['game_date']} ({result['fixture_status']})")
     _display_full_result(result)
 
     ml = result.get("moneyline", {})
@@ -982,19 +1224,22 @@ def main() -> None:
                         help="Sport: soccer, basketball, baseball/mlb, kbo, tennis")
     parser.add_argument("--home", required=True, help="Home team / player")
     parser.add_argument("--away", required=True, help="Away team / player")
+    parser.add_argument("--game-date", default=None, help="Actual fixture date YYYY-MM-DD")
     parser.add_argument("--league", default=None, help="League name (e.g. Eredivisie, MLB)")
     parser.add_argument("--markets", nargs="+", default=None,
                         help="Baseball prop markets (nrfi strikeouts home_runs).")
-    parser.add_argument("--market-line", type=float, default=0.0,
+    parser.add_argument("--market-line", type=float, default=None,
                         help="Basketball/soccer market line (spread/handicap).")
-    parser.add_argument("--market-total", type=float, default=2.5,
+    parser.add_argument("--market-total", type=float, default=None,
                         help="Market total (over/under).")
     parser.add_argument("--store-to-db", action="store_true",
                         help="Store prediction in core.historical_storage.")
     parser.add_argument("--push-discord", action="store_true",
                         help="Push result to Discord.")
     parser.add_argument("--live-odds", action="store_true",
-                        help="Fetch matched live soccer odds when ODDS_API_KEY is configured.")
+                        help="Fetch matched live soccer odds when ODDS_API_KEY is configured (default: auto-fetch on).")
+    parser.add_argument("--no-odds", action="store_true",
+                        help="Soccer/baseball: skip the Odds API auto-fetch (projection only, labelled UNLISTED).")
     # MLB market prices. run_baseball() has always accepted these, but main()
     # had no flags for them, so every CLI run (auto_mlb_scraper included) went
     # in with no moneyline and every card read "no market odds supplied".
@@ -1002,6 +1247,16 @@ def main() -> None:
                         help="Home moneyline, American odds (e.g. -125).")
     parser.add_argument("--away-ml", type=float, default=None,
                         help="Away moneyline, American odds (e.g. +105).")
+    parser.add_argument("--draw-ml", type=float, default=None,
+                        help="Soccer draw moneyline, American odds (e.g. +220).")
+    parser.add_argument("--spread-home-price", type=float, default=None,
+                        help="Price on the home side of the spread/handicap.")
+    parser.add_argument("--spread-away-price", type=float, default=None,
+                        help="Price on the away side of the spread/handicap.")
+    parser.add_argument("--runline", type=float, default=None,
+                        help="Baseball run line (usually +/-1.5).")
+    parser.add_argument("--runline-home-price", type=float, default=None)
+    parser.add_argument("--runline-away-price", type=float, default=None)
     parser.add_argument("--over-price", type=float, default=None)
     parser.add_argument("--under-price", type=float, default=None)
     parser.add_argument("--auto-odds", action="store_true",
@@ -1039,18 +1294,53 @@ def main() -> None:
               "australian open", "aus open"}
         best_of_5 = str(args.tournament).lower() in gs
 
-    if sport in ("soccer", "football"):
-        run_soccer(home, away, args.league, args.market_line, args.market_total,
-                   args.store_to_db, args.push_discord, args.live_odds)
+    if sport == "ncaaf" or (sport in ("basketball", "nba", "wnba", "ncaab", "ncaaw") and
+                             str(args.league or sport).upper() in {"NBA", "WNBA", "NCAAB", "NCAAW"}):
+        from run_ncaaf import main as run_score, push as push_score
+        score_sport = "ncaaf" if sport == "ncaaf" else "basketball"
+        score_args = ["--league", "NCAAF" if sport == "ncaaf" else str(args.league or sport).upper(),
+                      "--match", f"{home} vs {away}"]
+        if args.game_date:
+            score_args += ["--date", args.game_date]
+        if args.live_odds:
+            score_args.append("--odds")
+        else:
+            if args.home_ml is not None or args.away_ml is not None:
+                score_args += ["--moneyline", str(args.home_ml) if args.home_ml is not None else "none",
+                               str(args.away_ml) if args.away_ml is not None else "none"]
+            if args.market_line is not None:
+                score_args += ["--spread", str(args.market_line), "none", "none"]
+            if args.market_total is not None:
+                score_args += ["--total", str(args.market_total),
+                               str(args.over_price) if args.over_price is not None else "none",
+                               str(args.under_price) if args.under_price is not None else "none"]
+        if not args.store_to_db:
+            score_args.append("--dry-run")
+        results = run_score(score_sport, score_args)
+        if args.push_discord:
+            for result in results:
+                if not push_score(result):
+                    raise SystemExit("Discord push failed")
+    elif sport in ("soccer", "football"):
+        run_soccer(home, away, args.league, args.market_line if args.market_line is not None else 0.0, args.market_total if args.market_total is not None else 2.5,
+                   args.store_to_db, args.push_discord, args.live_odds,
+                   auto_odds=not args.no_odds,
+                   market_total_given=args.market_total is not None,
+                   market_line_given=args.market_line is not None,
+                   home_ml=args.home_ml, draw_ml=args.draw_ml,
+                   away_ml=args.away_ml, over_price=args.over_price,
+                   under_price=args.under_price,
+                   spread_home_price=args.spread_home_price,
+                   spread_away_price=args.spread_away_price)
     elif sport in ("basketball", "kbl", "nznbl", "euroleague", "eurocup", "liga acb", "acb"):
         run_basketball(home, away, args.league, args.market_line,
-                       args.store_to_db, args.push_discord)
+                       args.store_to_db, args.push_discord, args.market_total,
+                       args.home_ml, args.away_ml, args.over_price, args.under_price, args.game_date)
     elif sport in ("baseball", "mlb", "kbo"):
         home_ml, away_ml = args.home_ml, args.away_ml
-        market_total = args.market_total
-        if args.auto_odds and home_ml is None and away_ml is None:
-            home_ml, away_ml, market_total = _lookup_mlb_odds(
-                home, away, market_total)
+        market_total = args.market_total if args.market_total is not None else 8.5
+        # auto_odds is the default (tennis parity): only --no-odds disables.
+        # The legacy --auto-odds flag is kept for compat but no longer gates.
         run_baseball(home, away, args.league, args.markets, market_total,
                      args.home_sp_era, args.home_sp_k,
                      args.away_sp_era, args.away_sp_k,
@@ -1058,7 +1348,12 @@ def main() -> None:
                      home_pitcher=args.home_pitcher, away_pitcher=args.away_pitcher,
                      home_hitters=args.home_hitters, away_hitters=args.away_hitters,
                      home_ml=home_ml, away_ml=away_ml,
-                     over_price=args.over_price, under_price=args.under_price)
+                     over_price=args.over_price, under_price=args.under_price,
+                     runline=args.runline,
+                     runline_home_price=args.runline_home_price,
+                     runline_away_price=args.runline_away_price,
+                     market_total_given=args.market_total is not None,
+                     auto_odds=not args.no_odds)
     elif sport == "tennis":
         run_tennis(home, away, args.surface, args.tournament, args.round_name,
                    best_of_5, args.store_to_db, args.push_discord)

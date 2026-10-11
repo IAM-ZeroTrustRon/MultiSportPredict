@@ -1,0 +1,67 @@
+{
+  "checked_utc": "2026-10-10T04:05:47.155504+00:00",
+  "results": [
+    {
+      "command": [
+        "-m",
+        "unittest",
+        "-q",
+        "tests.test_table_tennis_engine",
+        "tests.test_soccer_extended_market_threading",
+        "tests.test_soccer_live_market_route",
+        "tests.test_score_engine",
+        "tests.test_tennis_markets"
+      ],
+      "exit_code": 0,
+      "stdout": "[tennis_predictor] Elo built from 10163 real matches (matches.csv).\n",
+      "stderr": "----------------------------------------------------------------------\nRan 52 tests in 2.327s\n\nOK\n"
+    },
+    {
+      "command": [
+        "-m",
+        "compileall",
+        "-q",
+        "table_tennis",
+        "ingest_table_tennis.py",
+        "train_table_tennis.py",
+        "run_table_tennis.py",
+        "grade_table_tennis.py",
+        "core/historical_storage.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ingest_table_tennis.py",
+        "--stats"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"tt_events\": 0,\n  \"tt_quotes\": 0,\n  \"tt_runs\": 0,\n  \"tt_grades\": 0,\n  \"finished\": 0,\n  \"range\": [\n    null,\n    null\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ingest_table_tennis.py",
+        "--days",
+        "1",
+        "--no-quotes"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "Live collection needs BETSAPI_KEY or ODDS_API_IO_KEY in .env. Use --import-file for verified exports meanwhile\n"
+    },
+    {
+      "command": [
+        "train_table_tennis.py"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "Training needs 150 eligible completed matches after each player has 8 prior matches; found 0. Keep collecting.\n"
+    }
+  ],
+  "real_account_coverage": "Not verified: provider credentials absent",
+  "example_data_imported": false,
+  "discord_messages_sent": false
+}

@@ -287,8 +287,12 @@ def audit(sport: str) -> Tuple[int, int, int, int, int]:
     season_errors = sample_errors = 0
     for path in STORES.get(sport, []):
         store = load_store(path)
-        records = {k: v for k, v in store.items()
-                   if not k.startswith("_") and isinstance(v, dict)}
+        if sport == "soccer":
+            from soccer_store import audit_records
+            records = audit_records(store)
+        else:
+            records = {k: v for k, v in store.items()
+                       if not k.startswith("_") and isinstance(v, dict)}
         if not records:
             print(f"  {path.name:<32} (missing or empty)")
             continue

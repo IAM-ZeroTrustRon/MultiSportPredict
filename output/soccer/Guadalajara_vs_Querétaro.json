@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "Liga MX",
+  "home_team": "Guadalajara",
+  "away_team": "Quer\u00e9taro",
+  "timestamp": "2026-09-26T12:51:52.104275",
+  "game": {
+    "projected_home_goals": 1.49,
+    "projected_away_goals": 1.02,
+    "projected_total_goals": 2.51,
+    "home_win_prob": 0.478,
+    "draw_prob": 0.262,
+    "away_win_prob": 0.261
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.466,
+      "market_line": 0.0,
+      "edge": 0.466,
+      "confidence": 33.6,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 2.512,
+      "market_total": 2.5,
+      "edge": 0.012,
+      "confidence": 24.6,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.511,
+      "confidence": 27.6,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.715,
+    "over_25_prob": 0.459,
+    "over_35_prob": 0.245
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.511,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.889,
+      "xg_against": 0.889,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.889,
+      "goals_against": 0.889,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.375,
+      "xg_against": 1.0,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 1.375,
+      "goals_against": 1.0,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

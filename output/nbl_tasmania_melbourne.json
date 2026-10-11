@@ -1,0 +1,137 @@
+{
+  "sport": "basketball",
+  "league": "NBL",
+  "home_team": "Tasmania JackJumpers",
+  "away_team": "Melbourne United",
+  "timestamp": "2026-10-01T01:49:47.715540+00:00",
+  "expected_pace": 80.01,
+  "team_metrics": {
+    "home": {
+      "ortg": 111.0,
+      "drtg": 107.5,
+      "pace": 81.5
+    },
+    "away": {
+      "ortg": 115.5,
+      "drtg": 108.0,
+      "pace": 83.2
+    }
+  },
+  "q1": {
+    "projected_home_points": 22.36,
+    "projected_away_points": 21.86,
+    "projected_total_points": 44.22,
+    "projected_spread": 0.51,
+    "home_moneyline_probability": 0.5368,
+    "away_moneyline_probability": 0.4632,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 5.5,
+    "projected_home_score": 22.36,
+    "projected_away_score": 21.86,
+    "projected_total": 44.22,
+    "probability": 0.5368,
+    "away_probability": 0.4632,
+    "model_edge": null,
+    "lean": "Tasmania JackJumpers"
+  },
+  "halftime": {
+    "projected_home_points": 45.17,
+    "projected_away_points": 44.16,
+    "projected_total_points": 89.33,
+    "projected_spread": 1.01,
+    "home_moneyline_probability": 0.5514,
+    "away_moneyline_probability": 0.4486,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 7.8,
+    "projected_home_score": 45.17,
+    "projected_away_score": 44.16,
+    "projected_total": 89.33,
+    "probability": 0.5514,
+    "away_probability": 0.4486,
+    "model_edge": null,
+    "lean": "Tasmania JackJumpers"
+  },
+  "full_game": {
+    "projected_home_points": 91.11,
+    "projected_away_points": 89.21,
+    "projected_total_points": 180.32,
+    "projected_spread": 1.9,
+    "home_moneyline_probability": 0.5686,
+    "away_moneyline_probability": 0.4314,
+    "market_spread": 2.5,
+    "spread_edge": -0.6,
+    "sigma": 11.0,
+    "projected_home_score": 91.11,
+    "projected_away_score": 89.21,
+    "projected_total": 180.32,
+    "probability": 0.5686,
+    "away_probability": 0.4314,
+    "model_edge": -0.6,
+    "lean": "Tasmania JackJumpers"
+  },
+  "market_info": {
+    "lines": {
+      "spread": 2.5
+    },
+    "total": 174.5
+  },
+  "notes": "NBL model using seeded ORtg/DRtg/pace and segment splits. Strict-fail lookup: unlisted teams stop the run unless --home/away-ortg/drtg/pace overrides are supplied.",
+  "segments": {
+    "1q": {
+      "projected_home_points": 22.36,
+      "projected_away_points": 21.86,
+      "projected_total_points": 44.22,
+      "projected_spread": 0.51,
+      "home_moneyline_probability": 0.5368,
+      "away_moneyline_probability": 0.4632,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 5.5,
+      "projected_home_score": 22.36,
+      "projected_away_score": 21.86,
+      "projected_total": 44.22,
+      "probability": 0.5368,
+      "away_probability": 0.4632,
+      "model_edge": null,
+      "lean": "Tasmania JackJumpers"
+    },
+    "ht": {
+      "projected_home_points": 45.17,
+      "projected_away_points": 44.16,
+      "projected_total_points": 89.33,
+      "projected_spread": 1.01,
+      "home_moneyline_probability": 0.5514,
+      "away_moneyline_probability": 0.4486,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 7.8,
+      "projected_home_score": 45.17,
+      "projected_away_score": 44.16,
+      "projected_total": 89.33,
+      "probability": 0.5514,
+      "away_probability": 0.4486,
+      "model_edge": null,
+      "lean": "Tasmania JackJumpers"
+    },
+    "fg": {
+      "projected_home_points": 91.11,
+      "projected_away_points": 89.21,
+      "projected_total_points": 180.32,
+      "projected_spread": 1.9,
+      "home_moneyline_probability": 0.5686,
+      "away_moneyline_probability": 0.4314,
+      "market_spread": 2.5,
+      "spread_edge": -0.6,
+      "sigma": 11.0,
+      "projected_home_score": 91.11,
+      "projected_away_score": 89.21,
+      "projected_total": 180.32,
+      "probability": 0.5686,
+      "away_probability": 0.4314,
+      "model_edge": -0.6,
+      "lean": "Tasmania JackJumpers"
+    }
+  }
+}

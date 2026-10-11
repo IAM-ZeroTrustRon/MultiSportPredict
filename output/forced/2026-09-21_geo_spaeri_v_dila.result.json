@@ -1,0 +1,69 @@
+{
+  "home": "FC Spaeri",
+  "away": "Dila Gori",
+  "proj_home": 1.31,
+  "proj_away": 1.26,
+  "margin": 0.05,
+  "total": 2.57,
+  "p_home_win": 0.37853332220604813,
+  "p_draw": 0.26532989564137316,
+  "p_away_win": 0.35613675518666943,
+  "p_btts": 0.5240378612112393,
+  "likely_scores": [
+    "1-1 (12.6%)",
+    "1-0 (10.0%)",
+    "0-1 (9.6%)"
+  ],
+  "league_avg": 1.3,
+  "league_avg_source": "mean of the two teams' supplied for/against",
+  "hfa": "x1.1 home / x0.9 away",
+  "adjustments": [],
+  "markets": [
+    {
+      "market": "1X2",
+      "line": "away",
+      "pick": "AWAY (Dila Gori)",
+      "prob": 0.35613675518666943,
+      "fair": "+181",
+      "edge": -9.84086993587851,
+      "call": "PASS",
+      "price": 120
+    },
+    {
+      "market": "Double chance",
+      "line": "X2",
+      "pick": "Dila Gori or draw",
+      "prob": 0.6214666508280426,
+      "fair": "-164",
+      "edge": -15.381424804836186,
+      "call": "PASS",
+      "price": -345
+    },
+    {
+      "market": "Total",
+      "line": "2.5",
+      "pick": "OVER",
+      "prob": 0.4752258400104438,
+      "fair": "+110",
+      "edge": -6.181119702659327,
+      "call": "PASS",
+      "price": -116
+    },
+    {
+      "market": "Total",
+      "line": "2.5",
+      "pick": "UNDER",
+      "prob": 0.5247741599895561,
+      "fair": "-110",
+      "edge": 0.09646361800322856,
+      "call": "PASS",
+      "price": -110
+    }
+  ],
+  "props": [],
+  "thin_samples": [],
+  "settings": {
+    "home_mult": 1.1,
+    "away_mult": 0.9
+  }
+}

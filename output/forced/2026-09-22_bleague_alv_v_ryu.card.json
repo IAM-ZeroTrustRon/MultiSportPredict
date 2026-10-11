@@ -1,0 +1,25 @@
+{
+  "title": "B.PREMIER | Ryukyu Golden Kings @ Alvark Tokyo",
+  "description": "**FORCED RUN - model math on web-sourced inputs, guards off.**\n2026-09-22 1:00 AM ET TOYOTA ARENA TOKYO",
+  "color": 14510880,
+  "fields": [
+    {
+      "name": "Projection",
+      "inline": false,
+      "value": "Alvark Tokyo 80.3 - Ryukyu Golden Kings 79.8\nTotal 160.1 | Home win 51.7%"
+    },
+    {
+      "name": "Plays (edge, pct pts)",
+      "inline": false,
+      "value": "No edges - PASS"
+    },
+    {
+      "name": "Adjustments",
+      "inline": false,
+      "value": "inputs regressed 50% toward average"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - FORCED RUN, not stored, not graded"
+  }
+}

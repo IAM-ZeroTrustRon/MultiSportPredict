@@ -1,0 +1,126 @@
+{
+  "sport": "soccer",
+  "league": "Premier League",
+  "home_team": "Manchester United",
+  "away_team": "Tottenham Hotspur",
+  "timestamp": "2026-10-10T11:06:55.585468",
+  "game": {
+    "projected_home_goals": 1.66,
+    "projected_away_goals": 0.77,
+    "projected_total_goals": 2.43,
+    "home_win_prob": 0.584,
+    "draw_prob": 0.244,
+    "away_win_prob": 0.172
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.892,
+      "market_line": -0.5,
+      "edge": 1.392,
+      "confidence": 49.0,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 2.432,
+      "market_total": 3.5,
+      "edge": -1.068,
+      "confidence": 43.2,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.474,
+      "confidence": 30.3,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.699,
+    "over_25_prob": 0.439,
+    "over_35_prob": 0.228
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.474,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.6,
+      "xg_against": 1.6,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.6,
+      "goals_against": 1.6,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 0.4,
+      "xg_against": 1.6,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 0.4,
+      "goals_against": 1.6,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.1,
+    "avg_goals_per_game": 2.85,
+    "home_advantage": 0.35,
+    "draw_rate": 0.25,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real",
+  "auto_odds": {
+    "home_ml": -136,
+    "away_ml": 320,
+    "draw_ml": 310,
+    "spread_line": -0.5,
+    "spread_home_price": -141,
+    "spread_away_price": 106,
+    "total_line": 3.5,
+    "over_price": 121,
+    "under_price": -162,
+    "status": "live",
+    "captured_at": "2026-10-10T15:06:52+00:00"
+  },
+  "market_moneyline": {
+    "home_ml": -136,
+    "draw_ml": 310,
+    "away_ml": 320,
+    "source": "live",
+    "captured_at": "2026-10-10T15:06:52+00:00"
+  },
+  "market_totals_prices": {
+    "over_price": 121,
+    "under_price": -162,
+    "source": "live",
+    "captured_at": "2026-10-10T15:06:52+00:00"
+  },
+  "market_spread_prices": {
+    "spread_line": -0.5,
+    "spread_home_price": -141,
+    "spread_away_price": 106,
+    "source": "live",
+    "captured_at": "2026-10-10T15:06:52+00:00"
+  },
+  "market_status": "live"
+}

@@ -1,0 +1,64 @@
+{
+  "home": "Brisbane Bullets",
+  "away": "New Zealand Breakers",
+  "proj_home": 90.8,
+  "proj_away": 91.3,
+  "margin": -0.6,
+  "total": 182.1,
+  "p_home_win": 0.4807252947148105,
+  "league_avg": 90.8,
+  "league_avg_source": "mean of the two teams' supplied for/against",
+  "hfa": 2.0,
+  "adjustments": [
+    "inputs regressed 70% toward average",
+    "away -1.5: ESTIMATE: played Sun 20 Sep in Auckland, flew to Brisbane, ~2 days rest; Brisbane ~10 days rest"
+  ],
+  "markets": [
+    {
+      "market": "Game spread",
+      "line": "home -2.5",
+      "pick": "AWAY (New Zealand Breakers)",
+      "prob": 0.6012819470942519,
+      "fair": "-151",
+      "edge": 8.908682514303234,
+      "call": "BET"
+    },
+    {
+      "market": "Game total",
+      "line": "187.5",
+      "pick": "UNDER",
+      "prob": 0.624623663180071,
+      "fair": "-166",
+      "edge": 11.242854122885149,
+      "call": "BET",
+      "proj": 182.1
+    },
+    {
+      "market": "Game moneyline",
+      "line": "-143/+115",
+      "pick": "AWAY (New Zealand Breakers)",
+      "prob": 0.5192747052851895,
+      "fair": "+108 home",
+      "edge": 7.781771554951867,
+      "call": "BET"
+    },
+    {
+      "market": "1H spread",
+      "line": "home +0",
+      "pick": "AWAY (New Zealand Breakers)",
+      "prob": 0.5134949725011355,
+      "fair": "-106",
+      "edge": 4.837869343136808,
+      "call": "LEAN"
+    }
+  ],
+  "props": [],
+  "thin_samples": [],
+  "settings": {
+    "margin_sd": 12.0,
+    "total_sd": 17.0,
+    "hfa": 2.0,
+    "h1": 0.49,
+    "q1": 0.25
+  }
+}

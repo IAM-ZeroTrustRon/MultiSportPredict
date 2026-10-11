@@ -1,4 +1,23 @@
+Czech Liga Pro engine installed — 2026-10-09. Collector/trainer/runner/grader and independent tests are local. No Gemini samples are used for production training. Live collection still needs BETSAPI_KEY (Events plus full Bet365 entitlement) or ODDS_API_IO_KEY in .env; neither was configured. Never reuse the other provider's ODDS_API_KEY. Consult README_CZECH_LIGA_PRO.md and tests/test_table_tennis_engine.py.
+
 # Handoff — Cline
+
+Names-only worked example: `run_tennis_full.py --match "Thiago Seyboth Wild vs Felipe Meligeni Alves"`.
+Public Challenger history supplement clears the former 2-match guard for this
+research run (85/49 run-history counts). All four alternative-market families,
+27 distinct priced lines, generated observation JSON and full saved report.
+`run_tennis_full.py --push` sends captured full Markdown to configured webhooks.
+No numerical injury/travel effects are invented and no database bets are written.
+
+Tennis odds automation (2026-10-09): normal runs request h2h/spreads/totals and
+event-level alternate game/set markets. Upcoming Shanghai verification returned
+eight paired game-line quotes; no set quotes. Manual flags override their type;
+15-minute cache, started fixtures rejected, additional API credits apply.
+
+Current state (2026-10-09): NCAAF now has a dedicated prediction runner.
+Tennis and basketball upgrades, working official KBL/NZ NBL/BBL replacements,
+verified fixtures, alternative markets and limitations are documented at the
+top of STATE_OF_MODEL.md and in COMMANDS.md. Older task lists below are historical.
 
 You edit files in this repo. Read `STATE_OF_MODEL.md` for what the project is
 and `INDEX.md` for where things live. This page is the working agreement.

@@ -796,6 +796,104 @@ def ingest_mlb_players(check: bool = False, season: Optional[int] = None) -> Ada
 
 
 # ==========================================================================
+# ADAPTER: MLB LINEUPS  (statsapi.mlb.com schedule?hydrate=lineups)
+# ==========================================================================
+# Populates data/mlb_lineups.json: today's announced batting orders so the
+# Discord card can name the key batters (the "WHO" behind the projection).
+#
+# Shape per team:
+#   "Atlanta Braves": {
+#       "date": "2026-09-30", "source": "statsapi.mlb.com",
+#       "updated": "2026-09-30T...", "game_pk": 849841,
+#       "opponent": "Philadelphia Phillies", "home_away": "home",
+#       "batting_order": ["Ronald Acuna Jr.", ... 9 names in order ...],
+#       "key_batters":  [... first 4 ...],
+#   }
+#
+# Never invents a number: teams with no announced lineup get NO record
+# (yesterday's order is not carried forward -- lineups change daily).
+# check=True fetches and reports, writes nothing.
+
+MLB_LINEUPS_STORE = DATA / "mlb_lineups.json"
+
+
+def _lineup_names(players: Any) -> List[str]:
+    """Full names in the order the feed lists them (batting order 1-9)."""
+    names: List[str] = []
+    for player in players or []:
+        if not isinstance(player, dict):
+            continue
+        name = str(player.get("fullName", "") or "").strip()
+        if name:
+            names.append(name)
+    return names
+
+
+def ingest_mlb_lineups(check: bool = False, season: Optional[int] = None,
+              target_date: Optional[str] = None) -> AdapterResult:
+    result = AdapterResult("mlb-lineups")
+    lineup_day = _dt.date.fromisoformat(target_date) if target_date else _dt.date.today()
+    date_str = lineup_day.isoformat()
+    # NOTE: built from the endpoint root, NOT by appending to
+    # MLB_SCHEDULE_URL -- that constant already carries its own query
+    # string (template placeholders included), which produced an HTTP 400.
+    url = ("https://statsapi.mlb.com/api/v1/schedule?sportId=1&hydrate=lineups"
+        f"&startDate={date_str}&endDate={date_str}")
+    try:
+     blob = http_get_json(url, cache_key=f"mlb_lineups_{date_str}",
+                             cache_hours=3.0)
+    except FetchError as exc:
+        raise RuntimeError(f"MLB lineup feed unreachable: {exc}") from exc
+
+    games = []
+    for date_blob in blob.get("dates", []) or []:
+        games.extend(date_blob.get("games", []) or [])
+    if check:
+        with_lineups = sum(1 for game in games if game.get("lineups"))
+        return result.succeed(
+            with_lineups,
+            f"{len(games)} game(s) today, {with_lineups} with announced lineups (dry run)")
+
+    now = _dt.datetime.now().isoformat(timespec="seconds")
+    records: Dict[str, Dict[str, Any]] = {}
+    for game in games:
+        lineups = game.get("lineups") or {}
+        teams = game.get("teams") or {}
+        for side in ("home", "away"):
+            club = (teams.get(side) or {}).get("team") or {}
+            team_name = club.get("name")
+            players = lineups.get(f"{side}Players")
+            order = _lineup_names(players)
+            if not team_name or len(order) < 9:
+                # No announced order (or a short/incomplete one) -- omit
+                # rather than carry yesterday's lineup forward.
+                continue
+            other = "away" if side == "home" else "home"
+            other_club = (teams.get(other) or {}).get("team") or {}
+            records[team_name] = {
+                "date": date_str,
+                "source": "statsapi.mlb.com",
+                "updated": now,
+                "game_pk": game.get("gamePk"),
+                "opponent": other_club.get("name"),
+                "home_away": side,
+                "batting_order": order,
+                "key_batters": order[:4],
+            }
+    if not records:
+        raise RuntimeError(
+            f"No announced lineups for {date_str} in {len(games)} game(s) -- "
+            "lineups usually post 2-4h before first pitch; ingest again closer to game time")
+
+    payload = {"generated": now, "date": date_str,
+               "source": "statsapi.mlb.com", "teams": records}
+    write_text_atomic(json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+                      MLB_LINEUPS_STORE)
+    return result.succeed(len(records),
+                          f"{len(records)} teams -> data/mlb_lineups.json")
+
+
+# ==========================================================================
 # ADAPTER: KBO TEAM METRICS  (mykbostats.com team splits)
 # ==========================================================================
 
@@ -1176,12 +1274,25 @@ def ingest_realgm(league_key: str, check: bool = False, season: Optional[int] = 
     return result.succeed(len(records), f"{len(records)} teams (season {used_season}) -> {BASKETBALL_STORE.name}")
 
 
+def ingest_official_basketball(key: str, check: bool = False, season: Optional[int] = None) -> AdapterResult:
+    from ingest_basketball_official import ingest
+    if season is not None:
+        raise ValueError("Official adapters refresh the active league season; omit --season")
+    result = ingest(key.upper(), check)
+    count = len({g[s+"_team"] for g in result["games"] for s in ("home", "away")})
+    return AdapterResult(key).succeed(count, "official league statistics and score history" + (" (check only)" if check else ""))
+
+
 def ingest_kbl(check: bool = False, season: Optional[int] = None) -> AdapterResult:
-    return ingest_realgm("kbl", check=check, season=season)
+    return ingest_official_basketball("kbl", check, season)
 
 
 def ingest_nznbl(check: bool = False, season: Optional[int] = None) -> AdapterResult:
-    return ingest_realgm("nznbl", check=check, season=season)
+    return ingest_official_basketball("nznbl", check, season)
+
+
+def ingest_bbl(check: bool = False, season: Optional[int] = None) -> AdapterResult:
+    return ingest_official_basketball("bbl", check, season)
 
 
 # ==========================================================================
@@ -1209,109 +1320,21 @@ def _sackmann_files(year: int) -> List[Tuple[str, str]]:
 
 
 def ingest_tennis(check: bool = False, season: Optional[int] = None) -> AdapterResult:
-    """Build the match-history CSV that models/tennis_elo.py loads.
-
-    Output columns are exactly what TennisElo.load_match_history() expects:
-        winner_name, loser_name, surface, tournament_date
-    plus tier/tourney/round columns it ignores but you may want when auditing.
-
-    Sackmann publishes the current year's main-tour file continuously and the
-    qualifying/Challenger file on a lag, so a 404 on one of them is normal and
-    is reported, not treated as a failure.
-    """
+    """Use the same tour-aware ingestor as the standalone tennis command."""
+    import subprocess
     result = AdapterResult("tennis")
     end_year = season or calendar_year_season()
-    years = list(range(end_year - TENNIS_YEARS_BACK + 1, end_year + 1))
-    log(f"[Tennis] Fetching ATP main-tour + Challenger results for {years[0]}-{years[-1]} ...")
-
-    rows: List[Dict[str, str]] = []
-    fetched: List[str] = []
-    missing = 0
-    attempted = 0
-    for year in years:
-        for tier, filename in _sackmann_files(year):
-            attempted += 1
-            urls = [pattern.format(name=filename) for pattern in SACKMANN_MIRRORS]
-            try:
-                text = http_get(urls[0], cache_key=f"tennis_{filename}",
-                                cache_hours=12.0, alternates=urls[1:])
-            except FetchError as exc:
-                missing += 1
-                if exc.status == 404:
-                    result.warn(f"{filename}: not available (404 from every mirror). "
-                                f"Current-year Challenger files are published on a lag, "
-                                f"so this is expected for the newest season.")
-                else:
-                    result.warn(f"{filename}: {exc}")
-                continue
-            except Exception as exc:  # noqa: BLE001
-                missing += 1
-                result.warn(f"{filename} failed ({type(exc).__name__}) -- skipped.")
-                continue
-
-            reader = csv.DictReader(io.StringIO(text))
-            added = 0
-            for record in reader:
-                winner = (record.get("winner_name") or "").strip()
-                loser = (record.get("loser_name") or "").strip()
-                if not winner or not loser:
-                    continue
-                surface = _SURFACE_MAP.get((record.get("surface") or "").strip().lower(), "hard")
-                raw_date = (record.get("tourney_date") or "").strip()
-                if len(raw_date) == 8 and raw_date.isdigit():
-                    date = f"{raw_date[:4]}-{raw_date[4:6]}-{raw_date[6:]}"
-                else:
-                    date = raw_date
-                rows.append({
-                    "winner_name": winner,
-                    "loser_name": loser,
-                    "surface": surface,
-                    "tournament_date": date,
-                    "tier": tier,
-                    "tourney_name": (record.get("tourney_name") or "").strip(),
-                    "round": (record.get("round") or "").strip(),
-                })
-                added += 1
-            fetched.append(f"{filename} ({added})")
-
-    if not rows:
-        raise RuntimeError(
-            f"All {attempted} tennis files failed across {len(SACKMANN_MIRRORS)} mirrors. "
-            f"Files for past seasons definitely exist, so this is a network block, not missing data -- check "
-            f"whether a firewall, VPN, DNS filter or antivirus is intercepting these hosts. "
-            f"Test in a browser: https://cdn.jsdelivr.net/gh/Aneeshers/tennis-sackmann-archive@main/atp/"
-            f"atp_matches_{years[0]}.csv"
-        )
-
-    rows.sort(key=lambda r: r["tournament_date"])   # Elo must be applied chronologically
-    tiers = {tier: sum(1 for r in rows if r["tier"] == tier) for tier in {r["tier"] for r in rows}}
-    players = len({r["winner_name"] for r in rows} | {r["loser_name"] for r in rows})
-
+    command = [sys.executable, str(ROOT / "ingest_tennis.py"), "--years",
+               str(end_year - 1), str(end_year)]
     if check:
-        return result.succeed(len(rows), f"{len(rows)} matches, {players} players (dry run)")
-
-    buffer = io.StringIO()
-    writer = csv.DictWriter(buffer, fieldnames=[
-        "winner_name", "loser_name", "surface", "tournament_date",
-        "tier", "tourney_name", "round",
-    ], lineterminator="\n")
-    writer.writeheader()
-    writer.writerows(rows)
-    write_text_atomic(buffer.getvalue(), TENNIS_MATCHES_CSV)
-
-    write_text_atomic(json.dumps({
-        "generated": TODAY,
-        "years": years,
-        "matches": len(rows),
-        "players": players,
-        "by_tier": tiers,
-        "files": fetched,
-        "source": "https://github.com/Aneeshers/tennis-sackmann-archive",
-        "license": "CC BY-NC-SA 4.0 (attribution required, non-commercial)",
-    }, indent=2) + "\n", TENNIS_META)
-
-    detail = ", ".join(f"{tier}={count}" for tier, count in sorted(tiers.items()))
-    return result.succeed(len(rows), f"{len(rows)} matches ({detail}), {players} players -> {TENNIS_MATCHES_CSV.name}")
+        command.append("--check")
+    completed = subprocess.run(command, cwd=ROOT, capture_output=True,
+                               text=True, encoding="utf-8", errors="replace")
+    log(completed.stdout)
+    if completed.returncode:
+        raise RuntimeError("Tennis refresh incomplete; see tour failures above. "
+                           "Existing failed-tour history was preserved. " + completed.stderr[-500:])
+    return result.succeed(0, "ATP/WTA refresh completed by ingest_tennis.py")
 
 
 # ==========================================================================
@@ -1374,10 +1397,12 @@ ADAPTERS: "Dict[str, Tuple[str, Adapter]]" = {
     "mlb":            ("MLB team metrics (statsapi.mlb.com)",            ingest_mlb_teams),
     "mlb-probables":  ("MLB probable starters, today + tomorrow",        ingest_mlb_probables),
     "mlb-players":    ("MLB player props via pybaseball",                ingest_mlb_players),
+    "mlb-lineups":    ("MLB batting orders, today (statsapi.mlb.com)",       ingest_mlb_lineups),
     "kbo":            ("KBO team metrics (mykbostats.com)",              ingest_kbo_teams),
     "euroleague":     ("EuroLeague ORTG/DRTG/pace (euroleague-api)",     ingest_euroleague),
-    "kbl":            ("Korean Basketball League (RealGM)",              ingest_kbl),
-    "nznbl":          ("New Zealand NBL (RealGM)",                       ingest_nznbl),
+    "kbl":            ("Korean Basketball League (official)",              ingest_kbl),
+    "nznbl":          ("New Zealand NBL (official Genius Sports)",                       ingest_nznbl),
+    "bbl":            ("German Basketball Bundesliga (official)", ingest_bbl),
     "tennis":         ("ATP + Challenger match history (Sackmann)",      ingest_tennis),
     "soccer-espn":    ("Soccer goals incl. Liga MX (ESPN)",              ingest_soccer_espn_delegate),
     "soccer":         ("Soccer xG via existing ingest_soccer.py (FBref)", ingest_soccer_delegate),
@@ -1385,8 +1410,8 @@ ADAPTERS: "Dict[str, Tuple[str, Adapter]]" = {
 
 # soccer-espn runs before soccer so that when FBref is reachable again its real
 # xG overwrites the ESPN goals estimate rather than the other way round.
-DEFAULT_ORDER = ["mlb", "mlb-probables", "mlb-players", "kbo",
-                 "euroleague", "kbl", "nznbl", "tennis", "soccer-espn", "soccer"]
+DEFAULT_ORDER = ["mlb", "mlb-probables", "mlb-players", "mlb-lineups", "kbo",
+                 "euroleague", "kbl", "nznbl", "bbl", "tennis", "soccer-espn", "soccer"]
 
 
 def run(selected: List[str], check: bool, season: Optional[int]) -> int:

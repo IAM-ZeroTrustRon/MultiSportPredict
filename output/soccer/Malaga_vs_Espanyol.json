@@ -1,0 +1,99 @@
+{
+  "sport": "soccer",
+  "league": "La Liga",
+  "home_team": "Malaga",
+  "away_team": "Espanyol",
+  "timestamp": "2026-10-09T11:33:23.303876",
+  "game": {
+    "projected_home_goals": 1.14,
+    "projected_away_goals": 1.34,
+    "projected_total_goals": 2.47,
+    "home_win_prob": 0.317,
+    "draw_prob": 0.271,
+    "away_win_prob": 0.412
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.199,
+      "market_line": 0.0,
+      "edge": -0.199,
+      "confidence": 28.8,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 2.475,
+      "market_total": 2.5,
+      "edge": -0.025,
+      "confidence": 24.9,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.525,
+      "confidence": 30.0,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.707,
+    "over_25_prob": 0.45,
+    "over_35_prob": 0.237
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.525,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 0.933,
+      "xg_against": 1.625,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 0.933,
+      "goals_against": 1.625,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.429,
+      "xg_against": 1.429,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 1.429,
+      "goals_against": 1.429,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.05,
+    "avg_goals_per_game": 2.65,
+    "home_advantage": 0.4,
+    "draw_rate": 0.27,
+    "data_tier": 1
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real",
+  "auto_odds": {
+    "status": "no_fixture",
+    "captured_at": "2026-10-09T15:31:38+00:00",
+    "reason": "no odds-feed fixture matched 'Malaga' vs 'Espanyol' in soccer_spain_la_liga today"
+  },
+  "market_status": "UNLISTED (Simulation Only - No EV)",
+  "market_note": "no odds-feed fixture matched 'Malaga' vs 'Espanyol' in soccer_spain_la_liga today"
+}

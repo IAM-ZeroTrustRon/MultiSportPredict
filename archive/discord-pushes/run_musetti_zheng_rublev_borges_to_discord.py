@@ -37,7 +37,7 @@ from models.tennis_predictor import predict_tennis_match
 # ---------------------------------------------------------------------------
 # Webhook URL (from user-provided config)
 # ---------------------------------------------------------------------------
-WEBHOOK_URL = "https://discord.com/api/webhooks/1517422221939708015/YB3a-symNZ6vhtC5qRnC6BOP5Lulk3Mj9L4-Ov1PALv79kUWTvuD67Y9Dk8itNUn6F3U"
+WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 
 # ---------------------------------------------------------------------------
 # Match context — ATP Cincinnati Open, hard court, best-of-3

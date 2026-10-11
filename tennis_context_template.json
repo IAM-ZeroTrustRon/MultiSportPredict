@@ -1,0 +1,13 @@
+{
+  "players": {
+    "Full Player Name": {
+      "source": "https://Source-URL",
+      "as_of": "YYYY-MM-DD",
+      "injury_status": "unknown",
+      "arrival_date": "YYYY-MM-DD",
+      "venue_notes": "Sourced Observation",
+      "elo_adjustment": 0,
+      "adjustment_reason": "Reason For Optional Scenario Adjustment"
+    }
+  }
+}

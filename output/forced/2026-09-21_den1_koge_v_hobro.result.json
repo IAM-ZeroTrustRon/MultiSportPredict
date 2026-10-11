@@ -1,0 +1,99 @@
+{
+  "home": "HB Koge",
+  "away": "Hobro IK",
+  "proj_home": 1.17,
+  "proj_away": 1.41,
+  "margin": -0.24,
+  "total": 2.58,
+  "p_home_win": 0.31267356433099003,
+  "p_draw": 0.2631676370056401,
+  "p_away_win": 0.42415875976172596,
+  "p_btts": 0.5203381139190139,
+  "likely_scores": [
+    "1-1 (12.5%)",
+    "0-1 (10.7%)",
+    "1-0 (8.9%)"
+  ],
+  "league_avg": 1.31,
+  "league_avg_source": "mean of the two teams' supplied for/against",
+  "hfa": "x1.1 home / x0.9 away",
+  "adjustments": [],
+  "markets": [
+    {
+      "market": "1X2",
+      "line": "home",
+      "pick": "HOME (HB Koge)",
+      "prob": 0.31267356433099003,
+      "fair": "+220",
+      "edge": -8.732643566901,
+      "call": "PASS",
+      "price": 150
+    },
+    {
+      "market": "1X2",
+      "line": "draw",
+      "pick": "DRAW",
+      "prob": 0.2631676370056401,
+      "fair": "+280",
+      "edge": -3.986266602466293,
+      "call": "PASS",
+      "price": 230
+    },
+    {
+      "market": "1X2",
+      "line": "away",
+      "pick": "AWAY (Hobro IK)",
+      "prob": 0.42415875976172596,
+      "fair": "+136",
+      "edge": 5.37883893913556,
+      "call": "LEAN",
+      "price": 170
+    },
+    {
+      "market": "Draw no bet",
+      "line": "away",
+      "pick": "AWAY (Hobro IK)",
+      "prob": 0.5756516421700287,
+      "fair": "-136",
+      "edge": 4.2941361796197,
+      "call": "LEAN",
+      "price": -114
+    },
+    {
+      "market": "Total",
+      "line": "2.5",
+      "pick": "OVER",
+      "prob": 0.47527632394630653,
+      "fair": "+110",
+      "edge": -4.85331998632173,
+      "call": "PASS",
+      "price": -110
+    },
+    {
+      "market": "Total",
+      "line": "2.5",
+      "pick": "UNDER",
+      "prob": 0.5247236760536935,
+      "fair": "-110",
+      "edge": -0.13426746572069437,
+      "call": "PASS",
+      "price": -111
+    },
+    {
+      "market": "BTTS",
+      "line": "yes",
+      "pick": "YES",
+      "prob": 0.5203381139190139,
+      "fair": "-108",
+      "edge": -11.602552244462249,
+      "call": "PASS",
+      "price": -175
+    }
+  ],
+  "props": [],
+  "thin_samples": [],
+  "settings": {
+    "home_mult": 1.1,
+    "away_mult": 0.9
+  }
+}

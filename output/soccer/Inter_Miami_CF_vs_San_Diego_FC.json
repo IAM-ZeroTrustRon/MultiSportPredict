@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "MLS",
+  "home_team": "Inter Miami CF",
+  "away_team": "San Diego FC",
+  "timestamp": "2026-09-20T11:14:08.888405",
+  "game": {
+    "projected_home_goals": 2.01,
+    "projected_away_goals": 1.47,
+    "projected_total_goals": 3.48,
+    "home_win_prob": 0.496,
+    "draw_prob": 0.22,
+    "away_win_prob": 0.284
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.542,
+      "market_line": 0.0,
+      "edge": 0.542,
+      "confidence": 35.0,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.476,
+      "market_total": 4.5,
+      "edge": -1.024,
+      "confidence": 42.5,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.731,
+      "confidence": 61.1,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.862,
+    "over_25_prob": 0.675,
+    "over_35_prob": 0.458
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.731,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 2.44,
+      "xg_against": 1.84,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 2.44,
+      "goals_against": 1.84,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.664,
+      "xg_against": 1.664,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 1.664,
+      "goals_against": 1.664,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

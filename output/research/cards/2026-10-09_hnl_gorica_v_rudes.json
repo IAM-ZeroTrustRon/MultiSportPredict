@@ -1,0 +1,38 @@
+{
+  "title": "HNK Gorica vs Rudes",
+  "description": "**RESEARCH CARD - not model output.** October 9, 2026, 12:00 PM ET. Gradski stadion, Velika Gorica.",
+  "fields": [
+    {
+      "name": "Market",
+      "value": "betPawa public-page snapshot retrieved before kickoff, approximately 09:56 AM ET. Book update time unavailable; availability in your account unconfirmed."
+    },
+    {
+      "name": "Best bet",
+      "value": "PASS: no strong validated bet; largest calculated EVs are research candidates only."
+    },
+    {
+      "name": "Calculated scenario",
+      "value": "Home/draw/away 54.9%/21.6%/23.4%. Expected goals 1.99-1.24. Rudes over 1.5 goals @ 3.430: +20.4% scenario EV; Rudes win @ 5.040: +18.1% scenario EV"
+    },
+    {
+      "name": "Why / observations",
+      "value": "Gorica won 1-0 at Istra on September 19; its preceding league match was 2-2 against Varazdin. Rudes conceded 24 in eight league games. Both league profiles list matches at Velika Gorica, so the generic home advantage may overstate venue unfamiliarity. Ante Erceg scored on his friendly return after missing the eight league rounds; a start is not confirmed. No verified complete injury list or starting XI. No opponent-adjusted xG, shot profile or player-prop inputs."
+    },
+    {
+      "name": "Against",
+      "value": "Gorica scored only five in eight games. Rudes defensive results include stronger opponents. A 6-0 cup head-to-head from 2025 is a different competition and is not included in the calculation. Neither eight-game average nor Erceg returning establishes a reliable betting edge."
+    },
+    {
+      "name": "Check before betting",
+      "value": "Final XI, actual current price, opponent-adjusted form. Captured snapshot replay does not refresh odds."
+    },
+    {
+      "name": "Confidence",
+      "value": "Low"
+    },
+    {
+      "name": "Sharp data",
+      "value": "No verified betting splits. No calibrated EV uncertainty interval."
+    }
+  ]
+}

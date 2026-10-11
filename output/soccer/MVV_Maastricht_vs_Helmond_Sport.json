@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "Eerste Divisie",
+  "home_team": "MVV Maastricht",
+  "away_team": "Helmond Sport",
+  "timestamp": "2026-09-26T13:21:45.952810",
+  "game": {
+    "projected_home_goals": 1.67,
+    "projected_away_goals": 1.91,
+    "projected_total_goals": 3.59,
+    "home_win_prob": 0.342,
+    "draw_prob": 0.223,
+    "away_win_prob": 0.435
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.239,
+      "market_line": 0.0,
+      "edge": -0.239,
+      "confidence": 29.5,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.588,
+      "market_total": 2.5,
+      "edge": 1.088,
+      "confidence": 43.5,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.724,
+      "confidence": 60.3,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.873,
+    "over_25_prob": 0.695,
+    "over_35_prob": 0.482
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.724,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.429,
+      "xg_against": 2.143,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.429,
+      "goals_against": 2.143,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.857,
+      "xg_against": 1.714,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 1.857,
+      "goals_against": 1.714,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.15,
+    "avg_goals_per_game": 3.1,
+    "home_advantage": 0.4,
+    "draw_rate": 0.25,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

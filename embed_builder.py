@@ -46,6 +46,7 @@ USE
 from __future__ import annotations
 
 import re
+import math
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # Discord colours
@@ -177,7 +178,8 @@ def as_notes(value: Any) -> List[str]:
 
 def market(name: str, *, model: Optional[str] = None, market_value: Optional[str] = None,
            edge: Optional[str] = None, pick: Optional[str] = None,
-           extra: Optional[str] = None, verdict: Optional[str] = None) -> Optional[Dict[str, Any]]:
+           extra: Optional[str] = None, verdict: Optional[str] = None,
+           inline: bool = True) -> Optional[Dict[str, Any]]:
     """One row. Returns None when there is nothing real to show.
 
     A row needs at least a model number or a pick. A heading with an empty
@@ -199,7 +201,8 @@ def market(name: str, *, model: Optional[str] = None, market_value: Optional[str
     if model is None and pick is None and extra is None and verdict is None:
         return None
     return {"name": name, "model": model, "market": market_value,
-            "edge": edge, "pick": pick, "extra": extra, "verdict": verdict}
+            "edge": edge, "pick": pick, "extra": extra, "verdict": verdict,
+            "inline": inline}
 
 
 def moneyline_verdict(action: Optional[str], side: Optional[str], strength: Optional[str],
@@ -310,7 +313,7 @@ def extract_baseball(data: Dict[str, Any]) -> Dict[str, Any]:
                                     model_side=short_name(fav_name),
                                     model_prob_text=fav_prob)
         rows.append(market(
-            "💰 Moneyline",
+            "🏆 Moneyline (Match Winner)",
             model=pair(away_name, pct(ap), home_name, pct(hp)),
             market_value=pct(ml.get("market_home_prob")) if has_market_edge else None,
             edge=signed(ml.get("edge_pct"), 1) if has_market_edge else None,
@@ -431,6 +434,18 @@ def extract_baseball(data: Dict[str, Any]) -> Dict[str, Any]:
     umpire = clean(data.get("umpire"))
     if umpire and umpire.lower() != "unknown":
         notes.append(f"🧑‍✈️ Umpire: {umpire}")
+    if data.get("market_status") == "UNLISTED (Simulation Only - No EV)":
+        notes.append("Market Odds: UNLISTED (Simulation Only - No EV)"
+                     + (f" -- {data['market_note']}" if data.get("market_note") else "."))
+    rl = data.get("market_runline") or {}
+    if rl.get("runline") is not None:
+        notes.append(f"Run line {float(rl['runline']):+g} "
+                     f"(H {rl.get('runline_home_price', 'n/a')} / "
+                     f"A {rl.get('runline_away_price', 'n/a')}, {rl.get('source', 'live')}).")
+    tp = data.get("market_totals_prices") or {}
+    if tp.get("over_price") is not None or tp.get("under_price") is not None:
+        notes.append(f"O/U prices {tp.get('over_price', 'n/a')} / {tp.get('under_price', 'n/a')} "
+                     f"({tp.get('source', 'live')}).")
     return {"markets": rows, "notes": notes,
             "context": clean(data.get("league"))}
 
@@ -497,6 +512,22 @@ def extract_soccer(data: Dict[str, Any]) -> Dict[str, Any]:
             extra="home / away, P(over 1.5)"))
 
     notes = as_notes(data.get("notes"))[:2]
+    # Tennis parity: surface the auto-fetch so a card built from live lines
+    # says when that price was taken, and an unlisted league says it has no
+    # market instead of looking like a priced pick.
+    auto = data.get("auto_odds") or {}
+    if auto.get("captured_at"):
+        notes.append(f"Market odds ({auto.get('status', 'live')}, "
+                     f"captured {auto['captured_at']}).")
+    for block_key, label in (("market_moneyline", "Moneyline"),
+                             ("market_totals_prices", "Totals prices"),
+                             ("market_spread_prices", "Spread prices")):
+        block = data.get(block_key) or {}
+        if block.get("source") in ("live", "cached") and block.get("captured_at"):
+            notes.append(f"{label} ({block['source']}, captured {block['captured_at']}).")
+    if data.get("market_status") == "UNLISTED (Simulation Only - No EV)":
+        notes.append("Market Odds: UNLISTED (Simulation Only - No EV)"
+                     + (f" -- {data['market_note']}" if data.get("market_note") else "."))
     tier = dig(data, "_stats_source", "data_tier")
     if tier == 2:
         notes.append("xG is estimated from goals -- no reachable feed publishes it.")
@@ -509,58 +540,35 @@ def extract_soccer(data: Dict[str, Any]) -> Dict[str, Any]:
 
 def extract_tennis(data: Dict[str, Any]) -> Dict[str, Any]:
     rows: List[Optional[Dict[str, Any]]] = []
-    ml, sets, games = (data.get("moneyline") or {}, data.get("sets") or {},
-                       data.get("total_games") or {})
+    ml = data.get("moneyline") or {}
 
-    if ml.get("home_win_prob") is not None:
-        # edge_pct is ALWAYS computed here, even with no market odds -- it's
-        # just model_prob minus a hardcoded 50% in that case, not a real
-        # market comparison. Showing it unconditionally made a coin-flip
-        # baseline look like a priced edge. Only surface it when real market
-        # odds were actually supplied; say so plainly otherwise.
-        # market_prob is what _recommendation() actually compares against --
-        # market_home_odds/market_away_odds are display-only strings that the
-        # real call chain (run_tennis.py -> universal_runner.run_tennis)
-        # never populates, so checking those would always read as "no
-        # market" even when --p1-ml/--p2-ml were given.
-        has_market = data.get("market_prob") is not None
-        home_name, away_name = clean(ml.get("home")), clean(ml.get("away"))
-        market_prob = num(data.get("market_prob"))
-        rec_side, action, strength = ml.get("side"), ml.get("action"), ml.get("strength")
-        # Price the recommended side was actually priced against -- market_prob
-        # is home's devigged probability; the away side's is the complement
-        # (no_vig() makes the two sum to 1 by construction).
-        if market_prob is not None:
-            side_price = (market_prob if rec_side == home_name
-                         else (1 - market_prob) if rec_side == away_name
-                         else market_prob)
-            price_text = pct(side_price)
+    home_name, away_name = clean(ml.get("home")), clean(ml.get("away"))
+    if not home_name or not away_name:
+        home_name, away_name = names_from(data)
+    home_prob, away_prob = num(ml.get("home_win_prob")), num(ml.get("away_win_prob"))
+    market_prob = num(data.get("market_prob"))
+    home_price, away_price = _tennis_price(data.get("market_home_odds")), \
+                              _tennis_price(data.get("market_away_odds"))
+    has_market = (market_prob is not None and home_price is not None
+                  and away_price is not None)
+    verdict, edge_text = _tennis_moneyline_verdict(
+        home_name, away_name, home_prob, away_prob, market_prob,
+        home_price, away_price)
+    if home_name and away_name and home_prob is not None and away_prob is not None:
+        if has_market:
+            origin = ("Live" if (data.get("auto_odds") or {}).get("status")
+                      in {"live", "cached"} else "User-Supplied")
+            market_text = (f"Market Odds ({origin}): {home_name} {home_price} "
+                           f"({_tennis_pct(market_prob)}) | {away_name} {away_price} "
+                           f"({_tennis_pct(1 - market_prob)})")
         else:
-            price_text = None
-        fav_name = home_name if num(ml.get("home_win_prob") or 0) >= \
-                   num(ml.get("away_win_prob") or 0) else away_name
-        fav_prob = pct(ml.get("home_win_prob") if fav_name == home_name
-                       else ml.get("away_win_prob"))
-        verdict = moneyline_verdict(action, rec_side, strength, "Moneyline",
-                                    price_text, has_market,
-                                    model_side=fav_name, model_prob_text=fav_prob)
+            market_text = ("Market Odds: Price: None — no complete priced market; "
+                           "no-vig probabilities unavailable")
         rows.append(market(
-            "💰 Moneyline",
-            model=f"{pct(ml.get('home_win_prob'))} / {pct(ml.get('away_win_prob'))}",
-            edge=signed(ml.get("edge_pct"), 1) if has_market else None,
-            verdict=verdict,
-            extra=(f"conf {dec(ml.get('confidence'), 0)}" if has_market and
-                   ml.get("confidence") is not None else None)))
-
-    if sets.get("over_35_prob") is not None:
-        rows.append(market("Sets", model=pct(sets.get("over_35_prob")),
-                           pick=clean(sets.get("recommendation_sets_ou")),
-                           extra=clean(sets.get("recommendation_spread"))))
-
-    if games.get("line") is not None or games.get("over_prob") is not None:
-        rows.append(market("Total games", model=pct(games.get("over_prob")),
-                           market_value=dec(games.get("line"), 1),
-                           pick=clean(games.get("recommendation"))))
+            "🏆 Moneyline (Match Winner)",
+            model=(f"**Model Projection:** {home_name} {_tennis_pct(home_prob)} | "
+                   f"{away_name} {_tennis_pct(away_prob)}\n**{market_text}**\n{edge_text}"),
+            verdict=verdict, inline=False))
 
     notes: List[str] = []
     elo = data.get("elo_ratings") or {}
@@ -572,9 +580,134 @@ def extract_tennis(data: Dict[str, Any]) -> Dict[str, Any]:
     if thin:
         notes.append(f"Thin sample: {', '.join(thin)} under 8 matches -- the "
                      f"rating is mostly the starting constant.")
+    for item in data.get("alternative_markets") or []:
+        display = _tennis_alternative_display(item, home_name, away_name)
+        rows.append(market(display["name"], model=display["model"],
+                           verdict=display["verdict"], extra=display["extra"],
+                           inline=False))
+    if data.get("context_audit", {}).get("observations"):
+        notes.append(data["context_audit"]["note"])
+    if data.get("alternative_markets"):
+        notes.append("⚠️ Note: Simulation uses baseline 75% serve-hold rate (uncalibrated)")
     context = " ".join(x for x in (clean(data.get("tournament")),
                                    clean(data.get("round"))) if x)
     return {"markets": rows, "notes": notes, "context": context or None}
+
+
+def _tennis_pct(value: Any) -> str:
+    number = num(value)
+    if number is None or not math.isfinite(number) or not 0 <= number <= 1:
+        return "unavailable"
+    return f"{number:.1%}"
+
+
+def _tennis_price(value: Any) -> Optional[str]:
+    number = num(value)
+    return f"{number:+g}" if number is not None and math.isfinite(number) else None
+
+
+def _tennis_ev(side: str, ev: Any, price: Optional[str]) -> str:
+    number = num(ev)
+    if number is None or not math.isfinite(number) or price is None:
+        return f"{side} Price: None — No EV calculated (PASS)"
+    return f"{side} {number * 100:+.1f}% EV"
+
+
+def _tennis_origin(item: Dict[str, Any]) -> str:
+    source = str(item.get("line_origin") or item.get("market_origin")
+                 or item.get("source") or "").lower()
+    if "live" in source:
+        return "Live Market Line"
+    if any(token in source for token in ("user", "manual", "custom")):
+        return "User-Supplied / Manual Line"
+    if item.get("price_a") is not None or item.get("price_b") is not None:
+        return "User-Supplied / Manual Line"
+    return "Model Baseline Line (no market prices)"
+
+
+def _tennis_moneyline_verdict(home: Optional[str], away: Optional[str],
+                              home_prob: Optional[float], away_prob: Optional[float],
+                              market_prob: Optional[float], home_price: Optional[str],
+                              away_price: Optional[str]) -> Tuple[str, str]:
+    if not home or not away or home_prob is None or away_prob is None:
+        return "👉 ACTION: PASS — Model probabilities or player names unavailable", \
+               "Edge: unavailable"
+    if not all(0 <= probability <= 1 for probability in (home_prob, away_prob, market_prob)
+               if probability is not None):
+        return "👉 ACTION: PASS — Moneyline probabilities unavailable", \
+               "Edge: unavailable"
+    if market_prob is None or home_price is None or away_price is None:
+        return "👉 ACTION: PASS — No priced moneyline market supplied", \
+               "Edge: unavailable — no priced market"
+    home_edge = home_prob - market_prob
+    player, price, edge = ((home, home_price, home_edge) if home_edge >= 0
+                           else (away, away_price, -home_edge))
+    edge_pct = abs(edge) * 100
+    if edge_pct >= 5.0 - 1e-9:
+        action = "BET"
+    elif edge_pct >= 2.0 - 1e-9:
+        action = "LEAN"
+    else:
+        return "👉 ACTION: PASS — Market is efficient", f"Edge: +{edge_pct:.1f}% on {player}"
+    return (f"👉 ACTION: {action} {player} ML ({price}) (Edge: +{edge_pct:.1f}%)",
+            f"Edge: +{edge_pct:.1f}% on {player}")
+
+
+def _tennis_alternative_display(item: Dict[str, Any], home: Optional[str],
+                                away: Optional[str]) -> Dict[str, str]:
+    kind = str(item.get("kind") or "")
+    if kind not in {"games_total", "sets_total", "games_spread", "sets_spread"}:
+        return {"name": kind.replace("_", " ").title(), "model": "Market details unavailable",
+                "verdict": "👉 ACTION: PASS — Unsupported market", "extra": ""}
+    line = num(item.get("line"))
+    if line is None or not math.isfinite(line):
+        return {"name": kind.replace("_", " ").title(), "model": "Line unavailable",
+                "verdict": "👉 ACTION: PASS — Market line unavailable", "extra": ""}
+    unit = "Games" if kind.startswith("games_") else "Sets"
+    if not home or not away:
+        return {"name": f"{unit} market", "model": "Player names unavailable",
+                "verdict": "👉 ACTION: PASS — Player names unavailable", "extra": ""}
+    name_a, name_b = home, away
+    price_a, price_b = _tennis_price(item.get("price_a")), _tennis_price(item.get("price_b"))
+    prob_a, prob_b = _tennis_pct(item.get("prob_a")), _tennis_pct(item.get("prob_b"))
+    ev_a, ev_b = num(item.get("ev_a")), num(item.get("ev_b"))
+    origin = _tennis_origin(item)
+    if kind.endswith("total"):
+        side_a, side_b = "Over", "Under"
+        title = f"📊 Total {unit} Over / Under {line:g}"
+        market_line = (f"**Market Line:** {line:g} {unit} @ Over {price_a or 'None'} / "
+                       f"Under {price_b or 'None'} ({origin})")
+        model_line = f"**Model Projection:** Over {prob_a} | Under {prob_b}"
+        selected = (("Over", ev_a, price_a), ("Under", ev_b, price_b))
+    else:
+        side_a, side_b = f"{name_a} {line:+g}", f"{name_b} {-line:+g}"
+        title = f"⚖️ {unit} Spread (Handicap +/- {abs(line):g})"
+        market_line = (f"**Market Line:** {name_a} {line:+g} ({price_a or 'None'}) vs "
+                       f"{name_b} {-line:+g} ({price_b or 'None'}) ({origin})")
+        model_line = (f"**Model Cover:** {name_a} ({line:+g}) {prob_a} | "
+                      f"{name_b} ({-line:+g}) {prob_b}")
+        selected = ((side_a, ev_a, price_a), (side_b, ev_b, price_b))
+
+    ev_line = (f"**Expected Value:** {_tennis_ev(side_a, item.get('ev_a'), price_a)} | "
+               f"{_tennis_ev(side_b, item.get('ev_b'), price_b)}")
+    candidates = [(ev, side, price) for (side, ev, price) in selected
+                  if ev is not None and price is not None and ev > 0]
+    if candidates:
+        ev, side, price = max(candidates)
+        if kind.endswith("total"):
+            action = (f"👉 ACTION: BET {side.upper()} {line:g} {unit} "
+                      f"({price}) (EV: {ev * 100:+.1f}%)")
+        else:
+            action = f"👉 ACTION: BET {side} {unit} ({price}) (EV: {ev * 100:+.1f}%)"
+    elif price_a is None or price_b is None:
+        action = "👉 ACTION: PASS — No EV available for every side without prices"
+    else:
+        action = "👉 ACTION: PASS — No positive expected value"
+    detail = "\n".join((market_line, model_line, ev_line))
+    if item.get("bookmaker"):
+        detail += f"\n**Sportsbook:** {item['bookmaker']} | Updated: {item.get('last_update') or 'unknown'}"
+    return {"name": title, "model": detail, "verdict": action,
+            "extra": f"Push probability: {_tennis_pct(item.get('push_prob'))}"}
 
 
 def extract_nfl(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -702,6 +835,12 @@ def extract_basketball(data: Dict[str, Any]) -> Dict[str, Any]:
                 extra=(f"proj {dec(block.get(f'projected_{period}_total'), 1)}"
                        if block.get(f"projected_{period}_total") is not None else None)))
 
+    for item in data.get("markets") or []:
+        rows.append(market(
+            f"{str(item['kind']).title()} {item['line']}",
+            model=f"A {pct(item['prob_a'])} / B {pct(item['prob_b'])}",
+            pick=item.get("recommendation"),
+            extra=f"Prices {item.get('price_a')} / {item.get('price_b')}; push {pct(item.get('push_prob'))}; model EV {item.get('ev_a')} / {item.get('ev_b')}"))
     notes = as_notes(data.get("notes"))[:2]
     source = clean(data.get("_stats_source"))
     if source and "placeholder" in source:
@@ -807,7 +946,9 @@ def build_embed(sport: str, data: Dict[str, Any]) -> Dict[str, Any]:
     title_bits = [f"{emoji} {label}"]
     if shape["context"] and shape["context"].upper() != label:
         title_bits.append(shape["context"])
-    title = " | ".join(title_bits) + f" | {shape['away']} at {shape['home']}"
+    match_label = (f"{shape['home']} vs {shape['away']}" if shape["sport"] == "tennis"
+                   else f"{shape['away']} at {shape['home']}")
+    title = " | ".join(title_bits) + f" | {match_label}"
 
     fields: List[Dict[str, Any]] = []
     for row in shape["markets"]:
@@ -834,7 +975,7 @@ def build_embed(sport: str, data: Dict[str, Any]) -> Dict[str, Any]:
             if row["extra"]:
                 body += f"\n*{row['extra']}*"
             fields.append({"name": f"{signal + ' ' if signal else ''}{row['name']}",
-                           "value": body or "​", "inline": True})
+                           "value": body or "​", "inline": row.get("inline", True)})
             continue
 
         # A model value that already carries its own markup (the per-team
@@ -857,11 +998,12 @@ def build_embed(sport: str, data: Dict[str, Any]) -> Dict[str, Any]:
             body = f"{body}\n*{row['extra']}*" if body else f"*{row['extra']}*"
         signal = _signal_badge(row.get("pick"))
         fields.append({"name": f"{signal + ' ' if signal else ''}{row['name']}",
-                       "value": body or "​", "inline": True})
+                       "value": body or "​", "inline": row.get("inline", True)})
 
     # Discord renders three per row; a trailing single field looks broken.
-    while len(fields) % 3 and len(fields) > 3:
-        fields.append({"name": "​", "value": "​", "inline": True})
+    if all(field["inline"] for field in fields):
+        while len(fields) % 3 and len(fields) > 3:
+            fields.append({"name": "​", "value": "​", "inline": True})
 
     embed: Dict[str, Any] = {
         "title": title[:256],

@@ -1,0 +1,128 @@
+# Thiago Seyboth Wild vs Felipe Meligeni Alves
+Antofagasta challenger | 2026-10-09 | clay | Best of 3
+Captured: 2026-10-09T13:29:02.404729+00:00
+Source: https://www.tennisexplorer.com/match-detail/?id=3343965
+
+EXPERIMENTAL MODEL REVIEW — estimates are uncalibrated, not verified betting recommendations.
+Opponent histories are incomplete for Challenger/ITF players; new opponents start at the Elo prior.
+
+## Model and measured results
+Thiago Seyboth Wild: Elo 1704; 85 matches in run history.
+Sourced 2025–2026 clay singles: 50/82 wins; latest ten 9-1; mean games 21.0.
+Felipe Meligeni Alves: Elo 1582; 49 matches in run history.
+Sourced 2025–2026 clay singles: 28/48 wins; latest ten 6-4; mean games 19.6.
+Serve/return inputs: No measured player point counts; 75% hold prior.
+
+## Moneyline
+Model: Thiago Seyboth Wild 63.7% | Felipe Meligeni Alves 36.3%
+Pinnacle: Thiago Seyboth Wild -270.27 | Felipe Meligeni Alves +227
+Quote update: 08.10. 19:51 / 09.10. 13:31 (source display timezone unspecified)
+Thiago Seyboth Wild model EV: -12.7%
+Felipe Meligeni Alves model EV: 18.6%
+Model verdict: LEAN Felipe Meligeni Alves ML — uncalibrated model EV
+
+## Every available alternative market
+sets_total +2.5: Over 48.3% | Under 51.7% | push 0.0%
+  10Bet: Over +150 (model EV +20.7%) | Under -208.33 (model EV -23.5%)
+  Quote update: 09.10. 08:34 / 09.10. 08:34 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +18.5: Over 83.1% | Under 16.9% | push 0.0%
+  1xBet: Over -188.68 (model EV +27.1%) | Under +124 (model EV -62.1%)
+  Quote update:  /  (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +19: Over 75.7% | Under 16.9% | push 7.4%
+  1xBet: Over -161.29 (model EV +30.0%) | Under +110 (model EV -57.1%)
+  Quote update:  /  (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +19.5: Over 75.7% | Under 24.3% | push 0.0%
+  1xBet: Over -166.67 (model EV +21.1%) | Under +111 (model EV -48.7%)
+  Quote update:  /  (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +20: Over 69.3% | Under 24.3% | push 6.4%
+  1xBet: Over -144.93 (model EV +23.5%) | Under +100 (model EV -45.0%)
+  Quote update:  /  (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +20.5: Over 69.3% | Under 30.7% | push 0.0%
+  1xBet: Over -161.29 (model EV +12.3%) | Under +108 (model EV -36.2%)
+  Quote update: 09.10. 14:48 / 09.10. 14:48 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +21: Over 64.3% | Under 30.7% | push 5.1%
+  1xBet: Over -142.86 (model EV +14.3%) | Under -102.04 (model EV -34.2%)
+  Quote update: 09.10. 10:25 / 09.10. 10:25 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +21.5: Over 64.3% | Under 35.7% | push 0.0%
+  1xBet: Over -121.95 (model EV +16.9%) | Under -116.28 (model EV -33.5%)
+  Quote update: 09.10. 14:48 / 09.10. 14:48 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +22: Over 56.9% | Under 35.7% | push 7.3%
+  1xBet: Over -107.53 (model EV +17.2%) | Under -135.14 (model EV -30.5%)
+  Quote update: 09.10. 14:48 / 09.10. 14:48 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +22.5: Over 56.9% | Under 43.1% | push 0.0%
+  1xBet: Over +106 (model EV +17.3%) | Under -158.73 (model EV -29.8%)
+  Quote update: 09.10. 14:48 / 09.10. 14:48 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +23.5: Over 51.6% | Under 48.4% | push 0.0%
+  bet-at-home: Over +140 (model EV +23.9%) | Under -200 (model EV -27.5%)
+  Quote update: 09.10. 08:36 / 09.10. 02:31 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_total +24.5: Over 49.9% | Under 50.1% | push 0.0%
+  bet-at-home: Over +155 (model EV +27.3%) | Under -222.22 (model EV -27.4%)
+  Quote update: 09.10. 14:16 /  (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+sets_spread -1.5: Thiago Seyboth Wild 35.1% | Felipe Meligeni Alves 64.9% | push 0.0%
+  1xBet: Thiago Seyboth Wild -112.36 (model EV -33.6%) | Felipe Meligeni Alves -129.87 (model EV +14.9%)
+  Quote update: 09.10. 10:07 / 09.10. 10:07 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+sets_spread +1.5: Thiago Seyboth Wild 83.4% | Felipe Meligeni Alves 16.6% | push 0.0%
+  1xBet: Thiago Seyboth Wild -909.09 (model EV -7.4%) | Felipe Meligeni Alves +415 (model EV -14.5%)
+  Quote update: 09.10. 10:07 / 09.10. 10:07 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -7.5: Thiago Seyboth Wild 4.4% | Felipe Meligeni Alves 95.6% | push 0.0%
+  1xBet: Thiago Seyboth Wild +265 (model EV -83.9%) | Felipe Meligeni Alves -454.55 (model EV +16.6%)
+  Quote update:  /  (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -7: Thiago Seyboth Wild 4.4% | Felipe Meligeni Alves 90.2% | push 5.3%
+  1xBet: Thiago Seyboth Wild +228 (model EV -80.2%) | Felipe Meligeni Alves -370.37 (model EV +20.0%)
+  Quote update:  /  (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -6.5: Thiago Seyboth Wild 9.8% | Felipe Meligeni Alves 90.2% | push 0.0%
+  1xBet: Thiago Seyboth Wild +298 (model EV -61.2%) | Felipe Meligeni Alves -526.32 (model EV +7.4%)
+  Quote update:  /  (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -6: Thiago Seyboth Wild 9.8% | Felipe Meligeni Alves 82.0% | push 8.2%
+  1xBet: Thiago Seyboth Wild +256 (model EV -57.0%) | Felipe Meligeni Alves -434.78 (model EV +9.1%)
+  Quote update:  /  (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -5.5: Thiago Seyboth Wild 18.0% | Felipe Meligeni Alves 82.0% | push 0.0%
+  1xBet: Thiago Seyboth Wild +188 (model EV -48.2%) | Felipe Meligeni Alves -294.12 (model EV +9.9%)
+  Quote update: 09.10. 14:48 / 09.10. 14:48 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -5: Thiago Seyboth Wild 18.0% | Felipe Meligeni Alves 71.3% | push 10.7%
+  1xBet: Thiago Seyboth Wild +157 (model EV -43.1%) | Felipe Meligeni Alves -238.1 (model EV +12.0%)
+  Quote update: 09.10. 14:48 / 09.10. 14:48 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -4.5: Thiago Seyboth Wild 28.7% | Felipe Meligeni Alves 71.3% | push 0.0%
+  1xBet: Thiago Seyboth Wild +112 (model EV -39.2%) | Felipe Meligeni Alves -163.93 (model EV +14.8%)
+  Quote update: 09.10. 14:48 / 09.10. 14:48 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -4: Thiago Seyboth Wild 28.7% | Felipe Meligeni Alves 59.6% | push 11.7%
+  1xBet: Thiago Seyboth Wild -112.36 (model EV -34.1%) | Felipe Meligeni Alves -129.87 (model EV +17.2%)
+  Quote update: 09.10. 14:51 / 09.10. 14:51 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -3.5: Thiago Seyboth Wild 40.4% | Felipe Meligeni Alves 59.6% | push 0.0%
+  1xBet: Thiago Seyboth Wild -138.89 (model EV -30.5%) | Felipe Meligeni Alves -102.04 (model EV +18.0%)
+  Quote update: 09.10. 14:48 / 09.10. 14:48 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -3: Thiago Seyboth Wild 40.4% | Felipe Meligeni Alves 49.9% | push 9.7%
+  1xBet: Thiago Seyboth Wild -172.41 (model EV -26.5%) | Felipe Meligeni Alves +117 (model EV +18.0%)
+  Quote update: 09.10. 14:48 / 09.10. 14:48 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -2.5: Thiago Seyboth Wild 50.1% | Felipe Meligeni Alves 49.9% | push 0.0%
+  1xBet: Thiago Seyboth Wild -200 (model EV -24.9%) | Felipe Meligeni Alves +134 (model EV +16.9%)
+  Quote update: 09.10. 10:07 / 09.10. 10:07 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -2: Thiago Seyboth Wild 50.1% | Felipe Meligeni Alves 43.3% | push 6.7%
+  1xBet: Thiago Seyboth Wild -232.56 (model EV -21.8%) | Felipe Meligeni Alves +154 (model EV +16.6%)
+  Quote update: 09.10. 10:07 / 09.10. 10:07 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+games_spread -1.5: Thiago Seyboth Wild 56.7% | Felipe Meligeni Alves 43.3% | push 0.0%
+  1xBet: Thiago Seyboth Wild -256.41 (model EV -21.2%) | Felipe Meligeni Alves +167 (model EV +15.6%)
+  Quote update: 09.10. 10:07 / 09.10. 10:07 (source display timezone unspecified). Verdict: MODEL ONLY — not calibrated.
+
+## Observations — reviewed, no invented numerical effects
+Thiago Seyboth Wild:
+  Ranking: Current/Highest rank - singles: 136. / 58.
+  Current injury status: unknown
+  Historical retirement entries: 04.09.2026 - 08.09.2026 Como challenger retired; 10.02.2026 - 15.04.2026 Buenos Aires retired; 09.07.2024 - 16.07.2024 Braunschweig challenger retired
+  Travel / arrival: Actual departure, arrival and acclimatization unknown.
+  Venue: Antofagasta challenger, clay; recent results establish participation, not arrival time.
+  Recent form: Sourced clay record: 50/82 wins; latest ten 9-1. Last result 2026-10-07.
+Felipe Meligeni Alves:
+  Ranking: Current/Highest rank - singles: 453. / 117.
+  Current injury status: unknown
+  Historical retirement entries: 02.04.2026 - 22.06.2026 Sao Leopoldo challenger retired; 09.07.2025 - 20.01.2026 Iasi challenger retired; 13.05.2025 - 20.05.2025 Oeiras 2 challenger retired
+  Travel / arrival: Actual departure, arrival and acclimatization unknown.
+  Venue: Antofagasta challenger, clay; recent results establish participation, not arrival time.
+  Recent form: Sourced clay record: 28/48 wins; latest ten 6-4. Last result 2026-10-07.
+
+## Missing inputs
+Current injury diagnosis/status and verified arrival time unknown.
+Opponent-complete Challenger history and calibrated serve/return model unavailable.
+
+Date matched on source; exact UTC start not verified. Check book before betting.
+Sourced results and market data are refreshed automatically. Injury diagnoses and arrival times remain unknown unless sourced.

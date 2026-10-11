@@ -1,0 +1,21 @@
+========================================================================
+MultiSportPredict daily ingestion - INGEST - 2026-10-09 00:41:48
+========================================================================
+
+--- kbl: Korean Basketball League (official)
+KBL: 9 current team records, 540 fixtures, 280 final; official source
+
+--- nznbl: New Zealand NBL (official Genius Sports)
+NZNBL: 11 current team records, 115 fixtures, 115 final; official source
+
+--- bbl: German Basketball Bundesliga (official)
+BBL: 18 current team records, 643 fixtures, 372 final; official source
+
+========================================================================
+SUMMARY
+========================================================================
+  [OK  ] kbl             official league statistics and score history
+  [OK  ] nznbl           official league statistics and score history
+  [OK  ] bbl             official league statistics and score history
+
+3/3 adapters succeeded in 29s

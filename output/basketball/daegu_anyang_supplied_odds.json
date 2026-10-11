@@ -1,0 +1,198 @@
+{
+  "sport": "basketball",
+  "league": "KBL",
+  "home_team": "Daegu Pegasus",
+  "away_team": "Anyang JungKwanJang Red Boosters",
+  "timestamp": "2026-10-05T03:43:58.732871+00:00",
+  "expected_pace": 72.16,
+  "team_metrics": {
+    "home": {
+      "league": "KBL",
+      "season": 2026,
+      "ortg": 104.757,
+      "source": "basketball.realgm.com/league/63",
+      "updated": "2026-09-30",
+      "games": 54,
+      "drtg": 109.215,
+      "pace": 72.764,
+      "baseline_net": -4.458,
+      "three_pt_pct": 0.314,
+      "orb_pct": 0.296
+    },
+    "away": {
+      "league": "KBL",
+      "season": 2026,
+      "ortg": 102.865,
+      "source": "basketball.realgm.com/league/63",
+      "updated": "2026-09-30",
+      "games": 58,
+      "drtg": 99.509,
+      "pace": 73.28,
+      "baseline_net": 3.356,
+      "three_pt_pct": 0.324,
+      "orb_pct": 0.26
+    }
+  },
+  "q1": {
+    "projected_home_points": 18.96,
+    "projected_away_points": 18.75,
+    "projected_total_points": 37.71,
+    "projected_spread": 0.21,
+    "home_moneyline_probability": 0.5152,
+    "away_moneyline_probability": 0.4848,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 5.5,
+    "projected_home_score": 18.96,
+    "projected_away_score": 18.75,
+    "projected_total": 37.71,
+    "probability": 0.5152,
+    "away_probability": 0.4848,
+    "model_edge": null,
+    "lean": "Daegu Pegasus"
+  },
+  "halftime": {
+    "projected_home_points": 38.28,
+    "projected_away_points": 37.88,
+    "projected_total_points": 76.16,
+    "projected_spread": 0.4,
+    "home_moneyline_probability": 0.5207,
+    "away_moneyline_probability": 0.4793,
+    "market_spread": null,
+    "spread_edge": null,
+    "sigma": 7.8,
+    "projected_home_score": 38.28,
+    "projected_away_score": 37.88,
+    "projected_total": 76.16,
+    "probability": 0.5207,
+    "away_probability": 0.4793,
+    "model_edge": null,
+    "lean": "Daegu Pegasus"
+  },
+  "full_game": {
+    "projected_home_points": 77.2,
+    "projected_away_points": 76.52,
+    "projected_total_points": 153.72,
+    "projected_spread": 0.68,
+    "home_moneyline_probability": 0.5247,
+    "away_moneyline_probability": 0.4753,
+    "market_spread": -4.5,
+    "spread_edge": 5.18,
+    "sigma": 11.0,
+    "projected_home_score": 77.2,
+    "projected_away_score": 76.52,
+    "projected_total": 153.72,
+    "probability": 0.5247,
+    "away_probability": 0.4753,
+    "model_edge": 5.18,
+    "lean": "Daegu Pegasus"
+  },
+  "market_info": {
+    "lines": {
+      "spread": -4.5
+    },
+    "total": 159.5
+  },
+  "notes": "First-listed team assumed home. Full-game model; no in-play score/time adjustment. Period projections use estimated ratios. Prices supplied by user, not independently refreshed.",
+  "segments": {
+    "1q": {
+      "projected_home_points": 18.96,
+      "projected_away_points": 18.75,
+      "projected_total_points": 37.71,
+      "projected_spread": 0.21,
+      "home_moneyline_probability": 0.5152,
+      "away_moneyline_probability": 0.4848,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 5.5,
+      "projected_home_score": 18.96,
+      "projected_away_score": 18.75,
+      "projected_total": 37.71,
+      "probability": 0.5152,
+      "away_probability": 0.4848,
+      "model_edge": null,
+      "lean": "Daegu Pegasus"
+    },
+    "ht": {
+      "projected_home_points": 38.28,
+      "projected_away_points": 37.88,
+      "projected_total_points": 76.16,
+      "projected_spread": 0.4,
+      "home_moneyline_probability": 0.5207,
+      "away_moneyline_probability": 0.4793,
+      "market_spread": null,
+      "spread_edge": null,
+      "sigma": 7.8,
+      "projected_home_score": 38.28,
+      "projected_away_score": 37.88,
+      "projected_total": 76.16,
+      "probability": 0.5207,
+      "away_probability": 0.4793,
+      "model_edge": null,
+      "lean": "Daegu Pegasus"
+    },
+    "fg": {
+      "projected_home_points": 77.2,
+      "projected_away_points": 76.52,
+      "projected_total_points": 153.72,
+      "projected_spread": 0.68,
+      "home_moneyline_probability": 0.5247,
+      "away_moneyline_probability": 0.4753,
+      "market_spread": -4.5,
+      "spread_edge": 5.18,
+      "sigma": 11.0,
+      "projected_home_score": 77.2,
+      "projected_away_score": 76.52,
+      "projected_total": 153.72,
+      "probability": 0.5247,
+      "away_probability": 0.4753,
+      "model_edge": 5.18,
+      "lean": "Daegu Pegasus"
+    }
+  },
+  "supplied_market": {
+    "home": "Daegu Pegasus",
+    "away": "Anyang JungKwanJang Red Boosters",
+    "home_key": "Korea Gas Corporation",
+    "away_key": "Anyang Kwan Jang",
+    "spread": 4.5,
+    "home_spread_price": -112,
+    "away_spread_price": -118,
+    "home_ml": 152,
+    "away_ml": -210,
+    "total": 159.5,
+    "over_price": -116,
+    "under_price": -116,
+    "filename": "daegu_anyang_supplied_odds.json"
+  },
+  "price_analysis": {
+    "Daegu Pegasus +4.5": {
+      "price": -112,
+      "model_probability": 0.6811471720997948,
+      "model_ev": 0.28931429004604015
+    },
+    "Anyang JungKwanJang Red Boosters -4.5": {
+      "price": -118,
+      "model_probability": 0.3188528279002052,
+      "model_ev": -0.4109329111674175
+    },
+    "Daegu Pegasus ML": {
+      "price": 152,
+      "model_probability": 0.5247,
+      "model_ev": 0.3222440000000002
+    },
+    "Anyang JungKwanJang Red Boosters ML": {
+      "price": -210,
+      "model_probability": 0.4753,
+      "model_ev": -0.29836666666666667
+    }
+  },
+  "total_analysis": {
+    "projection": 153.72,
+    "market_total": 159.5,
+    "edge_points": -5.780000000000001,
+    "lean": "UNDER",
+    "probability": null,
+    "ev": null
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "text": "Back\nTable Tennis\nCzechia\nCzech Liga Pro\nCzechia,\u00a0\nCzech Liga Pro\n\nRegner, Michal\n\nVS\nSaturday, 10 October 20:30\n\nFranek, Tomas\n\nAll\nResults\nTotals\n2 Way\n1\n2.46\n2\n1.49\nTotal\nOver (78.5)\n1.79\nUnder (78.5)\n1.92\nOver (79.5)\n1.85\nUnder (79.5)\n1.85\nOver (80.5)\n1.91\nUnder (80.5)\n1.80\nBetslip\nNo odds selected\n",
+  "url": "https://mystake.com/us/sportsbook/prematch/match/77161801",
+  "markets": [
+    {
+      "title": "2 Way",
+      "selections": [
+        {
+          "name": "1",
+          "price": "2.46"
+        },
+        {
+          "name": "2",
+          "price": "1.49"
+        }
+      ]
+    },
+    {
+      "title": "Total",
+      "selections": [
+        {
+          "name": "Over (78.5)",
+          "price": "1.79"
+        },
+        {
+          "name": "Under (78.5)",
+          "price": "1.92"
+        },
+        {
+          "name": "Over (79.5)",
+          "price": "1.85"
+        },
+        {
+          "name": "Under (79.5)",
+          "price": "1.85"
+        },
+        {
+          "name": "Over (80.5)",
+          "price": "1.91"
+        },
+        {
+          "name": "Under (80.5)",
+          "price": "1.80"
+        }
+      ]
+    }
+  ],
+  "captured_utc": "2026-10-11T00:23:56.579000+00:00"
+}

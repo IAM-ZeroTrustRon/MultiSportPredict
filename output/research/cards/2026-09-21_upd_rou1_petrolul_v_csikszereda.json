@@ -1,0 +1,30 @@
+{
+  "title": "UPDATE | SuperLiga | Petrolul Ploiesti vs FK Csikszereda",
+  "description": "**RESEARCH CARD (UPDATE 12:20pm ET) - not model output.** 2:00pm ET, Stadionul Ilie Oana",
+  "color": 3066993,
+  "fields": [
+    {
+      "name": "What changed",
+      "inline": false,
+      "value": "- Nlundulu (suspended) and Jerdea (surgery) confirmed out\n- Probable XI: Leescu + Teixeira up front\n- Csikszereda: no absences reported; Eppel (5 goals) starts\n- Odds unchanged: 1.70-1.85; Polymarket still 65 / 23 / 15"
+    },
+    {
+      "name": "Call",
+      "inline": false,
+      "value": "**Lean holds: Petrolul ML at 1.80 or better** (William Hill 1.85). Quick check ~60% vs 54-56% break-even.\nOver 2.5 at 2.00: small only."
+    },
+    {
+      "name": "Confidence",
+      "inline": true,
+      "value": "Low-medium"
+    },
+    {
+      "name": "Sharp data",
+      "inline": true,
+      "value": "None exists for this league"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - research, not a model pick"
+  }
+}

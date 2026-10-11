@@ -1,0 +1,20 @@
+{
+  "title": "Liga Profesional Argentina | Atletico Tucuman @ Aldosivi",
+  "description": "**FORCED RUN - model math on web-sourced inputs, guards off.**\n2026-09-21 1:30 PM ET Estadio Jose Maria Minella, Mar del Plata",
+  "color": 14510880,
+  "fields": [
+    {
+      "name": "Projection",
+      "inline": false,
+      "value": "Aldosivi 0.98 - Atletico Tucuman 1.15\nTotal 2.13 | Home win 30.8% | Draw 29.6% | Away 39.6%\nLikely: 0-1 (13.7%), 1-1 (13.4%), 0-0 (11.9%)"
+    },
+    {
+      "name": "Plays (edge, pct pts)",
+      "inline": false,
+      "value": "No edges - PASS"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - FORCED RUN, not stored, not graded"
+  }
+}

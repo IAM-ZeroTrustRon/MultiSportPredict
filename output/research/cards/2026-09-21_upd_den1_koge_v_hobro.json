@@ -1,0 +1,30 @@
+{
+  "title": "UPDATE | Danish 1st Div | HB Koge vs Hobro IK",
+  "description": "**RESEARCH CARD (UPDATE 12:20pm ET) - not model output.** 1:00pm ET, Capelli Sport Stadion",
+  "color": 3066993,
+  "fields": [
+    {
+      "name": "What changed",
+      "inline": false,
+      "value": "- Hobro captain **Frederik Dietz CONFIRMED OUT** (knee, indefinitely - Nordjyske)\n- Klitten, Hyltoft and all Koge absences still unconfirmed\n- Odds now level: 2.60 / 3.50 / 2.60 (was Koge favoured)"
+    },
+    {
+      "name": "Call",
+      "inline": false,
+      "value": "**Downgraded to PASS.** Hobro edge shrinks to ~+1.4 pts at 2.60 after the Dietz loss. Hobro DNB ~1.86 is break-even."
+    },
+    {
+      "name": "Confidence",
+      "inline": true,
+      "value": "Low"
+    },
+    {
+      "name": "Sharp data",
+      "inline": true,
+      "value": "None exists for this league"
+    }
+  ],
+  "footer": {
+    "text": "MultiSportPredict - research, not a model pick"
+  }
+}

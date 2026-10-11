@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "Eerste Divisie",
+  "home_team": "De Graafschap",
+  "away_team": "NAC Breda",
+  "timestamp": "2026-09-20T11:14:06.513325",
+  "game": {
+    "projected_home_goals": 1.72,
+    "projected_away_goals": 2.19,
+    "projected_total_goals": 3.92,
+    "home_win_prob": 0.309,
+    "draw_prob": 0.211,
+    "away_win_prob": 0.48
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": -0.47,
+      "market_line": 0.0,
+      "edge": -0.47,
+      "confidence": 33.7,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.919,
+      "market_total": 2.5,
+      "edge": 1.419,
+      "confidence": 48.7,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.786,
+      "confidence": 66.3,
+      "recommendation": "BET"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.902,
+    "over_25_prob": 0.75,
+    "over_35_prob": 0.55
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.786,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.167,
+      "xg_against": 3.0,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.167,
+      "goals_against": 3.0,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.833,
+      "xg_against": 2.333,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 1.833,
+      "goals_against": 2.333,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.15,
+    "avg_goals_per_game": 3.1,
+    "home_advantage": 0.4,
+    "draw_rate": 0.25,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

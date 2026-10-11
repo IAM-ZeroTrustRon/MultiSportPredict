@@ -1,0 +1,818 @@
+{
+  "id": "17694e68f399fdf9c5030021ec9bb595",
+  "sport_key": "soccer_france_ligue_one",
+  "sport_title": "Ligue 1 - France",
+  "commence_time": "2026-10-09T18:45:00Z",
+  "home_team": "RC Lens",
+  "away_team": "Lyon",
+  "bookmakers": [
+    {
+      "key": "pinnacle",
+      "title": "Pinnacle",
+      "markets": [
+        {
+          "key": "alternate_spreads",
+          "last_update": "2026-10-09T13:59:01Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": -105,
+              "point": -0.0
+            },
+            {
+              "name": "Lyon",
+              "price": -392,
+              "point": 1.0
+            },
+            {
+              "name": "Lyon",
+              "price": -256,
+              "point": 0.75
+            },
+            {
+              "name": "Lyon",
+              "price": -187,
+              "point": 0.5
+            },
+            {
+              "name": "Lyon",
+              "price": -146,
+              "point": 0.25
+            },
+            {
+              "name": "Lyon",
+              "price": 129,
+              "point": -0.25
+            },
+            {
+              "name": "Lyon",
+              "price": 163,
+              "point": -0.5
+            },
+            {
+              "name": "Lyon",
+              "price": 215,
+              "point": -0.75
+            },
+            {
+              "name": "Lyon",
+              "price": 321,
+              "point": -1.0
+            },
+            {
+              "name": "RC Lens",
+              "price": -103,
+              "point": 0.0
+            },
+            {
+              "name": "RC Lens",
+              "price": 328,
+              "point": -1.0
+            },
+            {
+              "name": "RC Lens",
+              "price": 220,
+              "point": -0.75
+            },
+            {
+              "name": "RC Lens",
+              "price": 166,
+              "point": -0.5
+            },
+            {
+              "name": "RC Lens",
+              "price": 132,
+              "point": -0.25
+            },
+            {
+              "name": "RC Lens",
+              "price": -142,
+              "point": 0.25
+            },
+            {
+              "name": "RC Lens",
+              "price": -183,
+              "point": 0.5
+            },
+            {
+              "name": "RC Lens",
+              "price": -250,
+              "point": 0.75
+            },
+            {
+              "name": "RC Lens",
+              "price": -384,
+              "point": 1.0
+            }
+          ]
+        },
+        {
+          "key": "alternate_totals",
+          "last_update": "2026-10-09T13:59:01Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -113,
+              "point": 3.0
+            },
+            {
+              "name": "Over",
+              "price": -427,
+              "point": 2.0
+            },
+            {
+              "name": "Over",
+              "price": -250,
+              "point": 2.25
+            },
+            {
+              "name": "Over",
+              "price": -175,
+              "point": 2.5
+            },
+            {
+              "name": "Over",
+              "price": -144,
+              "point": 2.75
+            },
+            {
+              "name": "Over",
+              "price": 112,
+              "point": 3.25
+            },
+            {
+              "name": "Over",
+              "price": 136,
+              "point": 3.5
+            },
+            {
+              "name": "Over",
+              "price": 172,
+              "point": 3.75
+            },
+            {
+              "name": "Over",
+              "price": 236,
+              "point": 4.0
+            },
+            {
+              "name": "Under",
+              "price": 102,
+              "point": 3.0
+            },
+            {
+              "name": "Under",
+              "price": 342,
+              "point": 2.0
+            },
+            {
+              "name": "Under",
+              "price": 211,
+              "point": 2.25
+            },
+            {
+              "name": "Under",
+              "price": 153,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 128,
+              "point": 2.75
+            },
+            {
+              "name": "Under",
+              "price": -126,
+              "point": 3.25
+            },
+            {
+              "name": "Under",
+              "price": -155,
+              "point": 3.5
+            },
+            {
+              "name": "Under",
+              "price": -201,
+              "point": 3.75
+            },
+            {
+              "name": "Under",
+              "price": -282,
+              "point": 4.0
+            }
+          ]
+        },
+        {
+          "key": "btts",
+          "last_update": "2026-10-09T13:58:34Z",
+          "outcomes": [
+            {
+              "name": "Yes",
+              "price": -214
+            },
+            {
+              "name": "No",
+              "price": 184
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "codere_it",
+      "title": "Codere (IT)",
+      "markets": [
+        {
+          "key": "alternate_totals",
+          "last_update": "2026-10-09T13:58:45Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -5000,
+              "point": 0.5
+            },
+            {
+              "name": "Over",
+              "price": -667,
+              "point": 1.5
+            },
+            {
+              "name": "Over",
+              "price": -200,
+              "point": 2.5
+            },
+            {
+              "name": "Over",
+              "price": 121,
+              "point": 3.5
+            },
+            {
+              "name": "Over",
+              "price": 270,
+              "point": 4.5
+            },
+            {
+              "name": "Over",
+              "price": 520,
+              "point": 5.5
+            },
+            {
+              "name": "Under",
+              "price": 820,
+              "point": 0.5
+            },
+            {
+              "name": "Under",
+              "price": 360,
+              "point": 1.5
+            },
+            {
+              "name": "Under",
+              "price": 135,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": -175,
+              "point": 3.5
+            },
+            {
+              "name": "Under",
+              "price": -455,
+              "point": 4.5
+            },
+            {
+              "name": "Under",
+              "price": -1250,
+              "point": 5.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "onexbet",
+      "title": "1xBet",
+      "markets": [
+        {
+          "key": "btts",
+          "last_update": "2026-10-09T13:58:11Z",
+          "outcomes": [
+            {
+              "name": "Yes",
+              "price": -233
+            },
+            {
+              "name": "No",
+              "price": 166
+            }
+          ]
+        },
+        {
+          "key": "alternate_spreads",
+          "last_update": "2026-10-09T13:46:15Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": -20000,
+              "point": 2.5
+            },
+            {
+              "name": "Lyon",
+              "price": -5000,
+              "point": 2.0
+            },
+            {
+              "name": "Lyon",
+              "price": -671,
+              "point": 1.5
+            },
+            {
+              "name": "Lyon",
+              "price": -450,
+              "point": 1.0
+            },
+            {
+              "name": "Lyon",
+              "price": -102,
+              "point": 0.0
+            },
+            {
+              "name": "Lyon",
+              "price": 292,
+              "point": -1.0
+            },
+            {
+              "name": "Lyon",
+              "price": 375,
+              "point": -1.5
+            },
+            {
+              "name": "Lyon",
+              "price": 770,
+              "point": -2.0
+            },
+            {
+              "name": "Lyon",
+              "price": 830,
+              "point": -2.5
+            },
+            {
+              "name": "RC Lens",
+              "price": 810,
+              "point": -2.5
+            },
+            {
+              "name": "RC Lens",
+              "price": 740,
+              "point": -2.0
+            },
+            {
+              "name": "RC Lens",
+              "price": 365,
+              "point": -1.5
+            },
+            {
+              "name": "RC Lens",
+              "price": 290,
+              "point": -1.0
+            },
+            {
+              "name": "RC Lens",
+              "price": -104,
+              "point": 0.0
+            },
+            {
+              "name": "RC Lens",
+              "price": -455,
+              "point": 1.0
+            },
+            {
+              "name": "RC Lens",
+              "price": -699,
+              "point": 1.5
+            },
+            {
+              "name": "RC Lens",
+              "price": -5882,
+              "point": 2.0
+            },
+            {
+              "name": "RC Lens",
+              "price": -33333,
+              "point": 2.5
+            }
+          ]
+        },
+        {
+          "key": "alternate_totals",
+          "last_update": "2026-10-09T13:46:15Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -3333,
+              "point": 0.5
+            },
+            {
+              "name": "Over",
+              "price": -2500,
+              "point": 1.0
+            },
+            {
+              "name": "Over",
+              "price": -855,
+              "point": 1.5
+            },
+            {
+              "name": "Over",
+              "price": -532,
+              "point": 2.0
+            },
+            {
+              "name": "Over",
+              "price": -200,
+              "point": 2.5
+            },
+            {
+              "name": "Over",
+              "price": -125,
+              "point": 3.0
+            },
+            {
+              "name": "Over",
+              "price": 136,
+              "point": 3.5
+            },
+            {
+              "name": "Over",
+              "price": 220,
+              "point": 4.0
+            },
+            {
+              "name": "Over",
+              "price": 280,
+              "point": 4.5
+            },
+            {
+              "name": "Over",
+              "price": 515,
+              "point": 5.0
+            },
+            {
+              "name": "Over",
+              "price": 565,
+              "point": 5.5
+            },
+            {
+              "name": "Over",
+              "price": 1400,
+              "point": 6.5
+            },
+            {
+              "name": "Over",
+              "price": 2500,
+              "point": 7.5
+            },
+            {
+              "name": "Over",
+              "price": 4900,
+              "point": 8.5
+            },
+            {
+              "name": "Under",
+              "price": 1700,
+              "point": 0.5
+            },
+            {
+              "name": "Under",
+              "price": 1250,
+              "point": 1.0
+            },
+            {
+              "name": "Under",
+              "price": 390,
+              "point": 1.5
+            },
+            {
+              "name": "Under",
+              "price": 310,
+              "point": 2.0
+            },
+            {
+              "name": "Under",
+              "price": 145,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": -103,
+              "point": 3.0
+            },
+            {
+              "name": "Under",
+              "price": -145,
+              "point": 3.5
+            },
+            {
+              "name": "Under",
+              "price": -303,
+              "point": 4.0
+            },
+            {
+              "name": "Under",
+              "price": -435,
+              "point": 4.5
+            },
+            {
+              "name": "Under",
+              "price": -1235,
+              "point": 5.0
+            },
+            {
+              "name": "Under",
+              "price": -1887,
+              "point": 5.5
+            },
+            {
+              "name": "Under",
+              "price": -3333,
+              "point": 6.5
+            },
+            {
+              "name": "Under",
+              "price": -10000,
+              "point": 7.5
+            },
+            {
+              "name": "Under",
+              "price": -50000,
+              "point": 8.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "coolbet",
+      "title": "Coolbet",
+      "markets": [
+        {
+          "key": "alternate_spreads",
+          "last_update": "2026-10-09T13:58:28Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": -506,
+              "point": 1.5
+            },
+            {
+              "name": "Lyon",
+              "price": 320,
+              "point": -1.0
+            },
+            {
+              "name": "Lyon",
+              "price": 420,
+              "point": -1.5
+            },
+            {
+              "name": "Lyon",
+              "price": -369,
+              "point": 1.0
+            },
+            {
+              "name": "Lyon",
+              "price": -1252,
+              "point": 2.0
+            },
+            {
+              "name": "Lyon",
+              "price": -1599,
+              "point": 2.5
+            },
+            {
+              "name": "RC Lens",
+              "price": 410,
+              "point": -1.5
+            },
+            {
+              "name": "RC Lens",
+              "price": -383,
+              "point": 1.0
+            },
+            {
+              "name": "RC Lens",
+              "price": -523,
+              "point": 1.5
+            },
+            {
+              "name": "RC Lens",
+              "price": 310,
+              "point": -1.0
+            },
+            {
+              "name": "RC Lens",
+              "price": 860,
+              "point": -2.0
+            },
+            {
+              "name": "RC Lens",
+              "price": 1050,
+              "point": -2.5
+            }
+          ]
+        },
+        {
+          "key": "alternate_totals",
+          "last_update": "2026-10-09T13:58:28Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -409,
+              "point": 2.0
+            },
+            {
+              "name": "Over",
+              "price": -556,
+              "point": 1.5
+            },
+            {
+              "name": "Over",
+              "price": 325,
+              "point": 4.5
+            },
+            {
+              "name": "Over",
+              "price": 710,
+              "point": 5.5
+            },
+            {
+              "name": "Over",
+              "price": 250,
+              "point": 4.0
+            },
+            {
+              "name": "Over",
+              "price": -2584,
+              "point": 1.0
+            },
+            {
+              "name": "Over",
+              "price": 137,
+              "point": 3.5
+            },
+            {
+              "name": "Over",
+              "price": -178,
+              "point": 2.5
+            },
+            {
+              "name": "Over",
+              "price": -115,
+              "point": 3.0
+            },
+            {
+              "name": "Over",
+              "price": 630,
+              "point": 5.0
+            },
+            {
+              "name": "Under",
+              "price": 340,
+              "point": 2.0
+            },
+            {
+              "name": "Under",
+              "price": 450,
+              "point": 1.5
+            },
+            {
+              "name": "Under",
+              "price": -387,
+              "point": 4.5
+            },
+            {
+              "name": "Under",
+              "price": -966,
+              "point": 5.5
+            },
+            {
+              "name": "Under",
+              "price": -291,
+              "point": 4.0
+            },
+            {
+              "name": "Under",
+              "price": 1400,
+              "point": 1.0
+            },
+            {
+              "name": "Under",
+              "price": -155,
+              "point": 3.5
+            },
+            {
+              "name": "Under",
+              "price": 156,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 102,
+              "point": 3.0
+            },
+            {
+              "name": "Under",
+              "price": -831,
+              "point": 5.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "williamhill",
+      "title": "William Hill",
+      "markets": [
+        {
+          "key": "btts",
+          "last_update": "2026-10-09T13:59:01Z",
+          "outcomes": [
+            {
+              "name": "Yes",
+              "price": -225
+            },
+            {
+              "name": "No",
+              "price": 170
+            }
+          ]
+        },
+        {
+          "key": "alternate_totals",
+          "last_update": "2026-10-09T13:59:01Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": -188,
+              "point": 2.5
+            },
+            {
+              "name": "Over",
+              "price": -650,
+              "point": 1.5
+            },
+            {
+              "name": "Under",
+              "price": 150,
+              "point": 2.5
+            },
+            {
+              "name": "Under",
+              "price": 400,
+              "point": 1.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "betonlineag",
+      "title": "BetOnline.ag",
+      "markets": [
+        {
+          "key": "alternate_spreads",
+          "last_update": "2026-10-09T13:58:43Z",
+          "outcomes": [
+            {
+              "name": "Lyon",
+              "price": -140,
+              "point": 0.25
+            },
+            {
+              "name": "RC Lens",
+              "price": 120,
+              "point": -0.25
+            }
+          ]
+        },
+        {
+          "key": "alternate_totals",
+          "last_update": "2026-10-09T13:58:43Z",
+          "outcomes": [
+            {
+              "name": "Over",
+              "price": 104,
+              "point": 3.25
+            },
+            {
+              "name": "Under",
+              "price": -128,
+              "point": 3.25
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

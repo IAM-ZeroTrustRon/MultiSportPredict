@@ -225,7 +225,8 @@ def merge_output(records: Dict[str, Dict[str, Any]], output: Path = OUTPUT_PATH)
     existing: Dict[str, Any] = {}
     if output.exists():
         existing = json.loads(output.read_text(encoding="utf-8-sig"))
-    existing.update(records)
+    from soccer_store import merge_records
+    existing = merge_records(existing, records)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(f"{output.suffix}.tmp")
     temporary.write_text(json.dumps(existing, indent=2) + "\n", encoding="utf-8")

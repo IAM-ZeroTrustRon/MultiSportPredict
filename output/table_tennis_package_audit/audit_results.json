@@ -1,0 +1,56 @@
+[
+  {
+    "check": "Exact 11-1 probability",
+    "actual": 0.0036105526805096126,
+    "expected": 0.002685546875,
+    "passed": false
+  },
+  {
+    "check": "Legal 13-11 score probability",
+    "actual": 0,
+    "expected": 0.02202463150024414,
+    "passed": false
+  },
+  {
+    "check": "Remaining points at 11-10",
+    "actual": 2.846153846153846,
+    "expected": 2.5384615384615383,
+    "passed": false
+  },
+  {
+    "check": "Reversed player quote orientation",
+    "actual": [
+      2.15,
+      1.65
+    ],
+    "expected": [
+      1.65,
+      2.15
+    ],
+    "passed": false
+  },
+  {
+    "check": "Explicit different event must not match by names",
+    "actual": true,
+    "expected": false,
+    "passed": false
+  },
+  {
+    "check": "Unknown player must not acquire an observed rating",
+    "actual": 750.0,
+    "expected": null,
+    "passed": false
+  },
+  {
+    "check": "OddsApiIoAdapter authenticated implementation",
+    "actual": [],
+    "expected": "HTTP request or explicit unsupported error",
+    "passed": false
+  },
+  {
+    "check": "BetsApiAdapter authenticated implementation",
+    "actual": [],
+    "expected": "HTTP request or explicit unsupported error",
+    "passed": false
+  }
+]

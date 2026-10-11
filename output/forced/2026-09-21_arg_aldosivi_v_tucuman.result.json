@@ -1,0 +1,109 @@
+{
+  "home": "Aldosivi",
+  "away": "Atletico Tucuman",
+  "proj_home": 0.98,
+  "proj_away": 1.15,
+  "margin": -0.17,
+  "total": 2.13,
+  "p_home_win": 0.3082380473132518,
+  "p_draw": 0.295693563909952,
+  "p_away_win": 0.39606838424299723,
+  "p_btts": 0.4263897678236409,
+  "likely_scores": [
+    "0-1 (13.7%)",
+    "1-1 (13.4%)",
+    "0-0 (11.9%)"
+  ],
+  "league_avg": 1.08,
+  "league_avg_source": "mean of the two teams' supplied for/against",
+  "hfa": "x1.1 home / x0.9 away",
+  "adjustments": [],
+  "markets": [
+    {
+      "market": "1X2",
+      "line": "home",
+      "pick": "HOME (Aldosivi)",
+      "prob": 0.3082380473132518,
+      "fair": "+224",
+      "edge": 0.5207744282948734,
+      "call": "PASS",
+      "price": 230
+    },
+    {
+      "market": "1X2",
+      "line": "draw",
+      "pick": "DRAW",
+      "prob": 0.295693563909952,
+      "fair": "+238",
+      "edge": -5.518362907250412,
+      "call": "PASS",
+      "price": 185
+    },
+    {
+      "market": "1X2",
+      "line": "away",
+      "pick": "AWAY (Atletico Tucuman)",
+      "prob": 0.39606838424299723,
+      "fair": "+152",
+      "edge": -2.0598282423669456,
+      "call": "PASS",
+      "price": 140
+    },
+    {
+      "market": "Draw no bet",
+      "line": "away",
+      "pick": "AWAY (Atletico Tucuman)",
+      "prob": 0.5623523567976575,
+      "fair": "-128",
+      "edge": -4.082224637694565,
+      "call": "PASS",
+      "price": -152
+    },
+    {
+      "market": "Total",
+      "line": "2.5",
+      "pick": "OVER",
+      "prob": 0.3579505816331734,
+      "fair": "+179",
+      "edge": -1.2419788737196957,
+      "call": "PASS",
+      "price": 170
+    },
+    {
+      "market": "Total",
+      "line": "2.5",
+      "pick": "UNDER",
+      "prob": 0.6420494183668266,
+      "fair": "-179",
+      "edge": -6.725290721456878,
+      "call": "PASS",
+      "price": -244
+    },
+    {
+      "market": "BTTS",
+      "line": "yes",
+      "pick": "YES",
+      "prob": 0.4263897678236409,
+      "fair": "+135",
+      "edge": -2.815568672181362,
+      "call": "PASS",
+      "price": 120
+    },
+    {
+      "market": "BTTS",
+      "line": "no",
+      "pick": "NO",
+      "prob": 0.5736102321763591,
+      "fair": "-135",
+      "edge": -4.3248005371533615,
+      "call": "PASS",
+      "price": -161
+    }
+  ],
+  "props": [],
+  "thin_samples": [],
+  "settings": {
+    "home_mult": 1.1,
+    "away_mult": 0.9
+  }
+}

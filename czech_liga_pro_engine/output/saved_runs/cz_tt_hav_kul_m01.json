@@ -1,0 +1,108 @@
+{
+  "saved_run_id": "cz_tt_hav_kul_m01",
+  "timestamp_utc": "2026-10-10T00:10:49.842487+00:00",
+  "match_name": "Havrda Leos vs Kulhanek Pavel",
+  "event_id": "cz_tt_hav_kul_m01",
+  "ratings": {
+    "home": 428.0,
+    "away": 476.0
+  },
+  "odds": {
+    "home": 2.15,
+    "away": 1.65
+  },
+  "all_market_quotes": {
+    "moneyline": {
+      "home_odds": 2.15,
+      "away_odds": 1.65,
+      "margin_pct": 7.1
+    },
+    "game_handicap": {
+      "line": -1.5,
+      "home_spread_odds": 3.4,
+      "away_spread_odds": 1.3,
+      "unit": "GAMES"
+    },
+    "total_games": {
+      "line": 3.5,
+      "over_odds": 1.45,
+      "under_odds": 2.65,
+      "unit": "GAMES"
+    },
+    "total_points": {
+      "line": 74.5,
+      "over_odds": 1.85,
+      "under_odds": 1.85,
+      "unit": "POINTS"
+    }
+  },
+  "prediction": {
+    "strategy": "HYBRID_TOP_DOWN_H2H",
+    "player_a_name": "Havrda Leos",
+    "player_b_name": "Kulhanek Pavel",
+    "probabilities": {
+      "top_down_market_a": 0.4342,
+      "bottom_up_strength_a": 0.4576,
+      "hybrid_final_a": 0.4247,
+      "selected_final_win_a": 0.4247,
+      "selected_final_win_b": 0.5753,
+      "implied_point_win_prob_a": 0.4896
+    },
+    "h2h_metrics": {
+      "h2h_sample_size": 0,
+      "h2h_weighted_sum": 0.0,
+      "raw_match_win_rate_a": 0.5,
+      "shrunk_match_win_prob_a": 0.5,
+      "shrunk_residual_h2h": 0.0,
+      "games_won_ratio_a": 0.5,
+      "avg_point_margin_per_game_a": 0.0,
+      "same_day_rematch_count": 0,
+      "first_game_win_rate_a": 0.5
+    },
+    "workload_metrics": {
+      "player_a_matches_today": 0,
+      "player_b_matches_today": 0,
+      "player_a_games_today": 0,
+      "player_b_games_today": 0,
+      "player_a_rest_minutes": null,
+      "player_b_rest_minutes": null,
+      "rest_difference_minutes": 0.0,
+      "workload_game_difference": 0
+    },
+    "market_distributions": {
+      "p_point_a": 0.48957977294921873,
+      "match_winner_a": 0.4247141622085641,
+      "match_winner_b": 0.5752858377914359,
+      "score_distribution": {
+        "3-0": 0.09712857299769903,
+        "3-1": 0.15744356905554457,
+        "3-2": 0.17014202015532048,
+        "2-3": 0.19999504944532576,
+        "1-3": 0.21754056249229978,
+        "0-3": 0.1577502258538104
+      },
+      "game_handicap": {
+        "unit": "GAMES",
+        "home_minus_1_5": 0.25457214205324363,
+        "away_plus_1_5": 0.7454278579467564
+      },
+      "total_games": {
+        "unit": "GAMES",
+        "over_3_5": 0.7451212011484907,
+        "under_3_5": 0.25487879885150944,
+        "over_4_5": 0.37013706960064624,
+        "under_4_5": 0.6298629303993538,
+        "expected": 4.115258270749137
+      },
+      "total_points": {
+        "unit": "POINTS",
+        "expected": 96.24939566787768,
+        "expected_margin_a": -2.0058811127195377
+      }
+    }
+  },
+  "live_state": {
+    "games": "0-0",
+    "points": "0-0"
+  }
+}

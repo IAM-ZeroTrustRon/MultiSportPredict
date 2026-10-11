@@ -1,0 +1,92 @@
+{
+  "sport": "soccer",
+  "league": "MLS",
+  "home_team": "San Jose Earthquakes",
+  "away_team": "Portland Timbers",
+  "timestamp": "2026-09-26T12:51:50.804736",
+  "game": {
+    "projected_home_goals": 1.68,
+    "projected_away_goals": 1.43,
+    "projected_total_goals": 3.12,
+    "home_win_prob": 0.433,
+    "draw_prob": 0.238,
+    "away_win_prob": 0.328
+  },
+  "predictions": {
+    "side": {
+      "model_xg_diff": 0.251,
+      "market_line": 0.0,
+      "edge": 0.251,
+      "confidence": 29.7,
+      "recommendation": "PASS"
+    },
+    "total": {
+      "model_total_xg": 3.117,
+      "market_total": 3.5,
+      "edge": -0.383,
+      "confidence": 31.4,
+      "recommendation": "PASS"
+    },
+    "btts": {
+      "probability": 0.674,
+      "confidence": 54.2,
+      "recommendation": "PASS"
+    }
+  },
+  "goals_analysis": {
+    "over_15_prob": 0.818,
+    "over_25_prob": 0.602,
+    "over_35_prob": 0.379
+  },
+  "corners_analysis": {
+    "projection": 10.9,
+    "over_85_prob": 0.762,
+    "over_95_prob": 0.653,
+    "over_105_prob": 0.533
+  },
+  "btts_probability": 0.674,
+  "corner_projection": 10.9,
+  "team_metrics": {
+    "home": {
+      "xg_for": 1.769,
+      "xg_against": 1.462,
+      "shots": 13.0,
+      "sot": 4.5,
+      "goals_for": 1.769,
+      "goals_against": 1.462,
+      "clean_sheets": 4,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.3,
+      "width_crossing": 0.55,
+      "final_third_pressure": 0.55
+    },
+    "away": {
+      "xg_for": 1.808,
+      "xg_against": 1.846,
+      "shots": 11.5,
+      "sot": 4.0,
+      "goals_for": 1.808,
+      "goals_against": 1.846,
+      "clean_sheets": 3,
+      "missing_attacker": 0,
+      "missing_creator": 0,
+      "missing_cb": 0,
+      "missing_gk": 0,
+      "tempo": 0.1,
+      "width_crossing": 0.5,
+      "final_third_pressure": 0.45
+    }
+  },
+  "league_config": {
+    "goal_variance": 1.0,
+    "avg_goals_per_game": 2.7,
+    "home_advantage": 0.35,
+    "draw_rate": 0.26,
+    "data_tier": 2
+  },
+  "notes": "Soccer prediction using Bivariate Poisson with Dixon-Coles time-decay adjustments on xG metrics",
+  "_stats_source": "real"
+}

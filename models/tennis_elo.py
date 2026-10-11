@@ -352,7 +352,7 @@ class TennisElo:
     # ------------------------------------------------------------------
 
     def load_match_history(self, csv_path: Optional[str] = None) -> int:
-        """Load match results from a CSV file, then apply seed data.
+        """Load real CSV results; synthetic seeds are an explicit demo-only option.
 
         CSV format: winner_name, loser_name, surface, tournament_date
         Returns total matches processed.
@@ -371,10 +371,12 @@ class TennisElo:
                     self._apply_result(winner, loser, surface, date)
                     count += 1
 
-        # Always apply seed data for baseline coverage
-        for winner, loser, surface, date in SEED_MATCHES:
-            self._apply_result(winner, loser, surface, date)
-            count += 1
+        if csv_path is None:
+            for winner, loser, surface, date in SEED_MATCHES:
+                self._apply_result(winner, loser, surface, date)
+                count += 1
+        elif not Path(csv_path).exists():
+            raise FileNotFoundError(csv_path)
 
         self._loaded = True
         return count

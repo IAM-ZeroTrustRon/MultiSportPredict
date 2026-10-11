@@ -1,0 +1,13 @@
+{
+  "source": "Sofascore public rendered DOM",
+  "real_completed_results": 3,
+  "http_access": 403,
+  "headless_match_collection": "verified",
+  "complete_backfill": "not verified",
+  "repeat_snapshot": {
+    "inserted": 0,
+    "duplicate": 1
+  },
+  "training_eligible_rows": 0,
+  "background_task_installed": false
+}
