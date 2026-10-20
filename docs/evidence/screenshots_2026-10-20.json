@@ -1,0 +1,65 @@
+[
+  {
+    "source_filename": "Screenshot 2026-08-29 222005.png",
+    "repository_path": "docs/evidence/delivery/2026-08-29-tennis-kecmanovic-shapovalov-discord.png",
+    "category": "Historical Discord delivery",
+    "sha256": "006f5789119326e8fe455bf9e31b6dcd7ea8bfac228f09f0998fe662d1b751b9",
+    "unchanged_copy": true
+  },
+  {
+    "source_filename": "Screenshot 2026-10-20 113803.png",
+    "repository_path": "docs/evidence/picks/2026-10-20-nba-knicks-sixers-readable-review.png",
+    "category": "NBA saved review with provisional periods",
+    "sha256": "83b403ee5c90f5b5f3f080e2171124312c0a59419843294c15ec280d5a4fb223",
+    "unchanged_copy": true
+  },
+  {
+    "source_filename": "Screenshot 2026-10-20 111138.png",
+    "repository_path": "docs/evidence/pricing/2026-10-20-tennis-manual-lines-unverified-fixture.png",
+    "category": "Manual pricing demonstration; unverified pairing",
+    "sha256": "f049b077f7d0c6e2ddb007e357b45277a9fe06e27d779adf76f4ff0d30596680",
+    "unchanged_copy": true
+  },
+  {
+    "source_filename": "Screenshot 2026-10-20 111039.png",
+    "repository_path": "docs/illustrations/methodology/2026-10-20-quarter-kelly-line-shopping.png",
+    "category": "Conceptual illustration, not measured performance",
+    "sha256": "b5521e4bf028090acab99ca5256fdfe5ee64e8c80cecff7100b671fa4d544530",
+    "unchanged_copy": true
+  },
+  {
+    "source_filename": "Screenshot 2026-10-20 111022.png",
+    "repository_path": "docs/illustrations/methodology/2026-10-20-price-discrepancies.png",
+    "category": "Conceptual illustration, not observed market evidence",
+    "sha256": "41fd7eba78e792bbaec5e186ad37a278d095383297d7d4add7a85bd4b5353cc1",
+    "unchanged_copy": true
+  },
+  {
+    "source_filename": "Screenshot 2026-10-20 111011.png",
+    "repository_path": "docs/illustrations/methodology/2026-10-20-positive-ev-example.png",
+    "category": "Hypothetical arithmetic example",
+    "sha256": "cd5f0b550317db7dab337e6040db1416d0f6cab1a3026078207e3c30fa07a64b",
+    "unchanged_copy": true
+  },
+  {
+    "source_filename": "Screenshot 2026-10-04 230815.png",
+    "repository_path": "docs/evidence/delivery/2026-10-04-nfl-lions-panthers-estimated-splits.png",
+    "category": "Historical Discord delivery with prior-season assumptions",
+    "sha256": "d1477e170f7d6b036accb3705d7e10750e5d0fc3807a05e2697bd0b6d62f8a77",
+    "unchanged_copy": true
+  },
+  {
+    "source_filename": "Screenshot 2026-08-30 025524.png",
+    "repository_path": "docs/evidence/delivery/2026-08-30-tennis-wong-paul-legacy-card.png",
+    "category": "Historical Discord delivery; prices unavailable",
+    "sha256": "de62f200cc1d5a77c6cf0898f6e8a1d792a691fe9baca773a42b2cb25923452c",
+    "unchanged_copy": true
+  },
+  {
+    "source_filename": "Screenshot 2026-08-30 025457.png",
+    "repository_path": "docs/evidence/validation/2026-08-30-tennis-missing-history-warning.png",
+    "category": "Historical missing-history and missing-price warning",
+    "sha256": "a9898bc04daca5d0941d868ac6f12aa07d54d2c9ed56d0183fbe337198678aa0",
+    "unchanged_copy": true
+  }
+]

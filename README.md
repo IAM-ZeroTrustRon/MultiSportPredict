@@ -12,13 +12,17 @@ Expected value describes the estimated payoff relative to the offered price over
 
 This README describes the approach without publishing proprietary thresholds, weighting or selection recipes. Market coverage, price capture and model validation vary by sport. An unpriced simulation does not establish a betting edge, and a reported EV estimate is not a guaranteed return.
 
+![Conceptual illustration of evaluating price discrepancies](docs/illustrations/methodology/2026-10-20-price-discrepancies.png)
+
+*Conceptual illustration, not observed market data or a measured edge.* More [methodology illustrations](docs/illustrations/methodology/README.md) cover EV arithmetic and fractional sizing, with their assumptions explained.
+
 ## Examples from the workflow
 
-Historical screenshots show the market-comparison interface and an unpriced EuroLeague market remaining a pass. They illustrate project behavior, not independently verified accuracy or returns. Model-only/uncalibrated labels and older interface limitations remain visible.
+The current NBA saved review shows named sides, signed estimated EV and explicitly provisional 1H/1Q score projections. Historical terminal and Discord captures document earlier interfaces and their visible limitations. These images illustrate project behavior, not independently verified accuracy or returns.
 
-![Historical tennis output comparing probabilities with market prices](docs/evidence/pricing/2026-10-09-tennis-market-comparison.png)
+![NBA saved review with readable market labels and provisional first-half and first-quarter projections](docs/evidence/picks/2026-10-20-nba-knicks-sixers-readable-review.png)
 
-See the [categorized evidence gallery](docs/evidence/README.md) for dates, context, source-refresh and manual-input examples, and the limits of each capture.
+See the [categorized evidence gallery](docs/evidence/README.md) for dates, context, historical Discord deliveries, source-refresh and manual-input examples, and the limits of each capture. The separate methodology graphics are illustrations, not bankroll or performance evidence.
 
 ## Current workflow
 
