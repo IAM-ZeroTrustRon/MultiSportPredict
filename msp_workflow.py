@@ -281,6 +281,22 @@ def saved_run(ident=None):
     result=dict(row);result['payload']=json.loads(result['payload']);return result
 
 
+def show_saved_score_review(saved):
+    """Render immutable score snapshots without rerunning a model or fetching prices."""
+    from score_review import format_review
+    fixtures={}
+    for row in saved['payload'].get('predictions',[]):
+        raw=json.loads(row['raw_json'])
+        if not isinstance(raw.get('projection'),dict) or not isinstance(raw.get('markets'),list):
+            return False
+        key=(row['sport'],row['league'],row['game_date'],row['home_team'],row['away_team'])
+        fixtures.setdefault(key,raw)
+    if not fixtures:return False
+    print('Saved run: '+saved['run_id'])
+    for raw in fixtures.values():print('\n'+format_review(raw))
+    return True
+
+
 def push_saved(ident=None):
     from core.historical_storage import workflow_delivery
     from discord_integration import push_prediction_to_all

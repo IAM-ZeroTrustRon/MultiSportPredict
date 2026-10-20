@@ -711,6 +711,9 @@ def _tennis_alternative_display(item: Dict[str, Any], home: Optional[str],
 
 
 def extract_nfl(data: Dict[str, Any]) -> Dict[str, Any]:
+    if isinstance(data.get("projection"), dict) and isinstance(data.get("markets"), list):
+        from score_review import card_shape
+        return card_shape(data)
     rows: List[Optional[Dict[str, Any]]] = []
     spread, ml = data.get("spread") or {}, data.get("moneyline") or {}
     total, half = data.get("total") or {}, data.get("halftime") or {}
@@ -785,6 +788,9 @@ def extract_nfl(data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def extract_basketball(data: Dict[str, Any]) -> Dict[str, Any]:
+    if isinstance(data.get("projection"), dict) and isinstance(data.get("markets"), list):
+        from score_review import card_shape
+        return card_shape(data)
     """Shape written by EuroleaguePredictor.predict() (universal_runner.py's
     EuroLeague/KBL/NZNBL branch) and predict_match.run_basketball_game()'s
     generic fallback -- this sport had no extractor at all before, so every

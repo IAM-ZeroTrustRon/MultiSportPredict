@@ -26,7 +26,9 @@ def main(argv=None):
     sub.add_parser('pending')
     ap=sub.add_parser('record');ap.add_argument('--all-time',action='store_true')
     for name in ['show','push']:
-        ap=sub.add_parser(name);choice=ap.add_mutually_exclusive_group(required=True)
+        ap=sub.add_parser(name)
+        if name=='show':ap.add_argument('--json',action='store_true',help='Show full-precision saved JSON instead of the formatted score review')
+        choice=ap.add_mutually_exclusive_group(required=True)
         choice.add_argument('--run-id');choice.add_argument('--latest',action='store_true')
     ap=sub.add_parser('cleanup');ap.add_argument('--before',required=True);ap.add_argument('--apply',action='store_true')
     ap=sub.add_parser('period');ap.add_argument('--start',required=True)
@@ -62,7 +64,9 @@ def main(argv=None):
             return 0
         if args.action=='pending':result=workflow.pending()
         elif args.action=='record':result=workflow.record(args.all_time)
-        elif args.action=='show':result=workflow.saved_run(args.run_id)
+        elif args.action=='show':
+            result=workflow.saved_run(args.run_id)
+            if not args.json and workflow.show_saved_score_review(result):return 0
         elif args.action=='push':result={'confirmed_destinations':workflow.push_saved(args.run_id)}
         elif args.action=='cleanup':result=workflow.cleanup(args.before,args.apply)
         elif args.action=='period':

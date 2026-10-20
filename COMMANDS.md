@@ -113,12 +113,14 @@ venv/Scripts/python.exe -u msp.py run --sport basketball --league KBL --match "S
 ```
 
 ```bash
-venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --match "Boston Celtics vs New York Knicks" --date 2026-10-19
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --match "New York Knicks vs Philadelphia 76ers" --date 2026-10-20
 ```
 
 ```bash
 venv/Scripts/python.exe -u msp.py slate --sport basketball --league NBA --date 2026-10-19
 ```
+
+NBA reviews now show Home/Away team names, signed EV percentages, and provisional 1H/1Q score estimates. Period estimates do not carry probabilities, EV or betting recommendations. `msp.py show --latest` prints the readable saved review; add `--json` for full-precision JSON. See [NBA review details](docs/NBA_REVIEW.md).
 
 Score-based leagues: NBA, WNBA, NCAAB, NCAAW, KBL, NZNBL and BBL. Australian NBL differs from NZNBL. NBL and EuroLeague delegate to the international metrics runner and retain its coverage limits; do not assume automatic fixture verification or priced markets for every league.
 

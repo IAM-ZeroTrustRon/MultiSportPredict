@@ -1,3 +1,9 @@
+## NBA review polish — October 20, 2026
+
+Score-runner terminal, saved review and Discord formatting now share named Home/Away or Over/Under labels, original American prices, one-decimal probabilities and signed two-decimal EV percentages. Raw full-game values and grading remain unchanged. NBA-only provisional 1H (49.5%) and 1Q (24.5%) score means include totals and model fair spreads derived from displayed team points. They have no period variance, probabilities, EV, betting recommendations or additional graded selections. Existing saved runs are displayed without rewriting their immutable snapshots; --json retains the original numeric payload.
+
+The odds adapter recognizes period quotes when present in the matched bookmaker payload, but does not fetch extra period markets or treat quotes as a calibrated distribution. Full-game market requests remain unchanged. Tested against the exact saved Knicks–Sixers forecast and real NBA training history; full-game projections and market calculations are identical. See docs/NBA_REVIEW.md. No Discord messages were sent.
+
 ## Current workflow and record — October 19, 2026
 
 The supported entrypoint is msp.py (see COMMANDS.md). Refresh, run/slate, immutable saved review, explicit delivery, grading and period/all-time records share the canonical database. The local hourly automation now grades all sports and sends no Discord messages; it never deletes records.

@@ -18,7 +18,7 @@ def fetch(league):
     return events or []
 
 
-def for_fixture(events, game):
+def for_fixture(events, game, include_periods=False):
     from grade_predictions import normalise_team
     norm = lambda n: normalise_team(n, game["league"].lower())
     matches = []
@@ -37,7 +37,11 @@ def for_fixture(events, game):
     for book in event.get("bookmakers", []):
         specs = []
         for market in book.get("markets", []):
-            kind = market.get("key")
+            key = market.get("key")
+            if not isinstance(key,str):continue
+            period = next((p for p in ('h1','q1') if key.endswith('_'+p)), None)
+            if period and not include_periods:continue
+            kind = key.rsplit('_',1)[0] if period else key
             prices = {o["name"]: o for o in market.get("outcomes", [])}
             if kind in {"h2h", "spreads"}:
                 a, b = prices.get(event["home_team"]), prices.get(event["away_team"])
@@ -53,7 +57,8 @@ def for_fixture(events, game):
                 continue
             specs.append({"kind": {"h2h":"moneyline", "spreads":"spread", "totals":"total"}[kind],
                 "line": 0.5 if kind == "h2h" else a["point"], "price_a": a["price"], "price_b": b["price"],
-                "bookmaker": book.get("key"), "updated": market.get("last_update") or book.get("last_update")})
-        if specs:
+                "bookmaker": book.get("key"), "updated": market.get("last_update") or book.get("last_update"),
+                **({"period":period,"pricing_status":"EV unavailable - no calibrated period model"} if period else {})})
+        if any(not s.get("period") for s in specs):
             return specs, f"Bookmaker {book.get('key')}; event {event['id']}"
     return [], "No complete bookmaker pairs; prices remain absent"

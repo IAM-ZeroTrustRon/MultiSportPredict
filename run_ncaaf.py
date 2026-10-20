@@ -31,37 +31,24 @@ def predict_fixture(game, model, specs, sport="ncaaf"):
             probabilities = market_probability(margin if kind == "spread" else total,
                 projection["margin_sd"] if kind == "spread" else projection["total_sd"], line, kind == "spread")
         markets.append(price_market(kind, line, probabilities, spec.get("price_a"), spec.get("price_b")))
-    return {"sport": sport, "league": game["league"], "home_team": game["home_team"],
+    segments = {}
+    if sport == "basketball" and game["league"].upper() == "NBA":
+        from models.basketball_periods import provisional_periods
+        segments = provisional_periods(projection)
+    return {**segments, "sport": sport, "league": game["league"], "home_team": game["home_team"],
             "away_team": game["away_team"], "game_date": game["date"], "game_id": game["game_id"],
             "projection": projection, "markets": markets, "fixture": game,
             "notes": [projection["note"], "Injuries, rosters and weather are not automatically included."]}
 
 
 def show(result):
-    p = result["projection"]
-    print(f"\n{result['league']} {result['game_date']} | {result['away_team']} @ {result['home_team']}")
-    print(f"Projected points: {p['home_points']:.1f}–{p['away_points']:.1f}; "
-          f"holdout {p['validation'].get('games')} games; RMSE margin {p['validation'].get('margin_rmse')}")
-    for m in result["markets"]:
-        print(f"  {m['kind']} {m['line']}: A {m['prob_a']:.1%}, B {m['prob_b']:.1%}, "
-              f"push {m['push_prob']:.1%}; EV {m['ev_a']} / {m['ev_b']}; {m['recommendation']}")
+    from score_review import format_review
+    print('\n' + format_review(result))
 
 
 def push(result):
-    from discord_integration import _broadcast_embed
-    fields = [{"name": "Projection", "value": f"{result['projection']['home_points']} — {result['projection']['away_points']}"}]
-    for m in result["markets"]:
-        fields.append({"name": f"{m['kind']} {m['line']}", "value":
-            f"A {m['prob_a']:.1%} / B {m['prob_b']:.1%}; push {m['push_prob']:.1%}\n"
-            f"Prices {m['price_a']} / {m['price_b']}\n{m['recommendation']}"})
-    chunks = [fields[i:i+25] for i in range(0, len(fields), 25)]
-    successful = True
-    for chunk in chunks:
-        sent = _broadcast_embed({"title": f"{result['league']} | {result['away_team']} @ {result['home_team']}",
-        "description": f"{result['game_date']} | Uncalibrated scoring model; measured holdout in saved JSON",
-            "fields": chunk, "color": 3447003}, label=result["league"])
-        successful = bool(sent) and successful
-    return successful
+    from discord_integration import push_prediction_to_all
+    return push_prediction_to_all(result['sport'], result, dry_run=False) > 0
 
 
 def store(result):
@@ -169,8 +156,8 @@ def main(sport="ncaaf", argv=None):
             game_specs, odds_note = specs, "No live odds requested"
             if args.odds:
                 from score_odds import for_fixture
-                fetched, odds_note = for_fixture(events, game)
-                game_specs = fetched or specs
+                fetched, odds_note = for_fixture(events, game, include_periods=(league == "NBA"))
+                game_specs = [s for s in fetched if not s.get("period")] or specs
             try:
                 result = predict_fixture(game, models[cutoff], game_specs, sport)
             except ValueError as exc:
@@ -179,6 +166,10 @@ def main(sport="ncaaf", argv=None):
                 print(f"[SKIPPED] {game['away_team']} @ {game['home_team']}: {exc}")
                 continue
             result["odds_source"] = {"note": odds_note, "markets": game_specs}
+            result["period_market_quotes"] = {period: [s for s in fetched if s.get("period") == period]
+                for period in ("h1", "q1")} if args.odds and league == "NBA" else {}
+            from score_review import format_review
+            result["formatted_review"] = format_review(result)
             print(odds_note)
             show(result)
             rows.append(result)

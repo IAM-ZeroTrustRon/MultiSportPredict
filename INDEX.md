@@ -1,3 +1,10 @@
+## NBA review additions — October 20, 2026
+
+- score_review.py — shared score-runner terminal/Discord presentation and precise Home/Away/Over/Under labels.
+- models/basketball_periods.py — explicit provisional NBA 1H/1Q means, without invented variance or EV.
+- tests/test_score_review.py — formatting, side identity, immutability, period arithmetic and no phantom bets.
+- docs/NBA_REVIEW.md — command examples, raw JSON mode, assumptions and quote/coverage limits.
+
 ## Shared workflow additions — October 19, 2026
 
 - msp.py / msp_workflow.py — supported daily refresh, sport/mixed-slate runs, saved review/delivery, grading, records and backed-up exceptional cleanup.
