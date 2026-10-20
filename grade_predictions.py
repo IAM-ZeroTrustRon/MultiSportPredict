@@ -574,9 +574,13 @@ def grade_row(row: sqlite3.Row, home_score: float, away_score: float
             # Soccer settles a draw as a loss on a two-way price; the other
             # sports here cannot draw, so a tie means the data is wrong.
             if sport in {"soccer", "football"}:
-                return "loss", pick, -1.0, True
-            raise Ungradable(f"tie score in {sport}, which should not happen")
-        outcome = "win" if pick == winner else "loss"
+                winner = "DRAW"
+            elif sport == "nfl" and prices.get("draw_ml") is None:
+                # A completed tied NFL game pushes a two-way moneyline.
+                winner = None
+            else:
+                raise Ungradable(f"tie score needs verified settlement rules in {sport}")
+        outcome = "push" if winner is None else "win" if pick == winner else "loss"
         price_key = "home_ml" if pick == "HOME" else "away_ml"
 
     elif market == "spread":
@@ -894,7 +898,8 @@ def fetch_tennis_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tup
                         away_key = resolved(away_name)
                         if not home_key or not away_key:
                             continue
-                            out[(day.isoformat(), normalise_team(home_key, "tennis"),
+                        # Keep verified winners reachable after the unresolved-name guard.
+                        out[(day.isoformat(), normalise_team(home_key, "tennis"),
                                 normalise_team(away_key, "tennis"))] = (
                             (1.0, 0.0) if home_won else (0.0, 1.0))
         day += _dt.timedelta(days=1)
@@ -1166,7 +1171,11 @@ fetch_basketball_results.wants_dates = True
 fetch_basketball_results.league_scoped = True
 
 
+from kbo_results import fetch_results as fetch_kbo_results
+
+
 AUTO_SOURCES = {
+    "kbo": fetch_kbo_results,
     "mlb": fetch_mlb_results,
     "baseball": fetch_mlb_results,   # rows logged as 'baseball' that are MLB games
     "nfl": fetch_nfl_results,
@@ -1272,7 +1281,10 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
 
     by_sport: Dict[str, List[sqlite3.Row]] = {}
     for row in to_grade:
-        by_sport.setdefault((row["sport"] or "").lower(), []).append(row)
+        source_sport = (row["sport"] or "").lower()
+        if source_sport in {"baseball", "mlb"} and str(row["league"] or "").upper() == "KBO":
+            source_sport = "kbo"
+        by_sport.setdefault(source_sport, []).append(row)
 
     graded = skipped = unmatched = 0
     for sport_key, sport_rows in sorted(by_sport.items()):

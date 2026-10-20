@@ -115,6 +115,7 @@ def main():
         if hasattr(stream,'reconfigure'):stream.reconfigure(encoding='utf-8',errors='replace',line_buffering=True)
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--match');p.add_argument('--event-id');p.add_argument('--date',help='UTC YYYY-MM-DD')
+    p.add_argument('--config',type=Path,help='Match settings JSON; defaults to data/table_tennis/current_match_config.json when no match/event is supplied')
     p.add_argument('--provider',choices=['auto','betsapi','oddsio'],default='auto')
     p.add_argument('--reference-book',help='Anchor bookmaker; default latest eligible paired moneyline')
     p.add_argument('--no-refresh',action='store_true',help='Use verified local data only')
@@ -134,6 +135,18 @@ def main():
     actions.add_argument('--list-runs',action='store_true',help='List ten most recent saved reports and their IDs')
     p.add_argument('--dry-run',action='store_true',help='Preview Discord without sending')
     args=p.parse_args()
+    if args.config or not any((args.match,args.event_id,args.push,args.show,args.list_runs,args.win_cover_player_id)):
+        config_path=args.config or ROOT/'data/table_tennis/current_match_config.json'
+        if config_path.exists():
+            try:
+                settings=json.loads(config_path.read_text(encoding='utf-8-sig'))
+                if not isinstance(settings,dict):raise ValueError('Match config must be a JSON object')
+                for key in ('match','mystake_url','start_utc','best_of'):
+                    if getattr(args,key) is None:setattr(args,key,settings.get(key))
+                if args.mystake_text_file is None:
+                    args.mystake_text_file=ROOT/'data/table_tennis/current_match.txt'
+            except (OSError,ValueError) as exc:p.exit(2,'Invalid match config: '+str(exc)+'\n')
+        elif args.config:p.error('Match config file does not exist: '+str(config_path))
     print('CZECH LIGA PRO | Loading saved report...' if args.show or args.list_runs or args.push else 'CZECH LIGA PRO | Starting match run...',flush=True)
     store=TableTennisStore()
     try:
@@ -204,6 +217,7 @@ def main():
         report=forecast(store,event,reference_book=args.reference_book)
         report['warnings'].extend(browser_notes)
         print(render(report));print('Saved report:',save(store,report))
+        print('RUN_ID='+report['run_id'],flush=True)
         print('Discord (Git Bash): venv/Scripts/python.exe run_table_tennis.py --push "'+report['run_id']+'"')
     except (ValueError,OSError) as exc:p.exit(2,str(exc)+'\n')
 

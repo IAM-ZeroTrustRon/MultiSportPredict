@@ -104,7 +104,16 @@ def debug(message: str) -> None:
 
 
 def fetch(url: str, save_as: Optional[str] = None) -> str:
-    response = requests.get(url, headers={"User-Agent": UA}, timeout=TIMEOUT)
+    # Retry transient transport/server failures only; a 403 is not an invitation to bypass it.
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
+    retry = Retry(total=2, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504],
+                  allowed_methods=["GET"], respect_retry_after_header=True)
+    with requests.Session() as client:
+        client.mount("https://", HTTPAdapter(max_retries=retry))
+        response = client.get(url, headers={"User-Agent": UA}, timeout=(10, TIMEOUT))
+    if response.encoding in (None, "ISO-8859-1"):
+        response.encoding = "utf-8-sig"
     if save_as:
         PROBE.mkdir(parents=True, exist_ok=True)
         (PROBE / save_as).write_text(response.text, encoding="utf-8", errors="replace")

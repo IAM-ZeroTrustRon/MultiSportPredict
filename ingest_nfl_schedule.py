@@ -151,7 +151,8 @@ def parse_event(event: Dict[str, Any], season: int, week: int) -> Optional[Dict[
     status = ((competition.get("status") or {}).get("type") or {})
     return {
         "game_id": str(event.get("id")),
-        "date": str(event.get("date", ""))[:10],
+        "date": _dt.datetime.fromisoformat(event["date"].replace("Z", "+00:00")).astimezone(__import__("zoneinfo").ZoneInfo("America/New_York")).date().isoformat(),
+        "start_time": event["date"],
         "season": season,
         "week": week,
         "status": status.get("name", "unknown"),
@@ -229,59 +230,40 @@ def load_schedule() -> List[Dict[str, Any]]:
     return payload.get("games", []) if isinstance(payload, dict) else []
 
 
-def home_away(team_a: str, team_b: str, date: Optional[str] = None,
-              season: Optional[int] = 2026
-              ) -> Tuple[Optional[str], Optional[str], str]:
-    """Return (home, away, note) for a real fixture, or (None, None, why).
+def resolve_fixture(team_a, team_b, date=None, season=None):
+    """Resolve an upcoming event in one season; never fall back to an old game."""
+    from sports_feed import today, EASTERN
+    now = _dt.datetime.now(EASTERN)
+    season = season if season is not None else int(today()[:4])
+    candidates = []
+    for game in load_schedule():
+        if game.get('season') != season:
+            continue
+        if {norm_team(team_a), norm_team(team_b)} != {norm_team(game['home_team']), norm_team(game['away_team'])}:
+            continue
+        if date and game['date'] != date:
+            continue
+        if game.get('completed') or game['date'] < today():
+            continue
+        if game.get('start_time') and _dt.datetime.fromisoformat(game['start_time'].replace('Z','+00:00')) <= now:
+            continue
+        if not game.get('game_id'):
+            continue
+        candidates.append(game)
+    candidates.sort(key=lambda g: (g['date'], g['game_id']))
+    if not candidates:
+        raise ValueError('No verified upcoming NFL fixture for these teams/date/season; refresh the schedule')
+    if date and len(candidates) != 1:
+        raise ValueError('Ambiguous NFL fixture on this date')
+    return candidates[0]
 
-    This is the fixture check. Two clubs being real does not make a game real --
-    that is precisely how nine predictions were produced for matchups nobody
-    had scheduled.
 
-    Season guard (§6.5): the schedule holds both 2025 and 2026 games, so a
-    bare team-pair match binds to the CURRENT season first. Without this a
-    2026 matchup can bind to last year's game and inherit the wrong week,
-    date, and home/away orientation.
-    """
-    games = load_schedule()
-    if not games:
-        return None, None, "no schedule on disk -- run ingest_nfl_schedule.py"
-
-    a, b = norm_team(team_a), norm_team(team_b)
-
-    def _season_of(game: Dict[str, Any]) -> Optional[int]:
-        try:
-            return int(game.get("season"))
-        except (TypeError, ValueError):
-            pass
-        for key in ("date", "commence_time", "game_date"):
-            val = str(game.get(key, "") or "")
-            match = re.search(r"(19|20)\d{2}", val)
-            if match:
-                return int(match.group(0))
-        return None
-
-    def _scan(only_season: Optional[int]) -> Optional[Tuple[str, str, str]]:
-        for game in games:
-            if date and game["date"] != date:
-                continue
-            if only_season is not None and _season_of(game) != only_season:
-                continue
-            home, away = norm_team(game["home_team"]), norm_team(game["away_team"])
-            if {a, b} == {home, away}:
-                return (game["home_team"], game["away_team"],
-                        f"{game['date']} week {game['week']}")
-        return None
-
-    # Pass 1: current season only. Pass 2: any season (explicit date lookups
-    # and seasons with no current-year game still resolve).
-    hit = _scan(season) if season is not None else None
-    if hit is None:
-        hit = _scan(None)
-    if hit is not None:
-        return hit
-    scope = f" on {date}" if date else ""
-    return None, None, f"no scheduled game between these two{scope}"
+def home_away(team_a, team_b, date=None, season=None):
+    try:
+        game = resolve_fixture(team_a, team_b, date, season)
+        return game['home_team'], game['away_team'], f"{game['date']} week {game['week']}"
+    except ValueError as exc:
+        return None, None, str(exc)
 
 
 # ==========================================================================

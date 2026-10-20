@@ -1,3 +1,20 @@
+## Shared workflow additions — October 19, 2026
+
+- msp.py / msp_workflow.py — supported daily refresh, sport/mixed-slate runs, saved review/delivery, grading, records and backed-up exceptional cleanup.
+- mlb_player_source.py — validated official player-ID joins, measured wOBA and consistent MLB player schema.
+- kbo_results.py — dated completed KBO scores; ambiguous doubleheaders remain unresolved.
+- slate_workflow.json — filled-in mixed-sport command example; edit to actual fixtures.
+- docs/PERFORMANCE_2026-10-19.md / performance_snapshot_2026-10-19.json — retained model record, price coverage and cleanup disclosure.
+- docs/REPOSITORY_REVIEW_2026-10-19.md — implemented highlights, evidence and remaining priorities.
+- tests/test_msp_workflow.py / tests/test_mlb_player_source.py — cleanup protections, fixture handling, saved delivery and official-source validation.
+- COMMANDS.md / TABLE_TENNIS_COMMANDS.md — active Git Bash references. Engine-folder guides are compatibility references.
+
+## Table-tennis workflow additions (2026-10-11)
+
+- `data/table_tennis/current_match_config.json` — match identity, URL, confirmed start and format for no-argument copied-page runs.
+- `tests/test_table_tennis_paste_grading.py` — clipboard and manual-grading acceptance tests.
+- `TABLE_TENNIS_COMMANDS.md` — simple forecast and confirmed-final grading commands.
+
 - `tests/test_table_tennis_report.py` — output value/sign preservation, all-alternative Discord pagination and read-only saved-report CLI checks.
 - `run_table_tennis.py --show/--list-runs` — display saved predictions directly in the terminal.
 

@@ -1,475 +1,74 @@
 # MultiSportPredict
 
-A multi-sport prediction engine that ingests live sports data, models match outcomes, and
-grades every forecast against real results. Built in Python with a hard rule: **the system
-refuses to produce a number it cannot justify.**
+**A multi-sport handicapper built to evaluate the price of a bet.**
 
-Sports covered: soccer (Premier League, Championship, Eredivisie, Liga MX), baseball
-(MLB, KBO), basketball (EuroLeague), tennis, with an NFL engine and WTA/ATP recently added 
+MultiSportPredict combines sport-specific analysis with market odds to look for line discrepancies and positive expected value. Its objective is disciplined long-term return on capital. Picking the most likely winner is only one input: a strong favorite can be poor value at its price, while an underdog can offer value despite being more likely to lose.
 
----
+## How picks are approached
 
-## Security & Reliability Engineering
+The workflow starts with the market: identify the exact fixture and priced market, account for the bookmaker margin where supported, and compare the available line with an estimated fair price. Sport-specific models add context such as scoring profiles, surface and player history, pitching, pace, form and scheduling when verified data is available. Confidence and data-quality checks help decide whether the result merits a recommendation or a pass.
 
-This project is as much an exercise in defensive engineering as in modelling. A prediction
-system that silently degrades is worse than one that stops — a confident number built on
-missing data is indistinguishable from a correct one until money is on it.
+Expected value describes the estimated payoff relative to the offered price over repeated comparable opportunities. It depends on the probability estimate being well calibrated and the quoted price being obtainable. An individual winning pick does not prove value; an individual loss does not disprove it. The project therefore aims to track the quality of pricing decisions, realised model returns and, where reliable opening/closing prices exist, closing-line value. Closing-line tracking remains a development area rather than a complete verified performance dataset.
 
-### Fail-closed data validation
+This README describes the approach without publishing proprietary thresholds, weighting or selection recipes. Market coverage, price capture and model validation vary by sport. An unpriced simulation does not establish a betting edge, and a reported EV estimate is not a guaranteed return.
 
-`data_guard.py` blocks a run rather than degrading. It validates every record before use:
+## Examples from the workflow
 
-- **Staleness** — season and last-updated fields are checked against an expected window
-- **Sample size** — teams below a per-sport minimum are refused, not averaged
-- **Severity separation** — wrong-season data is an *error* (blocks); merely old data is a
-  *warning* (informs). A guard that cries wolf gets ignored, which is worse than no guard.
+Historical screenshots show the market-comparison interface and an unpriced EuroLeague market remaining a pass. They illustrate project behavior, not independently verified accuracy or returns. Model-only/uncalibrated labels and older interface limitations remain visible.
 
-Built after a season-sorting bug silently loaded 1999/2000 league data into a 2026 slate.
-The ingest succeeded, the parse succeeded, the run reported success. The only symptom was a
-defunct club appearing in a team list — caught by eye, not by code. That gap is now closed.
+![Historical tennis output comparing probabilities with market prices](docs/evidence/pricing/2026-10-09-tennis-market-comparison.png)
 
-### Eliminating silent failure paths
+See the [categorized evidence gallery](docs/evidence/README.md) for dates, context, source-refresh and manual-input examples, and the limits of each capture.
 
-Three separate bugs were found where a failed lookup fell through to a hardcoded default,
-producing confident output from no data at all:
+## Current workflow
 
-| Component | Failure | Fix |
-|---|---|---|
-| `SoccerPredictor` | missing stats → default xG for both teams | raise on lookup miss |
-| `BaseballPredictor` | missing stats → league-average runs/ERA | pass real values, warn loudly on miss |
-| `TennisElo` | no data file → frozen seed ratings | load real match history, report count |
+One interface handles refresh, match/slate runs, immutable saved reviews, grading and records. Sport-specific engines and their guards remain underneath it; the wrapper does not turn every runner into the same model. Table tennis uses the root workflow alongside the other sports.
 
-Each produced *identical predictions across different matchups* — a failure mode that looks
-like working software. The pattern is now treated as a class of bug, not three incidents.
-
-### Secrets management
-
-- API credentials live in `.env`, excluded via `.gitignore` and verified untracked
-- No key, token, or webhook URL appears in source or in commit history
-- Credentials are read at runtime, never logged or written to output files
-
-### Least privilege access
-
-Remote access is configured with a **dedicated non-administrator account**, not the primary
-user. Filesystem permissions are scoped to the project directory only (`icacls`), so a
-compromised remote credential cannot reach the rest of the host. SSH is bound to the local
-network; no port is exposed to the internet.
-
-### Data integrity
-
-- **Atomic writes** — every store is written to a temp file and `os.replace`d, so an
-  interrupted write cannot corrupt it
-- **Corruption handling** — malformed JSON is quarantined with a timestamped copy rather
-  than overwritten
-- **Backups before mutation** — any script that edits existing source files writes a dated
-  backup first
-- **Merge, never clobber** — stores merge on write, so one league's ingest cannot delete
-  another's data
-
-### Network forensics
-
-`diagnose_sources.py` distinguishes *legitimate site-side blocking* from *traffic
-interception* — a distinction that matters before you conclude a source is unavailable:
-
-- Proxy environment variables and system proxy configuration
-- DNS resolution (detecting redirection to local or private addresses)
-- **TLS certificate issuer inspection** — a non-public CA on a public host indicates
-  interception by inspection middleware
-- Multi-method fetch comparison (proxied vs. direct, varying client fingerprints)
-
-Used to prove that four failing data sources were genuine CDN bot-protection (Cloudflare,
-Akamai) rather than a compromised local environment.
-
-### Respecting access controls
-
-- `koreabaseball.com` is deliberately **not** scraped — its `robots.txt` disallows automated
-  access, so an alternative source is used
-- Rate limiting and on-disk response caching on every scraped host
-- Data licence terms tracked in-source where they constrain use
-
-### Provenance and auditability
-
-Every stored record carries its `source`, `updated` timestamp, and a `data_tier` marking
-whether a value is measured or derived. Every prediction is logged to SQLite and graded
-against real outcomes, with wins settled at recorded market prices rather than assumed ones.
-
-The system distinguishes what it *knows* from what it *inferred* — and says so in the output.
-
-### Supply chain scepticism
-
-AI-generated contributions to this codebase are reviewed before use. One submission was
-rejected after inspection revealed hardcoded fabricated statistics labelled as live
-"Tier 1" data from a named source. Verified against the real feed, its numbers were wrong
-by up to a full run per game. **Provenance labels are checked, not trusted.**
-
----
-
-## Quick Start
-
-### Installation
+**Git Bash, from the project folder:**
 
 ```bash
-pip install -r MultiSportPredict/requirements.txt
+cd /c/MultiSportPredict
+venv/Scripts/python.exe -u msp.py daily --all
+venv/Scripts/python.exe -u msp.py record
+venv/Scripts/python.exe -u msp.py pending
 ```
 
-### Unified CLI
-
-Predict any sport with a single command:
+To run one verified fixture, edit the filled-in example values before execution:
 
 ```bash
-# Universal Runner (all sports)
-python run_match.py --sport baseball --home "NYY" --away "BOS" --store-to-db
-python run_match.py --sport soccer --home "Liverpool" --away "Aston Villa" --market-total 2.5
-python run_match.py --sport basketball --home "Real Madrid" --away "FC Barcelona" --league "EuroLeague"
-python run_match.py --sport tennis --home "Djokovic" --away "Alcaraz" --surface "Grass"
-
-# Legacy Unified CLI
-python predict_match.py kbo "Doosan Bears" "LG Twins"
-python predict_match.py soccer "Liverpool" "Aston Villa"
-python predict_match.py mlb "NYY" "BOS"
+venv/Scripts/python.exe -u msp.py run --sport kbo --match "KIA Tigers vs LG Twins" --date 2026-10-19
+venv/Scripts/python.exe -u msp.py show --latest
 ```
 
-### Batch Slate Processing
+The example illustrates syntax; it is not a claim that those teams play on that date. Runs save a review without sending Discord messages. Optional `msp.py push --latest` sends the latest successful saved snapshot after review; it does not rerun a model or place a wager.
 
-Each sport has its own slate runner (`run_mlb.py --today`, `run_nfl.py --week N`,
-`batch_tennis.py`). For soccer, run a slate file, review, then push what you pick:
+See [all-sports commands](COMMANDS.md), [table-tennis commands](TABLE_TENNIS_COMMANDS.md), and the filled [mixed-sport slate example](slate_workflow.json). With Python 3.10+ and a project virtual environment, dependencies are listed in [requirements.txt](requirements.txt); table-tennis extras are in [requirements-table-tennis.txt](requirements-table-tennis.txt). The workflow deliberately uses the project virtual environment instead of silently selecting another Python installation.
 
-```bash
-python run_soccer_batch.py --slate slate_today.json   # predict + store, NO Discord
-python run_soccer_batch.py --review                    # reprint the review table
-python run_soccer_batch.py --push 2 5                  # push those line numbers
-python run_soccer_batch.py --push-all                  # push every reviewed row
-```
+## Historical record — transparent scope
 
-Slate format (`slate_today.json`):
+As of October 19, 2026, the retained ordinary model record contains **181 wins, 195 losses and 3 pushes** (48.14% excluding pushes). The 238-selection recorded-price subset shows **+20.24 simulated units / +8.50% simulated ROI**, assuming one unit risked per selection. The remaining 141 grades lack confirmed recorded-price settlement and are excluded from that ROI.
 
-```json
-{"date": "2026-09-20", "matches": [
-  {"home": "Corinthians", "away": "Fluminense", "league": "Brasileirao"}
-]}
-```
+**These are retained model records, not audited wagers.** Historical unresolved rows were removed after backup during a documented cleanup. That missing-outcome/selection bias prevents these figures from representing the complete original recommendation history. They should not be presented as verified profitability or a validated long-term edge. Different markets on the same game are correlated; BET and LEAN decisions are included, while PASS/INFO/VOID and duplicate reruns are excluded.
 
-A club with no stats in the store is skipped, never run on league averages.
-(The old mixed-sport `run_slate.py` CSV runner is retired in `archive/legacy-modules/`.)
+A fresh reporting period starts **October 20, 2026** with no graded selections. Settled history remains available with `msp.py record --all-time`. See the [dated performance snapshot and limitations](docs/PERFORMANCE_2026-10-19.md) for definitions, coverage and reproduction commands.
 
-### Run Pre-built Analysis Scripts
+## Notable October improvements
 
-```bash
-# KBO June 16, 2026 - NC Dinos @ Hanwha Eagles + SSG Landers @ Lotte Giants
-python run_kbo_june16_matches.py
+- A shared command interface covers supported sport runners and mixed slates, with explicit saved-run and delivery records.
+- NFL fixture dates use America/New_York, preserve event identity, and avoid previous-season fallback. Two-way NFL moneylines push on verified tied finals.
+- KBO finals use a dedicated completed-score adapter instead of being routed through MLB results.
+- MLB player metrics now join the official MLB Stats API and measured Baseball Savant wOBA by player ID. Both import paths write the same schema; ambiguous names are excluded rather than merged.
+- Soccer refresh retries temporary transport/server failures. Source-derived goal estimates remain labeled as estimates.
+- Grading backs up first; exceptional historical cleanup writes an exact deletion manifest. A fresh reporting period does not erase settled history.
 
-# Taiwan P. League+ - Fubon Braves vs Taoyuan Pilots
-python run_taiwan_basketball_analysis.py
+## Coverage and limits
 
-# Estonian Meistriliiga - FC Kuressaare vs Trans Narva
-python run_kuressaare_narva_soccer.py
-```
+Runners cover MLB/KBO, soccer, ATP/WTA and tennis research, NFL/NCAAF, basketball and Czech Liga Pro table tennis. Coverage is source-dependent: Challenger identity/history, doubles, international basketball markets and point-level table-tennis finals can be incomplete. Some legacy/advanced paths still contain assumptions and require further hardening; guard coverage is not universal.
 
-## Project Structure
+The October refresh recovered MLB player data and France soccer data. The public table-tennis recent-results page was unreadable; that refresh remains a reported failure. Hourly local grading retries available results when the desktop automation is running, preserves unresolved active fixtures and sends no Discord messages. Its configured cadence is local operational setup, not a guarantee for other repository users.
 
-```
-MultiSportPredict/
-├── basketball/              # Basketball prediction module
-│   ├── __init__.py
-│   └── basketball_predict_game.py
-├── core/                    # Shared core engine
-│   ├── confidence_engine.py # Confidence scoring & bet recommendations
-│   ├── historical_storage.py# SQLite prediction storage
-│   └── schemas.py           # Data schemas
-├── features/                # Feature engineering
-│   ├── kbo_features.py
-│   ├── soccer_features.py
-│   └── basketball_features.py
-├── ingest/                  # Data ingestion & odds fetching
-│   ├── odds_client.py
-│   ├── schedule_ingest.py
-│   └── dispatcher.py
-├── mlb/                     # MLB prediction module
-│   ├── mlb_module.py        # Core MLB functionality
-│   ├── mlb_prop_edges.py    # Prop edge calculation
-│   └── README.md
-├── models/                  # Sport-specific models
-│   ├── kbo_model.py         # KBO Random Forest model
-│   ├── soccer_predictor.py  # xG + Poisson soccer model
-│   ├── basketball_predictor.py # FIBA basketball model
-│   ├── baseball_predictor.py   # MLB/KBO baseball model
-│   └── auto_dispatcher.py   # Automated prediction dispatcher
-├── output/                  # Prediction results
-│   ├── kbo/                 # KBO analysis output JSONs
-│   ├── basketball/          # Basketball analysis output JSONs
-│   ├── soccer/              # Soccer analysis output JSONs
-│   ├── baseball/            # Baseball/MLB analysis output JSONs
-│   └── mlb/                 # MLB-specific analysis output JSONs
-├── data/
-│   ├── mlb/
-│   │   ├── raw/             # Raw Statcast data
-│   │   ├── features/        # Engineered features
-│   │   └── models/          # Trained models
-│   └── processed/           # Processed feature CSVs
-├── run_kbo_june13_with_analysis.py
-├── run_kbo_june16_matches.py       # KBO June 16 doubleheader
-├── run_taiwan_basketball_analysis.py # Taiwan P. League+
-├── run_kuressaare_narva_soccer.py   # Estonian Meistriliiga
-├── MultiSportModel.py       # Core European basketball/corner modeling engine
-├── predict_match.py         # Unified CLI
-├── requirements.txt
-└── README.md
-```
+## Reliability and contribution
 
-## KBO Module (Korean Baseball Organization)
+Predictions, results, price provenance and grading share `multisport_history.db`. Backups and detailed runtime snapshots remain local. Credentials belong in `.env`, which is ignored by Git. Never load untrusted serialized model files. Follow source access terms and retain provenance when adapting an ingest.
 
-The KBO module provides comprehensive baseball predictions for the Korean Baseball Organization.
-
-### Features
-
-- **Sabermetric Team Profiles**: Detailed stats for all 10 KBO teams including wOBA, wRC+, FIP, WHIP, SwStr%, O-Swing%
-- **Park Factor Adjustments**: Venue-specific HR, runs, hits, and strikeout factors
-- **Poisson Totals Modeling**: Run distribution probabilities for over/under markets
-- **Win Probability**: Team strength-based moneyline projections
-- **Strikeout Props**: Pitcher K projections based on K/9 and park factors
-- **Sharp Consensus**: Market sentiment and sharp money indicators
-
-### KBO Teams Supported
-
-| Team | Abbreviation | Home Venue |
-|------|-------------|------------|
-| Doosan Bears | DOO | Jamsil Baseball Stadium |
-| LG Twins | LG | Jamsil Baseball Stadium |
-| Kiwoom Heroes | KIW | Gocheok Sky Dome |
-| KT Wiz | KT | Suwon KT Wiz Park |
-| SSG Landers | SSG | Incheon SSG Landers Field |
-| Lotte Giants | LOT | Sajik Baseball Stadium |
-| Samsung Lions | SAM | Samsung Lions Park |
-| NC Dinos | NC | Changwon NC Park |
-| KIA Tigers | KIA | KIA Champions Field |
-| Hanwha Eagles | HAN | Hanwha Life Eagles Park |
-
-### Run KBO Analysis
-
-```bash
-# June 16, 2026 doubleheader
-python run_kbo_june16_matches.py
-# Analyzes: NC Dinos @ Hanwha Eagles + SSG Landers @ Lotte Giants
-
-# June 13, 2026 analysis
-python run_kbo_june13_with_analysis.py
-# Analyzes: Hanwha Eagles @ Kiwoom Heroes + Doosan Bears @ KIA Tigers
-```
-
-## Taiwan P. League+ Basketball Module
-
-Basketball predictions for Taiwan's top professional league.
-
-### Features
-
-- **Advanced Metrics**: ORTG, DRTG, net rating, pace, 3PT%, rebounding
-- **Efficiency Gap Analysis**: Team strength differentials
-- **Spread Projections**: Model-based point spread with cover probability
-- **Totals Analysis**: Normal distribution-based over/under probabilities
-- **Win Probability**: Net rating gap + home court advantage modeling
-- **Player Props**: Star player points, team 3PT made projections
-- **Sharp Consensus**: Market sentiment integration
-
-### Run Taiwan Basketball Analysis
-
-```bash
-python run_taiwan_basketball_analysis.py
-# Analyzes: Fubon Braves vs Taoyuan Pilots (P. League+)
-```
-
-## Soccer Module (xG-Based Poisson Modeling)
-
-Provides soccer predictions using expected goals (xG) metrics and Poisson distribution modeling.
-
-### Features
-
-- **xG-Based Goal Projections**: Expected goals for/against with injury adjustments
-- **Poisson Outcome Probabilities**: Full match outcome (1X2) via bivariate Poisson
-- **Goals Over/Under**: Over 1.5, 2.5, 3.5, 4.5 probabilities
-- **BTTS (Both Teams To Score)**: Structural + Poisson hybrid calculation
-- **Corner Projections**: Shot volume, tempo, and width-based corner estimation
-- **Injury Impact**: Missing attacker/creator/CB/GK adjustments
-- **League Configs**: Per-league goal variance, home advantage, draw rate tuning
-
-### Supported Leagues
-
-- English Premier League, La Liga, Bundesliga, Serie A, Ligue 1
-- UEFA Champions League / Europa League
-- Estonian Meistriliiga, Kazakhstan Premier League
-- Australian NPL, and more (auto-detected or configurable)
-
-### Run Soccer Analysis
-
-```bash
-python run_kuressaare_narva_soccer.py
-# Analyzes: FC Kuressaare vs Trans Narva (Estonian Meistriliiga)
-```
-
-## MLB Module
-
-The MLB module provides comprehensive baseball predictions using Statcast data.
-
-### Features
-
-- **Data Ingestion**: Automatic Statcast data pulling via pybaseball
-- **Feature Engineering**: Pitcher, hitter, umpire, and game-level features
-- **Full Game Model**: Random Forest for total runs and run differential
-- **NRFI/YRFI**: No Run/Ye Run First Inning probability calculations
-- **Strikeout Props**: Pitcher K projections with umpire adjustments
-- **Home Run Props**: Barrel rate, hard hit%, weather, park factor integration
-- **Prop Edges**: Automated edge calculation for MLB prop markets
-
-### MLB Workflow
-
-```python
-from mlb import (
-    ingest_recent,
-    engineer_pitcher_features,
-    engineer_hitter_features,
-    engineer_umpire_features,
-    engineer_team_game_features,
-    predict_match,
-)
-
-# Step 1: Ingest recent data
-df = ingest_recent(days_back=3)
-
-# Step 2: Build features
-engineer_pitcher_features(df)
-engineer_hitter_features(df)
-engineer_umpire_features(df)
-engineer_team_game_features(df)
-
-# Step 3: Predict a matchup
-result = predict_match("NYY", "BOS")
-print(result)
-```
-
-See `mlb/README.md` for detailed documentation.
-
-## Confidence Engine
-
-All predictions use the core `confidence_score()` and `bet_recommendation()` functions from `core/confidence_engine.py`:
-
-- **Edge Calculation**: Model value minus market value
-- **Volatility Tuning**: Sport-specific volatility parameters (baseball: 0.65, basketball: 0.35-0.40, soccer: 0.45-0.55)
-- **Sharp/Market Alignment**: Consensus data integration
-- **Recommendations**: STRONG BET (>75), BET (60-75), PASS (<60)
-
-## Historical Storage & Analysis
-
-All predictions are automatically stored in a SQLite database (`multisport_history.db`) for tracking and analysis.
-
-### Querying Historical Predictions
-
-```python
-from core import get_predictions, get_prediction_summary, export_predictions_to_json
-
-# Get all basketball predictions
-bball_preds = get_predictions(sport="basketball")
-
-# Get predictions for a specific team
-team_preds = get_predictions(home_team="FC Barcelona")
-
-# Get predictions by date range
-recent_preds = get_predictions(
-    start_date="2026-06-01",
-    end_date="2026-06-30"
-)
-
-# Get summary statistics
-summary = get_prediction_summary()
-print(f"Total predictions: {summary['total_predictions']}")
-print(f"Average confidence: {summary['avg_confidence']}%")
-
-# Export to JSON
-export_predictions_to_json("output/all_predictions.json")
-```
-
-### Database Schema
-
-The predictions table includes:
-- `id`: Unique identifier
-- `sport`: Sport type (basketball, soccer, mlb, kbo)
-- `home_team`, `away_team`: Team names
-- `market_type`: Type of market (spread, total, moneyline, props)
-- `model_value`: Model's projected value
-- `market_value`: Market line/value
-- `edge`: Difference between model and market
-- `confidence`: Confidence score (0-100)
-- `recommendation`: Bet recommendation (STRONG BET, BET, PASS)
-- `timestamp`: When the prediction was made
-- `raw_json`: Full prediction result
-- `result_outcome`: Actual outcome (win, loss, push)
-- `profit_loss`: P&L tracking
-
-## Auto-Dispatcher
-
-The `models/auto_dispatcher.py` provides automated prediction dispatching:
-
-- Auto-creates missing CSV files
-- Fetches live odds (if ODDS_API_KEY configured)
-- Caches results for performance
-- Falls back to sensible defaults when data unavailable
-- Supports batch prediction across all sports
-
-```bash
-# Predict all upcoming matches across all sports
-python predict_match.py --batch
-
-# Predict upcoming matches for a specific sport
-python predict_match.py --upcoming --league epl
-```
-
-## Recent Updates (June 2026)
-
-| Date | Update | Details |
-|------|--------|---------|
-| Jun 16 | KBO Doubleheader | NC Dinos @ Hanwha Eagles + SSG Landers @ Lotte Giants |
-| Jun 16 | Taiwan PLG | Fubon Braves vs Taoyuan Pilots basketball analysis |
-| Jun 16 | Estonian Soccer | FC Kuressaare vs Trans Narva xG-based analysis |
-| Jun 15 | MLB June 15 | Comprehensive MLB analysis with NRFI props |
-| Jun 15 | KBO June 13 | Hanwha @ Kiwoom + Doosan @ KIA analysis scripts |
-| Jun 15 | Model Updates | MultiSportModel, OddsApiIngestor, auto_dispatcher improvements |
-| Jun 15 | MLB Prop Edges | New `mlb/mlb_prop_edges.py` module for prop edge calculation |
-| Jun 15 | Cleanup | Removed deprecated `predict.py`, `models/basketball_predict.py`, `models/soccer_predict.py` |
-
-## Requirements
-
-- Python 3.8+
-- pandas
-- numpy
-- scikit-learn
-- requests
-- matplotlib
-- pybaseball (for MLB)
-
-## 2026 Season Notes
-
-### MLB
-The 2026 MLB season features the new Automated Ball-Strike (ABS) Challenge System, resulting in:
-- Tighter strike zone (53.5% at top, 27% at bottom)
-- Average of 9.4 runs per game
-- Specific umpire tendencies affecting Over/Under trends
-
-### KBO
-- Higher scoring environment (~10.2 runs/game vs MLB's ~8.8)
-- Foreign player restrictions (3-player limit with significant impact)
-- Unique park factors (Gocheok Sky Dome suppresses HRs)
-- Contact-focused league (lowest SwStr% in professional baseball)
-
-### Taiwan P. League+
-- 40-minute FIBA rules format
-- Fubon Braves are back-to-back defending champions
-- Moderate scoring environment (~170-175 total points per game)
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## License
-
-MIT License
+The current review is documented in [repository review and priorities](docs/REPOSITORY_REVIEW_2026-10-19.md). Contributions should include a reproducible defect or improvement, meaningful pass/failure tests, and an update to affected commands and data contracts. Research output, delivered recommendations and actual bets must remain distinct.

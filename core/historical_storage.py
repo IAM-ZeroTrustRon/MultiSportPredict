@@ -117,15 +117,25 @@ def store_prediction(
     conn = sqlite3.connect(path)
     cur = conn.cursor()
 
+    import os
+    raw_json = dict(raw_json)
+    if os.environ.get("MSP_RUN_ID"):
+        raw_json["_workflow_run_id"] = os.environ["MSP_RUN_ID"]
     game_date = raw_json.get("game_date")
     event_key = raw_json.get("event_key")
+    fixture = raw_json.get("fixture") or {}
+    fixture_id = fixture.get("game_id") or fixture.get("game_pk")
+    if not event_key and fixture_id:
+        event_key = f"{sport}:{fixture_id}:{market_type}"
+        raw_json["event_key"] = event_key
     today = datetime.now().date().isoformat()
     existing = cur.execute("""
         SELECT id FROM predictions
         WHERE sport = ? AND home_team = ? AND away_team = ? AND market_type = ?
           AND date(timestamp) = ? AND result_outcome IS NULL
+          AND (? IS NULL OR game_date = ?)
         ORDER BY id DESC LIMIT 1
-    """, (sport, home_team, away_team, market_type, today)).fetchone()
+    """, (sport, home_team, away_team, market_type, today, game_date, game_date)).fetchone()
 
     if event_key:
         existing = cur.execute("SELECT id FROM predictions WHERE sport=? AND event_key=? AND result_outcome IS NULL ORDER BY id DESC LIMIT 1", (sport, event_key)).fetchone()
@@ -607,6 +617,9 @@ class TableTennisStore:
         return result
 
     def save_run(self, report):
+        import os
+        if os.environ.get("MSP_RUN_ID"):
+            report["_workflow_run_id"] = os.environ["MSP_RUN_ID"]
         with self._connection() as conn:
             conn.execute('INSERT INTO tt_runs VALUES(?,?,?,?)',(report['run_id'],report['event']['event_id'],report['created_utc'],json.dumps(report,allow_nan=False)))
 
@@ -631,3 +644,114 @@ class TableTennisStore:
             out['finished']=conn.execute("SELECT COUNT(*) FROM tt_events WHERE status='finished'").fetchone()[0]
             out['range']=conn.execute("SELECT MIN(start_utc),MAX(start_utc) FROM tt_events WHERE status='finished'").fetchone()
         return out
+
+
+# Workflow state shares the canonical database; forecasts and delivery are distinct facts.
+from contextlib import contextmanager, closing
+
+
+@contextmanager
+def workflow_connection(db_path=None):
+    path = Path(db_path or Path(__file__).resolve().parents[1] / 'multisport_history.db')
+    if str(path).startswith('\\\\'):
+        raise ValueError('Workflow SQLite writes require a local database path')
+    conn = sqlite3.connect(path, timeout=30)
+    conn.row_factory = sqlite3.Row
+    conn.executescript('''
+        CREATE TABLE IF NOT EXISTS workflow_runs (
+            run_id TEXT PRIMARY KEY, sport TEXT NOT NULL, created_utc TEXT NOT NULL,
+            status TEXT NOT NULL, payload TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS workflow_deliveries (
+            id INTEGER PRIMARY KEY, run_id TEXT, created_utc TEXT NOT NULL,
+            status TEXT NOT NULL, payload TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS workflow_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    ''')
+    conn.commit()
+    try:
+        with conn:
+            yield conn
+    finally:
+        conn.close()
+
+
+def workflow_save_run(run_id, sport, status, payload, db_path=None):
+    from datetime import timezone
+    with workflow_connection(db_path) as conn:
+        conn.execute('INSERT INTO workflow_runs VALUES(?,?,?,?,?)',
+                     (run_id, sport, datetime.now(timezone.utc).isoformat(), status, json.dumps(payload)))
+
+
+def workflow_delivery(run_id, status, payload, db_path=None):
+    from datetime import timezone
+    with workflow_connection(db_path) as conn:
+        conn.execute('INSERT INTO workflow_deliveries(run_id,created_utc,status,payload) VALUES(?,?,?,?)',
+                     (run_id, datetime.now(timezone.utc).isoformat(), status, json.dumps(payload)))
+
+
+def workflow_set_meta(key, value, db_path=None):
+    with workflow_connection(db_path) as conn:
+        conn.execute('INSERT OR REPLACE INTO workflow_meta VALUES(?,?)', (key, json.dumps(value)))
+
+
+def workflow_repair_dates(repairs, db_path=None):
+    """Persist verified identities with an audit trail; never replace an existing grade."""
+    with workflow_connection(db_path) as conn:
+        for item in repairs:
+            row = conn.execute('SELECT * FROM predictions WHERE id=?', (item['id'],)).fetchone()
+            if row is None or row['result_outcome'] is not None:
+                continue
+            raw = json.loads(row['raw_json'] or '{}')
+            if not isinstance(raw, dict):
+                raise ValueError('Prediction payload is not an object')
+            raw['_fixture_repair'] = item
+            raw['game_date'] = item['date']
+            raw['fixture'] = item['fixture']
+            raw['event_key'] = f"{row['sport']}:{item['fixture']['game_id']}:{row['market_type']}"
+            conn.execute('UPDATE predictions SET game_date=?,event_key=?,raw_json=? WHERE id=?',
+                         (item['date'],raw['event_key'],json.dumps(raw),row['id']))
+
+
+def workflow_backup(folder, db_path=None):
+    from datetime import timezone
+    path = Path(db_path or Path(__file__).resolve().parents[1] / 'multisport_history.db')
+    folder = Path(folder); folder.mkdir(parents=True, exist_ok=True)
+    target = folder / ('history_' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '.sqlite')
+    with closing(sqlite3.connect(f'file:{path.as_posix()}?mode=ro', uri=True)) as src:
+        with closing(sqlite3.connect(target)) as dst:
+            src.backup(dst)
+            if dst.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
+                raise ValueError('Backup integrity check failed')
+    return target
+
+
+def workflow_cleanup(prediction_ids, run_ids, before, folder, db_path=None):
+    """Delete only approved unresolved historical selections, after a verified backup."""
+    from datetime import date, timezone
+    date.fromisoformat(before)
+    backup = workflow_backup(folder, db_path)
+    manifest = {'backup':str(backup), 'before':before, 'predictions':[], 'table_tennis_runs':[]}
+    path = Path(db_path or Path(__file__).resolve().parents[1] / 'multisport_history.db')
+    with closing(sqlite3.connect(path, timeout=30)) as conn:
+        conn.row_factory = sqlite3.Row
+        conn.execute('BEGIN IMMEDIATE')
+        for ident in prediction_ids:
+            row=conn.execute('SELECT * FROM predictions WHERE id=?',(ident,)).fetchone()
+            if row is None: continue
+            if row['result_outcome'] is not None or not row['game_date'] or row['game_date'] >= before:
+                raise ValueError(f'Refusing to delete graded/future/undated prediction {ident}')
+            manifest['predictions'].append(dict(row))
+        for ident in run_ids:
+            row=conn.execute('SELECT r.*,e.start_utc,e.status AS event_status FROM tt_runs r JOIN tt_events e ON e.event_id=r.event_id WHERE r.run_id=?',(ident,)).fetchone()
+            if row is None: continue
+            start=datetime.fromisoformat(row['start_utc'].replace('Z','+00:00'))
+            from zoneinfo import ZoneInfo
+            if start.astimezone(ZoneInfo('America/New_York')).date().isoformat() >= before or row['event_status']=='finished' or conn.execute('SELECT 1 FROM tt_grades WHERE run_id=?',(ident,)).fetchone():
+                raise ValueError(f'Refusing to delete settled/future table-tennis run {ident}')
+            manifest['table_tennis_runs'].append(dict(row))
+        # Materialize the exact deleted records before committing any removal.
+        target=Path(folder)/('deleted_'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'.json')
+        target.write_text(json.dumps(manifest,indent=2),encoding='utf-8')
+        conn.executemany('DELETE FROM predictions WHERE id=?',[(r['id'],) for r in manifest['predictions']])
+        conn.executemany('DELETE FROM tt_runs WHERE run_id=?',[(r['run_id'],) for r in manifest['table_tennis_runs']])
+        conn.commit()
+    return {'backup':str(backup), 'manifest':str(target), 'predictions_deleted':len(manifest['predictions']), 'table_tennis_runs_deleted':len(manifest['table_tennis_runs'])}

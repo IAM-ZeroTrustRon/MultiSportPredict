@@ -769,22 +769,10 @@ def ingest_mlb_probables(check: bool = False, season: Optional[int] = None) -> A
 # ==========================================================================
 
 def ingest_mlb_players(check: bool = False, season: Optional[int] = None) -> AdapterResult:
-    """Run the project's existing pybaseball ingestor for wOBA/ISO/K% player props.
-
-    Kept as a delegation rather than reimplemented on statsapi because statsapi
-    does not publish wOBA, and computing a fake one would be exactly the kind of
-    invented number the rest of this file refuses to write.
-    """
+    """Fetch measured player metrics from MLB Stats API and Baseball Savant."""
     result = AdapterResult("mlb-players")
-    try:
-        import pybaseball  # noqa: F401
-    except ImportError:
-        result.warn("pybaseball is not installed -- skipping MLB player props. "
-                    "Install it with: pip install pybaseball")
-        return result.succeed(0, "skipped (pybaseball not installed)")
-
     if check:
-        return result.succeed(0, "pybaseball present (dry run, not fetched)")
+        return result.succeed(0, "official MLB sources configured (dry run, not fetched)")
 
     sys.path.insert(0, str(ROOT))
     from ingest_mlb import fetch_and_store_mlb  # type: ignore
@@ -1396,7 +1384,7 @@ Adapter = Callable[..., AdapterResult]
 ADAPTERS: "Dict[str, Tuple[str, Adapter]]" = {
     "mlb":            ("MLB team metrics (statsapi.mlb.com)",            ingest_mlb_teams),
     "mlb-probables":  ("MLB probable starters, today + tomorrow",        ingest_mlb_probables),
-    "mlb-players":    ("MLB player props via pybaseball",                ingest_mlb_players),
+    "mlb-players":    ("MLB player metrics via official MLB feeds",                ingest_mlb_players),
     "mlb-lineups":    ("MLB batting orders, today (statsapi.mlb.com)",       ingest_mlb_lineups),
     "kbo":            ("KBO team metrics (mykbostats.com)",              ingest_kbo_teams),
     "euroleague":     ("EuroLeague ORTG/DRTG/pace (euroleague-api)",     ingest_euroleague),

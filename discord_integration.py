@@ -1336,6 +1336,13 @@ def _broadcast_embed(embed, extra_webhooks=None, dry_run=False, label="predictio
         else ("[PARTIAL]" if success_count or bot_sent else "[WARN]")
     print(f"{tag} {label}: {' + '.join(parts)}."
           + (f" Failed: {', '.join(failed_hooks)}" if failed_hooks else ""))
+    if not dry_run:
+        from core.historical_storage import workflow_delivery
+        workflow_delivery(os.getenv("MSP_RUN_ID"),
+            "complete" if tag == "[OK]" else "partial" if tag == "[PARTIAL]" else "failed",
+            {"label": label, "game_key": game_key, "webhook_targets": len(targets),
+             "webhooks_succeeded": success_count, "bot_requested": bot_wanted,
+             "bot_succeeded": bool(bot_sent)})
     return success_count + (1 if bot_sent else 0)
 
 

@@ -142,3 +142,11 @@ pending_results.csv
 *.bak-*
 i-want-to-run-the-soccer-match-between/
 data/cache/
+
+# Local workflow evidence and recoverable cleanup backups
+output/workflow/
+output/workflow_upgrade_20261019/
+output/backups/
+
+# Runtime output stays local; publish curated screenshots under docs/evidence.
+/output/

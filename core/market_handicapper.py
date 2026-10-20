@@ -225,3 +225,34 @@ if __name__ == "__main__":
     rlm = detect_reverse_line_movement("Browns", "Steelers", 0.72, 0.48, -3.5, -2.5)
     print(f"\nRLM: {rlm.is_rlm} -> Back {rlm.sharp_side} ({rlm.confidence_reason})")
     print("=" * 65)
+
+# =====================================================================
+# SWEET SPOT BET EVALUATOR (+EV & 50%+ WIN PROBABILITY)
+# =====================================================================
+
+def check_sweet_spot_play(model_win_prob: float, american_odds: float) -> Tuple[bool, Optional[str]]:
+    """
+    Evaluates if a bet qualifies as a 'SWEET SPOT' play:
+    - Odds Band: between -150 and +100
+    - Sustainable Edge: between +3.0% and +6.0% EV
+    - Win Rate Floor: model_win_prob >= 53.0% (majority of bets win)
+    """
+    # 1. Filter Odds Band (-150 to +100)
+    in_odds_band = (-150 <= american_odds <= -100) or (0 < american_odds <= 100)
+    if not in_odds_band:
+        return False, None
+
+    # 2. Calculate break-even implied probability
+    if american_odds > 0:
+        implied_be = 100.0 / (american_odds + 100.0)
+    else:
+        implied_be = abs(american_odds) / (abs(american_odds) + 100.0)
+
+    edge_pct = (model_win_prob - implied_be) * 100.0
+
+    # 3. Check Sweet Spot criteria
+    if 3.0 <= edge_pct <= 6.0 and model_win_prob >= 0.53:
+        badge = f"🎯 SWEET SPOT ({model_win_prob*100:.1f}% Win Prob | +{edge_pct:.1f}% Edge)"
+        return True, badge
+
+    return False, None

@@ -33,13 +33,14 @@ def test_kbo_schedule_filters_target_date_and_maps_away_home(monkeypatch):
     games = run_mlb.load_kbo_schedule("2026-10-09")
 
     assert requested["url"] == run_mlb.KBO_SCHEDULE_URL
-    assert requested["params"] == {"date": "2026-10-09"}
+    assert requested["params"] == {"start": "2026-10-09"}
     assert games == [{
         "game_date": "2026-10-09",
         "away_team": "KIA Tigers",
         "home_team": "NC Dinos",
         "status": "scheduled",
         "source": "mykbostats.com",
+        "game_id": "/games/14029-Kia-vs-NC-20261009",
     }]
 
 

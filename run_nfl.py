@@ -176,7 +176,7 @@ def fetch_odds() -> Dict[str, Dict[str, Optional[float]]]:
 # ==========================================================================
 
 def run_one(home: str, away: str, lines: Dict[str, Optional[float]],
-            neutral: bool, push: bool) -> Dict[str, Any]:
+            neutral: bool, push: bool, game_date: Optional[str] = None) -> Dict[str, Any]:
     from universal_runner import run_nfl
     return run_nfl(
         home, away,
@@ -185,7 +185,7 @@ def run_one(home: str, away: str, lines: Dict[str, Optional[float]],
         spread_home_price=lines.get("spread_home_price"),
         spread_away_price=lines.get("spread_away_price"),
         over_price=lines.get("over_price"), under_price=lines.get("under_price"),
-        neutral_site=neutral, store_to_db=True, push_discord=push,
+        neutral_site=neutral, store_to_db=True, push_discord=push, game_date=game_date,
     )
 
 
@@ -229,6 +229,7 @@ def main() -> None:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--match", action="append", metavar='"HOME vs AWAY"')
     parser.add_argument("--week", type=int, help="Run a whole week from the schedule.")
+    parser.add_argument("--date", help="Actual fixture date YYYY-MM-DD in Eastern time")
     parser.add_argument("--season", type=int, default=None)
     parser.add_argument("--odds", action="store_true", help="Fetch live lines.")
     parser.add_argument("--spread", type=float, action="append")
@@ -279,8 +280,9 @@ def main() -> None:
                 continue
             row = rows[number - 1]
             log(f"  pushing {number}. {row['away']} at {row['home']}")
-            run_one(row["home"], row["away"], row.get("lines", {}),
-                    row.get("neutral_site", False), push=True)
+            from universal_runner import _push_full_result
+            if not _push_full_result("nfl", row["home"], row["away"], row):
+                raise SystemExit("No confirmed Discord delivery")
         return
 
     # ---- build the card ----
@@ -322,7 +324,8 @@ def main() -> None:
             continue
 
         if not args.no_fixture_check:
-            feed_home, feed_away, note = home_away(home, away)
+            fixture_date = args.date or next((g["date"] for g in (games if args.week else []) if {_norm(g["home_team"]),_norm(g["away_team"])} == {_norm(home),_norm(away)}), None)
+            feed_home, feed_away, note = home_away(home, away, date=fixture_date, season=args.season)
             if feed_home is None:
                 problems.append(f"{clean_team(home)} vs {clean_team(away)}: {note}")
                 continue
@@ -340,9 +343,8 @@ def main() -> None:
         rule()
         for problem in problems:
             log(f"  {problem}")
-        log("\nA prediction for a game nobody is playing looks exactly like a real")
-        log("one. If you are certain the fixture exists and the schedule is stale,")
-        log("refresh it -- or pass --no-fixture-check deliberately.")
+        log("\nRefresh the NFL schedule and verify the fixture date and season.")
+        log("Started and completed games cannot be run as upcoming forecasts.")
         sys.exit(1)
 
     lines_by_game: Dict[str, Dict[str, Optional[float]]] = fetch_odds() if args.odds else {}
@@ -373,14 +375,17 @@ def main() -> None:
             log(f"  [dry-run] {disp_away} at {disp_home}   lines={lines}")
             continue
         try:
-            result = run_one(home, away, lines, args.neutral_site, push=False)
+            fixture_date = args.date or next((g["date"] for g in (games if args.week else []) if {_norm(g["home_team"]),_norm(g["away_team"])} == {_norm(home),_norm(away)}), None)
+            result = run_one(home, away, lines, args.neutral_site, push=False, game_date=fixture_date)
             result["lines"] = lines
             result["neutral_site"] = args.neutral_site
             rows.append(result)
         except Exception as exc:                        # noqa: BLE001
             log(f"  [FAILED] {disp_away} at {disp_home}: {type(exc).__name__}: {exc}")
 
-    if args.dry_run or not rows:
+    if not rows and not args.dry_run:
+        raise SystemExit("No NFL forecasts were saved")
+    if args.dry_run:
         return
 
     REVIEW.parent.mkdir(parents=True, exist_ok=True)

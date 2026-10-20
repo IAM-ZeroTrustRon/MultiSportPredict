@@ -168,7 +168,7 @@ def load_kbo_schedule(date_str: str = SLATE_DATE) -> List[Dict[str, Any]]:
     """Fetch KBO games from MyKBO Stats and keep only the requested game date."""
     response = requests.get(
         KBO_SCHEDULE_URL,
-        params={"date": date_str},
+        params={"start": date_str},
         headers={
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                           "AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
@@ -205,6 +205,7 @@ def load_kbo_schedule(date_str: str = SLATE_DATE) -> List[Dict[str, Any]]:
             "home_team": home,
             "status": "scheduled",
             "source": "mykbostats.com",
+            "game_id": anchor.get("href"),
         })
     return games
 
@@ -506,7 +507,7 @@ def run_one(home: str, away: str, game: Optional[Dict[str, Any]], total: float,
         log(f"             {home}: {', '.join(home_batters) if home_batters else 'not announced'}")
     result = run_baseball(home, away, league=LEAGUE, markets=MARKETS,
                           market_total=total, store_to_db=True,
-                          push_discord=push_discord,
+                          push_discord=push_discord, game_date=SLATE_DATE, fixture=game,
                           home_ml=home_ml, away_ml=away_ml,
                           over_price=over_price, under_price=under_price,
                           runline=runline,
@@ -857,7 +858,7 @@ def main() -> None:
     pairs: List[Tuple[str, str, Optional[Dict[str, Any]]]] = []
     problems: List[str] = []
 
-    if args.today or args.date:
+    if args.today or (args.date and not args.match):
         for game in games:
             home, away = game.get("home_team"), game.get("away_team")
             if home in teams and away in teams:

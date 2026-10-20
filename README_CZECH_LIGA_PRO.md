@@ -1,3 +1,13 @@
+# Table tennis — current workflow (October 19, 2026)
+
+Use the root shared interface in `/c/MultiSportPredict`. The active guides are [table-tennis commands](TABLE_TENNIS_COMMANDS.md) and [all-sports commands](COMMANDS.md). The separate engine folder is retained for compatibility.
+
+Hourly all-sport grading is configured locally. Eighteen unresolved historical table-tennis runs were backed up and removed under the approved cleanup. Public recent-result collection currently fails to read its source page; no successful refresh or complete automated point-score coverage is claimed.
+
+## Historical implementation notes
+
+The older notes below describe earlier snapshots; they are not the current command reference or automation status.
+
 Free table-tennis collection — 2026-10-10
 
 - Added ingest_table_tennis_public.py and table_tennis/public_results.py. Existing Playwright/Chromium reads rendered public Sofascore results without keys. Only confirmed finished Czech Liga Pro matches with numeric player profile IDs, explicit UTC starts, consistent final match wins and all legal game point scores enter tt_events in the canonical multisport_history.db. No odds, lines, end times or live points are invented. Raw public DOM snapshots are archived.

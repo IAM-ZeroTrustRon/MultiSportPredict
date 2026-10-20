@@ -823,3 +823,57 @@ if __name__ == "__main__":
     print(f"  'Yankees' -> {detect_league('Yankees')}")
     print(f"  'Doosan Bears' -> {detect_league('Doosan Bears')}")
     print(f"  'Unknown Team' -> {detect_league('Unknown Team')}")
+# =====================================================================
+# MLB RUN LINE (+1.5 / -1.5) CALCULATION & EV
+# =====================================================================
+import math
+
+def calculate_runline_probabilities(proj_home_runs: float, proj_away_runs: float, max_runs: int = 15):
+    """Calculates +1.5 / -1.5 run line probabilities using a discrete Poisson grid."""
+    def _poisson_pmf(k: int, lmbda: float) -> float:
+        if lmbda <= 0:
+            return 1.0 if k == 0 else 0.0
+        return (math.pow(lmbda, k) * math.exp(-lmbda)) / math.factorial(k)
+
+    p_home_by_2_plus = 0.0
+    for h in range(2, max_runs + 1):
+        for a in range(0, h - 1):
+            p_home_by_2_plus += _poisson_pmf(h, proj_home_runs) * _poisson_pmf(a, proj_away_runs)
+
+    p_away_by_2_plus = 0.0
+    for a in range(2, max_runs + 1):
+        for h in range(0, a - 1):
+            p_away_by_2_plus += _poisson_pmf(a, proj_away_runs) * _poisson_pmf(h, proj_home_runs)
+
+    # 9th inning walk-off adjustment on home -1.5
+    p_home_minus_1_5 = max(0.01, min(0.99, p_home_by_2_plus * 0.98))
+    p_away_plus_1_5 = round(1.0 - p_home_minus_1_5, 4)
+
+    p_away_minus_1_5 = max(0.01, min(0.99, p_away_by_2_plus))
+    p_home_plus_1_5 = round(1.0 - p_away_minus_1_5, 4)
+
+    return {
+        "home_minus_1_5": round(p_home_minus_1_5, 4),
+        "away_plus_1_5": p_away_plus_1_5,
+        "away_minus_1_5": round(p_away_minus_1_5, 4),
+        "home_plus_1_5": p_home_plus_1_5,
+    }
+
+def evaluate_runline_ev(cover_prob: float, american_odds: float):
+    """Calculates EV and recommendation for a run line."""
+    if american_odds > 0:
+        dec = (american_odds / 100.0) + 1.0
+    elif american_odds < 0:
+        dec = (100.0 / abs(american_odds)) + 1.0
+    else:
+        return 0.0, "PASS"
+
+    ev = (cover_prob * dec) - 1.0
+    if ev >= 0.05:
+        rec = "BET"
+    elif ev >= 0.02:
+        rec = "LEAN"
+    else:
+        rec = "PASS"
+
+    return round(ev * 100.0, 1), rec

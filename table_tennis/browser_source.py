@@ -30,8 +30,9 @@ def copied_lines(text):
     for raw in text.splitlines():
         line=raw.strip()
         if not line:continue
-        if re.match(r'^VS(?=[A-Z])',line):
-            lines.extend(['VS',line[2:]]);continue
+        if re.match(r'^vs\s*(?=(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b)',line,re.I):
+            lines.extend(['VS',re.sub(r'^vs\s*','',line,flags=re.I)]);continue
+        if line.casefold()=='vs':line='VS'
         joined=re.fullmatch(r'((?:1|2)(?:\s*\([+-]?\d+(?:\.\d+)?\))?|(?:Over|Under)\s*\([+-]?\d+(?:\.\d+)?\))\s*(\d+\.\d+)',line)
         if joined:lines.extend(joined.groups())
         else:lines.append(line)
@@ -86,20 +87,28 @@ def parse_capture(data, match, start_utc, best_of):
     if start<=timestamp(now):raise ValueError('Match start has passed; use a genuinely upcoming prematch fixture')
     # Page participant paragraphs are separated by VS and the displayed date.
     lines=copied_lines(text)
-    try:
-        vs=lines.index('VS');a=lines[vs-1];b=lines[vs+2]
-    except (ValueError,IndexError):raise ValueError('Cannot identify participants in MyStake DOM') from None
-    if sorted(map(normalized_name,(a,b)))!=sorted(map(normalized_name,names)):
-        raise ValueError('MyStake match participants do not match the requested full names')
-    if not all(x in text for x in ('Table Tennis','Czechia','Czech Liga Pro')):
-        raise ValueError('Page is not verified Czech Liga Pro table tennis')
+    # Clipboard copies often omit navigation labels and insert blank/menu
+    # lines around VS. Match complete name tokens, not fixed line offsets or
+    # edit-distance guesses that could select a different player.
+    heading=' '.join(text.casefold().split())
+    if not re.search(r'\bczech\s+liga\s+pro\b',heading) or not re.search(r'\b(?:czechia|czech republic)\b',heading):
+        raise ValueError('Page is not verified Czech Liga Pro table tennis: include the Czechia / Czech Liga Pro competition header in the paste')
+    if re.search(r'\b(?:soccer|basketball|badminton)\b',heading) and 'table tennis' not in heading:
+        raise ValueError('Page contains a conflicting sport label; copy only the table-tennis match')
+    boundary=next((i for i,line in enumerate(lines) if line in ('2 Way','Total','Total Points','Point Handicap')),len(lines))
+    candidates=[(i,line) for i,line in enumerate(lines[:boundary]) if normalized_name(line) in [normalized_name(n) for n in names]]
+    if len(candidates)!=2 or len({normalized_name(line) for _,line in candidates})!=2:
+        raise ValueError('MyStake match participants do not match the requested full names, or multiple matches were pasted; copy one match only')
+    (ai,a),(bi,b)=candidates
+    between=lines[ai+1:bi]
+    displayed_start=' '.join(line for line in between if line!='VS') or 'Not included in copied text'
     pid=lambda n:'mystake:name_'+hashlib.sha256(' '.join(normalized_name(n)).encode()).hexdigest()[:24]
     e=validate_event(dict(event_id=eid,provider='mystake',provider_event_id=eid.split(':')[1],
         player_a=a,player_b=b,player_a_id=pid(a),player_b_id=pid(b),
         player_identity_basis='normalized full name; cross-provider IDs are not merged',
         league='Czech Liga Pro',country='CZ',start_utc=start.isoformat(),retrieved_utc=now,
         start_provenance='user-confirmed timezone-aware start',format_provenance='user-confirmed',
-        displayed_start=lines[vs+1],source_url=data['url'],best_of=best_of,
+        displayed_start=displayed_start,source_url=data['url'],best_of=best_of,
         status='scheduled',game_scores=[],current_points=[0,0]))
     quotes=[];notes=[]
     titles={'2 Way':'moneyline','Total':'points_total',

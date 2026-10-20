@@ -1,0 +1,65 @@
+{
+  "as_of": "2026-10-19 America/New_York",
+  "retained_historical_model_record": {
+    "period_start": "all time",
+    "ordinary_decisions": {
+      "n": 379,
+      "wins": 181,
+      "losses": 195,
+      "pushes": 3,
+      "win_pct": 48.138297872340424
+    },
+    "recorded_price_model_decisions": {
+      "n": 238,
+      "wins": 112,
+      "losses": 124,
+      "pushes": 2,
+      "win_pct": 47.45762711864407,
+      "units": 20.2397,
+      "roi": 8.5040756302521,
+      "stake_basis": "One unit risked per recorded-price selection, including pushes; simulated model record, not confirmed wagers."
+    },
+    "settlement_prices": {
+      "recorded": 238,
+      "default_or_unknown": 141
+    },
+    "awaiting_results": 2,
+    "excluded_duplicate_rows": 2,
+    "table_tennis_historical_research_grades": 0,
+    "note": "New-period view does not erase settled history. Research selections and ordinary decisions are not combined as independent bets."
+  },
+  "fresh_period": {
+    "period_start": "2026-10-20",
+    "ordinary_decisions": {
+      "n": 0,
+      "wins": 0,
+      "losses": 0,
+      "pushes": 0,
+      "win_pct": null
+    },
+    "recorded_price_model_decisions": {
+      "n": 0,
+      "wins": 0,
+      "losses": 0,
+      "pushes": 0,
+      "win_pct": null,
+      "units": 0,
+      "roi": null,
+      "stake_basis": "One unit risked per recorded-price selection, including pushes; simulated model record, not confirmed wagers."
+    },
+    "settlement_prices": {
+      "recorded": 0,
+      "default_or_unknown": 0
+    },
+    "awaiting_results": 0,
+    "excluded_duplicate_rows": 0,
+    "table_tennis_historical_research_grades": 0,
+    "note": "New-period view does not erase settled history. Research selections and ordinary decisions are not combined as independent bets."
+  },
+  "cleanup": {
+    "predictions_deleted": 47,
+    "table_tennis_runs_deleted": 18
+  },
+  "integrity": "ok",
+  "scope": "Stored model selections; not a wager ledger or independently audited performance."
+}

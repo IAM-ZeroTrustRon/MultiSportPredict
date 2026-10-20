@@ -1,3 +1,13 @@
+# Table tennis — current workflow (October 19, 2026)
+
+Use the root shared interface in `/c/MultiSportPredict`. The active guides are [table-tennis commands](../TABLE_TENNIS_COMMANDS.md) and [all-sports commands](../COMMANDS.md). The separate engine folder is retained for compatibility.
+
+Hourly all-sport grading is configured locally. Eighteen unresolved historical table-tennis runs were backed up and removed under the approved cleanup. Public recent-result collection currently fails to read its source page; no successful refresh or complete automated point-score coverage is claimed.
+
+## Historical implementation notes
+
+The older notes below describe earlier snapshots; they are not the current command reference or automation status.
+
 # Czech Liga Pro Table Tennis Prediction Engine
 
 Built for integration into `C:\MultiSportPredict`.

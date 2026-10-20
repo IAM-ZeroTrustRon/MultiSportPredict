@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Fetch current-season MLB metrics from pybaseball and write a keyed JSON store."""
+"""Fetch current-season MLB metrics from official MLB feeds and write a keyed JSON store."""
 
 from __future__ import annotations
 
@@ -13,54 +13,12 @@ from typing import Any
 OUTPUT_PATH = Path("data/mlb_stats.json")
 
 
-def _number(row: Any, column: str) -> float | None:
-    value = row.get(column)
-    if value is None:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
 def fetch_and_store_mlb(season: int | None = None, output: Path = OUTPUT_PATH) -> dict[str, Any]:
     """Fetch qualified pitcher/hitter data and atomically write it to ``output``."""
-    try:
-        from pybaseball import batting_stats, pitching_stats
-    except ImportError as exc:
-        raise RuntimeError("pybaseball is required: pip install pybaseball") from exc
-
+    from mlb_player_source import fetch_metrics
     season = season or date.today().year
-    print(f"[*] Fetching live MLB stats via pybaseball for {season}...")
-    pitchers = pitching_stats(season, qual=1)
-    batters = batting_stats(season, qual=10)
-    if pitchers is None or batters is None or pitchers.empty or batters.empty:
-        raise RuntimeError(f"pybaseball returned no MLB data for season {season}")
-
-    data: dict[str, Any] = {
-        "season": season,
-        "source": "pybaseball",
-        "pitchers": {},
-        "batters": {},
-    }
-    for _, row in pitchers.iterrows():
-        name = str(row.get("Name", "")).strip()
-        metrics = {key: _number(row, source) for key, source in (
-            ("era", "ERA"), ("k_per_9", "K/9"), ("k_rate", "K%"),
-        )}
-        if name and all(value is not None for value in metrics.values()):
-            data["pitchers"][name] = metrics
-
-    for _, row in batters.iterrows():
-        name = str(row.get("Name", "")).strip()
-        metrics = {key: _number(row, source) for key, source in (
-            ("woba", "wOBA"), ("iso", "ISO"),
-        )}
-        if name and all(value is not None for value in metrics.values()):
-            data["batters"][name] = metrics
-
-    if not data["pitchers"] or not data["batters"]:
-        raise RuntimeError("MLB feed contained no complete pitcher or batter records")
+    print(f"[*] Fetching official MLB player metrics for {season}...")
+    data = fetch_metrics(season)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(f"{output.suffix}.tmp")
     temporary.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
