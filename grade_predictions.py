@@ -543,6 +543,11 @@ def grade_row(row: sqlite3.Row, home_score: float, away_score: float
         raw = {}
     prices = _recorded_prices(raw)
     price_key: Optional[str] = None
+    if sport == "nhl":
+        settlement = raw.get("settlement") or {}
+        if (not isinstance(settlement, dict) or settlement.get("scope") != "official_final_including_ot_so"
+                or market not in {"moneyline", "spread", "total"}):
+            raise Ungradable("NHL settlement scope unavailable/unsupported; regulation and OT markets cannot be mixed")
 
     if market == "total":
         if model_value is None or market_value is None:
@@ -1174,7 +1179,29 @@ fetch_basketball_results.league_scoped = True
 from kbo_results import fetch_results as fetch_kbo_results
 
 
+def fetch_nhl_results(start, end, dates=None):
+    from nhl_sources import schedule
+    if dates is None:
+        first=_dt.date.fromisoformat(start);last=_dt.date.fromisoformat(end)
+        dates=[(first+_dt.timedelta(days=i)).isoformat() for i in range((last-first).days+1)]
+    result={};identities={}
+    for day in dates:
+        for game in schedule(day):
+            if game['date']!=day or not game['completed']:continue
+            key=(day,normalise_team(game['home_team'],'nhl'),normalise_team(game['away_team'],'nhl'))
+            if key in identities and identities[key]!=game['game_id']:
+                raise ValueError('Ambiguous same-day NHL fixture identity')
+            identities[key]=game['game_id'];result[key]=(game['home_score'],game['away_score'])
+    fetch_nhl_results.event_ids=identities
+    return result
+
+
+fetch_nhl_results.wants_dates=True
+fetch_nhl_results.event_ids={}
+
+
 AUTO_SOURCES = {
+    "nhl": fetch_nhl_results,
     "kbo": fetch_kbo_results,
     "mlb": fetch_mlb_results,
     "baseball": fetch_mlb_results,   # rows logged as 'baseball' that are MLB games
@@ -1338,6 +1365,13 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
                     log(f"    [no result] #{row['id']} {row['game_date']} "
                         f"{row['home_team']} vs {row['away_team']}")
                 continue
+            if sport_key=='nhl':
+                try:raw=json.loads(row['raw_json'] or '{}')
+                except ValueError:raw={}
+                ident=(raw.get('fixture') or {}).get('game_id')
+                actual=fetch_nhl_results.event_ids.get(key) or fetch_nhl_results.event_ids.get(flipped_key)
+                if not ident or str(ident)!=actual:
+                    unmatched+=1;log(f"    [identity mismatch] NHL #{row['id']} remains unresolved");continue
             outcome = apply_result(conn, row, scores[0], scores[1], f"{sport_key} feed")
             if outcome:
                 graded += 1
@@ -1465,6 +1499,112 @@ def _tally(rows: Sequence[sqlite3.Row]) -> Dict[str, Any]:
     }
 
 
+def _recorded_price_row(row):
+    """Validate settlement provenance identically for flat and weighted returns."""
+    try:
+        raw = json.loads(row["raw_json"] or "{}")
+        profit = float(row["profit_loss"]) if row["profit_loss"] is not None else None
+    except (TypeError, ValueError):
+        return None
+    if (not isinstance(raw, dict) or raw.get("_settled_at_recorded_price") is not True
+            or isinstance(raw.get("_settled_odds"), bool)
+            or _price(raw.get("_settled_odds")) is None
+            or isinstance(row["profit_loss"], bool)
+            or profit is None or not math.isfinite(profit)):
+        return None
+    return {**dict(row), "profit_loss": profit}
+
+
+def recorded_price_breakdown(rows: Sequence[sqlite3.Row]) -> Dict[str, Any]:
+    """Use original settlement provenance after dedup, never a default price.
+
+    Filtering first would resurrect an older priced run when the newest run
+    has unknown prices. Saved P/L preserves the grader's settlement rounding.
+    """
+    settled, _ = newest_per_fixture([r for r in rows if r["result_outcome"] in {"win", "loss", "push"}])
+    decisions = [r for r in settled if not is_excluded_tier(r["recommendation"])]
+    recorded = []
+    for row in decisions:
+        normalized = _recorded_price_row(row)
+        if normalized is not None:
+            recorded.append(normalized)
+
+    def tally(group):
+        stats = _tally(group)
+        # Every selection risks one unit; pushes refund it but stay in turnover.
+        stats["roi"] = stats["units"] / stats["n"] * 100 if stats["n"] else None
+        return stats
+
+    names = sorted({str(r["sport"] or "unknown").strip().lower() for r in recorded})
+    return {"overall": tally(recorded),
+            "by_sport": {name: tally([r for r in recorded if str(r["sport"] or "unknown").strip().lower() == name]) for name in names},
+            "excluded": len(decisions) - len(recorded)}
+
+
+STAKE_CAP = 0.05
+
+
+def _row_stake(row) -> Optional[float]:
+    """Stored quarter-Kelly bankroll fraction, or None when absent/invalid."""
+    try:
+        value = row["stake_size"]
+    except (IndexError, KeyError, TypeError):
+        return None
+    if value is None or isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    value = float(value)
+    return value if math.isfinite(value) and 0 < value <= STAKE_CAP else None
+
+
+def stake_weighted_breakdown(rows: Sequence) -> Dict[str, Any]:
+    """Bankroll-weighted record from stored stake fractions.
+
+    Saved P/L is per one unit, so weighted P/L is stake * stored P/L against a
+    fixed notional bankroll. Rows with no valid stored stake are excluded and
+    counted; they are never defaulted to a flat unit, and nothing is
+    retro-fitted. Recorded-price settlement provenance is required, just as
+    for the flat record. This is not compounding.
+    """
+    settled, _ = newest_per_fixture([r for r in rows if r["result_outcome"] in {"win", "loss", "push"}])
+    decisions = [r for r in settled if not is_excluded_tier(r["recommendation"])]
+    staked = units = 0.0
+    counted = []
+    missing_stake = unverified = 0
+    for row in decisions:
+        stake = _row_stake(row)
+        if stake is None:
+            missing_stake += 1
+            continue
+        normalized = _recorded_price_row(row)
+        if normalized is None:
+            unverified += 1
+            continue
+        staked += stake
+        units += stake*normalized["profit_loss"]
+        counted.append(normalized)
+    stats = _tally(counted)
+    return {"n": len(counted), "wins": stats["wins"], "losses": stats["losses"],
+            "pushes": stats["pushes"], "win_pct": stats["win_pct"],
+            "staked": staked, "units": units,
+            "roi": (units/staked*100) if staked else None,
+            "excluded_without_stake": missing_stake,
+            "excluded_unverified_settlement": unverified,
+            "excluded_total": missing_stake+unverified,
+            "stake_basis": "Stored quarter-Kelly fraction (5% cap) of a fixed notional bankroll; weighted P/L = stake x one-unit P/L. Not compounding, not a confirmed wager."}
+
+
+def print_recorded_price_table(report: Dict[str, Any]) -> None:
+    log("\nRECORDED PRICES ONLY (ASSUMED/UNKNOWN ODDS EXCLUDED)")
+    log(f"  {'SPORT':<26}{'W-L-P':<14}{'WIN%':>8}{'UNITS':>11}{'ROI':>10}")
+    for name, stats in [*report["by_sport"].items(), ("OVERALL", report["overall"])]:
+        win_pct = f"{stats['win_pct']:.2f}%" if stats["win_pct"] is not None else "n/a"
+        roi = f"{stats['roi']:+.2f}%" if stats["roi"] is not None else "n/a"
+        record = f"{stats['wins']}-{stats['losses']}-{stats['pushes']}"
+        log(f"  {name.upper():<26}{record:<14}{win_pct:>8}{stats['units']:>+10.2f}u{roi:>10}")
+    log(f"  {report['overall']['n']} recorded-price selections; {report['excluded']} excluded for missing/invalid price provenance or settlement.")
+    log("  One unit risked per selection, including pushes. Model record, not confirmed wagers.")
+
+
 def _line(label: str, stats: Dict[str, Any]) -> str:
     win_pct = f"{stats['win_pct']:.1f}%" if stats["win_pct"] is not None else "   -  "
     roi = f"{stats['roi']:+.1f}%" if stats["roi"] is not None else "   -  "
@@ -1492,6 +1632,8 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
     total_logged = conn.execute("SELECT COUNT(*) FROM predictions").fetchone()[0]
     if not rows:
         log(f"No graded predictions yet ({total_logged} logged in total).")
+        if sport and sport.lower()=='nhl':
+            log('NHL INFO observations are separate: venv/Scripts/python.exe -u run_nhl.py --observations')
         log("Start with:  python grade_predictions.py --auto")
         log("          or python grade_predictions.py --pending")
         return 0
@@ -1596,6 +1738,8 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
             f"the rest assumed {DEFAULT_ODDS:.0f}.")
     log("=" * 78)
 
+    print_recorded_price_table(recorded_price_breakdown(record_rows))
+
     if push_discord:
         _push_record_to_discord(record_rows, bets, days)
     return 0
@@ -1633,10 +1777,30 @@ def _push_record_to_discord(rows: Sequence[sqlite3.Row], bets: Sequence[sqlite3.
         "color": 3066993 if (overall["units"] or 0) >= 0 else 15158332,
         "fields": fields[:24],
         "footer": {"text": "MultiSportPredict | graded results only"},
-        "timestamp": _dt.datetime.utcnow().isoformat(),
+        "timestamp": _dt.datetime.now(_dt.timezone.utc).isoformat(),
     }
     try:
-        response = requests.post(webhook, json={"embeds": [embed]}, timeout=20)
+        verified = recorded_price_breakdown(rows)
+        stats = verified["overall"]
+        roi = f"{stats['roi']:+.2f}%" if stats["roi"] is not None else "n/a"
+        price_embed = {
+            "title": "Recorded-price model record",
+            "description": (f"**{stats['wins']}-{stats['losses']}-{stats['pushes']} W-L-P** | "
+                            f"{stats['units']:+.2f}u | ROI {roi}\n"
+                            f"{stats['n']} selections; {verified['excluded']} missing/invalid-price settlements excluded."
+                            + (f"\nLast {days} days" if days else "\nAll time")),
+            "color": 3066993 if stats["units"] >= 0 else 15158332,
+            "fields": [],
+            "footer": {"text": "One unit risked per selection, including pushes. Model record; not confirmed wagers."},
+        }
+        for name, sport_stats in verified["by_sport"].items():
+            sport_roi = f"{sport_stats['roi']:+.2f}%" if sport_stats["roi"] is not None else "n/a"
+            sport_win = f"{sport_stats['win_pct']:.2f}%" if sport_stats["win_pct"] is not None else "n/a"
+            price_embed["fields"].append({"name": name.upper(), "inline": True,
+                "value": f"{sport_stats['wins']}-{sport_stats['losses']}-{sport_stats['pushes']} | Win {sport_win}\n{sport_stats['units']:+.2f}u | ROI {sport_roi}"})
+        price_embed["fields"] = price_embed["fields"][:25]
+        embed["description"] += "\nLegacy totals may include assumed odds; recorded-price results are shown separately."
+        response = requests.post(webhook, json={"embeds": [embed, price_embed]}, timeout=20)
         ok = response.status_code in (200, 204)
         log(f"\n[discord] record {'posted' if ok else f'failed ({response.status_code})'}")
     except Exception as exc:  # noqa: BLE001

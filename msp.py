@@ -1,11 +1,13 @@
 """One entry point for refresh, predictions, saved reviews, grading and records."""
 import argparse
+import sys
 import json
 from pathlib import Path
 import msp_workflow as workflow
 
 
 def main(argv=None):
+    if hasattr(sys.stdout,'reconfigure'):sys.stdout.reconfigure(encoding='utf-8')
     p=argparse.ArgumentParser(description=__doc__)
     sub=p.add_subparsers(dest='action',required=True)
     for name in ['refresh','grade','daily']:

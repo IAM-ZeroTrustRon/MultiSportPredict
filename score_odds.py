@@ -3,6 +3,7 @@ import datetime as dt
 from sports_feed import EASTERN
 
 KEYS = {"NCAAF": "americanfootball_ncaaf", "NBA": "basketball_nba", "WNBA": "basketball_wnba", "NCAAB": "basketball_ncaab", "NCAAW": "basketball_wncaab"}
+KEYS['NHL'] = 'icehockey_nhl'
 
 
 def fetch(league):
@@ -39,6 +40,16 @@ def for_fixture(events, game, include_periods=False):
         for market in book.get("markets", []):
             key = market.get("key")
             if not isinstance(key,str):continue
+            if game['league']=='NHL':
+                # Only standard full-game pairs; a three-way regulation price
+                # cannot be silently treated as OT-inclusive moneyline.
+                if key not in {'h2h','spreads','totals'} or len(market.get('outcomes',[]))!=2:continue
+                updated=market.get('last_update') or book.get('last_update')
+                try:
+                    stamp=dt.datetime.fromisoformat(updated.replace('Z','+00:00'))
+                    age=(dt.datetime.now(dt.timezone.utc)-stamp).total_seconds()
+                except (AttributeError,TypeError,ValueError):continue
+                if stamp.tzinfo is None or not -5<=age<=900:continue
             period = next((p for p in ('h1','q1') if key.endswith('_'+p)), None)
             if period and not include_periods:continue
             kind = key.rsplit('_',1)[0] if period else key
@@ -58,7 +69,8 @@ def for_fixture(events, game, include_periods=False):
             specs.append({"kind": {"h2h":"moneyline", "spreads":"spread", "totals":"total"}[kind],
                 "line": 0.5 if kind == "h2h" else a["point"], "price_a": a["price"], "price_b": b["price"],
                 "bookmaker": book.get("key"), "updated": market.get("last_update") or book.get("last_update"),
-                **({"period":period,"pricing_status":"EV unavailable - no calibrated period model"} if period else {})})
+                **({"period":period,"pricing_status":"EV unavailable - no calibrated period model"} if period else {}),
+                **({'scope':'official_final_including_ot_so','timestamp_basis':'bookmaker update','source_event_id':event['id']} if game['league']=='NHL' else {})})
         if any(not s.get("period") for s in specs):
             return specs, f"Bookmaker {book.get('key')}; event {event['id']}"
     return [], "No complete bookmaker pairs; prices remain absent"

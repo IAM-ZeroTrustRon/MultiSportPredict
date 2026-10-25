@@ -6,6 +6,7 @@ Enables tracking of prediction performance over time.
 """
 
 import json
+import math
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -57,6 +58,12 @@ def init_db(db_path: Optional[Path] = None) -> None:
         if name not in existing_columns:
             cur.execute(f"ALTER TABLE predictions ADD COLUMN {name} TEXT")
 
+    # Dynamic position sizing (fraction of bankroll). Rows stored before this
+    # column existed keep NULL and are reported separately rather than being
+    # retro-fitted to a stake they never had.
+    if "stake_size" not in existing_columns:
+        cur.execute("ALTER TABLE predictions ADD COLUMN stake_size REAL")
+
     # Index for faster queries
     cur.execute("""
         CREATE INDEX IF NOT EXISTS idx_predictions_sport 
@@ -85,6 +92,7 @@ def store_prediction(
     raw_json: Dict[str, Any],
     db_path: Optional[Path] = None,
     league: Optional[str] = None,
+    stake_size: Optional[float] = None,
 ) -> int:
     """
     Store a prediction in the database.
@@ -109,11 +117,18 @@ def store_prediction(
         raw_json: Full prediction result dictionary
         db_path: Optional custom database path
         league: Optional league/competition (e.g. "MLB", "KBO", "EPL")
+        stake_size: Optional quarter-Kelly fraction of bankroll for the pick
 
     Returns:
         ID of the inserted (or overwritten) row
     """
     path = db_path or DB_PATH
+    if stake_size is not None:
+        if isinstance(stake_size, bool):
+            raise ValueError("stake_size must be a fraction of bankroll, not a boolean")
+        stake_size = float(stake_size)
+        if not math.isfinite(stake_size) or not 0 <= stake_size <= 1:
+            raise ValueError("stake_size must be a finite fraction of bankroll in [0, 1]")
     conn = sqlite3.connect(path)
     cur = conn.cursor()
 
@@ -145,25 +160,25 @@ def store_prediction(
         cur.execute("""
             UPDATE predictions
             SET model_value = ?, market_value = ?, edge = ?, confidence = ?,
-                recommendation = ?, timestamp = ?, raw_json = ?, league = ?
+                recommendation = ?, timestamp = ?, raw_json = ?, league = ?, stake_size = ?
             WHERE id = ?
         """, (
             model_value, market_value, edge, confidence, recommendation,
-            datetime.now().isoformat(), json.dumps(raw_json), league, row_id
+            datetime.now().isoformat(), json.dumps(raw_json), league, stake_size, row_id
         ))
     else:
         cur.execute("""
             INSERT INTO predictions (
                 sport, home_team, away_team, market_type,
                 model_value, market_value, edge,
-                confidence, recommendation, timestamp, raw_json, league
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                confidence, recommendation, timestamp, raw_json, league, stake_size
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             sport, home_team, away_team, market_type,
             model_value, market_value, edge,
             confidence, recommendation,
             datetime.now().isoformat(),
-            json.dumps(raw_json), league
+            json.dumps(raw_json), league, stake_size
         ))
         row_id = cur.lastrowid
 

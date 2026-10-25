@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent
 DB = ROOT / 'multisport_history.db'
 PYTHON = ROOT / 'venv/Scripts/python.exe'
 ET = ZoneInfo('America/New_York')
-SPORTS = ('mlb','kbo','soccer','tennis','tennis-research','nfl','ncaaf','basketball','table-tennis')
+SPORTS = ('mlb','kbo','soccer','tennis','tennis-research','nfl','ncaaf','basketball','table-tennis','nhl')
 
 
 def today():
@@ -36,6 +36,7 @@ def refresh_plan(sport=None, date=None):
     date=dt.date.fromisoformat(date or today());y=date.year
     days=[(date-dt.timedelta(days=i)).isoformat() for i in reversed(range(8))]
     tasks=[
+        ('nhl',['ingest_nhl.py']),
         ('mlb',['ingest_all_sports.py','--only','mlb','mlb-probables','mlb-lineups','mlb-players']),
         ('kbo',['ingest_all_sports.py','--only','kbo']),
         ('soccer',['ingest_soccer_espn.py','--all','--fixtures']),
@@ -174,21 +175,17 @@ def record(all_time=False):
         counts=g._tally(bets)
         # Unknown-price historical unit calculations cannot substantiate realised ROI.
         counts.pop('units',None);counts.pop('roi',None)
-        recorded=[]
-        price_counts={'recorded':0,'default_or_unknown':0}
-        for r in bets:
-            try:raw=json.loads(r['raw_json'] or '{}')
-            except ValueError:raw={}
-            priced=isinstance(raw,dict) and raw.get('_settled_at_recorded_price')
-            price_counts['recorded' if priced else 'default_or_unknown']+=1
-            if priced:recorded.append(r)
+        pricing=g.recorded_price_breakdown(bets)
+        price_counts={'recorded':pricing['overall']['n'],'default_or_unknown':pricing['excluded']}
+        staking=g.stake_weighted_breakdown(bets)
         tt_count=conn.execute('SELECT count(*) FROM tt_grades').fetchone()[0] if 'tt_grades' in tables else 0
-    priced_stats=g._tally(recorded)
-    priced_stats['roi']=priced_stats['units']/priced_stats['n']*100 if priced_stats['n'] else None
+    priced_stats=pricing['overall']
     priced_stats['stake_basis']='One unit risked per recorded-price selection, including pushes; simulated model record, not confirmed wagers.'
     return {'period_start':start or 'all time','ordinary_decisions':counts,'recorded_price_model_decisions':priced_stats,'settlement_prices':price_counts,
+            'recorded_price_model_decisions_by_sport':pricing['by_sport'],'quarter_kelly_decisions':staking,
             'awaiting_results':len(active),'excluded_duplicate_rows':len(dupes),'table_tennis_historical_research_grades':tt_count,
-            'note':'New-period view does not erase settled history. Research selections and ordinary decisions are not combined as independent bets.'}
+            'note':('New-period view does not erase settled history. Research selections and ordinary decisions are not combined as independent bets. '
+                    'quarter_kelly_decisions covers only rows that stored a stake at prediction time; rows without one are excluded, not defaulted to a unit.')}
 
 
 def cleanup(before, apply=False):
@@ -210,15 +207,19 @@ def run_command(sport, matches, date, league, options, extra):
     args=[]
     for match in matches:args+=['--match',match]
     date=date or today()
+    # Score runners forbid mixing automatic quotes and manually priced lines.
+    manual_score_prices=any(arg.split('=',1)[0] in {'--moneyline','--spread','--total'} for arg in extra)
+    score_odds=[] if manual_score_prices or '--odds' in extra else ['--odds']
+    if sport=='nhl':return ['run_nhl.py',*args,'--date',date,'--odds',*extra]
     if sport=='nfl':return ['run_nfl.py',*args,'--date',date,'--odds',*extra]
     if sport in ('mlb','kbo'):return ['run_mlb.py','--league',sport.upper(),*(args or ['--today']),'--date',date,'--odds','--no-discord',*extra]
-    if sport=='ncaaf':return ['run_ncaaf.py',*args,'--date',date,'--odds',*extra]
+    if sport=='ncaaf':return ['run_ncaaf.py',*args,'--date',date,*score_odds,*extra]
     if sport=='basketball':
         if not league:raise ValueError('Basketball requires --league (for example KBL)')
         if league.upper() in ('NBL','EUROLEAGUE'):
             if len(matches)!=1:raise ValueError('International basketball needs one matchup per slate item')
             a,b=split_match(matches[0]);return ['run_basketball.py','--home',a,'--away',b,'--league',league,'--game-date',date,'--store-to-db',*extra]
-        return ['run_basketball.py',*args,'--league',league,'--date',date,'--odds',*extra]
+        return ['run_basketball.py',*args,'--league',league,'--date',date,*score_odds,*extra]
     if sport=='soccer':
         if len(matches)!=1 or not league:raise ValueError('Soccer requires one matchup and --league per slate item')
         a,b=split_match(matches[0]);return ['universal_runner.py','--sport','soccer','--home',a,'--away',b,'--league',league,'--game-date',date,'--live-odds','--store-to-db',*extra]

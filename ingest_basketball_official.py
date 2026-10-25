@@ -201,8 +201,10 @@ def ingest(league, check=False):
     games = {g["game_id"]: g for g in rows}
     if sum(g["completed"] for g in games.values()) < 80:
         raise ValueError("Official history incomplete; existing files retained")
+    from models.basketball_readiness import season_count_metadata
     result = dict(updated=today(), league=league, source="Public official league feeds",
                   games=sorted(games.values(), key=lambda g:(g["date"],g["game_id"])))
+    result["season_games_played"] = season_count_metadata(result["games"], league, today(), records)
     if not check:
         store = ROOT/"data/basketball_stats.json"
         previous = json.loads(store.read_text(encoding="utf-8-sig")) if store.exists() else {}

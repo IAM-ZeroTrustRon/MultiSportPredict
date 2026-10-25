@@ -56,6 +56,7 @@ COLOR_PASS = 0x95A5A6        # grey   - no disagreement worth backing
 COLOR_INFO = 0x7F8C8D        # slate  - projection only, no market
 
 SPORT_LABEL = {
+    "nhl": ("🏒", "NHL"),
     "baseball": ("⚾", "BASEBALL"), "mlb": ("⚾", "MLB"),
     "kbo": ("⚾", "KBO"), "soccer": ("⚽", "SOCCER"),
     "tennis": ("\U0001f3be", "TENNIS"), "nfl": ("\U0001f3c8", "NFL"),
@@ -856,6 +857,7 @@ def extract_basketball(data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 EXTRACTORS: Dict[str, Callable[[Dict[str, Any]], Dict[str, Any]]] = {
+    "nhl": extract_nfl,
     "baseball": extract_baseball, "mlb": extract_baseball, "kbo": extract_baseball,
     "soccer": extract_soccer, "tennis": extract_tennis,
     "nfl": extract_nfl, "ncaaf": extract_nfl,

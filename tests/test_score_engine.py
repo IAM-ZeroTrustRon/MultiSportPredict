@@ -47,6 +47,70 @@ class ScoreEngineTests(unittest.TestCase):
         self.assertAlmostEqual(priced['ev_a'], .15)
         self.assertEqual(priced['pick'], 'OVER')
 
+    def test_devig_fair_probabilities_and_quarter_kelly_stake(self):
+        market = price_market('moneyline', .5, (.60, .40, 0), 120, -140)
+        self.assertAlmostEqual(market['fair_prob_a'] + market['fair_prob_b'], 1.0, places=6)
+        self.assertLess(market['fair_prob_a'], .60)
+        # EV stays on the model probability against the offered price.
+        self.assertAlmostEqual(market['ev_a'], .60*1.20 - .40)
+        fair_ev = market['fair_prob_a']*1.20 - market['fair_prob_b']
+        self.assertLess(fair_ev, 0)
+        self.assertLess(fair_ev, market['ev_a'])
+        # f* = EV/(D-1); quarter of it, capped at 5% of bankroll.
+        expected = min(((.60*1.20-.40)/(2.20-1))*.25, .05)
+        self.assertAlmostEqual(market['stake_size'], expected)
+        self.assertEqual(market['pick'], 'HOME')
+        self.assertIn('quarter-Kelly', market['stake_basis'])
+
+    def test_small_edge_stake_is_not_capped(self):
+        market = price_market('moneyline', .5, (.55, .45, 0), 105, -125)
+        ev = .55*1.05 - .45
+        self.assertGreaterEqual(ev, .05)
+        self.assertAlmostEqual(market['stake_size'], (ev/1.05)*.25)
+        self.assertLess(market['stake_size'], .05)
+
+    def test_stake_is_unavailable_without_a_binary_price_pair(self):
+        push = price_market('total', 6, (.5, .40, .10), -110, -110)
+        self.assertEqual(push['pick'], 'OVER')
+        self.assertIsNone(push['stake_size'])
+        self.assertIsNone(push['fair_prob_a'])
+        self.assertIn('push', push['stake_basis'])
+        self.assertIsNone(price_market('moneyline', .5, (.55, .45, 0))['stake_size'])
+        below = price_market('moneyline', .5, (.51, .49, 0), -110, -110)
+        self.assertIsNone(below['pick'])
+        self.assertIsNone(below['stake_size'])
+
+    def test_stake_size_persists_and_defaults_to_null(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder)/'history.db'
+            init_db(path)
+            store_prediction('nhl', 'A', 'B', 'moneyline', .6, .5, 10, None, 'LEAN HOME',
+                             dict(event_key='NHL:1:moneyline'), path, 'NHL', stake_size=.025)
+            store_prediction('nhl', 'C', 'D', 'moneyline', .6, .5, 10, None, 'LEAN HOME',
+                             dict(event_key='NHL:2:moneyline'), path, 'NHL')
+            with sqlite3.connect(path) as conn:
+                rows = dict(conn.execute('SELECT event_key, stake_size FROM predictions'))
+            conn.close()
+            self.assertEqual(rows['NHL:1:moneyline'], .025)
+            self.assertIsNone(rows['NHL:2:moneyline'])
+            with self.assertRaises(ValueError):
+                store_prediction('nhl', 'E', 'F', 'moneyline', .6, .5, 10, None, 'LEAN HOME',
+                                 dict(event_key='NHL:3:moneyline'), path, 'NHL', stake_size=1.5)
+
+    def test_store_forwards_the_quarter_kelly_stake(self):
+        import run_ncaaf
+        result = dict(sport='ncaaf', league='NCAAF', home_team='A', away_team='B',
+                      game_date='2026-10-24', game_id='1',
+                      projection=dict(home_points=28.0, away_points=20.0, note='x'),
+                      markets=[price_market('moneyline', .5, (.62, .38, 0), 120, -140)],
+                      notes=[], fixture={})
+        with patch('core.historical_storage.init_db'), \
+             patch('core.historical_storage.store_prediction') as save:
+            run_ncaaf.store(result)
+        self.assertEqual(save.call_args.kwargs['stake_size'],
+                         min((.62*1.20-.38)/(2.20-1)*.25, .05))
+        self.assertEqual(save.call_args.args[8], 'LEAN HOME')
+
     def test_alternative_lines_survive_storage_and_grading(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder)/'history.db'

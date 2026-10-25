@@ -71,21 +71,28 @@ def devig_proportional(implied_probs: List[float]) -> List[float]:
 def devig_power(implied_probs: List[float], tol: float = 1e-7,
                 max_iter: int = 100) -> List[float]:
     """Power method: solve sum(p_i^k) = 1.0; P_true,i = p_i^k."""
-    total = sum(implied_probs)
-    if abs(total - 1.0) < tol:
-        return list(implied_probs)
-    low, high = 1.0, 10.0
+    if (len(implied_probs) < 2 or any(isinstance(p, bool) or
+            not math.isfinite(p) or not 0 < p < 1 for p in implied_probs)):
+        raise ValueError("Power de-vig requires at least two finite probabilities strictly between 0 and 1")
+    if not math.isfinite(tol) or tol <= 0 or max_iter < 1:
+        raise ValueError("Power de-vig requires positive tolerance and iteration limit")
+    # Underround pairs need an exponent below one; the old [1, 10] bracket
+    # silently returned probabilities that did not sum to one. Expand the
+    # upper bound for heavily overrounded markets instead of assuming 10 fits.
+    low, high = 0.0, 1.0
+    while sum(math.pow(p, high) for p in implied_probs) > 1.0:
+        high *= 2.0
     for _ in range(max_iter):
         mid = (low + high) / 2.0
-        val = sum(math.pow(p, mid) for p in implied_probs)
-        if abs(val - 1.0) < tol:
-            break
+        result = [math.pow(p, mid) for p in implied_probs]
+        val = sum(result)
+        if abs(val - 1.0) <= tol:
+            return result
         if val > 1.0:
             low = mid
         else:
             high = mid
-    k = (low + high) / 2.0
-    return [math.pow(p, k) for p in implied_probs]
+    raise ValueError("Power de-vig did not converge; fair probabilities unavailable")
 
 
 def devig_shin(implied_probs: List[float], tol: float = 1e-7,

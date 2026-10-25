@@ -1,3 +1,39 @@
+## Verified takeover and shared agent handoff — October 24, 2026
+
+- `docs/AI_HANDOFF.md` — authoritative shared Gemini/Claude/Codex takeover context,
+  verified NHL implementation, ledger snapshot, limitations, commands and backlog.
+- `docs/GEMINI_START_HERE.md`, `docs/CLAUDE_START_HERE.md` — copyable starting prompts.
+- `docs/TAKEOVER_AUDIT_2026-10-24.md` — findings, targeted repairs and verification.
+- `tests/test_takeover_repairs.py` — power solver, score-runner manual pricing and
+  weighted settlement provenance regressions.
+
+## Agent handoff and repository state — October 24, 2026
+
+- `docs/HANDOFF_2026-10-24.md` — current architecture, folder map, NHL special-teams
+  feature work, archive cleanup, verification results and open items. Start here.
+- Root clutter was moved (never deleted) into `archive/backups/`,
+  `archive/db-snapshots/`, `archive/scratch/`, `archive/scratch-data/` and
+  `archive/misc/`; the root now holds live entry points only.
+
+## NHL — October 21, 2026
+
+- `ingest_nhl.py`, `nhl_sources.py`, `ingest/nhl_api_fetcher.py` — official fixture/result identities and published MoneyPuck CSVs, atomic cache/manifests, verified 5-on-5 and special-teams joins.
+- `features/nhl_features.py`, `models/nhl_model.py`, `train_nhl.py` — prior-game rolling 5-on-5, special-teams and workload feature schema, cached regulation Poisson and fitted regular-season OT/SO winner benchmark, chronological validation.
+- `run_nhl.py`, `nhl_review.py` — guarded forecasts/observations, market scope, original odds, source provenance and explicit readiness limitations.
+- `nhl_observations.py` / `run_nhl.py --observations` — read-only forward winner/goal error metrics, earliest prematch forecast per event; separate from bet ROI.
+- `tests/test_nhl_engine.py` — source identity, leakage, probability mass, settlement, price freshness, record exclusion, canonical routing and persistence checks.
+- `docs/NHL_COPILOT_HANDOFF.md` — implemented workflow and original specification, including baseline limits.
+
+## Basketball readiness — October 21, 2026
+
+- `models/basketball_readiness.py` — NBA/NCAAB current-season sample policy, per-team counters, immutable observation-market masking.
+- `tests/test_basketball_readiness.py` — thresholds, season boundaries, leakage exclusion, ingestion, terminal/Discord and INFO-only persistence.
+
+## Recorded-price report — October 21, 2026
+
+- `grade_predictions.py` / `msp_workflow.py` — shared recorded-price sport breakdown for terminal, summary JSON and explicit Discord delivery.
+- `tests/test_recorded_price_report.py` — price provenance, dedup ordering, push denominators, invalid inputs and reporting consistency.
+
 ## NBA review additions — October 20, 2026
 
 - score_review.py — shared score-runner terminal/Discord presentation and precise Home/Away/Over/Under labels.

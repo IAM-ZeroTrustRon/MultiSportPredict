@@ -1,3 +1,20 @@
+## Manual score-market prices — repaired October 24, 2026
+
+`msp.py run --sport basketball` and `--sport ncaaf` now omit automatic `--odds`
+when you supply `--moneyline`, `--spread` or `--total`. Do not explicitly combine
+`--odds` with those manual flags. Prices are HOME/AWAY; spread line applies to
+HOME; total prices are OVER/UNDER. Repeated total/spread flags support alternatives.
+The runner verifies actual home/away from the fixture; pair manual prices accordingly.
+
+Current shared handoff and NHL readiness/odds limitations: `docs/AI_HANDOFF.md`.
+Read-only NHL observation report (separate from wagering returns):
+
+```bash
+venv/Scripts/python.exe -u run_nhl.py --observations
+```
+
+Historical examples elsewhere in this guide are syntax examples, not today's slate.
+
 ## MultiSportPredict — Git Bash command reference
 
 Updated October 19, 2026. Copy one complete command into Git Bash. No input prompts or placeholder values are used. Match examples show command syntax, not a verified schedule: edit the names, date, league and tournament before running. Omit --date to use today in America/New_York; table-tennis date filtering uses UTC.

@@ -2,6 +2,7 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from sports_feed import ROOT, fetch_json, parse_game, atomic_json, today
+from models.basketball_readiness import season_count_metadata
 
 LEAGUES = {"NBA": "nba", "WNBA": "wnba", "NCAAB": "mens-college-basketball", "NCAAW": "womens-college-basketball"}
 
@@ -20,6 +21,7 @@ def ingest(league, seasons, check=False):
         for event in result.get("events", []):
             row = parse_game(event, league.upper())
             if row and row["season"] == season:
+                row["season_type"] = 2
                 output.append(row)
         # Add postseason where published; regular-season emptiness is allowed
         # only for a future season, never used as a successful ratings refresh.
@@ -27,6 +29,7 @@ def ingest(league, seasons, check=False):
         for event in post.get("events", []):
             row = parse_game(event, league.upper())
             if row and row["season"] == season:
+                row["season_type"] = 3
                 output.append(row)
         return output
     roster_ids = {str(t["team"]["id"]) for t in teams}
@@ -39,6 +42,8 @@ def ingest(league, seasons, check=False):
         raise ValueError("Insufficient final scores; existing store retained")
     result = {"updated": today(), "league": league.upper(), "source": "ESPN team schedules",
               "seasons": seasons, "games": sorted(games.values(), key=lambda r:(r["date"],r["game_id"]))}
+    result["season_games_played"] = season_count_metadata(result["games"], league.upper(), today(),
+        [t["team"]["displayName"] for t in teams])
     print(f"{league}: {len(teams)} teams, {len(games)} fixtures, {sum(r['completed'] for r in games.values())} final")
     if not check:
         atomic_json(ROOT / f"data/basketball_{league.lower()}_games.json", result)

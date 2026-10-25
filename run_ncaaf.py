@@ -35,6 +35,15 @@ def predict_fixture(game, model, specs, sport="ncaaf"):
     if sport == "basketball" and game["league"].upper() == "NBA":
         from models.basketball_periods import provisional_periods
         segments = provisional_periods(projection)
+    if sport == "basketball":
+        from models.basketball_readiness import readiness, observation_markets
+        cutoff = getattr(model, "cutoff", None)
+        gate = readiness(game, getattr(model, "games", []), cutoff if isinstance(cutoff, str) else game["date"])
+        if gate is not None:
+            segments["readiness"] = gate
+            projection["season_games_played"] = dict(gate["season_games_played"])
+            if not gate["eligible"]:
+                markets = observation_markets(markets)
     return {**segments, "sport": sport, "league": game["league"], "home_team": game["home_team"],
             "away_team": game["away_team"], "game_date": game["date"], "game_id": game["game_id"],
             "projection": projection, "markets": markets, "fixture": game,
@@ -54,6 +63,11 @@ def push(result):
 def store(result):
     from core.historical_storage import init_db, store_prediction
     init_db()
+    from models.basketball_readiness import projection_only, observation_markets
+    if projection_only(result):
+        # INFO rows preserve observation snapshots but are excluded by grading
+        # and record filters. Never persist a stale LEAN from an earlier layer.
+        result = {**result, "markets": observation_markets(result["markets"], result["readiness"]["status"])}
     p = result["projection"]
     for m in result["markets"]:
         kind = m["kind"]
@@ -66,8 +80,9 @@ def store(result):
         store_prediction(result["sport"], result["home_team"], result["away_team"], kind,
             (p["home_points"]+p["away_points"]) if kind == "total" else m["prob_a"],
             m["line"] if kind != "moneyline" else 0.5,
-            max(v for v in (m["ev_a"], m["ev_b"], 0) if v is not None)*100,
-            None, m["recommendation"], raw, league=result["league"])
+            None if projection_only(result) else max(v for v in (m["ev_a"], m["ev_b"], 0) if v is not None)*100,
+            None, m["recommendation"], raw, league=result["league"],
+            stake_size=m.get("stake_size"))
 
 
 def main(sport="ncaaf", argv=None):

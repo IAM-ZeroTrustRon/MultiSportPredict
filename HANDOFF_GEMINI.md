@@ -1,3 +1,6 @@
+> Current takeover corrections and shared Gemini/Claude handoff: **docs/AI_HANDOFF.md**.
+> The dated content below is retained as history; use the shared handoff for current facts.
+
 # Handoff — Gemini
 
 You are joining an in-progress project. Read `STATE_OF_MODEL.md` first; this

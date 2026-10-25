@@ -3,6 +3,14 @@ import math
 from collections import Counter
 import numpy as np
 
+from core.market_handicapper import american_to_decimal, devig_market, kelly_stake_fraction
+
+# Position sizing mirrors the documented handicap policy: a quarter of full
+# Kelly on the offered price, capped at 5% of bankroll.
+KELLY_MULTIPLIER = 0.25
+KELLY_MAX_BANKROLL_PCT = 0.05
+FAIR_DEVIG_METHOD = "power"
+
 
 def _fit(games, cutoff):
     names = sorted({g[s + "_team"] for g in games for s in ("home", "away")})
@@ -117,6 +125,24 @@ def market_probability(mean, sd, line, spread=False):
     return win, lose, push
 
 
+def fair_probabilities(price_a, price_b, push=0.0):
+    """Bookmaker's vig-free probabilities for a binary two-way market.
+
+    A line with push mass is not a two-outcome pair, so its prices cannot be
+    de-vigged as one. Those return (None, None) instead of a fabricated fair
+    price rather than normalising a three-outcome market into two numbers.
+    """
+    if price_a is None or price_b is None or push > 0:
+        return None, None
+    try:
+        fair = devig_market([float(price_a), float(price_b)], method=FAIR_DEVIG_METHOD)
+    except (TypeError, ValueError, ZeroDivisionError):
+        return None, None
+    if len(fair) != 2 or any(not math.isfinite(p) or not 0 < p < 1 for p in fair):
+        return None, None
+    return fair[0], fair[1]
+
+
 def price_market(kind, line, probabilities, price_a=None, price_b=None):
     win, lose, push = probabilities
     evs = []
@@ -127,13 +153,34 @@ def price_market(kind, line, probabilities, price_a=None, price_b=None):
             odds = float(odds)
             if not math.isfinite(odds) or abs(odds) < 100:
                 raise ValueError("American odds must be <= -100 or >= +100")
+            # EV is measured on the model probability against the offered price:
+            # p*(D-1) - P(lose). Using the de-vigged market probability here
+            # would price the market against itself and always return ~zero.
             evs.append(p*(odds/100 if odds > 0 else 100/-odds)-loss)
     pick = None
+    stake_size = None
+    stake_basis = "unavailable: no priced model edge"
     if any(v is not None for v in evs):
         best = max(range(2), key=lambda i: evs[i] if evs[i] is not None else -math.inf)
         if evs[best] >= 0.05:
             pick = ("OVER" if best == 0 else "UNDER") if kind == "total" else ("HOME" if best == 0 else "AWAY")
+            odds, model_p = (price_a, price_b)[best], (win, lose)[best]
+            if odds is None:
+                stake_basis = "unavailable: missing price on the recommended side"
+            elif push > 0:
+                stake_basis = "unavailable: integer line carries push mass"
+            elif not (math.isfinite(float(model_p)) and 0 < float(model_p) < 1):
+                stake_basis = "unavailable: undefined model probability"
+            else:
+                stake_size = kelly_stake_fraction(float(model_p), american_to_decimal(float(odds)),
+                                                  multiplier=KELLY_MULTIPLIER,
+                                                  max_bankroll_pct=KELLY_MAX_BANKROLL_PCT)
+                stake_basis = (f"quarter-Kelly ({KELLY_MULTIPLIER:.0%} of full Kelly, "
+                               f"{KELLY_MAX_BANKROLL_PCT:.0%} bankroll cap) on model edge")
+    fair_a, fair_b = fair_probabilities(price_a, price_b, push)
     return {"kind": kind, "line": line, "prob_a": win, "prob_b": lose, "push_prob": push,
+            "fair_prob_a": fair_a, "fair_prob_b": fair_b,
             "price_a": price_a, "price_b": price_b, "ev_a": evs[0], "ev_b": evs[1],
-            "pick": pick, "recommendation": f"LEAN {pick}" if pick else "PASS — no priced model value",
+            "pick": pick, "stake_size": stake_size, "stake_basis": stake_basis,
+            "recommendation": f"LEAN {pick}" if pick else "PASS — no priced model value",
             "note": "Uncalibrated model EV; LEAN threshold 5%, not an established betting record"}

@@ -1,5 +1,6 @@
 """Shared score-runner presentation; raw probabilities/EV remain full-precision fractions."""
 from models.basketball_periods import provisional_periods
+from models.basketball_readiness import projection_only, PROJECTION_ONLY
 
 
 def percent(value, signed=False):
@@ -21,11 +22,13 @@ def market_rows(result, item):
     else:
         raise ValueError(f'Unsupported score market: {kind}')
     return [{'market': kind.title(), 'selection': label, 'probability': item.get('prob_' + side),
-             'price': item.get('price_' + side), 'ev': item.get('ev_' + side)}
+             'price': item.get('price_' + side), 'ev': None if projection_only(result) else item.get('ev_' + side)}
             for label, side in zip(labels, ('a', 'b'))]
 
 
 def recommendation(result, item):
+    if projection_only(result):
+        return result['readiness']['status']
     text = item.get('recommendation') or 'No recommendation'
     # Rendering only: preserve the stored pick tokens used by the grader.
     for token, replacement in [('HOME', f"Home: {result['home_team']}"),
@@ -45,6 +48,9 @@ def periods(result):
 
 
 def format_review(result):
+    if result.get('sport') == 'nhl':
+        from nhl_review import format_review as hockey_review
+        return hockey_review(result)
     p = result['projection']
     display_total = round(round(p['home_points'], 1) + round(p['away_points'], 1), 1)
     lines = [f"{result['league']} {result['game_date']} | {result['away_team']} @ {result['home_team']}",
@@ -53,6 +59,12 @@ def format_review(result):
              f"(Total: {display_total:.1f})"]
     if (result.get('odds_source') or {}).get('note'):
         lines.append('Market source: ' + result['odds_source']['note'])
+    gate = result.get('readiness')
+    if gate:
+        counts = gate['season_games_played']
+        lines += [gate['status'],
+                  f"Season {gate['season']} games before {gate['counted_before']}: Home {counts['home']} | Away {counts['away']} | Required each: {gate['required_games']}",
+                  gate['reason']]
     validation = p.get('validation') or {}
     if validation.get('games') is not None:
         rmse = validation.get('margin_rmse')
@@ -63,7 +75,7 @@ def format_review(result):
     lines += ['', f"{'Market':<12} {'Selection':<{width}}  {'Odds':>7}  {'Probability':>11}  Estimated EV", '-' * (width + 58)]
     for item in result['markets']:
         for row in market_rows(result, item):
-            ev = percent(row['ev'], True) if row['ev'] is not None else 'Unavailable - no price'
+            ev = result['readiness']['status'] if projection_only(result) else percent(row['ev'], True) if row['ev'] is not None else 'Unavailable - no price'
             lines.append(f"{row['market']:<12} {row['selection']:<{width}}  {price(row['price']):>7}  "
                          f"{percent(row['probability']):>11}  {ev}")
         lines.append('  ' + recommendation(result, item) + f" | Push: {percent(item.get('push_prob'))}")
@@ -87,10 +99,19 @@ def card_shape(result):
     rows = [{'name': 'Full game - projected score', 'model':
              f"Home: {result['home_team']} {p['home_points']:.1f} | Away: {result['away_team']} {p['away_points']:.1f}",
              'inline': False}]
+    gate = result.get('readiness')
+    if gate:
+        counts = gate['season_games_played']
+        rows.append({'name': 'Current-season readiness', 'model': gate['status'],
+                     'extra': f"Season {gate['season']} | Home {counts['home']} | Away {counts['away']} | Required each: {gate['required_games']}"
+                              + ('\n'+'; '.join(gate['reasons']) if result.get('sport')=='nhl' else ''), 'inline': False})
+    if result.get('sport')=='nhl':
+        rows[0]['name']='NHL regulation goal means'
+        rows[0]['model']=f"Home: {result['home_team']} {p['regulation_home']:.2f} | Away: {result['away_team']} {p['regulation_away']:.2f}"
     for item in result['markets']:
         detail = []
         for row in market_rows(result, item):
-            ev = percent(row['ev'], True) if row['ev'] is not None else 'Unavailable - no price'
+            ev = result['readiness']['status'] if projection_only(result) else percent(row['ev'], True) if row['ev'] is not None else 'Unavailable - no price'
             detail.append(f"{row['selection']}: {percent(row['probability'])} | Odds {price(row['price'])} | EV {ev}")
         rows.append({'name': 'Full game - ' + item['kind'].title(), 'model': '\n'.join(detail),
                      'pick': recommendation(result, item), 'extra': f"Push: {percent(item.get('push_prob'))}", 'inline': False})
@@ -113,5 +134,5 @@ def card_shape(result):
     rows = [{'market': None, 'edge': None, 'pick': None, 'extra': None, 'verdict': None, **row} for row in rows]
     note = 'Uncalibrated full-game model.'
     if str(result.get('league','')).upper() == 'NBA':note += ' NBA period shares are provisional assumptions.'
-    return {'markets': rows, 'notes': [note],
+    return {'markets': rows, 'notes': ['MoneyPuck.com advanced data; non-commercial published downloads.']+result.get('notes',[]) if result.get('sport')=='nhl' else [note],
             'context': str(result.get('league') or '')}
