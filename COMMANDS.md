@@ -6,7 +6,6 @@ when you supply `--moneyline`, `--spread` or `--total`. Do not explicitly combin
 HOME; total prices are OVER/UNDER. Repeated total/spread flags support alternatives.
 The runner verifies actual home/away from the fixture; pair manual prices accordingly.
 
-Current shared handoff and NHL readiness/odds limitations: `docs/AI_HANDOFF.md`.
 Read-only NHL observation report (separate from wagering returns):
 
 ```bash

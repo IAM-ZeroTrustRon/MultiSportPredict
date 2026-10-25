@@ -150,3 +150,11 @@ output/backups/
 
 # Runtime output stays local; publish curated screenshots under docs/evidence.
 /output/
+
+# Local agent handoffs and prompts; keep off GitHub.
+/docs/AI_HANDOFF.md
+/docs/CLAUDE_START_HERE.md
+/docs/GEMINI_START_HERE.md
+/docs/HANDOFF_2026-10-24.md
+/docs/NHL_COPILOT_HANDOFF.md
+/docs/TAKEOVER_AUDIT_2026-10-24.md

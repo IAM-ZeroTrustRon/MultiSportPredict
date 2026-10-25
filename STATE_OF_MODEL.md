@@ -1,6 +1,6 @@
 ## Verified takeover corrections — October 24, 2026
 
-See docs/AI_HANDOFF.md and docs/TAKEOVER_AUDIT_2026-10-24.md. The takeover preserved
+The takeover preserved
 Freebuff's NHL/sizing work and staged archive moves. Power de-vig now brackets
 underround and extreme overround markets correctly; the shared NBA/NCAAF wrapper
 no longer adds automatic odds to manually priced requests. Weighted Kelly returns

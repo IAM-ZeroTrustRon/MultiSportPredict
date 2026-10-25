@@ -1,6 +1,3 @@
-> Current takeover corrections and shared Gemini/Claude handoff: **docs/AI_HANDOFF.md**.
-> The dated content below is retained as history; use the shared handoff for current facts.
-
 Czech Liga Pro engine installed — 2026-10-09. Collector/trainer/runner/grader and independent tests are local. No Gemini samples are used for production training. Live collection still needs BETSAPI_KEY (Events plus full Bet365 entitlement) or ODDS_API_IO_KEY in .env; neither was configured. Never reuse the other provider's ODDS_API_KEY. Consult README_CZECH_LIGA_PRO.md and tests/test_table_tennis_engine.py.
 
 # Handoff — Cline
