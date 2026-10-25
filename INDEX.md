@@ -1,3 +1,12 @@
+## Soccer fixture verification — October 25, 2026
+
+- `fixture_guard.py` — explicit league/date, verified kickoff, normalized exact
+  team identity, unique match and feed home/away orientation.
+- `universal_runner.py` — consumes verified soccer orientation and remaps side quotes.
+- `tests/test_soccer_fixture_guard.py` — recorded-card and caller regression tests.
+- `tests/fixtures/soccer/espn_bundesliga_20261023.json` and
+  `espn_bundesliga_20261025.json` — minimized real ESPN captures with provenance.
+
 ## NHL — October 21, 2026
 
 - `ingest_nhl.py`, `nhl_sources.py`, `ingest/nhl_api_fetcher.py` — official fixture/result identities and published MoneyPuck CSVs, atomic cache/manifests, verified 5-on-5 and special-teams joins.

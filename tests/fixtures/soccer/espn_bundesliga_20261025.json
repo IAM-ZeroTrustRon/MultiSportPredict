@@ -1,0 +1,132 @@
+{
+  "_capture": {
+    "source_url": "https://site.web.api.espn.com/apis/site/v2/sports/soccer/ger.1/scoreboard?dates=20261025",
+    "retrieved_utc": "2026-10-25T20:57:19.926682+00:00",
+    "raw_sha256": "4184c75764afa5a1015ce2b8b9aa2536d07e5aaee9b23e0e2935b609a795851e",
+    "basis": "Recorded ESPN response; only fixture identity, kickoff, team names and status retained. Not synthetic results."
+  },
+  "events": [
+    {
+      "id": "401884760",
+      "date": "2026-10-25T14:30Z",
+      "name": "Bayer Leverkusen at TSG Hoffenheim",
+      "status": {
+        "clock": 5400.0,
+        "displayClock": "90'+10'",
+        "period": 2,
+        "type": {
+          "id": "28",
+          "name": "STATUS_FULL_TIME",
+          "state": "post",
+          "completed": true,
+          "description": "Full Time",
+          "detail": "FT",
+          "shortDetail": "FT"
+        }
+      },
+      "competitions": [
+        {
+          "id": "401884760",
+          "date": "2026-10-25T14:30Z",
+          "status": {
+            "clock": 5400.0,
+            "displayClock": "90'+10'",
+            "period": 2,
+            "type": {
+              "id": "28",
+              "name": "STATUS_FULL_TIME",
+              "state": "post",
+              "completed": true,
+              "description": "Full Time",
+              "detail": "FT",
+              "shortDetail": "FT"
+            }
+          },
+          "competitors": [
+            {
+              "homeAway": "home",
+              "team": {
+                "id": "7911",
+                "displayName": "TSG Hoffenheim",
+                "shortDisplayName": "Hoffenheim",
+                "name": "TSG Hoffenheim",
+                "abbreviation": "TSG"
+              }
+            },
+            {
+              "homeAway": "away",
+              "team": {
+                "id": "131",
+                "displayName": "Bayer Leverkusen",
+                "shortDisplayName": "Leverkusen",
+                "name": "Bayer Leverkusen",
+                "abbreviation": "B04"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "401884759",
+      "date": "2026-10-25T16:30Z",
+      "name": "Bayern Munich at SC Freiburg",
+      "status": {
+        "clock": 5400.0,
+        "displayClock": "90'+6'",
+        "period": 2,
+        "type": {
+          "id": "28",
+          "name": "STATUS_FULL_TIME",
+          "state": "post",
+          "completed": true,
+          "description": "Full Time",
+          "detail": "FT",
+          "shortDetail": "FT"
+        }
+      },
+      "competitions": [
+        {
+          "id": "401884759",
+          "date": "2026-10-25T16:30Z",
+          "status": {
+            "clock": 5400.0,
+            "displayClock": "90'+6'",
+            "period": 2,
+            "type": {
+              "id": "28",
+              "name": "STATUS_FULL_TIME",
+              "state": "post",
+              "completed": true,
+              "description": "Full Time",
+              "detail": "FT",
+              "shortDetail": "FT"
+            }
+          },
+          "competitors": [
+            {
+              "homeAway": "home",
+              "team": {
+                "id": "126",
+                "displayName": "SC Freiburg",
+                "shortDisplayName": "Freiburg",
+                "name": "SC Freiburg",
+                "abbreviation": "SCF"
+              }
+            },
+            {
+              "homeAway": "away",
+              "team": {
+                "id": "132",
+                "displayName": "Bayern Munich",
+                "shortDisplayName": "Bayern",
+                "name": "Bayern Munich",
+                "abbreviation": "MUN"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

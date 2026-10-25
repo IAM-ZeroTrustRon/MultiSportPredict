@@ -1,3 +1,18 @@
+## Read-only soccer fixture verification — October 25, 2026
+
+This checks a real upcoming card without running a model, storing picks or sending
+Discord. It prints the verified home/away, project date, kickoff and event ID.
+This dated example was verified during the October 25 repair; it is not a perpetual slate.
+
+```bash
+venv/Scripts/python.exe -u fixture_guard.py soccer "SV Elversberg" "Mainz" 2026-10-30 "Bundesliga"
+```
+
+Normal dated soccer runs through msp.py use the repaired guard automatically.
+If you supply teams in reversed order, side prices and the signed handicap follow
+the named teams when the runner corrects orientation. Totals/draw prices stay unchanged.
+Unknown competitions are refused; use a configured league, never an EPL substitute.
+
 ## Manual score-market prices — repaired October 24, 2026
 
 `msp.py run --sport basketball` and `--sport ncaaf` now omit automatic `--odds`

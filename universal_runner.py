@@ -420,8 +420,17 @@ def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
     if game_date:
         from fixture_guard import verify_fixture
         valid, message, orientation = verify_fixture("soccer", home, away, game_date, league)
-        if not valid or orientation != "correct":
+        if not valid or orientation not in {"correct", "reversed"}:
             raise ValueError(f"Soccer fixture/date/home-away verification failed: {message}")
+        print(message)
+        if orientation == "reversed":
+            # Manual side quotes belong to the requested teams, not the input
+            # labels. Reverse them with the teams before stats/automatic odds.
+            home, away = away, home
+            home_ml, away_ml = away_ml, home_ml
+            spread_home_price, spread_away_price = spread_away_price, spread_home_price
+            market_line = -market_line
+            print(f"Using verified home/away: {home} vs {away}; side prices and handicap remapped")
 
     hs = get_soccer_team_stats(home, league)
     aws = get_soccer_team_stats(away, league)

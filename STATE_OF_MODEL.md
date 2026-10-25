@@ -1,3 +1,33 @@
+> Task 1 review follow-up: CLI UTF-8 output and missing-date usage are fixed;
+> 46 soccer/CLI regressions and 320 total tests pass (14 existing warnings).
+> The October 30 Elversberg–Mainz card is Bundesliga, confirmed by the club.
+> Task 1 passed final external review and is approved for local integration.
+
+## Soccer fixture guard repair — October 25, 2026
+
+Dated soccer verification now queries the explicit ESPN competition/date, checks
+actual timezone-aware kickoff against America/New_York, matches normalized exact
+published names or explicit Bundesliga aliases, and uses homeAway fields rather
+than competitor order. Unknown/missing leagues, malformed dates/identities,
+postponed cards, ambiguous aliases and multiple matching cards fail closed.
+The existing (valid, message, orientation) interface is retained.
+
+universal_runner.run_soccer consumes reversed orientation before stats or odds:
+team ML and handicap prices swap, the signed handicap reverses, and totals/draw
+prices remain unchanged. The verified home/away, date, kickoff and event ID print
+before prediction. msp.py already supplies game_date and needs no change.
+Legacy undated direct calls keep their prior behavior; this check verifies fixture
+identity, not a new prematch/readiness policy. Model equations, Kelly and betting
+thresholds are untouched. No odds-snapshot scheduler or BTTS change is included.
+
+Recorded ESPN regression fixtures include Stuttgart–Gladbach on October 23 and
+the October 25 Bundesliga board, with capture URL/time/hash. A live October 30
+SV Elversberg–Mainz card verified both orientations and rejected an invented
+opponent. tests/test_soccer_fixture_guard.py covers the guard and caller mapping.
+No live prediction or grade was stored; backups and the local review diff are
+under output/soccer_fixture_repair/. These changes passed final external diff review.
+Local integration is approved; GitHub publication remains a separate action.
+
 ## Verified takeover corrections — October 24, 2026
 
 The takeover preserved
