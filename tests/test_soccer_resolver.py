@@ -31,14 +31,14 @@ def test_utrecht_youth_does_not_resolve_to_senior_utrecht():
     """Same base name, different division -- must refuse, not fuzzy-match."""
     name, how = resolve("FC Utrecht Youth", STORE, "Eerste Divisie")
     print(f"[{'PASS' if name is None else 'FAIL'}] 'FC Utrecht Youth' -> {name!r} ({how})")
-    return name is None
+    assert name is None, f"expected a refusal, resolved to {name!r} ({how})"
 
 
 def test_eindhoven_does_not_resolve_to_psv():
     """Different clubs, same city, different tier -- must refuse."""
     name, how = resolve("FC Eindhoven", STORE, "Eerste Divisie")
     print(f"[{'PASS' if name is None else 'FAIL'}] 'FC Eindhoven' -> {name!r} ({how})")
-    return name is None
+    assert name is None, f"expected a refusal, resolved to {name!r} ({how})"
 
 
 def test_league_not_in_store_refuses_cleanly():
@@ -46,7 +46,7 @@ def test_league_not_in_store_refuses_cleanly():
     fall through to a global fuzzy search."""
     name, how = resolve("Al Khaleej", STORE, "Saudi Pro League")
     print(f"[{'PASS' if name is None else 'FAIL'}] 'Al Khaleej' (Saudi Pro League) -> {name!r} ({how})")
-    return name is None
+    assert name is None, f"expected a refusal, resolved to {name!r} ({how})"
 
 
 def test_legitimate_same_league_partial_still_works():
@@ -55,21 +55,21 @@ def test_legitimate_same_league_partial_still_works():
     name, how = resolve("Utrecht", STORE, "Eredivisie")
     ok = name == "Utrecht"
     print(f"[{'PASS' if ok else 'FAIL'}] 'Utrecht' (Eredivisie) -> {name!r} ({how})")
-    return ok
+    assert ok, f"unexpected resolution {name!r} ({how})"
 
 
 def test_reserve_team_resolves_within_its_own_league():
     name, how = resolve("Jong AZ Alkmaar", STORE, "Eerste Divisie")
     ok = name == "Jong AZ Alkmaar"
     print(f"[{'PASS' if ok else 'FAIL'}] 'Jong AZ Alkmaar' (Eerste Divisie) -> {name!r} ({how})")
-    return ok
+    assert ok, f"unexpected resolution {name!r} ({how})"
 
 
 def test_noise_stripped_partial_still_works_within_league():
     name, how = resolve("Bournemouth AFC", STORE, "Premier League")
     ok = name == "Bournemouth"
     print(f"[{'PASS' if ok else 'FAIL'}] 'Bournemouth AFC' (Premier League) -> {name!r} ({how})")
-    return ok
+    assert ok, f"unexpected resolution {name!r} ({how})"
 
 
 def test_no_league_given_falls_back_to_old_global_behaviour():
@@ -79,7 +79,7 @@ def test_no_league_given_falls_back_to_old_global_behaviour():
     name, how = resolve("PSV Eindhoven", STORE, None)
     ok = name == "PSV Eindhoven"
     print(f"[{'PASS' if ok else 'FAIL'}] 'PSV Eindhoven' (no league given) -> {name!r} ({how})")
-    return ok
+    assert ok, f"unexpected resolution {name!r} ({how})"
 
 
 def main() -> int:
@@ -95,7 +95,8 @@ def main() -> int:
     results = []
     for test in tests:
         try:
-            results.append(bool(test()))
+            test()
+            results.append(True)
         except Exception as exc:  # noqa: BLE001
             print(f"[FAIL] {test.__name__} crashed: {exc}")
             results.append(False)

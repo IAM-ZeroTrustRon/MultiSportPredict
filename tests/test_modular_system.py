@@ -35,14 +35,13 @@ def test_base_predictor():
                 print(f"[PASS] {sport}: {predictor}")
             except Exception as e:
                 print(f"[FAIL] {sport}: FAILED - {e}")
-                return False
+                raise
         
         print("\n[PASS] Base predictor tests PASSED")
-        return True
         
     except Exception as e:
         print(f"\n[FAIL] Base predictor tests FAILED: {e}")
-        return False
+        raise
 
 
 def test_basketball_predictor():
@@ -81,13 +80,12 @@ def test_basketball_predictor():
         print(f"  Lean: {result['full_game']['lean']}")
         
         print("\n[PASS] Basketball predictor tests PASSED")
-        return True
         
     except Exception as e:
         print(f"\n[FAIL] Basketball predictor tests FAILED: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise
 
 
 def test_soccer_predictor():
@@ -127,13 +125,12 @@ def test_soccer_predictor():
         print(f"  Home Win: {result['game']['home_win_prob']:.1%}, Draw: {result['game']['draw_prob']:.1%}, Away Win: {result['game']['away_win_prob']:.1%}")
         
         print("\n[PASS] Soccer predictor tests PASSED")
-        return True
         
     except Exception as e:
         print(f"\n[FAIL] Soccer predictor tests FAILED: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise
 
 
 def test_baseball_predictor():
@@ -160,7 +157,7 @@ def test_baseball_predictor():
             status = "[PASS]" if detected == expected else "[FAIL]"
             print(f"  {status} '{team}' -> {detected} (expected: {expected})")
             if detected != expected:
-                return False
+                raise AssertionError(f"detect_league({team!r}) -> {detected}, expected {expected}")
         
         # Test league configurations
         for league in ['MLB', 'KBO']:
@@ -191,13 +188,12 @@ def test_baseball_predictor():
             print("[PASS] KBO correctly shows higher run environment than MLB")
         
         print("\n[PASS] Baseball predictor tests PASSED")
-        return True
         
     except Exception as e:
         print(f"\n[FAIL] Baseball predictor tests FAILED: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise
 
 
 def test_cli_integration():
@@ -217,33 +213,29 @@ def test_cli_integration():
         if result and 'full_game' in result:
             print("[PASS] Basketball CLI test passed")
         else:
-            print("[FAIL] Basketball CLI test failed")
-            return False
+            raise AssertionError("Basketball CLI test failed")
         
         # Test soccer CLI (quick test)
         result = run_soccer_game("Liverpool", "Aston Villa", league="Premier League")
         if result and 'game' in result:
             print("[PASS] Soccer CLI test passed")
         else:
-            print("[FAIL] Soccer CLI test failed")
-            return False
+            raise AssertionError("Soccer CLI test failed")
         
         # Test baseball CLI (quick test)
         result = run_baseball_game("Yankees", "Red Sox", league="MLB")
         if result and ('game' in result or 'moneyline_and_side' in result):
             print("[PASS] Baseball CLI test passed")
         else:
-            print("[FAIL] Baseball CLI test failed")
-            return False
+            raise AssertionError("Baseball CLI test failed")
         
         print("\n[PASS] CLI integration tests PASSED")
-        return True
         
     except Exception as e:
         print(f"\n[FAIL] CLI integration tests FAILED: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise
 
 
 def test_backward_compatibility():
@@ -272,11 +264,10 @@ def test_backward_compatibility():
         print("[PASS] Old sport-specific modules still accessible")
         
         print("\n[PASS] Backward compatibility tests PASSED")
-        return True
         
     except Exception as e:
         print(f"\n[FAIL] Backward compatibility tests FAILED: {e}")
-        return False
+        raise
 
 
 def test_output_generation():
@@ -326,11 +317,10 @@ def test_output_generation():
         print("[PASS] Baseball output generated")
         
         print("\n[PASS] Output generation tests PASSED")
-        return True
         
     except Exception as e:
         print(f"\n[FAIL] Output generation tests FAILED: {e}")
-        return False
+        raise
 
 
 def main():
@@ -352,8 +342,8 @@ def main():
     results = []
     for test in tests:
         try:
-            result = test()
-            results.append(result)
+            test()
+            results.append(True)
         except Exception as e:
             print(f"\n✗ Test crashed: {e}")
             results.append(False)
