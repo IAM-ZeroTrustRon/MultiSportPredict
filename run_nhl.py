@@ -153,7 +153,12 @@ def main():
         if not rows:raise ValueError("No NHL fixtures passed data requirements")
         if not args.dry_run:
             from run_ncaaf import store
-            for row in rows:store(row)
+            from core.historical_storage import capture_prediction_odds
+            for row in rows:
+                store(row)
+                # Immutable record of the prices this forecast was priced with.
+                capture=capture_prediction_odds(row)
+                if capture["refused"]:print("Odds snapshot refused:",capture["refused"])
             atomic_json(ROOT/"data/nhl_review.json",dict(generated=today(),rows=rows))
             folder=ROOT/"output/nhl";folder.mkdir(parents=True,exist_ok=True)
             for row in rows:atomic_json(folder/(row["game_id"]+".json"),row)

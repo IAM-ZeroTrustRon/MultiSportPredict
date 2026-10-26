@@ -268,7 +268,7 @@ def _fetch_event_odds(sport_key: str, event_id: str, region: str,
         return None, "non-JSON response"
 
 
-def _fetch_odds_key(sport_key: str, region: str, markets: str) -> Tuple[Optional[List[Dict[str, Any]]], Optional[str]]:
+def _fetch_odds_key(sport_key: str, region: str, markets: str, usage=None) -> Tuple[Optional[List[Dict[str, Any]]], Optional[str]]:
     """One real API call. Returns (events, error) -- error is None on success."""
     if requests is None:
         return None, "requests library not installed"
@@ -283,6 +283,10 @@ def _fetch_odds_key(sport_key: str, region: str, markets: str) -> Tuple[Optional
         )
     except Exception as exc:  # noqa: BLE001
         return None, f"{type(exc).__name__}: {exc}"
+    if usage is not None:
+        # Only quota headers are exposed; URLs/credentials never enter reports.
+        usage.update({name: resp.headers.get(name) for name in
+                      ("x-requests-last", "x-requests-used", "x-requests-remaining")})
     if resp.status_code != 200:
         return None, f"HTTP {resp.status_code}"
     try:

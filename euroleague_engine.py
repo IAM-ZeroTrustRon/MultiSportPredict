@@ -483,12 +483,18 @@ def run_cli(args=None) -> Dict[str, Any]:
         if not ns.game_date:
             raise SystemExit("--store-to-db requires --game-date YYYY-MM-DD for international basketball")
         from run_ncaaf import store
+        from core.historical_storage import capture_prediction_odds
         projected = result["full_game"]
-        store({"sport": "basketball", "league": league, "game_date": ns.game_date,
+        payload = {"sport": "basketball", "league": league, "game_date": ns.game_date,
             "game_id": f"{league}:{ns.game_date}:{home_name}:{away_name}",
             "home_team": home_name, "away_team": away_name, "markets": result["markets"],
             "projection": {"home_points": projected["projected_home_points"], "away_points": projected["projected_away_points"]},
-            "model_result": result})
+            "model_result": result}
+        store(payload)
+        # The exact prices this forecast used, archived immutably for CLV.
+        refused = capture_prediction_odds(payload)["refused"]
+        if refused:
+            print(f"[WARN] Odds snapshot refused: {refused}")
     if ns.push_discord:
         from universal_runner import _push_full_result
         if not _push_full_result("basketball", home_name, away_name, result):

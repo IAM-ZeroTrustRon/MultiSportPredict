@@ -61,6 +61,12 @@ def push(result):
 
 
 def store(result):
+    import os
+    import uuid
+    # Direct runners also need a contemporaneous forecast identifier shared by
+    # their ledger rows and quotes. This is not a synthetic workflow_runs row.
+    result.setdefault("_odds_capture_run_id", os.environ.get("MSP_RUN_ID") or
+                      result.get("_workflow_run_id") or "direct_" + uuid.uuid4().hex)
     from core.historical_storage import init_db, store_prediction
     init_db()
     from models.basketball_readiness import projection_only, observation_markets
@@ -191,8 +197,14 @@ def main(sport="ncaaf", argv=None):
         if not rows:
             raise ValueError("No fixtures passed the history requirements")
         if not args.dry_run:
+            from core.historical_storage import capture_prediction_odds
             for row in rows:
                 store(row)
+                # Archive the exact pairs this forecast used; the archive is
+                # append-only, so a later closing capture cannot rewrite it.
+                capture = capture_prediction_odds(row)
+                if capture["refused"]:
+                    print(f"Odds snapshot refused: {capture['refused']}")
             atomic_json(review, {"generated": today(), "rows": rows})
             print(f"Saved {len(rows)} matches to {review.name}; Discord OFF")
     except (ValueError, KeyError) as exc:

@@ -5,10 +5,12 @@ Provides SQLite-based storage for predictions across all sports.
 Enables tracking of prediction performance over time.
 """
 
+import hashlib
 import json
 import math
 import sqlite3
-from datetime import datetime
+import unicodedata
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 import pandas as pd
@@ -16,6 +18,55 @@ import pandas as pd
 
 # Database path
 DB_PATH = Path("multisport_history.db")
+
+
+# Odds snapshots are observations, not a mutable cache. The triggers below make
+# that structural: a stored quote can never be rewritten or deleted, so a
+# closing price and the price a forecast actually used both survive verbatim.
+def _ensure_odds_snapshots(conn: sqlite3.Connection) -> None:
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS odds_snapshots (
+            snapshot_id TEXT PRIMARY KEY,
+            created_utc TEXT NOT NULL,
+            observed_utc TEXT NOT NULL,
+            quote_updated_utc TEXT,
+            capture_kind TEXT NOT NULL,
+            sport TEXT NOT NULL,
+            league TEXT NOT NULL,
+            event_key TEXT NOT NULL,
+            fixture_key TEXT NOT NULL,
+            source_event_id TEXT,
+            game_date TEXT,
+            kickoff_utc TEXT,
+            home_team TEXT NOT NULL,
+            away_team TEXT NOT NULL,
+            market_type TEXT NOT NULL,
+            line REAL,
+            price_a REAL NOT NULL,
+            price_b REAL NOT NULL,
+            bookmaker TEXT,
+            source TEXT NOT NULL,
+            scope TEXT,
+            payload TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_odds_snapshots_event
+            ON odds_snapshots(event_key, market_type, observed_utc);
+        CREATE INDEX IF NOT EXISTS idx_odds_snapshots_fixture
+            ON odds_snapshots(fixture_key, market_type, capture_kind, observed_utc);
+        CREATE INDEX IF NOT EXISTS idx_odds_snapshots_kind
+            ON odds_snapshots(capture_kind, observed_utc);
+        CREATE TRIGGER IF NOT EXISTS odds_snapshots_append_only_update
+            BEFORE UPDATE ON odds_snapshots
+            BEGIN
+                SELECT RAISE(ABORT, 'odds_snapshots is append-only: capture a new quote instead of rewriting history');
+            END;
+        CREATE TRIGGER IF NOT EXISTS odds_snapshots_append_only_delete
+            BEFORE DELETE ON odds_snapshots
+            BEGIN
+                SELECT RAISE(ABORT, 'odds_snapshots is append-only: archived quotes are never deleted');
+            END;
+    """)
+    conn.commit()
 
 
 def init_db(db_path: Optional[Path] = None) -> None:
@@ -63,6 +114,8 @@ def init_db(db_path: Optional[Path] = None) -> None:
     # retro-fitted to a stake they never had.
     if "stake_size" not in existing_columns:
         cur.execute("ALTER TABLE predictions ADD COLUMN stake_size REAL")
+
+    _ensure_odds_snapshots(conn)
 
     # Index for faster queries
     cur.execute("""
@@ -189,6 +242,274 @@ def store_prediction(
     conn.close()
 
     return row_id
+
+
+# ---------------------------------------------------------------------------
+# Immutable odds snapshots
+# ---------------------------------------------------------------------------
+CAPTURE_KINDS = ("prediction", "closing")
+
+
+def odds_fixture_key(league, game_date, home_team, away_team) -> str:
+    """Provider-independent fixture key used to pair a forecast with its close."""
+    def fold(text):
+        normalized = unicodedata.normalize("NFKD", str(text or ""))
+        return "".join(c for c in normalized.casefold() if c.isalnum())
+    return f"{str(league or '').upper()}:{game_date or ''}:{fold(home_team)}:{fold(away_team)}"
+
+
+def _snapshot_stamp(value, field):
+    """Timezone-aware UTC timestamp or None. Naive times are refused, not guessed."""
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        stamp = value
+    else:
+        text = str(value).strip()
+        if not text:
+            return None
+        try:
+            stamp = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        except ValueError:
+            raise ValueError(f"{field} must be an ISO-8601 timestamp")
+    if stamp.tzinfo is None:
+        raise ValueError(f"{field} must include a timezone")
+    return stamp.astimezone(timezone.utc)
+
+
+def _snapshot_price(value, field) -> float:
+    if value is None or isinstance(value, bool):
+        raise ValueError(f"{field} is required American odds")
+    price = float(value)
+    if not math.isfinite(price) or abs(price) < 100:
+        raise ValueError(f"{field} must be American odds of at least 100 in magnitude")
+    return price
+
+
+def _snapshot_line(value):
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        raise ValueError("line must be numeric or null")
+    line = float(value)
+    if not math.isfinite(line):
+        raise ValueError("line must be finite")
+    return line
+
+
+def save_odds_snapshot(quote: Dict[str, Any], db_path: Optional[Path] = None) -> Dict[str, Any]:
+    """Append one observed price pair. Existing rows are never overwritten.
+
+    A closing capture is refused unless the kickoff is verified and both the
+    observation and the bookmaker's own quote timestamp are strictly earlier.
+    That guard lives here, at the storage boundary, so no caller can archive an
+    in-play price as a closing line.
+
+    Returns {"snapshot_id", "inserted", "event_key", "fixture_key", "capture_kind"}.
+    """
+    if not isinstance(quote, dict):
+        raise ValueError("Odds snapshot must be an object")
+    capture_kind = quote.get("capture_kind")
+    if capture_kind not in CAPTURE_KINDS:
+        raise ValueError("capture_kind must be one of " + ", ".join(CAPTURE_KINDS))
+    for field in ("sport", "league", "event_key", "home_team", "away_team", "market_type"):
+        if not str(quote.get(field) or "").strip():
+            raise ValueError(f"{field} is required for an odds snapshot")
+
+    observed = _snapshot_stamp(quote.get("observed_utc"), "observed_utc") or datetime.now(timezone.utc)
+    kickoff = _snapshot_stamp(quote.get("kickoff_utc"), "kickoff_utc")
+    quote_updated = _snapshot_stamp(quote.get("quote_updated_utc"), "quote_updated_utc")
+    price_a = _snapshot_price(quote.get("price_a"), "price_a")
+    price_b = _snapshot_price(quote.get("price_b"), "price_b")
+    line = _snapshot_line(quote.get("line"))
+
+    if kickoff is None:
+        raise ValueError("All prematch snapshots require the verified kickoff time")
+    if capture_kind == "closing":
+        if quote_updated is None:
+            raise ValueError("Closing quotes require a bookmaker update timestamp")
+        for field in ("bookmaker", "source_event_id", "scope"):
+            if not str(quote.get(field) or "").strip():
+                raise ValueError(f"Closing quotes require verified {field}")
+    if kickoff is not None:
+        if observed >= kickoff:
+            raise ValueError("Refused in-play odds: observed at or after kickoff")
+        if quote_updated is not None and quote_updated >= kickoff:
+            raise ValueError("Refused in-play odds: bookmaker quote published at or after kickoff")
+    if quote_updated is not None and (quote_updated-observed).total_seconds() > 5:
+        raise ValueError("Bookmaker quote timestamp is in the future relative to capture")
+
+    sport = str(quote["sport"]).strip().lower()
+    league = str(quote["league"]).strip().upper()
+    event_key = str(quote["event_key"]).strip()
+    market_type = str(quote["market_type"]).strip()
+    home_team = str(quote["home_team"]).strip()
+    away_team = str(quote["away_team"]).strip()
+    game_date = None if quote.get("game_date") is None else str(quote["game_date"])
+    bookmaker = None if quote.get("bookmaker") is None else str(quote["bookmaker"])
+    source_event_id = None if quote.get("source_event_id") is None else str(quote["source_event_id"])
+    scope = None if quote.get("scope") is None else str(quote["scope"])
+    source = str(quote.get("source") or ("odds_api" if bookmaker or source_event_id else "manual"))
+    payload = quote.get("payload") or {}
+    if not isinstance(payload, dict):
+        raise ValueError("payload must be an object")
+    fixture_key = odds_fixture_key(league, game_date, home_team, away_team)
+
+    # The same bookmaker publication collected twice is one closing observation.
+    # Prediction captures are scoped to their immutable run, never a later rerun.
+    identity = {"event_key": event_key, "fixture_key": fixture_key,
+                "sport": sport, "league": league, "market_type": market_type, "line": line,
+                "capture_kind": capture_kind, "bookmaker": bookmaker,
+                "source_event_id": source_event_id, "scope": scope,
+                "kickoff_utc": kickoff.isoformat(),
+                "period": payload.get("period", "full_game"),
+                "price_a": price_a, "price_b": price_b,
+                "quote_updated_utc": quote_updated.isoformat() if quote_updated else None,
+                "run_id": payload.get("run_id"),
+                "observed_utc": None if capture_kind == "closing" or payload.get("run_id") else observed.isoformat()}
+    snapshot_id = hashlib.sha256(json.dumps(identity, sort_keys=True).encode("utf-8")).hexdigest()
+
+    path = db_path or DB_PATH
+    conn = sqlite3.connect(path)
+    try:
+        _ensure_odds_snapshots(conn)
+        cur = conn.execute("""
+            INSERT OR IGNORE INTO odds_snapshots (
+                snapshot_id, created_utc, observed_utc, quote_updated_utc, capture_kind,
+                sport, league, event_key, fixture_key, source_event_id, game_date,
+                kickoff_utc, home_team, away_team, market_type, line, price_a, price_b,
+                bookmaker, source, scope, payload
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            snapshot_id, datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            observed.isoformat(timespec="seconds"),
+            None if quote_updated is None else quote_updated.isoformat(timespec="seconds"),
+            capture_kind, sport, league, event_key, fixture_key, source_event_id, game_date,
+            None if kickoff is None else kickoff.isoformat(timespec="seconds"),
+            home_team, away_team, market_type, line, price_a, price_b,
+            bookmaker, source, scope,
+            json.dumps(payload, sort_keys=True, allow_nan=False, default=str)
+        ))
+        inserted = cur.rowcount == 1
+        conn.commit()
+    finally:
+        conn.close()
+
+    return {"snapshot_id": snapshot_id, "inserted": inserted, "event_key": event_key,
+            "fixture_key": fixture_key, "capture_kind": capture_kind}
+
+
+def capture_prediction_odds(result: Dict[str, Any], db_path: Optional[Path] = None,
+                            observed_utc=None) -> Dict[str, Any]:
+    """Archive the exact price pairs a persisted forecast used.
+
+    Called by the score runners after a forecast is stored. Markets without a
+    complete price pair are skipped rather than priced by assumption, and a
+    quote that fails the kickoff guard is reported in `refused` instead of
+    being written or silently dropped.
+    """
+    if not isinstance(result, dict):
+        raise ValueError("Prediction capture requires the forecast result object")
+    markets = result.get("markets")
+    saved, refused = [], []
+    import os
+    run_id = os.environ.get("MSP_RUN_ID") or result.get("_workflow_run_id") or result.get("_odds_capture_run_id")
+    if not isinstance(markets, list):
+        return {"saved": saved, "refused": refused, "skipped_without_price": 0}
+
+    league = result.get("league")
+    sport = result.get("sport")
+    game_id = result.get("game_id")
+    game_date = result.get("game_date")
+    fixture = result.get("fixture") if isinstance(result.get("fixture"), dict) else {}
+    kickoff = next((fixture.get(key) for key in
+                    ("start_time", "start_utc", "commence_time", "kickoff_utc")
+                    if fixture.get(key)), None)
+    settlement = result.get("settlement") if isinstance(result.get("settlement"), dict) else {}
+    settlement_scope = settlement.get("scope")
+    specs = {}
+    odds_source = result.get("odds_source")
+    if isinstance(odds_source, dict):
+        for spec in odds_source.get("markets") or []:
+            if isinstance(spec, dict):
+                try:
+                    specs[(spec.get("kind"), _snapshot_line(spec.get("line")))] = spec
+                except ValueError:
+                    continue
+
+    skipped = 0
+    for market in markets:
+        if not isinstance(market, dict):
+            continue
+        kind = market.get("kind")
+        try:
+            line = _snapshot_line(market.get("line"))
+        except ValueError:
+            refused.append({"event_key": None, "reason": "line is not numeric"})
+            continue
+        if market.get("price_a") is None or market.get("price_b") is None:
+            skipped += 1
+            continue
+        quote = market.get("quote") if isinstance(market.get("quote"), dict) else {}
+        spec = specs.get((kind, line)) or quote
+        event_key = f"{league}:{game_id}:{kind}:{line}"
+        try:
+            saved.append(save_odds_snapshot({
+                "capture_kind": "prediction", "sport": sport, "league": league,
+                "event_key": event_key, "source_event_id": spec.get("source_event_id"),
+                "game_date": game_date, "kickoff_utc": kickoff,
+                "home_team": result.get("home_team"), "away_team": result.get("away_team"),
+                "market_type": kind, "line": line,
+                "price_a": market.get("price_a"), "price_b": market.get("price_b"),
+                "bookmaker": spec.get("bookmaker"), "observed_utc": observed_utc,
+                "quote_updated_utc": spec.get("updated"),
+                "scope": spec.get("scope") or settlement_scope,
+                "payload": {"quote": spec, "market": market,
+                            "run_id": run_id,
+                            "run_id_basis": "direct_forecast" if str(run_id).startswith("direct_") else "workflow" if run_id else "unavailable",
+                            "official_fixture_id": str(game_id) if game_id is not None else None,
+                            "period": spec.get("period") or "full_game", "odds_format": "american",
+                            "selection_a": "Over" if kind == "total" else result.get("home_team"),
+                            "selection_b": "Under" if kind == "total" else result.get("away_team"),
+                            "odds_source": odds_source.get("note") if isinstance(odds_source, dict) else None},
+            }, db_path))
+        except ValueError as exc:
+            refused.append({"event_key": event_key, "reason": str(exc)})
+    return {"saved": saved, "refused": refused, "skipped_without_price": skipped}
+
+
+def get_odds_snapshots(db_path: Optional[Path] = None, *, event_key=None, fixture_key=None,
+                       sport=None, capture_kind=None, market_type=None) -> List[Dict[str, Any]]:
+    """Read archived quotes oldest first. Never creates a missing database."""
+    path = Path(db_path or DB_PATH)
+    try:
+        conn = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
+    except sqlite3.OperationalError:
+        return []
+    conn.row_factory = sqlite3.Row
+    try:
+        exists = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='odds_snapshots'").fetchone()
+        if not exists:
+            return []
+        query = "SELECT * FROM odds_snapshots WHERE 1=1"
+        params = []
+        for column, value in (("event_key", event_key), ("fixture_key", fixture_key),
+                              ("sport", sport), ("capture_kind", capture_kind),
+                              ("market_type", market_type)):
+            if value is not None:
+                query += f" AND {column} = ?"
+                params.append(value)
+        query += " ORDER BY observed_utc, created_utc, snapshot_id"
+        rows = [dict(row) for row in conn.execute(query, params)]
+    finally:
+        conn.close()
+    for row in rows:
+        try:
+            row["payload"] = json.loads(row["payload"])
+        except (TypeError, ValueError):
+            row["payload"] = None
+    return rows
 
 
 def update_prediction_outcome(
