@@ -1,3 +1,23 @@
+## Tracked pregame odds and CLV — October 25, 2026
+
+No scheduler is active. These commands collect only eligible tracked predictions
+and compare last-observed prematch references, not guaranteed sportsbook closes.
+No tracked fixture in the window means no paid odds request. A collection request
+may cost multiple API credits; its report includes available quota headers.
+
+```bash
+venv/Scripts/python.exe -u closing_collector.py --league NHL
+venv/Scripts/python.exe -u clv.py --sport nhl --json
+```
+
+Default collection window is 30 to 1 minutes before kickoff, with provider quotes
+at most five minutes old. Original bookmaker and fresh official fixture identity
+must match. A provider kickoff later than the league's is tolerated up to 15
+minutes (the provider mirrors the schedule and was measured exactly 600s late);
+the league kickoff stays the binding deadline and an earlier provider time is
+always refused. These commands do not create a forecast or send Discord. Missing
+predictions/closes remain unavailable. Do not fabricate a historic opening quote.
+
 ## Read-only soccer fixture verification — October 25, 2026
 
 This checks a real upcoming card without running a model, storing picks or sending

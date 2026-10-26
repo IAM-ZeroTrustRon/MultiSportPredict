@@ -1,3 +1,48 @@
+## Odds capture unblocked, audit handoff — October 26, 2026
+
+Two bounded live tests were run on real NHL fixtures. Prediction capture is now
+proven live: six rows across games 2026020183 and 2026020184, both FanDuel, both
+observed prematch, each carrying the provider event ID, official fixture ID, run
+ID and the bookmaker's own quote timestamp. Collection was refused both times:
+the provider mirrored kickoff exactly 600s late (measured on 2026020184 as
+02:10:00Z against the league's 02:00:00Z), and the earlier strict-equality guard
+turned that mirror into a hard block on every NHL close.
+
+The guard was relaxed in one direction only. A provider kickoff later than the
+league's is tolerated up to 15 minutes, the storage deadline becomes
+min(official, provider) so the league time still binds, and a provider kickoff
+EARLIER than the league's is always refused. No capture can now land later than
+the league's own kickoff. Quota spend for the two tests: 6 credits (388 -> 394
+used, 106 remaining).
+
+No closing row exists yet, so closing-line value remains unavailable rather than
+zero. A live close on the next eligible fixture is the outstanding proof. No
+scheduler, no hand-inserted snapshot, no model or Kelly change. Full contract and
+status: docs/ODDS_CLV_HANDOFF.md.
+
+## Task 2 odds audit repairs — October 25, 2026
+
+The existing Freebuff snapshot pipeline has been tightened locally. Closing
+collection now gates on tracked predictions, original bookmaker and a fresh
+official scheduled fixture before a paid request. Defaults are 30-to-1 minutes
+before kickoff and a five-minute provider quote age. Closing rows require a
+bookmaker update timestamp; repeats of the same publication are idempotent.
+Prediction payloads retain run/official ID, period, selections and odds format.
+No new live schema change or history rewrite was needed in this repair.
+
+CLV now matches event, teams, bookmaker, league, market, period and settlement
+scope, and reports kickoff changes as unavailable. It uses the latest eligible
+reference rather than an older matching line; line movement stays separate.
+Each run remains an observation, not an independent wager. Fair-price CLV uses
+the same bookmaker's de-vigged reference, not a claimed market consensus.
+Quota headers are available for collector requests without exposing credentials.
+
+No scheduler, paid odds request, live capture, Git commit or push was performed
+by the repair audit. A direct Freebuff live-test prompt and identical Gemini/
+Claude update are local under output/task2_codex_review/. Soccer/MLB/KBO/NFL/
+tennis/TT capture remains unsupported; EuroLeague may lack required provenance.
+See docs/ODDS_CLV_SCHEDULER_PROPOSAL.md for the actual operational contract.
+
 > Task 1 review follow-up: CLI UTF-8 output and missing-date usage are fixed;
 > 46 soccer/CLI regressions and 320 total tests pass (14 existing warnings).
 > The October 30 Elversberg–Mainz card is Bundesliga, confirmed by the club.

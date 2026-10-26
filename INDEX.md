@@ -1,3 +1,35 @@
+## Odds/CLV handoff and kickoff tolerance — October 26, 2026
+
+- `docs/ODDS_CLV_HANDOFF.md` — read-first contract: data flow, guard table, the
+  measured +600s provider skew and the 15-minute late-mirror tolerance, live-vs-
+  mocked coverage, audit status and open items.
+- `closing_collector.py` — a provider kickoff later than the league's is now
+  tolerated up to `KICKOFF_TOLERANCE_MINUTES = 15`; an earlier provider kickoff is
+  always refused and the league time remains the binding deadline.
+- `tests/test_task2_safety.py` — late-mirror capture, earlier-than-official
+  refusal and beyond-tolerance refusal.
+
+## Task 2 audit safety coverage — October 25, 2026
+
+- `tests/test_task2_safety.py` — cross-book/scope/event/period refusal, original
+  run linkage, concurrent idempotence, official fixture checks and zero-call gates.
+- `docs/ODDS_CLV_SCHEDULER_PROPOSAL.md` — corrected manual collection, measured
+  quota reporting, current coverage and scheduler-disabled policy.
+
+## Odds snapshots and CLV — October 25, 2026
+
+- `core/historical_storage.py` — `odds_snapshots` table plus `save_odds_snapshot`,
+  `capture_prediction_odds`, `get_odds_snapshots`; append-only UPDATE/DELETE
+  triggers and a storage-level pre-kickoff guard that refuses in-play rows.
+- `closing_collector.py` — pre-match closing capture with window, minimum lead,
+  bookmaker-timestamp and kickoff guards. Not scheduled.
+- `clv.py` — exact-line CLV (price and power-de-vigged probability) kept
+  separate from line movement; in-play closes refused, never scored.
+- `run_ncaaf.py`, `run_nhl.py` — archive the price pair each stored forecast used.
+- `tests/test_odds_snapshots.py` — prediction capture, closing capture, in-play
+  refusal, immutability, identical-line CLV and line-movement reporting.
+- `docs/ODDS_CLV_SCHEDULER_PROPOSAL.md` — proposed cadence and credit cost model.
+
 ## Soccer fixture verification — October 25, 2026
 
 - `fixture_guard.py` — explicit league/date, verified kickoff, normalized exact
