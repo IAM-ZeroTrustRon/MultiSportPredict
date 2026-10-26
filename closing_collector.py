@@ -168,6 +168,12 @@ def collect(events, league, now=None, window_minutes=DEFAULT_WINDOW_MINUTES,
                 commence=_utc(event.get("commence_time"),"provider kickoff")
                 if commence is None: raise ValueError("provider kickoff unavailable")
                 skew=(commence-kickoff).total_seconds()
+                # Measured, never assumed: record the provider-vs-league mirror
+                # offset on every considered event, including refused ones, so a
+                # tolerance decision rests on observed deltas rather than a
+                # remembered 600s anecdote. No extra request is made for this.
+                report.setdefault("kickoff_skew_seconds",[]).append(
+                    dict(event_id=ident,sport=SPORTS[league],provider_minus_official_seconds=skew))
                 if skew<0: raise ValueError("provider kickoff earlier than official fixture")
                 if skew>KICKOFF_TOLERANCE_MINUTES*60:
                     raise ValueError("provider kickoff changed/mismatches official fixture")

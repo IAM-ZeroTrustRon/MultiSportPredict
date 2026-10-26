@@ -69,6 +69,33 @@ def _ensure_odds_snapshots(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def _backfill_cohorts(cur) -> None:
+    """Tag rows written before the cohort column existed.
+
+    Runs once, inside the migration that adds the column. Derivation is the
+    same helper the live write path uses, so history and new rows agree. A row
+    whose probability cannot be recovered is left NULL rather than guessed.
+    """
+    from probability_signal import cohort_for, picked_side_signal
+    rows = cur.execute(
+        "SELECT id, market_type, market_value, recommendation, raw_json "
+        "FROM predictions WHERE cohort IS NULL").fetchall()
+    for row_id, market_type, market_value, recommendation, raw_json in rows:
+        try:
+            raw = json.loads(raw_json or "{}")
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(raw, dict):
+            continue
+        line = market_value if str(market_type).lower() in ("spread", "total") else None
+        signal = picked_side_signal(market_type, raw, line=line,
+                                    recommendation=recommendation)
+        cohort = cohort_for(signal["probability"] if signal else None,
+                            exploratory=bool(raw.get("exploratory")))
+        if cohort:
+            cur.execute("UPDATE predictions SET cohort = ? WHERE id = ?", (cohort, row_id))
+
+
 def init_db(db_path: Optional[Path] = None) -> None:
     """
     Initialize the SQLite database with required tables.
@@ -115,6 +142,22 @@ def init_db(db_path: Optional[Path] = None) -> None:
     if "stake_size" not in existing_columns:
         cur.execute("ALTER TABLE predictions ADD COLUMN stake_size REAL")
 
+    # Explicit quarantine marker complements cohort and remains queryable without JSON.
+    if "is_exploratory" not in existing_columns:
+        cur.execute("ALTER TABLE predictions ADD COLUMN is_exploratory INTEGER NOT NULL DEFAULT 0")
+        if "cohort" in existing_columns:
+            cur.execute("UPDATE predictions SET is_exploratory=1 WHERE cohort='EXPLORATORY'")
+
+    # Observation cohorts. HIGH_PROBABILITY marks a selection the model gives
+    # at least 75% to win, whether or not it is a value bet -- that record is
+    # graded and reported separately from the value ledger. EXPLORATORY marks a
+    # forecast built from disclosed league baselines rather than verified team
+    # data, so it can never be pooled with sourced forecasts.
+    if "cohort" not in existing_columns:
+        cur.execute("ALTER TABLE predictions ADD COLUMN cohort TEXT")
+        _backfill_cohorts(cur)
+    cur.execute("UPDATE predictions SET is_exploratory=1 WHERE cohort='EXPLORATORY' AND is_exploratory=0")
+
     _ensure_odds_snapshots(conn)
 
     # Index for faster queries
@@ -126,6 +169,11 @@ def init_db(db_path: Optional[Path] = None) -> None:
     cur.execute("""
         CREATE INDEX IF NOT EXISTS idx_predictions_teams 
         ON predictions(home_team, away_team)
+    """)
+
+    cur.execute("""
+        CREATE INDEX IF NOT EXISTS idx_predictions_cohort
+        ON predictions(cohort, sport, game_date)
     """)
     
     conn.commit()
@@ -196,45 +244,68 @@ def store_prediction(
     if not event_key and fixture_id:
         event_key = f"{sport}:{fixture_id}:{market_type}"
         raw_json["event_key"] = event_key
+    # Cohort tag, derived once at write time from the row's own probability.
+    # Kept in the table (not recomputed on read) so a later model reset cannot
+    # silently reclassify history that was already graded.
+    from probability_signal import cohort_for, picked_side_signal
+    line = market_value if str(market_type).lower() in ("spread", "total") else None
+    exploratory = bool(raw_json.get("exploratory")) or \
+        str(raw_json.get("mode", "")).lower() == "exploratory"
+    side_signal = picked_side_signal(market_type, raw_json, line=line,
+                                     recommendation=recommendation)
+    cohort = cohort_for(side_signal["probability"] if side_signal else None,
+                        exploratory=exploratory)
+
     today = datetime.now().date().isoformat()
     existing = cur.execute("""
         SELECT id FROM predictions
         WHERE sport = ? AND home_team = ? AND away_team = ? AND market_type = ?
           AND date(timestamp) = ? AND result_outcome IS NULL
           AND (? IS NULL OR game_date = ?)
+          AND is_exploratory = ?
         ORDER BY id DESC LIMIT 1
-    """, (sport, home_team, away_team, market_type, today, game_date, game_date)).fetchone()
+    """, (sport, home_team, away_team, market_type, today, game_date, game_date, int(exploratory))).fetchone()
 
     if event_key:
-        existing = cur.execute("SELECT id FROM predictions WHERE sport=? AND event_key=? AND result_outcome IS NULL ORDER BY id DESC LIMIT 1", (sport, event_key)).fetchone()
+        existing = cur.execute("SELECT id FROM predictions WHERE sport=? AND event_key=? AND is_exploratory=? AND result_outcome IS NULL ORDER BY id DESC LIMIT 1", (sport, event_key, int(exploratory))).fetchone()
 
+    # Observation and production rows must never overwrite one another, even
+    # when event IDs/markets match. Separate quarantine identity at write time.
+    if existing:
+        previous_exploratory = cur.execute("SELECT is_exploratory FROM predictions WHERE id=?", (existing[0],)).fetchone()[0]
+        if bool(previous_exploratory) != exploratory:
+            existing = None
     if existing:
         row_id = existing[0]
         cur.execute("""
             UPDATE predictions
             SET model_value = ?, market_value = ?, edge = ?, confidence = ?,
-                recommendation = ?, timestamp = ?, raw_json = ?, league = ?, stake_size = ?
+                recommendation = ?, timestamp = ?, raw_json = ?, league = ?, stake_size = ?,
+                cohort = ?
             WHERE id = ?
         """, (
             model_value, market_value, edge, confidence, recommendation,
-            datetime.now().isoformat(), json.dumps(raw_json), league, stake_size, row_id
+            datetime.now().isoformat(), json.dumps(raw_json), league, stake_size,
+            cohort, row_id
         ))
     else:
         cur.execute("""
             INSERT INTO predictions (
                 sport, home_team, away_team, market_type,
                 model_value, market_value, edge,
-                confidence, recommendation, timestamp, raw_json, league, stake_size
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                confidence, recommendation, timestamp, raw_json, league, stake_size,
+                cohort
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             sport, home_team, away_team, market_type,
             model_value, market_value, edge,
             confidence, recommendation,
             datetime.now().isoformat(),
-            json.dumps(raw_json), league, stake_size
+            json.dumps(raw_json), league, stake_size, cohort
         ))
         row_id = cur.lastrowid
 
+    cur.execute("UPDATE predictions SET is_exploratory=? WHERE id=?", (int(exploratory), row_id))
     if game_date or event_key:
         cur.execute("UPDATE predictions SET game_date=COALESCE(?,game_date), event_key=COALESCE(?,event_key) WHERE id=?",
                     (game_date, event_key, row_id))

@@ -1,6 +1,7 @@
 """Shared score-runner presentation; raw probabilities/EV remain full-precision fractions."""
 from models.basketball_periods import provisional_periods
 from models.basketball_readiness import projection_only, PROJECTION_ONLY
+from probability_signal import high_probability_lines
 
 
 def percent(value, signed=False):
@@ -59,6 +60,18 @@ def format_review(result):
              f"(Total: {display_total:.1f})"]
     if (result.get('odds_source') or {}).get('note'):
         lines.append('Market source: ' + result['odds_source']['note'])
+    if result.get('exploratory'):
+        lines += ['', 'EXPLORATORY COHORT - excluded from the core value record',
+                  'Probabilities and EV are assumption-based scenarios; no actionable value verdict.',
+                  'Fixture: ' + ('verified schedule' if result.get('fixture_verified') else 'UNVERIFIED; user-supplied home/away order'),
+                  'INPUT PROVENANCE']
+        for side, item in result.get('input_provenance', {}).items():
+            metrics = ', '.join(f'{key}={value:.2f}' for key, value in item['metrics'].items())
+            lines.append(f"  {side.title()}: {item['name']} | {item['status']} | {item['games']} games | {metrics} | {item['source']}")
+        for item in result.get('substitutions', []):
+            value = f"{item['value']:.2f}" if isinstance(item['value'], (float, int)) else item['value']
+            lines.append(f"  Assumed {item['input']}: {value} [{item['source']}] ({item['why']})")
+        lines += list(result.get('notes', []))
     gate = result.get('readiness')
     if gate:
         counts = gate['season_games_played']
@@ -89,6 +102,23 @@ def format_review(result):
         for quote in (result.get('period_market_quotes') or {}).get(key, []):
             labels = ' / '.join(f"{row['selection']} ({price(row['price'])})" for row in market_rows(result, quote))
             lines.append(f"  Bookmaker {quote['kind']}: {labels} | EV unavailable - period model not calibrated")
+    # Two signals, kept visibly separate: how likely the selection is to win,
+    # and whether the offered price pays for it.
+    best = None
+    for item in result['markets']:
+        for row in market_rows(result, item):
+            if row['probability'] is None:
+                continue
+            if best is None or row['probability'] > best[1]:
+                best = (row['selection'], row['probability'], row['price'], row['ev'])
+    if best is not None:
+        block = high_probability_lines(*best)
+        if block:
+            if result.get('exploratory'):
+                lines += ['', f'HIGH MODEL PROBABILITY (75%+) - EXPLORATORY SCENARIO: {best[0]} {best[1]:.1%}',
+                          'Assumed inputs/uncertainty; this badge does not establish a likely winning bet.']
+            else:
+                lines += [''] + block
     lines.append('\nFull-game probabilities and EV are uncalibrated model estimates, not proven betting returns.')
     return '\n'.join(lines)
 
@@ -99,6 +129,11 @@ def card_shape(result):
     rows = [{'name': 'Full game - projected score', 'model':
              f"Home: {result['home_team']} {p['home_points']:.1f} | Away: {result['away_team']} {p['away_points']:.1f}",
              'inline': False}]
+    if result.get('exploratory'):
+        rows.append({'name': 'EXPLORATORY - assumption-based scenario',
+                     'model': 'Excluded from core value record; no actionable value verdict.',
+                     'extra': '\n'.join(f"{i['input']}: {i['value']} [{i['source']}]" for i in result.get('substitutions', [])),
+                     'inline': False})
     gate = result.get('readiness')
     if gate:
         counts = gate['season_games_played']

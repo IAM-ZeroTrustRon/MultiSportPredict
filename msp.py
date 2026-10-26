@@ -25,8 +25,10 @@ def main(argv=None):
         ap.add_argument('--surface',choices=['hard','clay','grass','carpet'])
         ap.add_argument('--best-of',type=int,choices=[3,5])
         ap.add_argument('--file',type=Path,help='JSON matches list with sport, match, date and optional league/tournament/args')
+        ap.add_argument('--props',action='store_true',help='Basketball player-prop research instead of a team pick (NBA)')
+        ap.add_argument('--player',action='append',default=[],help='Player-prop filter (repeatable)')
     sub.add_parser('pending')
-    ap=sub.add_parser('record');ap.add_argument('--all-time',action='store_true')
+    ap=sub.add_parser('record');ap.add_argument('--all-time',action='store_true');ap.add_argument('--cohort',choices=['value','exploratory','high-probability'],default='value')
     for name in ['show','push']:
         ap=sub.add_parser(name)
         if name=='show':ap.add_argument('--json',action='store_true',help='Show full-precision saved JSON instead of the formatted score review')
@@ -65,7 +67,7 @@ def main(argv=None):
             workflow.run(args.sport,args.match,args.date,args.league,vars(args),extra)
             return 0
         if args.action=='pending':result=workflow.pending()
-        elif args.action=='record':result=workflow.record(args.all_time)
+        elif args.action=='record':result=workflow.record(args.all_time, cohort=args.cohort)
         elif args.action=='show':
             result=workflow.saved_run(args.run_id)
             if not args.json and workflow.show_saved_score_review(result):return 0

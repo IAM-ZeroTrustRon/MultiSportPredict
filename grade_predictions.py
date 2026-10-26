@@ -162,8 +162,12 @@ def tier_of(recommendation: Optional[str]) -> str:
         return "LEAN"
     if text in {"PASS", "NO BET"} or text.startswith("PASS "):
         return "PASS"
-    if text in {"OVER", "UNDER"}:
-        return "BET"  # a real directional pick; this sport's convention just has no BET/LEAN prefix
+    if text in {"OVER", "UNDER", "HOME", "AWAY"}:
+        # A real directional pick; this sport's convention just has no BET/LEAN
+        # prefix. HOME/AWAY were missing, so every bare NFL spread or moneyline
+        # recommendation was classified INFO and never graded or counted, while
+        # the OVER/UNDER totals from the same fixture were counted.
+        return "BET"
     return "INFO"
 
 
@@ -363,8 +367,9 @@ def dedup_key(row: sqlite3.Row) -> Tuple[str, str, str, str]:
     2026). A matchup-pair-only key would settle every one of those meetings at
     a single night's score -- that is a fabricated result, not a grade.
     """
+    scope = ("EXPLORATORY",) if _cohort(row) == "EXPLORATORY" else ()
     if "event_key" in row.keys() and row["event_key"] and row["market_type"] in {"spread", "total"}:
-        return (str(row["sport"] or ""), str(row["event_key"]))
+        return (str(row["sport"] or ""), str(row["event_key"]), *scope)
     sport = row["sport"] or ""
     def strip_season(name: str) -> str:
         return normalise_team(DEDUP_TEAM_NOISE.sub("", name or ""), sport)
@@ -378,8 +383,16 @@ def dedup_key(row: sqlite3.Row) -> Tuple[str, str, str, str]:
         (row["market_type"] or "").strip().lower(),
     )
     if sport.lower() == "basketball" and "league" in row.keys():
-        return (*key, str(row["league"] or "").upper())
-    return key
+        return (*key, str(row["league"] or "").upper(), *scope)
+    return (*key, *scope)
+
+
+def _cohort(row) -> Optional[str]:
+    """Observation cohort tag, or None. Works on sqlite3.Row and dicts."""
+    try:
+        return row["cohort"]
+    except (KeyError, IndexError, TypeError):
+        return None
 
 
 def is_excluded_tier(recommendation: Optional[str]) -> bool:
@@ -599,6 +612,14 @@ def grade_row(row: sqlite3.Row, home_score: float, away_score: float
             raise Ungradable("spread line not recorded in raw_json['spread']")
         pick = (_side_bet(row, raw)
                 or str(spread.get("pick") or "").upper() or None)
+        if pick not in ("HOME", "AWAY") and _cohort(row):
+            # An observation row records the model's favoured side rather than
+            # a staked side. model_value is the home cover probability for
+            # score-rating rows, so the side is still recoverable without
+            # inventing one.
+            if model_value is None:
+                raise Ungradable("observation row has no probability to derive a side")
+            pick = "HOME" if float(model_value) >= 0.5 else "AWAY"
         if pick not in ("HOME", "AWAY"):
             raise Ungradable("spread bet does not say which side")
         cover = (home_score - away_score) + float(line)
@@ -1241,8 +1262,11 @@ def ungraded(conn: sqlite3.Connection, sport: Optional[str] = None,
     rows = list(conn.execute(query, params))
     # PASS and INFO rows are not bets, so they are not "awaiting a result" --
     # filtering here keeps them out of --pending, --auto and --manual alike,
-    # while they remain in the database as calibration data.
-    return [row for row in rows if not is_excluded_tier(row["recommendation"])]
+    # while they remain in the database as calibration data. Observation
+    # cohorts are the exception: their whole purpose is to be settled even
+    # when there was no value bet, so they are graded and reported separately.
+    return [row for row in rows
+            if not is_excluded_tier(row["recommendation"]) or _cohort(row)]
 
 
 def cmd_pending(conn: sqlite3.Connection, sport: Optional[str], days: Optional[int]) -> int:
@@ -1506,7 +1530,8 @@ def _recorded_price_row(row):
         profit = float(row["profit_loss"]) if row["profit_loss"] is not None else None
     except (TypeError, ValueError):
         return None
-    if (not isinstance(raw, dict) or raw.get("_settled_at_recorded_price") is not True
+    if (not isinstance(raw, dict) or raw.get("exploratory") or _cohort(row) == "EXPLORATORY"
+            or raw.get("_settled_at_recorded_price") is not True
             or isinstance(raw.get("_settled_odds"), bool)
             or _price(raw.get("_settled_odds")) is None
             or isinstance(row["profit_loss"], bool)
@@ -1521,7 +1546,8 @@ def recorded_price_breakdown(rows: Sequence[sqlite3.Row]) -> Dict[str, Any]:
     Filtering first would resurrect an older priced run when the newest run
     has unknown prices. Saved P/L preserves the grader's settlement rounding.
     """
-    settled, _ = newest_per_fixture([r for r in rows if r["result_outcome"] in {"win", "loss", "push"}])
+    settled, _ = newest_per_fixture([r for r in rows if _cohort(r) != "EXPLORATORY"
+                                    and r["result_outcome"] in {"win", "loss", "push"}])
     decisions = [r for r in settled if not is_excluded_tier(r["recommendation"])]
     recorded = []
     for row in decisions:
@@ -1565,7 +1591,8 @@ def stake_weighted_breakdown(rows: Sequence) -> Dict[str, Any]:
     retro-fitted. Recorded-price settlement provenance is required, just as
     for the flat record. This is not compounding.
     """
-    settled, _ = newest_per_fixture([r for r in rows if r["result_outcome"] in {"win", "loss", "push"}])
+    settled, _ = newest_per_fixture([r for r in rows if _cohort(r) != "EXPLORATORY"
+                                    and r["result_outcome"] in {"win", "loss", "push"}])
     decisions = [r for r in settled if not is_excluded_tier(r["recommendation"])]
     staked = units = 0.0
     counted = []
@@ -1612,6 +1639,99 @@ def _line(label: str, stats: Dict[str, Any]) -> str:
     return f"  {label:<26}{record:<12}{win_pct:>8}{stats['units']:>10.2f}u{roi:>10}"
 
 
+def cohort_record(conn: sqlite3.Connection, cohort: str,
+                  sport: Optional[str] = None) -> dict:
+    """Settled rows of one observation cohort, kept out of the value ledger.
+
+    These rows are settled whether or not they were value bets and whether or
+    not a price existed, so "is it likely to win?" and "is it worth the price?"
+    are never silently blended into one number.
+    """
+    from probability_signal import picked_side_signal
+    # A report may be run against an older database or a read-only backup that
+    # predates the cohort migration. That is an empty cohort, not a crash.
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(predictions)")}
+    if "cohort" not in columns:
+        return {"cohort": cohort, "overall": dict(n=0, wins=0, losses=0, pushes=0,
+                                                   win_pct=None, mean_probability=None),
+                "by_sport": {},
+                "note": "cohort column not present in this database (pre-migration)"}
+    query = ("SELECT * FROM predictions WHERE cohort = ? "
+             "AND result_outcome IN ('win','loss','push')")
+    params: List[Any] = [cohort]
+    if sport:
+        query += " AND lower(sport) = ?"
+        params.append(sport.lower())
+    rows, _ = newest_per_fixture(list(conn.execute(query, params)))
+
+    observations = []
+    for row in rows:
+        try:
+            raw = json.loads(row["raw_json"] or "{}")
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(raw, dict):
+            continue
+        market = (row["market_type"] or "").strip().lower()
+        line = row["market_value"] if market in ("spread", "total") else None
+        signal = picked_side_signal(market, raw, line=line,
+                                    recommendation=row["recommendation"])
+        if signal is None:
+            continue
+        observations.append(dict(sport=(row["sport"] or "?").lower(), market=market,
+                                 probability=float(signal["probability"]),
+                                 outcome=row["result_outcome"], id=row["id"]))
+
+    def tally(items):
+        wins = sum(1 for i in items if i["outcome"] == "win")
+        losses = sum(1 for i in items if i["outcome"] == "loss")
+        pushes = sum(1 for i in items if i["outcome"] == "push")
+        decided = wins + losses
+        return dict(n=len(items), wins=wins, losses=losses, pushes=pushes,
+                    win_pct=round(100.0 * wins / decided, 2) if decided else None,
+                    mean_probability=(round(sum(i["probability"] for i in items)
+                                            / len(items), 4) if items else None))
+
+    by_sport: Dict[str, dict] = {}
+    for name in sorted({i["sport"] for i in observations}):
+        by_sport[name] = tally([i for i in observations if i["sport"] == name])
+    return {"cohort": cohort, "overall": tally(observations), "by_sport": by_sport,
+            "note": ("Observation cohort: settled regardless of EV sign or price "
+                     "availability. Not part of the value record and not a wager.")}
+
+
+def probability_record(conn: sqlite3.Connection,
+                       sport: Optional[str] = None) -> dict:
+    from probability_signal import HIGH_COHORT
+    return cohort_record(conn, HIGH_COHORT, sport)
+
+
+def print_cohort_record(record: dict, title: str) -> None:
+    overall = record["overall"]
+    log("")
+    log("=" * 78)
+    log(f"{title} - separate from the value ledger")
+    log("=" * 78)
+    if not overall["n"]:
+        log(f"  No settled {title.lower()} yet.")
+        return
+    log(f"  {'SPORT':<16}{'W-L-P':<12}{'WIN%':>8}{'MEAN P':>9}")
+    for name, stats in record["by_sport"].items():
+        record_text = f"{stats['wins']}-{stats['losses']}-{stats['pushes']}"
+        win_pct = f"{stats['win_pct']:.1f}%" if stats["win_pct"] is not None else "n/a"
+        mean_p = f"{stats['mean_probability']:.1%}" if stats["mean_probability"] else "n/a"
+        log(f"  {name.upper():<16}{record_text:<12}{win_pct:>8}{mean_p:>9}")
+    record_text = f"{overall['wins']}-{overall['losses']}-{overall['pushes']}"
+    win_pct = f"{overall['win_pct']:.1f}%" if overall["win_pct"] is not None else "n/a"
+    mean_p = f"{overall['mean_probability']:.1%}" if overall["mean_probability"] else "n/a"
+    log(f"  {'OVERALL':<16}{record_text:<12}{win_pct:>8}{mean_p:>9}")
+    log("  " + record["note"])
+
+
+def print_probability_record(record: dict) -> None:
+    print_cohort_record(record, "HIGH MODEL PROBABILITY OBSERVATIONS (75%+)")
+
+
 def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[int],
                push_discord: bool) -> int:
     query = "SELECT * FROM predictions WHERE result_outcome IS NOT NULL"
@@ -1623,6 +1743,13 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
         query += " AND game_date >= ?"
         params.append((_dt.date.today() - _dt.timedelta(days=days)).isoformat())
     rows = list(conn.execute(query, params))
+
+    # Observation-only rows (settled for the cohort record, never a value bet)
+    # are removed BEFORE dedup. Otherwise a newer PASS observation could
+    # displace the real selection on the same fixture+market and quietly
+    # change the value ledger.
+    rows = [r for r in rows
+            if _cohort(r) != "EXPLORATORY" and not (_cohort(r) and is_excluded_tier(r["recommendation"]))]
 
     # Deduplicate before anything is tallied. Both orientations of one game and
     # re-runs of a slate collapse to the same (date, sport, {teams}, market),
@@ -1739,6 +1866,14 @@ def cmd_report(conn: sqlite3.Connection, sport: Optional[str], days: Optional[in
     log("=" * 78)
 
     print_recorded_price_table(recorded_price_breakdown(record_rows))
+
+    # Deliberately separate blocks: a likely winner, a good price, and a
+    # baseline guess are three different questions and none may hide inside
+    # another.
+    print_probability_record(probability_record(conn, sport))
+    from probability_signal import EXPLORATORY_COHORT
+    print_cohort_record(cohort_record(conn, EXPLORATORY_COHORT, sport),
+                        "EXPLORATORY BASELINE FORECASTS (no verified team data)")
 
     if push_discord:
         _push_record_to_discord(record_rows, bets, days)

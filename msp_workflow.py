@@ -46,7 +46,7 @@ def refresh_plan(sport=None, date=None):
         ('nfl',['ingest_nfl.py','--season',str(y)]),
         ('ncaaf',['ingest_ncaaf.py','--dates',*days]),
         ('ncaaf',['ingest_ncaaf_model.py','--seasons',str(y-1),str(y)]),
-        ('basketball',['ingest_basketball_espn.py','--leagues','NBA','WNBA','NCAAB','NCAAW','--seasons',str(y-1),str(y),str(y+1)]),
+        ('basketball',['ingest_basketball_espn.py','--leagues','NBA','WNBA','NCAAB','NCAAW','NBL','--seasons',str(y-1),str(y),str(y+1)]),
         ('basketball',['ingest_basketball_official.py','--leagues','KBL','NZNBL','BBL']),
         ('basketball',['ingest_all_sports.py','--only','euroleague']),
         ('table-tennis',['ingest_table_tennis_public.py','--recent','--max-events','100','--auto-train']),
@@ -160,17 +160,25 @@ def grade_all(collect_table_tennis=True):
     return output
 
 
-def record(all_time=False):
+def record(all_time=False, cohort="value"):
     import grade_predictions as g
     with read_db() as conn:
+        if cohort != 'value':
+            if cohort not in {'exploratory','high-probability'}:raise ValueError('Unknown cohort')
+            return g.cohort_record(conn, 'EXPLORATORY' if cohort == 'exploratory' else 'HIGH_PROBABILITY')
         tables={r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         start=None
         if not all_time and 'workflow_meta' in tables:
             found=conn.execute("SELECT value FROM workflow_meta WHERE key='report_start'").fetchone()
             start=json.loads(found[0]) if found else None
         rows=list(conn.execute('SELECT * FROM predictions'+(' WHERE game_date>=?' if start else ''),(start,) if start else ()))
+        rows=[r for r in rows if g._cohort(r) != 'EXPLORATORY']
         active,dupes=g.split_duplicates(conn,[r for r in rows if r['result_outcome'] is None and not g.is_excluded_tier(r['recommendation'])])
-        settled,_=g.newest_per_fixture([r for r in rows if r['result_outcome'] is not None])
+        # Observation-only cohort rows are settled but are not bets: drop them
+        # before dedup so they cannot displace a real selection on the same
+        # fixture+market and quietly change the value ledger.
+        settled,_=g.newest_per_fixture([r for r in rows if r['result_outcome'] is not None
+                                        and not (g._cohort(r) and g.is_excluded_tier(r['recommendation']))])
         bets=[r for r in settled if not g.is_excluded_tier(r['recommendation'])]
         counts=g._tally(bets)
         # Unknown-price historical unit calculations cannot substantiate realised ROI.
@@ -203,6 +211,13 @@ def cleanup(before, apply=False):
     return workflow_cleanup(ids,runs,before,ROOT/'output/backups/workflow')
 
 
+def run_status(exit_code, saved_artifact, dry_run=False):
+    """Decide a workflow run's status without conflating a preview with a failure."""
+    success=exit_code==0 and bool(saved_artifact or dry_run)
+    status='preview' if dry_run and exit_code==0 else ('saved' if success else 'failed')
+    return success,status
+
+
 def run_command(sport, matches, date, league, options, extra):
     args=[]
     for match in matches:args+=['--match',match]
@@ -215,11 +230,21 @@ def run_command(sport, matches, date, league, options, extra):
     if sport in ('mlb','kbo'):return ['run_mlb.py','--league',sport.upper(),*(args or ['--today']),'--date',date,'--odds','--no-discord',*extra]
     if sport=='ncaaf':return ['run_ncaaf.py',*args,'--date',date,*score_odds,*extra]
     if sport=='basketball':
+        if options.get('props'):
+            # Player-prop research is a workflow stage, never a team-pick wager.
+            if not league:raise ValueError('Basketball props require --league (NBA for this phase)')
+            players=[]
+            for name in options.get('player') or []:players+=['--player',name]
+            return ['run_basketball_props.py',*args,'--league',league,'--date',date,*players,*extra]
         if not league:raise ValueError('Basketball requires --league (for example KBL)')
-        if league.upper() in ('NBL','EUROLEAGUE'):
+        if league.upper() == 'EUROLEAGUE' and '--exploratory' not in extra:
             if len(matches)!=1:raise ValueError('International basketball needs one matchup per slate item')
             a,b=split_match(matches[0]);return ['run_basketball.py','--home',a,'--away',b,'--league',league,'--game-date',date,'--store-to-db',*extra]
-        return ['run_basketball.py',*args,'--league',league,'--date',date,*score_odds,*extra]
+        from basketball_resolution import canonical_league
+        from score_odds import KEYS
+        league=canonical_league(league)
+        automatic=score_odds if league in KEYS else []
+        return ['run_basketball.py',*args,'--league',league,'--date',date,*automatic,*extra]
     if sport=='soccer':
         if len(matches)!=1 or not league:raise ValueError('Soccer requires one matchup and --league per slate item')
         a,b=split_match(matches[0]);return ['universal_runner.py','--sport','soccer','--home',a,'--away',b,'--league',league,'--game-date',date,'--live-odds','--store-to-db',*extra]
@@ -261,12 +286,26 @@ def run(sport,matches,date,league,options,extra):
     if sport=='tennis-research' and stage['exit_code']==0:
         p=ROOT/'data/tennis/full_review.json'
         if p.exists() and p.stat().st_mtime>=Path(stage['log']).stat().st_ctime:review=json.loads(p.read_text(encoding='utf-8'))
-    success=stage['exit_code']==0 and bool(predictions or tt or review)
-    payload={'command':command,'stage':stage,'predictions':predictions,'table_tennis_runs':tt,'research':review}
-    workflow_save_run(ident,sport,'saved' if success else 'failed',payload)
+    # Player-prop research is a real stage but never writes a team-pick row, so it
+    # proves success with its own artifact instead of a predictions match.
+    props_research=None
+    if command and command[0]=='run_basketball_props.py' and stage['exit_code']==0:
+        p=ROOT/'output/basketball_props/latest.json'
+        if p.exists() and p.stat().st_mtime>=Path(stage['log']).stat().st_ctime:
+            props_research=json.loads(p.read_text(encoding='utf-8'))
+    # --dry-run saves nothing by design. That is a preview, not a failure, and it
+    # must not be recorded as a failed run that later looks like a broken model.
+    dry=any(x=='--dry-run' for x in command)
+    success,status=run_status(stage['exit_code'],bool(predictions or tt or review or props_research),dry)
+    payload={'command':command,'stage':stage,'predictions':predictions,'table_tennis_runs':tt,'research':review,
+             'props_research':props_research,'dry_run':dry}
+    workflow_save_run(ident,sport,status,payload)
     (folder/'snapshot.json').write_text(json.dumps(payload,indent=2),encoding='utf-8')
     print('RUN_ID='+ident)
     print(Path(stage['log']).read_text(encoding='utf-8'))
+    if dry and success:
+        print('PREVIEW ONLY: exit code 0, nothing saved, no forecast claimed.')
+        return ident
     if not success:raise ValueError('Runner saved no forecast, or failed. Read the stage log; no successful run claimed.')
     return ident
 

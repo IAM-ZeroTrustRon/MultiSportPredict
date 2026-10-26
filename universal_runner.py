@@ -208,8 +208,43 @@ def _store_prediction(
         return False
 
 
+def _high_probability_lines(result: Dict[str, Any]) -> list:
+    """Dual-signal block for the sports this runner displays.
+
+    Probability and value are separate signals: a 78% favourite at -450 is a
+    likely winner and a losing bet. EV is left unavailable where the sport does
+    not price one rather than inventing a number.
+    """
+    from probability_signal import high_probability_lines
+    sport = result.get("sport")
+    candidates = []
+    if sport == "tennis":
+        moneyline = result.get("moneyline") or {}
+        priced = result.get("moneyline_ev") or {}
+        home_p = moneyline.get("home_win_prob")
+        if home_p is not None:
+            candidates.append((f"Home: {result.get('home_team')} moneyline", float(home_p),
+                               result.get("market_home_odds"), priced.get("ev_a")))
+            candidates.append((f"Away: {result.get('away_team')} moneyline", 1.0 - float(home_p),
+                               result.get("market_away_odds"), priced.get("ev_b")))
+    elif sport == "soccer":
+        game = result.get("game") or {}
+        odds = result.get("market_odds") or {}
+        if game.get("home_win_prob") is not None and game.get("away_win_prob") is not None:
+            candidates.append((f"Home: {result.get('home_team')} moneyline",
+                               float(game["home_win_prob"]), odds.get("home_ml"), None))
+            candidates.append((f"Away: {result.get('away_team')} moneyline",
+                               float(game["away_win_prob"]), odds.get("away_ml"), None))
+    usable = [c for c in candidates if c[1] is not None]
+    if not usable:
+        return []
+    return high_probability_lines(*max(usable, key=lambda item: item[1]))
+
+
 def _display_full_result(result: Dict[str, Any]) -> None:
     """Display model output as compact, readable Rich tables."""
+    for line in _high_probability_lines(result):
+        print(line)
     if result.get("sport") == "tennis":
         from run_tennis import format_tennis_review
 

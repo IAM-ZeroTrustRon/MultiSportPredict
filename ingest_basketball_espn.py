@@ -4,14 +4,17 @@ from concurrent.futures import ThreadPoolExecutor
 from sports_feed import ROOT, fetch_json, parse_game, atomic_json, today
 from models.basketball_readiness import season_count_metadata
 
-LEAGUES = {"NBA": "nba", "WNBA": "wnba", "NCAAB": "mens-college-basketball", "NCAAW": "womens-college-basketball"}
+LEAGUES = {"NBA": "nba", "WNBA": "wnba", "NCAAB": "mens-college-basketball", "NCAAW": "womens-college-basketball", "NBL": "nbl"}
 
 
 def ingest(league, seasons, check=False):
     slug = LEAGUES[league.upper()]
     base = f"https://site.web.api.espn.com/apis/site/v2/sports/basketball/{slug}"
     payload = fetch_json(base + "/teams?limit=500")
-    teams = payload["sports"][0]["leagues"][0]["teams"]
+    competition = payload["sports"][0]["leagues"][0]
+    if league.upper() == "NBL" and competition.get("slug") != "nbl":
+        raise ValueError("Australian NBL competition identity mismatch")
+    teams = competition["teams"]
     if not teams:
         raise ValueError("No team registry; existing store retained")
     def load(task):

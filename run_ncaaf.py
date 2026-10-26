@@ -91,7 +91,7 @@ def store(result):
             stake_size=m.get("stake_size"))
 
 
-def main(sport="ncaaf", argv=None):
+def main(sport="ncaaf", argv=None, prepared_models=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--league", default="NCAAF" if sport == "ncaaf" else "NBA")
     ap.add_argument("--match", action="append")
@@ -106,7 +106,7 @@ def main(sport="ncaaf", argv=None):
     args = ap.parse_args(argv)
     league = args.league.upper()
     league = {"NZ NBL": "NZNBL", "NEW ZEALAND NBL": "NZNBL", "BUNDESLIGA": "BBL", "GERMAN BBL": "BBL"}.get(league, league)
-    if league not in ({"NCAAF"} if sport == "ncaaf" else {"NBA", "WNBA", "NCAAB", "NCAAW", "KBL", "NZNBL", "BBL"}):
+    if league not in ({"NCAAF"} if sport == "ncaaf" else {"NBA", "WNBA", "NCAAB", "NCAAW", "KBL", "NZNBL", "BBL", "NBL"}):
         ap.error("Unsupported league for score ratings")
     if args.date:
         try:
@@ -169,7 +169,7 @@ def main(sport="ncaaf", argv=None):
             events = fetch(league)
         if not specs:
             specs = [{"kind": "moneyline", "line": 0.5}]
-        models, rows = {}, []
+        models, rows = dict(prepared_models or {}), []
         for game in fixtures:
             cutoff = min(today(), game["date"])
             if cutoff not in models:

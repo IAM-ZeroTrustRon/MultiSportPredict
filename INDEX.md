@@ -1,3 +1,40 @@
+## NBA player-prop research, phase 1 — October 26, 2026
+
+- `ingest_basketball_props.py` — ESPN public box scores per game: starter, DNP
+  reason, minutes, PTS/REB/AST, overtime and the feed's verified season ID.
+  RealGM deliberately not scraped.
+- `basketball_availability.py` — event-scoped pregame availability. Identity-checked
+  against the requested fixture and both team ids; freshness from the snapshot's own
+  stamp with per-designation dates; rejected designations carry a reason. A stale,
+  missing or failed read degrades to unknown, never to available.
+- `features/basketball_props.py` — pure, cutoff-bounded appearance windows; DNP,
+  zero-minute appearance and missing data kept distinct; trade and rest handling.
+- `models/basketball_props.py` — transparent minutes baseline plus opt-in fitted
+  candidate, availability gate, research stat projections, chronological validation.
+- `run_basketball_props.py` — `--validate` and per-fixture research output; writes
+  no pick, no price and no betting output.
+- `tests/test_basketball_props.py` — leakage, DNP, overtime, trades, availability,
+  restrictions, invalid inputs, split integrity and dry-run preview status.
+- `tests/test_basketball_props_repairs.py` — strict clearance whitelist, `--`
+  display, verified season IDs and stale flags, played-game vs participation
+  separation, fixture date/kickoff/status guards, event-scoped availability
+  freshness and tri-state (appeared / did-not-play / unverified) validation.
+- `msp.py run --sport basketball --props` — unified entry point for the above.
+- `output/basketball_props/FREEBUFF_HANDOFF.md` — local handoff (never publish).
+
+## Progressive basketball resolution — October 26, 2026
+
+- `basketball_resolution.py` — canonical competitions, local/public cascade,
+  exact identities, pre-cutoff team metrics and explicit hybrid substitutions.
+- `basketball_runner.py` / `run_basketball.py` — integrated score runner and
+  opt-in exploratory fallback, same CLI and ledger; EuroLeague legacy interface.
+- `ingest_basketball_espn.py` — Australian NBL uses verified ESPN `nbl` feed.
+- `tests/test_basketball_resolution.py` — routing, local/source promotion,
+  hybrid preservation, pricing orientation and grading/record quarantine.
+- `msp.py record --cohort exploratory` — separate settled observation report.
+- `output/basketball_resolution/FREEBUFF_PICK_UP_HERE.md` — local continuation
+  handoff, source/DB backup and verification evidence (never publish to GitHub).
+
 ## Odds/CLV handoff and kickoff tolerance — October 26, 2026
 
 - `docs/ODDS_CLV_HANDOFF.md` — read-first contract: data flow, guard table, the

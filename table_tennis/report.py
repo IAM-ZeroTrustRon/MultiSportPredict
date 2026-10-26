@@ -65,7 +65,21 @@ def render(report):
         f"{e['player_b']}: {1-d['p_match_a']:.1%} to win",
         f"Expected total points: {d['expected_points']:.2f} | Games: {d['expected_games']:.2f}",
         f"Expected A point margin: {d['expected_point_margin']:+.2f}",
-        f"Method: {report['strategy']}",'⚠️ '+assessment(report),'','🔎 EV REVIEW',best_summary(report),
+        f"Method: {report['strategy']}",'⚠️ '+assessment(report)]
+    # Two signals, side by side: chance to win the match, and value at the
+    # captured price. Never collapsed into one "confidence" number.
+    from probability_signal import high_probability_lines
+    priced_ml=[r for r in report['priced_markets'] if r['market']=='moneyline']
+    if priced_ml:
+        top=max(priced_ml,key=lambda r:r['probability'])
+        signal=(selection(top),top['probability'],top['price'],top['ev'])
+    else:
+        p_a=d['p_match_a']
+        signal=((e['player_a'],p_a,None,None) if p_a>=0.5
+                else (e['player_b'],1-p_a,None,None))
+    block=high_probability_lines(*signal)
+    lines+=(['']+block) if block else []
+    lines+=['','🔎 EV REVIEW',best_summary(report),
         'EV is expected return per unit staked. Odds are decimal. Win excludes pushes.',
         '','💵 PRICED MARKETS — captured sportsbook odds']
     rows=ranked(report)
