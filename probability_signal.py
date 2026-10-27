@@ -72,7 +72,7 @@ def format_ev(ev) -> str:
         return "unavailable"
     if not math.isfinite(value):
         return "unavailable"
-    return f"{value:+.1%}"
+    return f"{value:+.2%}"
 
 
 def probability_flag(probability) -> str:

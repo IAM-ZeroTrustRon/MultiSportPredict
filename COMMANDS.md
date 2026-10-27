@@ -227,6 +227,18 @@ venv/Scripts/python.exe -u msp.py run --sport tennis --match "Matteo Arnaldi vs 
 
 The date must agree with the matched odds fixture. A tournament label does not prove that fixture exists. Correct a mismatch rather than changing the date blindly.
 
+Tennis grading keys each result on the match's own date (ESPN returns the whole draw for any
+query date), recovers only uniquely resolved players, refuses swapped-side duplicate writes, and
+settles by market rule: a match-winner bet survives a retirement, games/sets markets need a
+completed match, and a walkover voids every market as a refunded push.
+
+```bash
+venv/Scripts/python.exe -u grade_predictions.py --auto --sport tennis --days 7
+venv/Scripts/python.exe -u grade_predictions.py --pending --sport tennis
+```
+
+PASS/INFO rows are never graded — they are not bets and stay in the database as calibration data.
+
 ## Tennis — Challenger research
 
 ```bash
@@ -374,3 +386,133 @@ venv/Scripts/python.exe -u msp.py cleanup --before 2026-10-19 --apply
 ## When a command refuses
 
 Inspect the printed log path. A failed lookup, absent price, wrong date, missing history or inaccessible result is a data issue. Fix the source or fixture; do not bypass guards. A zero exit from a legacy runner is not enough: this workflow verifies that a forecast was actually saved. Logs and immutable run snapshots are in output/workflow/. No command here places a wager.
+
+---
+
+## Tonight: copy and paste (verified slate, 2026-10-26 America/New_York)
+
+Run everything from Git Bash:
+
+```bash
+cd /c/MultiSportPredict
+```
+
+Prices and schedules are discovered automatically; `--odds` is the only flag you need for pricing.
+
+### NBA team picks (verified fixtures, 2026-10-26)
+
+```bash
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-26 --match "Phoenix Suns vs Oklahoma City Thunder" --odds
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-26 --match "Indiana Pacers vs Milwaukee Bucks" --odds
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-26 --match "Golden State Warriors vs Denver Nuggets" --odds
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-26 --match "Memphis Grizzlies vs Utah Jazz" --odds
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-26 --match "Chicago Bulls vs Boston Celtics" --odds
+```
+
+There is no Pacers–Bulls game tonight. Indiana plays at Milwaukee; Chicago plays at Boston. Both are listed above.
+
+### NBA player props (research only — availability is UNKNOWN)
+
+```bash
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-26 --match "Phoenix Suns vs Oklahoma City Thunder" --props
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-26 --match "Phoenix Suns vs Oklahoma City Thunder" --props --player "Shai Gilgeous-Alexander" --player "Devin Booker"
+```
+
+Projections use this season's rotation once a player has 3+ games in it, so keep the
+boxscore store current. The default look-back is 21 days; a deeper history makes the
+prior-season fallback and the holdout meaningful.
+
+```bash
+venv/Scripts/python.exe -u ingest_basketball_props.py --days 21                     # routine top-up (free, ESPN)
+venv/Scripts/python.exe -u ingest_basketball_props.py --from 2026-02-20 --to 2026-04-12 --cache-hours 720   # history backfill
+venv/Scripts/python.exe -u run_basketball_props.py --validate                      # baseline vs candidate, by stat
+```
+
+### NFL / NHL / NBL / EuroLeague
+
+```bash
+venv/Scripts/python.exe -u msp.py run --sport nfl --league NFL --date 2026-10-26 --match "Philadelphia Eagles vs Dallas Cowboys" --odds
+venv/Scripts/python.exe -u msp.py run --sport nhl --league NHL --date 2026-10-26 --match "Detroit Red Wings vs Edmonton Oilers" --odds
+venv/Scripts/python.exe -u msp.py run --sport nhl --league NHL --date 2026-10-26 --match "Los Angeles Kings vs New York Rangers" --odds
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBL --date 2026-10-28 --match "Sydney Kings vs Perth Wildcats" --odds
+venv/Scripts/python.exe -u msp.py run --sport basketball --league EUROLEAGUE --date 2026-10-27 --match "Bayern Munich vs FC Barcelona" --odds
+```
+
+NBL and NZNBL are different competitions and are never merged. Pass `--league NZNBL` for New Zealand games.
+
+### Review, preview, grade, record
+
+```bash
+venv/Scripts/python.exe -u msp.py show --latest            # formatted saved review
+venv/Scripts/python.exe -u msp.py push --latest --preview  # build Discord payload locally, sends nothing
+venv/Scripts/python.exe -u msp.py show --run-id <run_id>   # a specific saved run
+venv/Scripts/python.exe -u msp.py pending                  # ungraded picks
+venv/Scripts/python.exe -u msp.py grade                    # collect results and grade
+venv/Scripts/python.exe -u msp.py record --cohort value    # value ledger
+venv/Scripts/python.exe -u msp.py record --cohort high-probability
+venv/Scripts/python.exe -u msp.py record --cohort exploratory
+venv/Scripts/python.exe -u msp.py cleanup --before 2026-09-26           # dry run of hourly-snapshot pruning
+```
+
+Previews are written to `output/workflow/previews/<run_id>.json`. `--preview` never calls a webhook.
+
+### Discord pushes (separate, deliberate step)
+
+Webhook delivery is opt-in and is never part of a research run:
+
+```bash
+venv/Scripts/python.exe -u msp.py push --run-id <run_id>
+venv/Scripts/python.exe -u msp.py push --latest
+```
+
+Omitting `--preview` is the send path: it posts the saved run and prints the confirmed destinations. Check `--preview` output first, and keep the webhook in `.env`.
+
+### Exploratory mode (disclosed substitutions only)
+
+```bash
+venv/Scripts/python.exe -u run_basketball.py --league NBL --date 2026-10-28 --match "Sydney Kings vs Perth Wildcats" --exploratory
+venv/Scripts/python.exe -u universal_runner.py --sport soccer --league EPL --home Arsenal --away Chelsea --game-date 2026-10-31 --live-odds --exploratory
+```
+
+Exploratory output lists every substituted input and is stored in its own grading cohort. It is never written to the value ledger.
+
+### Next verified fixtures — checked against the live feeds (2026-10-27 / 2026-10-28)
+
+Every line below was resolved against the actual feed before being written here. Basketball and
+NHL take matches as **away vs home**; the EuroLeague engine has no fixture feed, so it takes
+**home vs away**.
+
+```bash
+# NHL — 2026-10-27 (priced at FanDuel when --odds is used; verdict is NO BET until goalies are confirmed)
+venv/Scripts/python.exe -u msp.py run --sport nhl --league NHL --date 2026-10-27 --match "Boston Bruins vs Carolina Hurricanes" --odds
+venv/Scripts/python.exe -u msp.py run --sport nhl --league NHL --date 2026-10-27 --match "Columbus Blue Jackets vs Philadelphia Flyers" --odds
+venv/Scripts/python.exe -u msp.py run --sport nhl --league NHL --date 2026-10-27 --match "Los Angeles Kings vs Chicago Blackhawks" --odds
+
+# NBA — 2026-10-27 (away vs home, verified)
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-27 --match "Brooklyn Nets vs Boston Celtics" --odds
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-27 --match "Detroit Pistons vs New York Knicks" --odds
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-27 --match "Sacramento Kings vs San Antonio Spurs" --odds
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-27 --match "Portland Trail Blazers vs Los Angeles Lakers" --odds
+
+# NBA props — 2026-10-28 (away vs home; books had not posted props lines at the time of writing)
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBA --date 2026-10-28 --match "Philadelphia 76ers vs Indiana Pacers" --props
+
+# NBL — 2026-10-28 (away vs home, verified)
+venv/Scripts/python.exe -u msp.py run --sport basketball --league NBL --date 2026-10-28 --match "Sydney Kings vs Perth Wildcats" --odds
+
+# EuroLeague — 2026-10-27 (home vs away, verified; standings/stats from euroleague-api)
+venv/Scripts/python.exe -u msp.py run --sport basketball --league EUROLEAGUE --date 2026-10-27 --match "Bayern Munich vs FC Barcelona" --no-odds
+```
+
+`--no-odds` exists on the props runner and the EuroLeague route only. The NBA/NHL team routes always
+price automatically; pass manual `--moneyline`/`--spread`/`--total` values instead if you want to
+suppress automatic pricing.
+
+A gated NHL game now prints **one** verdict (`VERDICT: NO BET — starting goalies unconfirmed`) above
+one market table, and the same single verdict is what the Discord card carries.
+
+### Tests
+
+```bash
+venv/Scripts/python.exe -m pytest -q
+```

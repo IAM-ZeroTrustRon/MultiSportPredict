@@ -42,7 +42,10 @@ def test_tennis_completed_winner_is_returned(monkeypatch, tmp_path):
     store = tmp_path / "players.json"
     store.write_text(json.dumps({"Alcaraz C.": {}, "Sinner J.": {}}))
     monkeypatch.setattr(run_tennis, "STORE", store)
-    competition = {"status": {"type": {"completed": True}}, "competitors": [
+    # The match's own date is now the fixture identity: the tennis scoreboard returns
+    # the whole draw for any query date, so a result with no date cannot be keyed.
+    competition = {"date": "2026-10-10T10:00Z",
+                   "status": {"type": {"completed": True}}, "competitors": [
         {"homeAway": "home", "athlete": {"fullName": "Carlos Alcaraz"}, "winner": True},
         {"homeAway": "away", "athlete": {"fullName": "Jannik Sinner"}, "winner": False},
     ]}

@@ -90,7 +90,14 @@ def basketball_forecast(league, home, away):
         substitutions=substitutions)
 
 
-def soccer_forecast(league, home, away):
+def soccer_forecast(league, home, away, home_scoring=None, away_scoring=None):
+    """League-baseline soccer scenario, optionally keeping one measured side.
+
+    ``home_scoring``/``away_scoring`` are verified goals-per-game for that side. When
+    supplied, only that side's placeholder rate is replaced - proportionally to the
+    league baseline, so no new coefficient is invented. The other side stays a
+    declared substitution. Passing neither reproduces the pure baseline forecast.
+    """
     baseline = SOCCER_BASELINES.get(str(league).upper())
     substitutions = []
     if baseline is None:
@@ -102,10 +109,26 @@ def soccer_forecast(league, home, away):
         substitutions.append(dict(
             input="league goals baseline", value=f"{baseline['goals']:.2f} goals/team",
             source=f"configured baseline for {str(league).upper()}",
-            why="both teams' scoring and conceding rates are unknown"))
+            why="used for any side without verified scoring data"))
+    measured = []
+    if home_scoring is not None:
+        measured.append(dict(input=f"{home} scoring rate",
+                             value=f"{float(home_scoring):.2f} goals/game (verified)",
+                             source="competition-scoped verified team data",
+                             why="measured input retained; replaces the league placeholder"))
+    if away_scoring is not None:
+        measured.append(dict(input=f"{away} scoring rate",
+                             value=f"{float(away_scoring):.2f} goals/game (verified)",
+                             source="competition-scoped verified team data",
+                             why="measured input retained; replaces the league placeholder"))
+    substitutions += measured
+    if home_scoring is None or away_scoring is None:
+        missing = [name for name, value in ((home, home_scoring), (away, away_scoring))
+                   if value is None]
+        substitutions.append(dict(
+            input="team scoring/xG rate", value="league average for " + " and ".join(missing),
+            source="placeholder", why="no verified team metrics for that side"))
     substitutions += [
-        dict(input="team xG for/against", value="league average for both teams",
-             source="placeholder", why="no verified team metrics"),
         dict(input="home advantage", value=f"+{HOME_ADVANTAGE['soccer']:.2f} goals",
              source="generic constant", why="venue-specific effect not measured"),
         dict(input="lineups, injuries, motivation", value="ignored",
@@ -113,6 +136,12 @@ def soccer_forecast(league, home, away):
     ]
     home_rate = baseline["goals"] + HOME_ADVANTAGE["soccer"] / 2
     away_rate = baseline["goals"] - HOME_ADVANTAGE["soccer"] / 2
+    per_team = baseline["goals"]
+    if per_team > 0:
+        if home_scoring is not None:
+            home_rate *= float(home_scoring) / per_team
+        if away_scoring is not None:
+            away_rate *= float(away_scoring) / per_team
     limit = 8
     home_win = draw = away_win = 0.0
     for h in range(limit + 1):
@@ -133,13 +162,14 @@ def soccer_forecast(league, home, away):
         substitutions=substitutions)
 
 
-def build(sport, league, home, away, game_date=None):
+def build(sport, league, home, away, game_date=None, **kwargs):
     sport = (sport or "").strip().lower()
     if sport == "basketball":
         body = basketball_forecast(league, home, away)
     elif sport in ("soccer", "football"):
         sport = "soccer"
-        body = soccer_forecast(league, home, away)
+        body = soccer_forecast(league, home, away,
+                               kwargs.get("home_scoring"), kwargs.get("away_scoring"))
     else:
         raise ValueError("exploratory mode supports basketball and soccer only")
     game_date = game_date or dt.date.today().isoformat()

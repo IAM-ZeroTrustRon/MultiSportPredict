@@ -4,6 +4,8 @@ from sports_feed import EASTERN
 
 KEYS = {"NCAAF": "americanfootball_ncaaf", "NBA": "basketball_nba", "WNBA": "basketball_wnba", "NCAAB": "basketball_ncaab", "NCAAW": "basketball_wncaab"}
 KEYS['NHL'] = 'icehockey_nhl'
+# Verified present in the account catalogue (basketball_nbl).
+KEYS['NBL'] = 'basketball_nbl'
 
 
 def fetch(league, usage=None):

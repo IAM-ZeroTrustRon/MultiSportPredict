@@ -186,10 +186,17 @@ class MinutesModelTests(unittest.TestCase):
         self.assertIsNone(clamp_minutes(float("nan")))
 
     def test_baseline_prefers_ten_then_five_then_season(self):
-        features = {"windows": {5: {"minutes_mean": 20.0}, 10: {"minutes_mean": 30.0},
-                                20: {"minutes_mean": 40.0}}, "minutes_season_mean": 25.0}
+        features = {"windows": {5: {"n": 5, "minutes_mean": 20.0}, 10: {"n": 10, "minutes_mean": 30.0},
+                                20: {"n": 20, "minutes_mean": 40.0}}, "minutes_season_mean": 25.0}
         self.assertEqual(30.0, baseline_minutes(features))
         features["windows"][10]["minutes_mean"] = None
+        self.assertEqual(20.0, baseline_minutes(features))
+
+    def test_baseline_skips_a_window_supported_by_one_game(self):
+        # A single appearance is not a rotation mean; fall through to the next
+        # window that has a real sample.
+        features = {"windows": {5: {"n": 5, "minutes_mean": 20.0}, 10: {"n": 1, "minutes_mean": 41.0},
+                                20: {"n": 20, "minutes_mean": 30.0}}, "minutes_season_mean": 25.0}
         self.assertEqual(20.0, baseline_minutes(features))
 
     def test_candidate_needs_a_fitted_model(self):
@@ -258,6 +265,43 @@ class SplitTests(unittest.TestCase):
         self.assertGreater(report["played_game_accuracy"]["candidate"]["n"], 0)
         self.assertEqual(report["played_game_accuracy"]["baseline"]["n"],
                          report["played_game_accuracy"]["candidate"]["n"])
+
+
+class SeasonScopeTests(unittest.TestCase):
+    @staticmethod
+    def _labelled(day, minutes, label, event):
+        payload = row(event=event, date=day, minutes=minutes)
+        payload["season_label"] = label
+        return payload
+
+    def test_current_season_rotation_is_not_pooled_with_last_season(self):
+        # Last April was played on rest days with a different roster; three games
+        # of this season say far more about tonight's role.
+        prior = [self._labelled(f"2026-04-{day:02d}", minutes, "2025-26", f"a{day}")
+                 for day, minutes in zip(range(1, 7), (24.0, 30.0, 28.0, 26.0, 30.0, 29.0))]
+        current = [self._labelled(f"2026-10-{day:02d}", 36.0, "2026-27", f"b{day}")
+                   for day in (20, 22, 25)]
+        features = appearance_windows(prior + current, "2026-10-26", target_season="2026-27")
+        self.assertEqual("current_season", features["window_scope"])
+        self.assertEqual(36.0, features["windows"][10]["minutes_mean"])
+        self.assertEqual(3, features["windows"][10]["n"])
+        # Minutes are scoped to the season, but the per-minute rate falls back to
+        # the wider recent sample when the same-season sample is thin.
+        self.assertEqual(3, features["rates_last10"]["_appearances"])
+        self.assertEqual(9, features["rates_all"]["_appearances"])
+        self.assertEqual("all_appearances", project_player(features)["rate_window"])
+        self.assertFalse(features["stale_rotation"])
+
+    def test_thin_current_season_is_disclosed_as_carryover(self):
+        prior = [self._labelled(f"2026-04-{day:02d}", 30.0, "2025-26", f"a{day}")
+                 for day in range(1, 7)]
+        current = [self._labelled(f"2026-10-{day:02d}", 36.0, "2026-27", f"b{day}")
+                   for day in (20, 22)]
+        features = appearance_windows(prior + current, "2026-10-26", target_season="2026-27")
+        self.assertEqual("prior_season_carryover", features["window_scope"])
+        self.assertTrue(features["stale_rotation"])
+        self.assertTrue(any("carried over" in reason for reason in features["stale_reasons"]))
+        self.assertEqual(8, features["n_window_appearances"])
 
 
 class WorkflowRoutingTests(unittest.TestCase):

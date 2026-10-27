@@ -32,6 +32,7 @@ def main(argv=None):
     for name in ['show','push']:
         ap=sub.add_parser(name)
         if name=='show':ap.add_argument('--json',action='store_true',help='Show full-precision saved JSON instead of the formatted score review')
+        if name=='push':ap.add_argument('--preview',action='store_true',help='Build and save the Discord payloads locally; send nothing')
         choice=ap.add_mutually_exclusive_group(required=True)
         choice.add_argument('--run-id');choice.add_argument('--latest',action='store_true')
     ap=sub.add_parser('cleanup');ap.add_argument('--before',required=True);ap.add_argument('--apply',action='store_true')
@@ -71,7 +72,9 @@ def main(argv=None):
         elif args.action=='show':
             result=workflow.saved_run(args.run_id)
             if not args.json and workflow.show_saved_score_review(result):return 0
-        elif args.action=='push':result={'confirmed_destinations':workflow.push_saved(args.run_id)}
+        elif args.action=='push':
+            result=(workflow.preview_saved(args.run_id) if getattr(args,'preview',False)
+                    else {'confirmed_destinations':workflow.push_saved(args.run_id)})
         elif args.action=='cleanup':result=workflow.cleanup(args.before,args.apply)
         elif args.action=='period':
             import datetime

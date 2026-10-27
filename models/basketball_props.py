@@ -19,6 +19,7 @@ from features.basketball_props import (
     APPEARED,
     COMBOS,
     DID_NOT_PLAY,
+    MIN_WINDOW_SAMPLE,
     STATS,
     appearance_windows,
     combo_means,
@@ -94,9 +95,11 @@ def baseline_minutes(features):
     """
     windows = features.get("windows") or {}
     for size in (10, 5, 20):
-        value = (windows.get(size) or {}).get("minutes_mean")
-        if value is not None:
-            return value
+        block = windows.get(size) or {}
+        # A mean over one or two games is noise, not a rotation. Skip thin windows
+        # and fall through to a supported one rather than projecting from them.
+        if block.get("minutes_mean") is not None and (block.get("n") or 0) >= MIN_WINDOW_SAMPLE:
+            return block["minutes_mean"]
     return features.get("minutes_season_mean")
 
 
@@ -173,6 +176,9 @@ def project_player(features, minutes_model=None, designation=None, allow_overtim
         "team_changes_20": features.get("team_changes_20"),
         "overtime_share": features.get("overtime_share"),
         "windows": features.get("windows"),
+        "window_scope": features.get("window_scope"),
+        "n_window_appearances": features.get("n_window_appearances"),
+        "same_season_appearances": features.get("same_season_appearances"),
         "season_labels": features.get("season_labels"),
         "last_appearance_season": features.get("last_appearance_season"),
         "target_season": features.get("target_season"),
@@ -254,7 +260,10 @@ def chronological_split(rows, train_fraction=0.6):
 def _features_for(row, by_player, by_team):
     player_rows = by_player.get(str(row.get("player_id")), [])
     team_rows = by_team.get(str(row.get("team_id")), [])
-    return appearance_windows(player_rows, row.get("game_date"), team_rows)
+    # Score each holdout row exactly the way a live forecast is scored: from the
+    # rotation as it stood inside that row's own season.
+    return appearance_windows(player_rows, row.get("game_date"), team_rows,
+                             target_season=row.get("season_label"))
 
 
 def _error_summary(errors):

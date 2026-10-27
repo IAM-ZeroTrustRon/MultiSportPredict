@@ -52,16 +52,20 @@ def forecast(game,data,model,specs,now=None,goalies=None):
     result=model.predict(features,game["season_type"]==3)
     d=result.pop("distribution")
     counts={s:obs[s]["season_games_played"] for s in ("home","away")}
-    reasons=[]
-    if game.get('neutral_site'):reasons.append('Neutral-site effect is not separately validated by this team baseline')
+    # Two kinds of blocker, kept apart: data/validation reasons mean the model itself
+    # is not trustworthy tonight, while context reasons only withhold the bet. Only
+    # the first kind suppresses the priced model estimate.
+    data_reasons=[]
+    if game.get('neutral_site'):data_reasons.append('Neutral-site effect is not separately validated by this team baseline')
     # Provisional operational gate, not a claim of a validated season cutoff.
-    if min(counts.values())<10:reasons.append("Observation policy: fewer than 10 current-season games for a team")
+    if min(counts.values())<10:data_reasons.append("Observation policy: fewer than 10 current-season games for a team")
     v=model.validation
     if (v["winner_brier"] is None or v["winner_brier"]>=v["baseline_winner_brier"]
             or v["goal_deviance"]>=v["baseline_goal_deviance"]):
-        reasons.append("Historical benchmark did not improve both baseline winner and scoring metrics")
-    if max(v["goal_dispersion"])>v.get("dispersion_limit",1.5):reasons.append("Goal dispersion exceeds the Poisson operational limit")
-    if d is None:reasons.append("No validated OT/SO component for this game type; eventual-winner markets unavailable")
+        data_reasons.append("Historical benchmark did not improve both baseline winner and scoring metrics")
+    if max(v["goal_dispersion"])>v.get("dispersion_limit",1.5):data_reasons.append("Goal dispersion exceeds the Poisson operational limit")
+    if d is None:data_reasons.append("No validated OT/SO component for this game type; eventual-winner markets unavailable")
+    context_reasons=[]
     goalie_context=None
     if goalies is not None:
         if not isinstance(goalies,dict):raise ValueError('Goalie context must be a JSON object')
@@ -74,7 +78,11 @@ def forecast(game,data,model,specs,now=None,goalies=None):
                     or detail.get("confirmed") is not True or not str(detail.get("source_url","")).startswith("https://")):
                 raise ValueError("Goalie context requires confirmed numeric player/team identity and HTTPS source for each side")
         goalie_context=goalies
-    if goalie_context is None:reasons.append("Starting goalies unconfirmed; no goalie-quality adjustment or betting recommendation")
+    if goalie_context is None:context_reasons.append("Starting goalies unconfirmed; no goalie-quality adjustment or betting recommendation")
+    reasons=data_reasons+context_reasons
+    # A goalie-identity gap does not invalidate the priced arithmetic, so the EV is
+    # still reported as a MODEL ESTIMATE while every actionable field stays empty.
+    estimates=not data_reasons
     gate=dict(eligible=not reasons,season=game["season"],required_games=10,season_games_played=counts,
               status="Team baseline eligible — still uncalibrated" if not reasons else "Insufficient verified NHL inputs — Projection only",
               reasons=reasons,policy="Provisional operational policy; not an accuracy guarantee")
@@ -95,14 +103,17 @@ def forecast(game,data,model,specs,now=None,goalies=None):
         if d:item["omitted_tail"]=d["omitted_tail"]
         markets.append(item)
     if reasons:
-        markets=observation_markets(markets)
-        for item in markets:item.update(status=gate["status"],recommendation="INFO — "+gate["status"])
+        markets=observation_markets(markets,keep_estimates=estimates)
+        verdict=("INFO — NO BET: starting goalies unconfirmed; EV shown is a model estimate"
+                 if estimates else "INFO — "+gate["status"])
+        for item in markets:item.update(status=gate["status"],recommendation=verdict)
     h,a=result["regulation_home"],result["regulation_away"]
     if d:
         h+=d["regulation"]["draw"]*result["ot_home_probability"]
         a+=d["regulation"]["draw"]*(1-result["ot_home_probability"])
     return dict(sport="nhl",league="NHL",home_team=game["home_team"],away_team=game["away_team"],
                 game_id=game["game_id"],game_date=game["date"],fixture=game,readiness=gate,
+                estimates_retained=estimates,
                 projection=dict(home_points=h,away_points=a,**result,final_probability_available=d is not None,validation=v),
                 markets=markets,model_version=model.version,observations=obs,features=features,
                 goalie_context=goalie_context,created_utc=now.isoformat(),sources=data["sources"],

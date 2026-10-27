@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -474,6 +475,9 @@ def run_cli(args=None) -> Dict[str, Any]:
         f"--home/away-ortg/drtg/pace overrides are supplied.")
 
     if ns.home_ml is not None or ns.away_ml is not None:
+        # Replace the engine's unpriced moneyline with the priced one so the same
+        # market is never stored twice.
+        result["markets"] = [m for m in result["markets"] if m.get("kind") != "moneyline"]
         from models.score_ratings import price_market
         p = result["full_game"]["home_moneyline_probability"]
         result["markets"].append(price_market("moneyline", 0.5, (p, 1-p, 0), ns.home_ml, ns.away_ml))
@@ -489,6 +493,8 @@ def run_cli(args=None) -> Dict[str, Any]:
             "game_id": f"{league}:{ns.game_date}:{home_name}:{away_name}",
             "home_team": home_name, "away_team": away_name, "markets": result["markets"],
             "projection": {"home_points": projected["projected_home_points"], "away_points": projected["projected_away_points"]},
+            # Tag the row with the workflow run so saved-review lookup can find it.
+            "_workflow_run_id": os.environ.get("MSP_RUN_ID"),
             "model_result": result}
         store(payload)
         # The exact prices this forecast used, archived immutably for CLV.
@@ -507,6 +513,21 @@ def run_cli(args=None) -> Dict[str, Any]:
         except OSError as exc:
             raise SystemExit(f"[ERROR] Could not write {out}: {exc}")
         print(f"[+] Wrote prediction to {out}")
+    elif ns.store_to_db:
+        # A saved workflow run gets a readable card, not a raw dictionary dump.
+        fg = result["full_game"]
+        print("")
+        print("=" * 78)
+        print(f"{league.upper()}  {ns.game_date}  |  {home_name} (home) vs {away_name} (away)")
+        print("=" * 78)
+        print(f"Projected: {home_name} {fg['projected_home_points']:.1f} | "
+              f"{away_name} {fg['projected_away_points']:.1f} "
+              f"(total {fg['projected_total_points']:.1f})")
+        if fg.get("market_spread") is not None:
+            print(f"Market spread {fg['market_spread']:+.1f} | model edge {fg.get('spread_edge')}")
+        for item in result["markets"]:
+            print(f"  {item['kind']:<10} {item.get('recommendation')}")
+        print("Probabilities are uncalibrated model estimates, not proven betting returns.")
     else:
         print(json.dumps(result, indent=2))
     return result

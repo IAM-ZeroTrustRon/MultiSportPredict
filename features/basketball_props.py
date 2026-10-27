@@ -198,12 +198,21 @@ def team_schedule_dates(team_rows):
 
 
 def appearance_windows(player_rows, cutoff_date, team_rows=None, windows=APPEARANCE_WINDOWS,
-                       target_season=None, stale_days=STALE_ROTATION_DAYS):
+                       target_season=None, stale_days=STALE_ROTATION_DAYS,
+                       season_scope_min=MIN_WINDOW_SAMPLE):
     """Everything a prop projection may know about a player before a cutoff date.
 
     ``player_rows`` is every stored row for one player; ``team_rows`` is every
     stored row for the player's current team so that missed games and rest can be
     measured against a real schedule rather than guessed.
+
+    Rotation windows are **season-scoped** whenever the player has at least
+    ``season_scope_min`` appearances in the forecast season. Pooling April games
+    (rest days, different roster) with October games is what produced projections
+    far below a player's current role, so a same-season sample is preferred and the
+    choice is disclosed in ``window_scope``. With too few same-season appearances
+    the most recent appearances are used instead, which is disclosed as
+    ``prior_season_carryover`` rather than passed off as current form.
     """
     history = history_before(player_rows, cutoff_date)
     appearances = [r for r in history if has_minutes(r)]
@@ -211,9 +220,18 @@ def appearance_windows(player_rows, cutoff_date, team_rows=None, windows=APPEARA
     zero_minute = [r for r in listed if not has_minutes(r)]
     dnps = [r for r in history if r.get("status") == "dnp"]
 
+    same_season = ([r for r in appearances if r.get("season_label") == target_season]
+                   if target_season else [])
+    if target_season and len(same_season) >= season_scope_min:
+        scoped, scope = same_season, "current_season"
+    elif target_season and same_season:
+        scoped, scope = appearances, "prior_season_carryover"
+    else:
+        scoped, scope = appearances, ("prior_season_only" if target_season else "all_appearances")
+
     window_stats = {}
     for size in windows:
-        slice_ = appearances[-size:]
+        slice_ = scoped[-size:]
         minutes = [_minutes(r) for r in slice_]
         window_stats[size] = {
             "n": len(slice_),
@@ -221,8 +239,8 @@ def appearance_windows(player_rows, cutoff_date, team_rows=None, windows=APPEARA
             "starter_freq": mean_or_none([_starter(r) for r in slice_]),
         }
 
-    all_minutes = [_minutes(r) for r in appearances]
-    last10 = appearances[-10:]
+    all_minutes = [_minutes(r) for r in scoped]
+    last10 = scoped[-10:]
     last_ten_minutes = [_minutes(r) for r in last10]
     stability = None
     if len(last_ten_minutes) >= MIN_WINDOW_SAMPLE:
@@ -238,7 +256,7 @@ def appearance_windows(player_rows, cutoff_date, team_rows=None, windows=APPEARA
         except ValueError:
             rest_days = None
 
-    season_teams = {str(r.get("team_id")) for r in appearances[-20:] if r.get("team_id")}
+    season_teams = {str(r.get("team_id")) for r in scoped[-20:] if r.get("team_id")}
     missed_games = None
     scheduled = None
     if team_rows:
@@ -261,10 +279,18 @@ def appearance_windows(player_rows, cutoff_date, team_rows=None, windows=APPEARA
         stale_reasons.append(f"{rest_days} days since last appearance (limit {stale_days})")
     if not appearances:
         stale_reasons.append("no recorded appearances")
+    if scope == "prior_season_carryover":
+        stale_reasons.append(
+            f"only {len(same_season)} appearance(s) in {target_season} "
+            f"(minimum {season_scope_min}); rotation is carried over from {labels[-1] if labels else 'an earlier season'}")
 
     return {
         "cutoff_date": str(cutoff_date)[:10],
         "windows": window_stats,
+        "window_scope": scope,
+        "window_season": target_season,
+        "n_window_appearances": len(scoped),
+        "same_season_appearances": len(same_season),
         "n_appearances": len(appearances),
         "n_listed": len(listed),
         "n_zero_minute_appearances": len(zero_minute),
@@ -283,6 +309,10 @@ def appearance_windows(player_rows, cutoff_date, team_rows=None, windows=APPEARA
         "overtime_appearances": len(overtime_games),
         "overtime_share": (len(overtime_games) / len(appearances)) if appearances else None,
         "rates_last10": per_minute_rates(last10),
+        # Minutes are role and are scoped by season; per-minute production is a
+        # skill and is deliberately pooled over a larger recent sample. When the
+        # same-season rate sample is thin, ``rates_all`` is the only supported
+        # estimate, so it spans the season boundary on purpose.
         "rates_all": per_minute_rates(appearances),
         "last_appearance_date": str(appearances[-1]["game_date"])[:10] if appearances else None,
         "season_labels": labels,

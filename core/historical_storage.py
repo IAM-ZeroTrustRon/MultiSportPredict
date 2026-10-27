@@ -158,6 +158,16 @@ def init_db(db_path: Optional[Path] = None) -> None:
         _backfill_cohorts(cur)
     cur.execute("UPDATE predictions SET is_exploratory=1 WHERE cohort='EXPLORATORY' AND is_exploratory=0")
 
+    # Grading columns. They exist in the long-lived database because they were added
+    # by hand before this schema was written down, which meant any fresh database
+    # failed every grade with "no such column: actual_home_score". Declared here so
+    # init_db() produces a schema the grader can actually write to.
+    for name, ddl in (("pick", "TEXT"), ("actual_home_score", "REAL"),
+                      ("actual_away_score", "REAL"), ("graded_at", "TEXT"),
+                      ("grade_note", "TEXT")):
+        if name not in existing_columns:
+            cur.execute(f"ALTER TABLE predictions ADD COLUMN {name} {ddl}")
+
     _ensure_odds_snapshots(conn)
 
     # Index for faster queries

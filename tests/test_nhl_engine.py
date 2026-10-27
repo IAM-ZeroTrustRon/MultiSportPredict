@@ -181,7 +181,13 @@ def test_unknown_goalies_projection_only_saved_info_and_discord_clean():
     data=dict(retrieved_utc=NOW,data_hash='hash',games=history(),sources={})
     spec=dict(kind='moneyline',line=.5,price_a=110,price_b=-130,scope='official_final_including_ot_so')
     r=forecast(game(),data,mock_model(),[spec],now=NOW)
-    assert not r['readiness']['eligible'] and r['markets'][0]['ev_a'] is None
+    assert not r['readiness']['eligible']
+    # Contract: an unconfirmed goalie withholds the bet, not the arithmetic. The EV
+    # stays visible as a disclosed model estimate, while pick/stake stay empty so
+    # nothing can enter the value ledger.
+    assert r['markets'][0]['ev_a'] is not None and r['estimates_retained'] is True
+    assert r['markets'][0]['pick'] is None and r['markets'][0]['stake_size'] is None
+    assert 'NO BET' in r['markets'][0]['recommendation']
     assert 'Starting goalies' in str(r['readiness']['reasons'])
     json.dumps(r,allow_nan=False)
     with patch('core.historical_storage.init_db'),patch('core.historical_storage.store_prediction') as save:
@@ -189,8 +195,31 @@ def test_unknown_goalies_projection_only_saved_info_and_discord_clean():
     assert is_excluded_tier(save.call_args.args[8])
     assert save.call_args.args[6] is None
     assert save.call_args.kwargs['stake_size'] is None
+    from nhl_review import format_review
+    text=format_review(r)
+    assert 'MODEL ESTIMATE' in text and 'NO BET' in text and 'HOME:' in text
     embed=json.dumps(build_embed('nhl',r),ensure_ascii=False)
-    assert 'NHL' in embed and 'Starting goalies' in embed
+    # The card carries the same single verdict as the review, not the raw reason text.
+    assert 'NHL' in embed and 'NO BET' in embed and 'goalies unconfirmed' in embed
+
+
+def test_nhl_goalie_gate_states_one_verdict_on_every_surface():
+    data=dict(retrieved_utc=NOW,data_hash='hash',games=history(),sources={})
+    spec=dict(kind='moneyline',line=.5,price_a=110,price_b=-130,scope='official_final_including_ot_so')
+    r=forecast(game(),data,mock_model(),[spec],now=NOW)
+    from nhl_review import format_review
+    text=format_review(r)
+    # One verdict for the game, not one per market, and no duplicated reason ladder.
+    assert text.count('VERDICT:')==1
+    assert text.count('NO BET')==1
+    assert 'starting goalies unconfirmed' in text
+    from score_review import card_shape
+    card=card_shape(r)
+    names=[row['name'] for row in card['markets']]
+    assert names.count('VERDICT')==1
+    assert not any('NO BET' in (row.get('pick') or '') for row in card['markets'])
+    # The priced estimate is still carried into the Discord payload.
+    assert any('EV +' in row['model'] or 'EV -' in row['model'] for row in card['markets'])
 
 
 def test_started_stale_model_and_mismatched_scope_are_refused():

@@ -1,14 +1,23 @@
-"""NBA player-prop research: projected minutes and stat expectations.
+"""NBA player-prop research: projected minutes, projected stats and offered prices.
 
-This produces research projections only. It never writes a team-pick prediction,
-never joins the value ledger, and never emits a cover probability, an expected
-value, a stake or a recommendation. Those need real bookmaker prop prices and a
-distribution assumption, neither of which this phase has.
+This produces research projections and, when a real bookmaker price is available,
+a MODEL ESTIMATE of the probability and expected value at that exact line. It never
+writes a team-pick prediction, never enters the value ledger, and never stakes: prop
+staking is not enabled, so ``stake_size`` is always null with the reason stated.
+
+Two signals are kept apart on purpose:
+
+* probability - the model's own chance the selection wins, from measured residuals
+* value       - that probability priced against the offered odds
+
+A selection can be likely to win and still be a losing bet. Neither signal is
+blended with the market, and no threshold is tuned here: the EV pick uses the same
+LEAN gate as the rest of the project (``models.score_ratings.price_market``).
 
 Usage (Git Bash, from C:/MultiSportPredict):
 
-    venv/Scripts/python.exe -u run_basketball_props.py --date 2026-10-28 \\
-        --match "Miami Heat vs Atlanta Hawks"
+    venv/Scripts/python.exe -u run_basketball_props.py --date 2026-10-26 \\
+        --match "Phoenix Suns vs Oklahoma City Thunder"
 
     venv/Scripts/python.exe -u run_basketball_props.py --validate
 """
@@ -20,12 +29,29 @@ import datetime as dt
 import json
 
 import basketball_availability as availability
+import prop_odds
 from features.basketball_props import appearance_windows, dedupe, has_minutes, to_float
 from models.basketball_props import (
     candidate_vector,
     fit_minutes_model,
     project_player,
     validate,
+)
+from models.prop_probability import (
+    MARKETS,
+    build_residual_pool,
+    pool_size,
+    priceability,
+    probability_for,
+    residual_scale,
+)
+from models.score_ratings import price_market
+from probability_signal import (
+    format_price,
+    format_probability,
+    high_probability_lines,
+    probability_flag,
+    value_verdict,
 )
 from sports_feed import EASTERN, ROOT, atomic_json, fetch_json, today
 
@@ -35,6 +61,16 @@ ROSTER = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/{te
 SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates={date}"
 # Only a scheduled game can be projected. Anything in progress or finished is refused.
 PROJECTABLE_STATUS = {"STATUS_SCHEDULED", "STATUS_PRE"}
+DEFAULT_MARKETS = ("points", "rebounds", "assists", "pra", "pa", "ra")
+MARKET_LABEL = {"points": "PTS", "rebounds": "REB", "assists": "AST",
+                "pra": "PRA", "pa": "PA", "ra": "RA"}
+
+# A gap this large between the model's probability and the de-vigged market
+# probability means the two disagree about the player's level, not about luck.
+# With a short or cross-season history that is almost always the model's input
+# being wrong, so the row is labelled neutrally and EV is withheld. This is a
+# disclosure rule, not a tuned edge threshold: it can only remove edges.
+DISCREPANCY_LIMIT = 0.25
 
 
 def load_rows():
@@ -110,6 +146,13 @@ def resolve_fixture(date, match, now=None):
     raise ValueError(f"No fixture {away!r} vs {home!r} on {date}. Scheduled: {available}")
 
 
+def team_names(event):
+    competition = (event.get("competitions") or [{}])[0]
+    sides = {s.get("homeAway"): (s.get("team") or {}).get("displayName")
+             for s in competition.get("competitors") or []}
+    return sides.get("home"), sides.get("away")
+
+
 def team_ids(event):
     competition = (event.get("competitions") or [{}])[0]
     ids = {}
@@ -143,8 +186,153 @@ def fit_from_store(rows, date, by_player, by_team):
     return fit_minutes_model(samples)
 
 
+def _prop_markets(projection, payload, pool, player_name, markets):
+    """Price every requested market that has a real offered line for this player.
+
+    Three outcomes are kept distinct: priced (``ok``), line known but withheld
+    because the projection cannot resolve it (``withheld``), and no usable market
+    (``unavailable`` with a reason). A missing price is never a zero.
+    """
+    stats_means = projection.get("projected_stats") or {}
+    combo_means = projection.get("projected_combos") or {}
+    minutes = projection.get("projected_minutes")
+    entries = []
+    for market in markets:
+        label = MARKET_LABEL[market]
+        mean = stats_means.get(market) if market in stats_means else combo_means.get(market)
+        entry = {"market": market, "label": label, "status": "unavailable",
+                 "reason": None, "line": None, "selection": None, "price": None,
+                 "probability": None, "ev": None, "push": None, "recommendation": None,
+                 "model_probability_over": None, "model_probability_under": None,
+                 "de_vig_over": None, "bookmaker": None, "updated_at": None,
+                 "projected": mean, "projection_gap": None, "error_scale": None}
+        if payload is None:
+            entry["reason"] = "no offered prices retrieved for this fixture"
+            entries.append(entry)
+            continue
+        if mean is None:
+            entry["reason"] = "projection unavailable"
+            entries.append(entry)
+            continue
+        rows = prop_odds.player_lines(payload, player_name, prop_odds.PROP_MARKETS[market])
+        if not rows:
+            entry["reason"] = "bookmakers published no line for this player/market"
+            entries.append(entry)
+            continue
+        line = prop_odds.consensus_line(rows)
+        best = prop_odds.best_prices(rows, line)
+        entry["line"] = line
+
+        # Refuse to price a line the projection cannot resolve. Without this the
+        # model happily reports a huge edge whenever its own projection is the
+        # thing that is wrong.
+        scale = residual_scale(pool, market, minutes)
+        gate = priceability(mean, line, scale)
+        entry["error_scale"] = gate.get("error_scale")
+        entry["projection_gap"] = gate.get("gap")
+        if not gate.get("priceable"):
+            entry["status"] = "withheld"
+            entry["reason"] = gate.get("reason")
+            entries.append(entry)
+            continue
+
+        probabilities = probability_for(pool, market, mean, minutes, line)
+        if probabilities.get("status") != "ok":
+            entry["reason"] = probabilities.get("reason")
+            entries.append(entry)
+            continue
+        over_price = (best.get("over") or {}).get("price")
+        under_price = (best.get("under") or {}).get("price")
+        if over_price is None and under_price is None:
+            entry["reason"] = "line published without a usable price"
+            entries.append(entry)
+            continue
+        entry.update({
+            "model_probability_over": probabilities["over"],
+            "model_probability_under": probabilities["under"],
+            "push": probabilities["push"],
+            "probability_samples": probabilities["samples"],
+            "probability_scope": probabilities["scope"],
+        })
+
+        priced = price_market("total", line, (probabilities["over"], probabilities["under"],
+                                              probabilities["push"]),
+                              over_price, under_price)
+        pick = priced.get("pick")
+        if pick not in ("OVER", "UNDER"):
+            # No side clears the LEAN gate; show the likelier priced side as a pass.
+            options = [("OVER", probabilities["over"], over_price, priced["ev_a"], best.get("over")),
+                       ("UNDER", probabilities["under"], under_price, priced["ev_b"], best.get("under"))]
+            options = [o for o in options if o[2] is not None]
+            pick, probability, price, ev, book = max(options, key=lambda o: o[1])
+        else:
+            if pick == "OVER":
+                probability, price, ev = probabilities["over"], over_price, priced["ev_a"]
+                book = best.get("over") or {}
+            else:
+                probability, price, ev = probabilities["under"], under_price, priced["ev_b"]
+                book = best.get("under") or {}
+            if price is None:
+                # The recommended side has no price; report the other side instead of
+                # an EV computed against nothing.
+                pick = "UNDER" if pick == "OVER" else "OVER"
+                probability = probabilities[pick.lower()]
+                price = under_price if pick == "UNDER" else over_price
+                ev = priced["ev_b"] if pick == "UNDER" else priced["ev_a"]
+                book = best.get(pick.lower()) or {}
+
+        fair_market = prop_odds.de_vig(over_price, under_price) if (
+            over_price is not None and under_price is not None) else None
+        market_probability = None
+        if fair_market:
+            market_probability = fair_market[0] if pick == "OVER" else fair_market[1]
+        if (market_probability is not None and probability is not None
+                and abs(float(probability) - float(market_probability)) > DISCREPANCY_LIMIT):
+            entry.update({
+                "status": "discrepancy",
+                "selection": pick,
+                "price": price,
+                "probability": probability,
+                "ev": None,
+                "de_vig_over": fair_market[0],
+                "bookmaker": book.get("bookmaker"),
+                "updated_at": book.get("updated_at"),
+                "model_estimate": True,
+                "probability_flag": probability_flag(probability),
+                "value_verdict": "MODEL/MARKET DISCREPANCY",
+                "recommendation": "MODEL/MARKET DISCREPANCY - EV withheld",
+                "reason": (f"model {float(probability):.1%} vs de-vigged market "
+                           f"{float(market_probability):.1%} on {pick}; the disagreement is "
+                           "about the player's level, so no EV is published"),
+            })
+            entries.append(entry)
+            continue
+
+        entry.update({
+            "status": "ok",
+            "selection": pick,
+            "price": price,
+            "probability": probability,
+            "ev": ev,
+            "bookmaker": book.get("bookmaker"),
+            "updated_at": book.get("updated_at"),
+            "recommendation": priced.get("recommendation"),
+            "stake_size": None,
+            "stake_basis": "unavailable: prop staking is not enabled",
+            "model_estimate": True,
+            "probability_flag": probability_flag(probability),
+            "value_verdict": value_verdict(ev),
+        })
+        if over_price is not None and under_price is not None:
+            fair = prop_odds.de_vig(over_price, under_price)
+            if fair:
+                entry["de_vig_over"] = fair[0]
+        entries.append(entry)
+    return entries
+
+
 def research(date, match, player_filter, limit, json_only=False, minutes_model="baseline",
-             dry_run=False, now=None):
+             dry_run=False, now=None, use_odds=True, markets=DEFAULT_MARKETS, regions="us"):
     payload, rows = load_rows()
     events = resolve_fixture(date, match, now)
     if not events:
@@ -156,15 +344,55 @@ def research(date, match, player_filter, limit, json_only=False, minutes_model="
         if coefficients is None:
             raise ValueError("Not enough stored history to fit the candidate minutes model")
 
+    pool = build_residual_pool(rows, date)
+    sizes = pool_size(pool)
+
+    odds_events, odds_meta = [], None
+    odds_notes = []
+    if use_odds:
+        try:
+            odds_events, odds_meta = prop_odds.list_events("basketball_nba")
+        except (RuntimeError, ValueError) as exc:
+            odds_notes.append(f"prices unavailable: {exc}")
+            odds_events = []
+
+    quota_metas = [odds_meta] if odds_meta else []
     results = []
     availability_reports = []
+    price_reports = []
     for event in events[:1] if match else events:
         assert_projectable(event, date, now)
         home_id, away_id = team_ids(event)
+        home_name, away_name = team_names(event)
         snapshot = availability.snapshot(event.get("id"), now=now)
         availability_reports.append(snapshot)
         target = snapshot.get("season") or {}
         target_label = target.get("label")
+
+        odds_payload = None
+        if use_odds and odds_events:
+            try:
+                priced_event = prop_odds.match_event(odds_events, away_name, home_name)
+            except ValueError as exc:
+                odds_notes.append(str(exc))
+                priced_event = None
+            if priced_event is None:
+                odds_notes.append(f"{away_name} @ {home_name}: no priced event for this fixture")
+            else:
+                market_keys = ",".join(prop_odds.PROP_MARKETS[m] for m in markets)
+                odds_payload, meta = prop_odds.event_odds(
+                    "basketball_nba", priced_event["id"], market_keys, regions=regions)
+                if meta:
+                    quota_metas.append(meta)
+                    price_reports.append({"event_id": priced_event["id"],
+                                          "commence_time": priced_event.get("commence_time"),
+                                          **{k: meta.get(k) for k in
+                                             ("cached", "credit_cost", "remaining", "markets_unavailable")}})
+                    for key in meta.get("markets_unavailable") or []:
+                        odds_notes.append(f"{key}: not published by any bookmaker")
+                if odds_payload is None:
+                    odds_notes.append(f"{away_name} @ {home_name}: {meta.get('reason')}")
+
         for side, team_id in (("away", away_id), ("home", home_id)):
             for athlete in roster(team_id):
                 player_id = str(athlete.get("id"))
@@ -175,7 +403,7 @@ def research(date, match, player_filter, limit, json_only=False, minutes_model="
                                               by_team.get(team_id, []), target_season=target_label)
                 projection = project_player(features, coefficients,
                                             availability.designation_for(snapshot, player_id, now))
-                results.append({
+                entry = {
                     "date": date, "event_id": str(event.get("id")), "matchup": event.get("name"),
                     "kickoff": (event_kickoff(event) or "").isoformat() if event_kickoff(event) else None,
                     "status": event_status(event),
@@ -184,7 +412,15 @@ def research(date, match, player_filter, limit, json_only=False, minutes_model="
                     "position": (athlete.get("position") or {}).get("abbreviation"),
                     "season_label": target_label,
                     **projection,
-                })
+                }
+                if projection.get("refused"):
+                    entry["prop_markets"] = []
+                else:
+                    entry["prop_markets"] = _prop_markets(projection, odds_payload, pool,
+                                                          name, markets)
+                entry["recommendation"] = _player_recommendation(entry)
+                results.append(entry)
+
     results.sort(key=lambda r: (r.get("projected_minutes") is None, -(r.get("projected_minutes") or 0)))
     shown = results[:limit] if limit else results
     document = {
@@ -202,11 +438,24 @@ def research(date, match, player_filter, limit, json_only=False, minutes_model="
         "cutoff_rule": "only games dated strictly before the forecast date are used",
         "availability": [{k: v for k, v in report.items() if k != "players"}
                          for report in availability_reports],
+        "residual_pool": {**sizes, "games_used": pool["games_used"],
+                          "assumptions": pool["assumptions"]},
+        "odds": {
+            "enabled": bool(use_odds),
+            "markets_requested": list(markets),
+            "regions": regions,
+            "fixtures": price_reports,
+            "quota": prop_odds.quota_note(quota_metas),
+            "notes": odds_notes,
+        },
         "players_evaluated": len(results),
         "rows": shown,
         "research_only": True,
-        "no_betting_output": ("No cover probability, expected value, stake, probability flag "
-                             "or recommendation is produced in this phase."),
+        "model_estimates": ("Probabilities are empirical residual frequencies and EV is the model "
+                            "probability priced at the offered line; both are MODEL ESTIMATES, "
+                            "unvalidated against market prices."),
+        "no_betting_output": ("No stake is produced. Prop staking is not enabled; recommendations "
+                             "use the project's existing LEAN threshold unchanged."),
     }
     if not dry_run:
         atomic_json(LATEST, document)
@@ -215,6 +464,21 @@ def research(date, match, player_filter, limit, json_only=False, minutes_model="
     else:
         print(format_research(document))
     return document
+
+
+def _player_recommendation(entry):
+    """One verdict per player, never a value claim the data cannot support."""
+    availability_block = entry.get("availability") or {}
+    if entry.get("refused"):
+        return "REFUSED - " + str(entry.get("status") or "unavailable")
+    if not availability_block.get("actionable"):
+        return "RESEARCH ONLY - availability unverified"
+    priced = [m for m in entry.get("prop_markets") or [] if m.get("status") == "ok"]
+    leans = [m for m in priced if m.get("value_verdict") == "VALUE"]
+    if leans:
+        best = max(leans, key=lambda m: m.get("ev") or 0)
+        return f"LEAN {best['selection']} {best['label']} {best['line']} (MODEL ESTIMATE)"
+    return "PASS - no priced model edge"
 
 
 def _num(value, width, decimals=1):
@@ -233,12 +497,30 @@ def _minutes_triplet(row):
     return "/".join(parts)
 
 
+def _odds_price(value):
+    if value is None:
+        return "--"
+    return format_price(value)
+
+
+def _probability(value):
+    if value is None:
+        return "--"
+    return format_probability(value)
+
+
+def _ev(value):
+    if value is None:
+        return "--"
+    return f"{value:+.2%}"
+
+
 def format_research(document):
     provenance = document.get("availability") or []
     lines = [
-        "=" * 132,
+        "=" * 138,
         f"NBA PLAYER PROP RESEARCH - {document['date']}   (research only, not a betting recommendation)",
-        "=" * 132,
+        "=" * 138,
         f"Stored games: {document['store_games']} | player rows: {document['store_rows']} | "
         f"seasons: {', '.join(document.get('store_seasons') or ['unknown'])} | "
         f"source: {document['store_source']} | updated {document['store_updated']}",
@@ -247,7 +529,7 @@ def format_research(document):
         "",
         f"{'PLAYER':<26}{'SIDE':<7}{'ROLE':<7}{'MIN':>6}{'RECENT MIN 5/10/20':>20}"
         f"{'PTS':>8}{'REB':>8}{'AST':>8}{'PRA':>8}{'APPS':>6}{'SEASON':>10}  FLAGS",
-        "-" * 132,
+        "-" * 138,
     ]
     for row in document["rows"]:
         availability_block = row.get("availability") or {}
@@ -258,6 +540,8 @@ def format_research(document):
             flags.append("STALE")
         if row.get("crosses_season"):
             flags.append("CROSS-SEASON")
+        if row.get("window_scope") == "prior_season_carryover":
+            flags.append("PRIOR-SEASON ROTATION")
         if availability_block.get("refuse"):
             flags.append("UNAVAILABLE")
         flag_text = ", ".join(flags) or "-"
@@ -276,21 +560,101 @@ def format_research(document):
             f"{_num(row.get('projected_minutes'), 6)}{_minutes_triplet(row):>20}"
             f"{_num(stats.get('points'), 8)}{_num(stats.get('rebounds'), 8)}"
             f"{_num(stats.get('assists'), 8)}{_num(combos.get('pra'), 8)}"
-            f"{row.get('n_appearances', 0):>6}{season:>10}  {flag_text}"
+            f"{row.get('n_window_appearances', row.get('n_appearances', 0)):>6}{season:>10}  {flag_text}"
         )
     lines += [
-        "-" * 132,
+        "-" * 138,
         "MIN = projected minutes. RECENT MIN = mean minutes over the last 5/10/20 appearances,",
-        "strictly before the forecast date. APPS = usable appearances. '--' means the value is",
+        "strictly before the forecast date, using only this season once 3+ games exist.",
+        "APPS = appearances in the window that produced the projection. '--' means the value is",
         "missing or refused; it is never rendered as 0.0.",
         "",
         "STALE = rotation history is older than the declared limit or from a previous season.",
         "CROSS-SEASON = the last appearance came from a different NBA season than this fixture.",
         "Availability is UNKNOWN unless the feed published a designation for that player.",
+    ]
+
+    priced_rows = [(row, market) for row in document["rows"]
+                   for market in row.get("prop_markets") or [] if market.get("status") == "ok"]
+    withheld_rows = [(row, market) for row in document["rows"]
+                     for market in row.get("prop_markets") or [] if market.get("status") == "withheld"]
+    discrepancy_rows = [(row, market) for row in document["rows"]
+                        for market in row.get("prop_markets") or []
+                        if market.get("status") == "discrepancy"]
+    odds_block = document.get("odds") or {}
+    lines += ["", "-" * 138,
+              "PROP MARKETS - offered price, MODEL ESTIMATE (unvalidated), '--' when withheld or unpriced",
+              "-" * 138]
+    if not odds_block.get("enabled"):
+        lines.append("  Prices not requested for this run (--no-odds).")
+    elif not priced_rows and not withheld_rows and not discrepancy_rows:
+        lines.append("  No offered prop market matched a projected player for this fixture.")
+        for note in odds_block.get("notes") or []:
+            lines.append(f"  note: {note}")
+    else:
+        lines.append(f"{'PLAYER':<26}{'MARKET':<7}{'LINE':>6}{'PROJ':>7}{'SIDE':<7}{'ODDS':>7}"
+                     f"{'PROB':>8}{'EV':>9}{'HIGH':>6}  VERDICT / BOOK")
+        for row, market in priced_rows:
+            verdict = market.get("value_verdict") or "--"
+            if not (row.get("availability") or {}).get("actionable"):
+                verdict = "RESEARCH ONLY"
+            lines.append(
+                f"{(row['player'] or '?')[:25]:<26}{market['label']:<7}{market['line']:>6.1f}"
+                f"{_num(market.get('projected'), 7)}{market['selection']:<7}"
+                f"{_odds_price(market.get('price')):>7}"
+                f"{_probability(market.get('probability')):>8}{_ev(market.get('ev')):>9}"
+                f"{('HIGH' if market.get('probability_flag') == 'HIGH' else '-'):>6}"
+                f"  {verdict} / {market.get('bookmaker') or '--'}")
+        for row, market in withheld_rows:
+            lines.append(
+                f"{(row['player'] or '?')[:25]:<26}{market['label']:<7}{market['line']:>6.1f}"
+                f"{_num(market.get('projected'), 7)}{'--':<7}{'--':>7}{'--':>8}{'--':>9}"
+                f"{'--':>6}  WITHHELD: gap {_num(market.get('projection_gap'), 4, 1).strip()}"
+                f" vs measured error {_num(market.get('error_scale'), 4, 1).strip()}")
+        for row, market in discrepancy_rows:
+            fair = market.get('de_vig_over')
+            if fair is not None and market.get('selection') == 'UNDER':
+                fair = 1 - fair
+            lines.append(
+                f"{(row['player'] or '?')[:25]:<26}{market['label']:<7}{market['line']:>6.1f}"
+                f"{_num(market.get('projected'), 7)}{market['selection']:<7}"
+                f"{_odds_price(market.get('price')):>7}"
+                f"{_probability(market.get('probability')):>8}{'--':>9}{'--':>6}"
+                f"  MODEL/MARKET DISCREPANCY: model "
+                f"{_probability(market.get('probability')).strip()} vs market "
+                f"{_probability(fair).strip()}; EV withheld")
+        notes = odds_block.get("notes") or []
+        if notes:
+            lines.append("")
+            for note in notes:
+                lines.append(f"  note: {note}")
+
+    high_lines = []
+    for row, market in priced_rows:
+        selection = f"{row['player']} {market['label']} {market['selection']} {market['line']}"
+        high_lines.extend(high_probability_lines(selection, market.get("probability"),
+                                                market.get("price"), market.get("ev"),
+                                                market.get("de_vig_over")
+                                                if market["selection"] == "OVER"
+                                                else (1 - market["de_vig_over"]
+                                                      if market.get("de_vig_over") is not None else None)))
+    if high_lines:
+        lines += ["", "-" * 138]
+        lines += high_lines
+
+    quota = odds_block.get("quota") or {}
+    lines += [
         "",
-        f"NOTE: {document['no_betting_output']}",
-        "Minutes include overtime and are not adjusted for it. Combo PRA is the sum of component",
-        "means; no independence between components is assumed and no combo spread is reported.",
+        "-" * 138,
+        f"Odds credits: {quota.get('credits_spent', 0)} spent this run | "
+        f"{quota.get('requests', 0)} request(s), {quota.get('cache_hits', 0)} cached | "
+        f"provider remaining: {quota.get('credits_remaining') if quota.get('credits_remaining') is not None else '--'}",
+        "Market labels: PTS/REB/AST are single stats, PRA/PA/RA are combined counts.",
+        "Probabilities are empirical residual frequencies within a rotation-minutes band; combos",
+        "use the joint residual of the same historical game (no independence is assumed).",
+        "EV = model probability priced at the offered line. LEAN uses the project's existing 5%",
+        "gate. De-vig is a benchmark only and never replaces the model probability. No stake is",
+        "produced: prop staking is not enabled and no profit is claimed.",
         "This record is kept outside the team-pick value ledger.",
     ]
     return "\n".join(lines)
@@ -386,6 +750,11 @@ def main(argv=None):
     parser.add_argument("--validate", action="store_true")
     parser.add_argument("--minutes-model", choices=["baseline", "candidate"], default="baseline",
                         help="baseline is the transparent recent-rotation mean; candidate is the fitted model")
+    parser.add_argument("--markets", default=",".join(DEFAULT_MARKETS),
+                        help="Comma-separated: " + ", ".join(DEFAULT_MARKETS))
+    parser.add_argument("--regions", default="us")
+    parser.add_argument("--no-odds", action="store_true",
+                        help="Do not request prices (avoids any provider credit)")
     parser.add_argument("--dry-run", action="store_true",
                         help="Print the projection and write nothing")
     args = parser.parse_args(argv)
@@ -397,8 +766,12 @@ def main(argv=None):
         report = validate(rows)
         print(json.dumps(report, indent=2) if args.json else format_validation(report))
         return 0
+    markets = tuple(m.strip().lower() for m in args.markets.split(",") if m.strip())
+    unknown = [m for m in markets if m not in MARKETS]
+    if unknown:
+        raise ValueError(f"Unsupported market(s): {', '.join(unknown)}; choose from {', '.join(MARKETS)}")
     research(args.date, args.match, args.player, args.limit, args.json, args.minutes_model,
-             args.dry_run)
+             args.dry_run, use_odds=not args.no_odds, markets=markets, regions=args.regions)
     return 0
 
 

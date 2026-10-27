@@ -164,7 +164,12 @@ def test_msp_uses_nbl_score_route_and_accepts_aliases():
     command = run_command('basketball',['Sydney Kings vs Perth Wildcats'],DAY,'Australian NBL',{},['--exploratory'])
     assert '--home' not in command and '--match' in command
     assert command[command.index('--league')+1] == 'NBL'
-    assert '--odds' not in command and '--exploratory' in command
+    # Prices are discovered automatically by default (2026-10-26 operational pass),
+    # and manual lines still suppress the automatic quote fetch.
+    assert '--odds' in command and '--exploratory' in command
+    manual = run_command('basketball',['Sydney Kings vs Perth Wildcats'],DAY,'Australian NBL',{},
+                         ['--moneyline','-104','-121'])
+    assert '--odds' not in manual
 
 
 def test_measured_partial_efficiency_is_preserved(tmp_path, monkeypatch):

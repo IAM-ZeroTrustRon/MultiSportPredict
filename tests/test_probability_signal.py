@@ -22,7 +22,9 @@ def test_value_verdict_is_independent_of_probability():
     assert signal["value_verdict"] == "PASS"
     assert signal["probability_display"] == "78.2%"
     assert signal["price_display"] == "-450"
-    assert signal["ev_display"] == "-4.4%"
+    # EV is rendered to two decimals by the presentation spec; the -4.4% in the
+    # original illustration is the same value at one decimal.
+    assert signal["ev_display"] == "-4.40%"
 
 
 def test_high_block_matches_the_agreed_shape():
@@ -31,7 +33,7 @@ def test_high_block_matches_the_agreed_shape():
     assert "Selection: Philadelphia moneyline" in lines
     assert "Model probability: 78.2%" in lines
     assert "Odds: -450" in lines
-    assert "Estimated EV: -4.4%" in lines
+    assert "Estimated EV: -4.40%" in lines
     assert "Value verdict: PASS" in lines
     assert "Probability flag: HIGH" in lines
 

@@ -208,6 +208,44 @@ def _store_prediction(
         return False
 
 
+def _reversed_tennis_duplicate(home: str, away: str,
+                              game_date: Optional[str]) -> Optional[Dict[str, Any]]:
+    """An existing tennis row for the same fixture with its sides swapped.
+
+    Tennis has no home/away, so the same match can be typed in either order and
+    has been stored twice that way. Grading already collapses the unordered pair,
+    but the second write still double-logs the fixture, so a reversed orientation
+    is refused. A same-orientation re-run is left alone: that is a legitimate
+    re-price, not a duplicate fixture.
+    """
+    if not game_date:
+        return None
+    import sqlite3
+    from core.historical_storage import DB_PATH, init_db
+    from grade_predictions import normalise_team
+    conn = None
+    try:
+        init_db()
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        rows = list(conn.execute(
+            "SELECT id, home_team, away_team, game_date FROM predictions "
+            "WHERE lower(sport)='tennis' AND game_date=? AND lower(market_type)='moneyline'",
+            (str(game_date),)))
+    except sqlite3.Error:
+        return None
+    finally:
+        # Windows will not delete or replace a database file with a live handle.
+        if conn is not None:
+            conn.close()
+    home_key, away_key = normalise_team(home, "tennis"), normalise_team(away, "tennis")
+    for row in rows:
+        if (normalise_team(row["home_team"], "tennis") == away_key
+                and normalise_team(row["away_team"], "tennis") == home_key):
+            return dict(row)
+    return None
+
+
 def _high_probability_lines(result: Dict[str, Any]) -> list:
     """Dual-signal block for the sports this runner displays.
 
@@ -437,7 +475,8 @@ def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
                under_price: Optional[float] = None,
                spread_home_price: Optional[float] = None,
                spread_away_price: Optional[float] = None,
-               game_date: Optional[str] = None) -> Dict[str, Any]:
+               game_date: Optional[str] = None,
+               exploratory: bool = False) -> Dict[str, Any]:
     """
     auto_odds: try live_odds.get_soccer_odds() BEFORE predicting, so the
     prediction itself (not just an attached "live_market" afterthought) is
@@ -467,10 +506,36 @@ def run_soccer(home: str, away: str, league: Optional[str], market_line: float,
             market_line = -market_line
             print(f"Using verified home/away: {home} vs {away}; side prices and handicap remapped")
 
+    # Three-tier resolution: local -> one supported public refresh -> disclosed
+    # exploratory scenario. Missing data never becomes a silent league average.
+    from soccer_resolution import TIER_LABELS, exploratory_observation, resolve_team_stats
+    # Tier 1 is the existing verified store lookup, so a populated store never
+    # triggers a network refresh. Only a miss escalates to the cascade.
     hs = get_soccer_team_stats(home, league)
     aws = get_soccer_team_stats(away, league)
+    if hs is not None and aws is not None:
+        tier, tier_notes = 1, ["Competition-scoped local history in use"]
+    else:
+        hs, aws, tier, tier_notes = resolve_team_stats(home, away, league)
+    print(f"[soccer] resolution tier {tier}: {TIER_LABELS[tier]}")
+    for note in tier_notes:
+        print(f"  {note}")
     if hs is None or aws is None:
-        raise ValueError(f"Stats missing for '{home}' or '{away}'. Seed stats in team_stats_provider.py before running.")
+        if not exploratory:
+            raise ValueError(
+                f"Stats missing for '{home}' or '{away}'. Seed the store, or re-run with "
+                "--exploratory for a disclosed scenario that stays outside the value ledger.")
+        # Whatever side did resolve is kept: an exploratory run must not throw away
+        # verified team data just because its opponent is missing.
+        observation = exploratory_observation(home, away, league, game_date,
+                                             home_stats=hs, away_stats=aws)
+        print(observation["card"])
+        if observation.get("partial"):
+            print(f"[soccer] retained verified data for {', '.join(observation['verified_sides'])}; "
+                  f"substituted {', '.join(observation['substituted_sides'])}")
+        print(f"Saved exploratory observation to {observation['path']} "
+              "(not stored in the value ledger; no price, EV or stake attached).")
+        return observation
 
     fetched_market: Dict[str, Any] = {}
     result_extra: Dict[str, Any] = {}
@@ -1189,20 +1254,27 @@ def run_tennis(home: str, away: str, surface: str, tournament: Optional[str],
     rec = ml.get("recommendation", "PASS")
 
     if store_to_db:
-        _store_prediction(
-            sport="tennis",
-            home=home,
-            away=away,
-            market_type="moneyline",
-            model_value=home_win_prob,
-            market_value=market_prob if market_prob is not None else 0.5,
-            edge=edge,
-            confidence=conf,
-            recommendation=rec,
-            raw_json=result,
-            prices={"home_ml": home_ml, "away_ml": away_ml},
-        )
-        print(f"[OK] Tennis prediction stored to multisport_history.db")
+        duplicate = _reversed_tennis_duplicate(home, away, result.get("game_date"))
+        if duplicate:
+            print(f"[SKIP] {home} vs {away} is already stored as "
+                  f"{duplicate['home_team']} vs {duplicate['away_team']} on "
+                  f"{duplicate['game_date']} (id {duplicate['id']}); the reversed "
+                  "orientation is not written twice.")
+        else:
+            _store_prediction(
+                sport="tennis",
+                home=home,
+                away=away,
+                market_type="moneyline",
+                model_value=home_win_prob,
+                market_value=market_prob if market_prob is not None else 0.5,
+                edge=edge,
+                confidence=conf,
+                recommendation=rec,
+                raw_json=result,
+                prices={"home_ml": home_ml, "away_ml": away_ml},
+            )
+            print(f"[OK] Tennis prediction stored to multisport_history.db")
 
     if push_discord:
         status = _push_full_result("tennis", home, away, result)
@@ -1276,6 +1348,9 @@ def main() -> None:
                         help="Push result to Discord.")
     parser.add_argument("--live-odds", action="store_true",
                         help="Fetch matched live soccer odds when ODDS_API_KEY is configured (default: auto-fetch on).")
+    parser.add_argument("--exploratory", action="store_true",
+                        help="Soccer only: allow a disclosed league-baseline scenario when verified "
+                             "team data is missing. Never written to the value ledger.")
     parser.add_argument("--no-odds", action="store_true",
                         help="Soccer/baseball: skip the Odds API auto-fetch (projection only, labelled UNLISTED).")
     # MLB market prices. run_baseball() has always accepted these, but main()
@@ -1369,7 +1444,8 @@ def main() -> None:
                    away_ml=args.away_ml, over_price=args.over_price,
                    under_price=args.under_price,
                    spread_home_price=args.spread_home_price,
-                   spread_away_price=args.spread_away_price, game_date=args.game_date)
+                   spread_away_price=args.spread_away_price, game_date=args.game_date,
+                   exploratory=args.exploratory)
     elif sport in ("basketball", "kbl", "nznbl", "euroleague", "eurocup", "liga acb", "acb"):
         run_basketball(home, away, args.league, args.market_line,
                        args.store_to_db, args.push_discord, args.market_total,

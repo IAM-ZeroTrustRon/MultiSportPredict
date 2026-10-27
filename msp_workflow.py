@@ -239,7 +239,29 @@ def run_command(sport, matches, date, league, options, extra):
         if not league:raise ValueError('Basketball requires --league (for example KBL)')
         if league.upper() == 'EUROLEAGUE' and '--exploratory' not in extra:
             if len(matches)!=1:raise ValueError('International basketball needs one matchup per slate item')
-            a,b=split_match(matches[0]);return ['run_basketball.py','--home',a,'--away',b,'--league',league,'--game-date',date,'--store-to-db',*extra]
+            # This engine has no fixture feed to verify orientation against, so the
+            # typed order IS the declared home/away: "Home vs Away".
+            home_team,away_team=split_match(matches[0])
+            # The EuroLeague engine takes --game-date and has no --odds/--dry-run
+            # flags; translate the workflow flags instead of failing on them.
+            dry_run='--dry-run' in extra
+            extra=[x for x in extra if x not in ('--no-odds','--dry-run')]
+            command=['run_basketball.py','--home',home_team,'--away',away_team,'--league',league,'--game-date',date]
+            if not dry_run:command.append('--store-to-db')
+            if '--odds' in extra:
+                extra=[x for x in extra if x!='--odds']
+                try:
+                    import prop_odds
+                    events,_=prop_odds.list_events('basketball_euroleague')
+                    priced=prop_odds.match_event(events,away_team,home_team)
+                    if priced:
+                        payload,_meta=prop_odds.event_odds('basketball_euroleague',priced['id'],
+                                                           prop_odds.TEAM_MARKETS)
+                        if payload:
+                            command+=prop_odds.team_price_flags(payload,away_team,home_team)
+                except (RuntimeError,ValueError) as exc:
+                    print(f'[odds] EuroLeague prices unavailable: {exc}')
+            return [*command,*extra]
         from basketball_resolution import canonical_league
         from score_odds import KEYS
         league=canonical_league(league)
@@ -335,6 +357,75 @@ def show_saved_score_review(saved):
     print('Saved run: '+saved['run_id'])
     for raw in fixtures.values():print('\n'+format_review(raw))
     return True
+
+
+def preview_saved(ident=None):
+    """Build the exact Discord payloads locally and send nothing.
+
+    The same renderer the push uses, so a preview that builds is a preview of what
+    would be published. No webhook is called and no delivery row is written.
+    """
+    from sports_feed import ROOT, atomic_json
+    saved=saved_run(ident)
+    payload=saved['payload']
+    embeds=[]
+    if payload.get('props_research'):
+        from probability_signal import format_ev, format_price, format_probability
+        doc=payload['props_research']
+        priced,held,best_probability=[] ,0,None
+        for player in doc.get('rows') or []:
+            availability=(player.get('availability') or {}).get('status') or 'UNKNOWN'
+            for market in player.get('prop_markets') or []:
+                if market.get('status')=='ok' and market.get('ev') is not None:
+                    priced.append((player,market,availability))
+                    if best_probability is None or (market.get('probability') or 0)>best_probability:
+                        best_probability=market.get('probability') or 0
+                elif market.get('status') in ('withheld','discrepancy'):
+                    held+=1
+        if not priced:raise ValueError('No priced prop market to preview')
+        priced.sort(key=lambda row:(-(row[1].get('probability') or 0),-(row[1].get('ev') or 0)))
+        lines=[]
+        for player,market,availability in priced[:14]:
+            flag=' **[HIGH]**' if market.get('probability_flag')=='HIGH' else ''
+            note=' — research only, availability UNKNOWN' if availability=='UNKNOWN' else ''
+            lines.append(f"**{player['player']}** · {market['label']} {market['selection']} "
+                         f"{market['line']} @ {format_price(market.get('price'))} · "
+                         f"{format_probability(market.get('probability'))} · "
+                         f"EV {format_ev(market.get('ev'))} · "
+                         f"{market.get('value_verdict') or '--'}{flag}{note}")
+        fields=[]
+        if held:
+            fields.append({'name':'Not priced','inline':False,
+                           'value':f'{held} market(s) withheld: the projection could not resolve the '
+                                   'line, or model and market disagreed on the player level.'})
+        fields.append({'name':'Reading this','inline':False,
+                       'value':'Probability and EV are unvalidated model estimates against the '
+                               'offered price. HIGH means the model likes the chance of winning; it '
+                               'is not a value verdict. No stake is produced.'})
+        embed={'title':f"NBA player props | {doc.get('date')}",
+               'description':"\n".join(lines),
+               'fields':fields,
+               'footer':{'text':'Model estimates, unvalidated. Not a betting recommendation.'}}
+        if len(priced)>14:
+            embed['footer']['text']+=f" Showing 14 of {len(priced)} priced markets."
+        embeds.append(embed)
+    else:
+        from discord_integration import format_prediction_embed
+        fixtures={}
+        for row in payload['predictions']:
+            raw=json.loads(row['raw_json'])
+            key=(row['sport'],row['league'],row['game_date'],row['home_team'],row['away_team'])
+            fixtures.setdefault(key,raw)
+        if not fixtures:raise ValueError('Run saved no forecast to preview')
+        for (sport,_league,_date,_home,_away),raw in fixtures.items():
+            embeds.append(format_prediction_embed(sport,raw))
+    path=ROOT/f'output/workflow/previews/{saved["run_id"]}.json'
+    atomic_json(path,{'run_id':saved['run_id'],'status':saved['status'],
+                      'parts':len(embeds),'embeds':embeds})
+    return {'run_id':saved['run_id'],'status':saved['status'],'parts':len(embeds),
+            'preview':str(path.relative_to(ROOT)),
+            'titles':[e.get('title') for e in embeds],
+            'field_counts':[len(e.get('fields') or []) for e in embeds]}
 
 
 def push_saved(ident=None):

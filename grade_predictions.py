@@ -657,7 +657,8 @@ def grade_row(row: sqlite3.Row, home_score: float, away_score: float
 
 
 def apply_result(conn: sqlite3.Connection, row: sqlite3.Row,
-                 home_score: float, away_score: float, source: str) -> Optional[str]:
+                 home_score: float, away_score: float, source: str,
+                 void_reason: Optional[str] = None) -> Optional[str]:
     """Grade one row and write it back. Returns the outcome, or None if skipped.
 
     Rows whose recommendation is PASS or INFO are deliberately NOT graded: they
@@ -675,6 +676,18 @@ def apply_result(conn: sqlite3.Connection, row: sqlite3.Row,
              f"(source: {source})", row["id"]),
         )
         return None
+
+    if void_reason:
+        # A void is a refunded stake, not a result. It is recorded as a push with
+        # zero profit so it never inflates a win rate, and the reason is explicit.
+        conn.execute(
+            "UPDATE predictions SET result_outcome='push', profit_loss=0.0, "
+            "actual_home_score=?, actual_away_score=?, graded_at=?, grade_note=? "
+            "WHERE id=?",
+            (home_score, away_score,
+             _dt.datetime.now().isoformat(timespec="seconds"), void_reason, row["id"]),
+        )
+        return "push"
 
     try:
         outcome, pick, profit, priced, odds = grade_row(row, home_score, away_score)
@@ -844,6 +857,52 @@ def fetch_nfl_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[
 
 TENNIS_SCOREBOARD = "https://site.web.api.espn.com/apis/site/v2/sports/tennis/{tour}/scoreboard?dates={date}"
 
+# ESPN's tennis scoreboard ignores the requested date and returns the whole
+# tournament draw, so the competition's own date is the only trustworthy fixture
+# identity. These statuses decide whether a result may settle a recorded market.
+TENNIS_RETIRED = {"STATUS_RETIRED", "STATUS_RETIREMENT"}
+TENNIS_NO_PLAY = {"STATUS_WALKOVER", "STATUS_W/O", "STATUS_DEFAULT", "STATUS_ABANDONED",
+                  "STATUS_CANCELED", "STATUS_POSTPONED", "STATUS_SUSPENDED"}
+
+
+def _eastern_match_date(stamp: Any) -> Optional[_dt.date]:
+    """A feed timestamp as an Eastern calendar date, or None when unusable.
+
+    Stored predictions use the Eastern date of the fixture, so results have to be
+    keyed the same way or a late-night match lands on the previous day.
+    """
+    if not stamp:
+        return None
+    try:
+        parsed = _dt.datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=_dt.timezone.utc)
+    from sports_feed import EASTERN
+    return parsed.astimezone(EASTERN).date()
+
+
+def tennis_settlement_rule(market: str, status_name: str) -> Tuple[str, Optional[str]]:
+    """How a recorded tennis market settles for a given ending.
+
+    The recorded market rule is the one stored with the pick: a match-winner
+    (moneyline) bet is a bet on who advances, so an official winner settles it even
+    when the match ends by retirement. Anything that depends on completed play -
+    games/sets totals, handicaps, set betting - cannot be settled from a retirement.
+    A walkover, default or abandonment is no play at all: every market is void and
+    the stake is returned rather than being scored as a win or a loss.
+    """
+    market = (market or "").strip().lower()
+    status_name = (status_name or "").strip().upper()
+    if status_name in TENNIS_NO_PLAY:
+        return "void", "no play (walkover/default/abandoned) — market voided"
+    if status_name in TENNIS_RETIRED:
+        if market == "moneyline":
+            return "settle", "retirement — match-winner settles on the official winner"
+        return "void", "retirement — this market requires a completed match"
+    return "settle", None
+
 
 def fetch_tennis_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tuple[float, float]]:
     """(date, home, away) -> (1.0, 0.0) if home won, (0.0, 1.0) if away won.
@@ -854,17 +913,25 @@ def fetch_tennis_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tup
     into the exact same grading path MLB/NFL/NCAAF use, no tennis-specific
     code needed there.
 
-    ESPN's stored names are full names ("Roberto Carballes Baena"); this
-    project's tennis store and every stored prediction use the surname/
-    initial key run_tennis.py's own resolver produces ("Carballes Baena R.").
-    Those two spellings don't line up under a plain squash the way two
-    spellings of a team name usually do, so each ESPN competitor name is
-    resolved against the SAME player store and the SAME resolver run_tennis.py
-    uses for typed CLI input -- treating ESPN's name as if a person had typed
-    it. An ambiguous or unresolved name is skipped, not guessed, consistent
-    with every other resolver in this project.
+    ESPN's tennis scoreboard ignores ``dates`` and returns the whole tournament
+    draw, so the fixture is keyed on the *competition's own* date, converted to
+    Eastern the way stored predictions are. Only completed singles matches with a
+    single winner and two names that resolve uniquely are recovered; a key two
+    feed entries disagree about is withdrawn rather than guessed.
+
+    Stored rows appear in two spellings ("Jannik Sinner" and the older
+    "Sinner J." store key). Each ESPN name is resolved through the SAME player
+    store and resolver run_tennis.py uses for typed input, and the raw display
+    name is recorded as an alias, so both spellings reach one verified result.
+
+    ``fetch_tennis_results.settlements`` carries the ending of each fixture
+    (final / retirement / walkover) so the caller can apply the market's own
+    settlement rule instead of assuming every completed match is a clean finish.
     """
     out: Dict[Tuple[str, str, str], Tuple[float, float]] = {}
+    # Ending of each fixture, so a settlement rule can be applied per market.
+    settlements: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+    blocked = set()
 
     from run_tennis import resolve as resolve_player, STORE as PLAYER_STORE_PATH
     try:
@@ -878,6 +945,35 @@ def fetch_tennis_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tup
         # to check here, just pass the key through.
         key, _how = resolve_player(name, player_store)
         return key
+
+    def record_result(day: str, home_key: str, away_key: str,
+                      value: Tuple[float, float], status_name: str,
+                      home_name: str = "", away_name: str = "") -> None:
+        """Store one uniquely verified result, plus an alias for its feed spelling.
+
+        A key that two feed entries disagree about is removed rather than guessed,
+        and the blocked set stops a later duplicate from reinstating it. The raw
+        display-name alias lets a stored full name ("Jannik Sinner") reach the same
+        result as the store key, without weakening the one-winner requirement.
+        """
+        aliases = [(normalise_team(home_key, "tennis"), normalise_team(away_key, "tennis"))]
+        if home_name and away_name:
+            alias = (normalise_team(home_name, "tennis"), normalise_team(away_name, "tennis"))
+            if alias not in aliases:
+                aliases.append(alias)
+        for home_alias, away_alias in aliases:
+            key = (day, home_alias, away_alias)
+            if key in blocked:
+                continue
+            if key not in out:
+                out[key] = value
+                settlements[key] = {"status": status_name}
+            elif out[key] != value:
+                # Two competitions on the same day disagree: this is not a result
+                # that can be settled, so it is withdrawn instead of picked.
+                out.pop(key, None)
+                settlements.pop(key, None)
+                blocked.add(key)
 
     try:
         start_date = _dt.date.fromisoformat(start)
@@ -903,6 +999,13 @@ def fetch_tennis_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tup
                         status = ((competition.get("status") or {}).get("type") or {})
                         if not status.get("completed"):
                             continue
+                        # The tournament draw is returned for every query date. Key on
+                        # the match's own date (Eastern, like stored predictions) and
+                        # refuse anything outside the window actually being graded.
+                        played = _eastern_match_date(competition.get("date")
+                                                    or competition.get("startDate"))
+                        if played is None or not (start_date <= played <= end_date):
+                            continue
                         competitors = competition.get("competitors") or []
                         if len(competitors) != 2:
                             continue
@@ -924,13 +1027,16 @@ def fetch_tennis_results(start: str, end: str) -> Dict[Tuple[str, str, str], Tup
                         away_key = resolved(away_name)
                         if not home_key or not away_key:
                             continue
-                        # Keep verified winners reachable after the unresolved-name guard.
-                        out[(day.isoformat(), normalise_team(home_key, "tennis"),
-                                normalise_team(away_key, "tennis"))] = (
-                            (1.0, 0.0) if home_won else (0.0, 1.0))
+                        record_result(played.isoformat(), home_key, away_key,
+                                      (1.0, 0.0) if home_won else (0.0, 1.0),
+                                      str(status.get("name") or ""), home_name, away_name)
         day += _dt.timedelta(days=1)
 
+    fetch_tennis_results.settlements = settlements
     return out
+
+
+fetch_tennis_results.settlements = {}
 
 
 NCAAF_SCOREBOARD = ("https://site.web.api.espn.com/apis/site/v2/sports/football/"
@@ -1396,11 +1502,27 @@ def cmd_auto(conn: sqlite3.Connection, sport: Optional[str], days: int) -> int:
                 actual=fetch_nhl_results.event_ids.get(key) or fetch_nhl_results.event_ids.get(flipped_key)
                 if not ident or str(ident)!=actual:
                     unmatched+=1;log(f"    [identity mismatch] NHL #{row['id']} remains unresolved");continue
-            outcome = apply_result(conn, row, scores[0], scores[1], f"{sport_key} feed")
+            # A recorded tennis market settles by its own rule: a match-winner
+            # survives a retirement, while every market is void when there was no play.
+            void_reason = None
+            source = f"{sport_key} feed"
+            if sport_key == "tennis":
+                settled = ((getattr(fetcher, "settlements", {}) or {}).get(key)
+                           or (getattr(fetcher, "settlements", {}) or {}).get(flipped_key))
+                if settled:
+                    rule, why = tennis_settlement_rule(row["market_type"],
+                                                       settled.get("status"))
+                    if rule == "void":
+                        void_reason = f"void: {why} (source: tennis feed)"
+                    elif why:
+                        source += f" ({why})"
+            outcome = apply_result(conn, row, scores[0], scores[1], source,
+                                   void_reason=void_reason)
             if outcome:
                 graded += 1
+                label = "VOID" if void_reason else outcome.upper()
                 log(f"    #{row['id']:>4} {row['home_team']} vs {row['away_team']} "
-                    f"({row['market_type']}) -> {outcome.upper()} "
+                    f"({row['market_type']}) -> {label} "
                     f"[{scores[0]:.0f}-{scores[1]:.0f}]")
     conn.commit()
 

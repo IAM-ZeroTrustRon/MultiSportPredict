@@ -12,8 +12,12 @@ def price(value):
     return '--' if value is None else f'{value:+g}'
 
 
-def market_rows(result, item):
-    """A/B is a storage contract: Home/Away for sides, Over/Under for totals."""
+def market_rows(result, item, keep_estimates=False):
+    """A/B is a storage contract: Home/Away for sides, Over/Under for totals.
+
+    ``keep_estimates`` lets a context-gated run still display the model estimate;
+    see ``models.basketball_readiness.observation_markets``. Recommends nothing.
+    """
     kind, line = item['kind'], item['line']
     if kind == 'total':
         labels = [f'Over {line:g}', f'Under {line:g}']
@@ -23,7 +27,9 @@ def market_rows(result, item):
     else:
         raise ValueError(f'Unsupported score market: {kind}')
     return [{'market': kind.title(), 'selection': label, 'probability': item.get('prob_' + side),
-             'price': item.get('price_' + side), 'ev': None if projection_only(result) else item.get('ev_' + side)}
+             'price': item.get('price_' + side),
+             'ev': (None if (projection_only(result) and not keep_estimates)
+                    else item.get('ev_' + side))}
             for label, side in zip(labels, ('a', 'b'))]
 
 
@@ -126,6 +132,7 @@ def format_review(result):
 def card_shape(result):
     """The same labels/rounding consumed by embed_builder and direct runner sends."""
     p = result['projection']
+    keep = bool(result.get('estimates_retained'))
     rows = [{'name': 'Full game - projected score', 'model':
              f"Home: {result['home_team']} {p['home_points']:.1f} | Away: {result['away_team']} {p['away_points']:.1f}",
              'inline': False}]
@@ -134,22 +141,34 @@ def card_shape(result):
                      'model': 'Excluded from core value record; no actionable value verdict.',
                      'extra': '\n'.join(f"{i['input']}: {i['value']} [{i['source']}]" for i in result.get('substitutions', [])),
                      'inline': False})
+    hockey = result.get('sport') == 'nhl'
     gate = result.get('readiness')
     if gate:
         counts = gate['season_games_played']
-        rows.append({'name': 'Current-season readiness', 'model': gate['status'],
+        # The NHL card states one verdict for the game; the reasons behind it live in
+        # that same field rather than being repeated on every market.
+        from nhl_review import verdict_line
+        rows.append({'name': 'VERDICT' if hockey else 'Current-season readiness',
+                     'model': verdict_line(result) if hockey else gate['status'],
                      'extra': f"Season {gate['season']} | Home {counts['home']} | Away {counts['away']} | Required each: {gate['required_games']}"
-                              + ('\n'+'; '.join(gate['reasons']) if result.get('sport')=='nhl' else ''), 'inline': False})
+                              + (('\n' + ' | '.join(gate['reasons'])) if hockey and len(gate['reasons']) > 1 else ''),
+                     'inline': False})
     if result.get('sport')=='nhl':
         rows[0]['name']='NHL regulation goal means'
         rows[0]['model']=f"Home: {result['home_team']} {p['regulation_home']:.2f} | Away: {result['away_team']} {p['regulation_away']:.2f}"
     for item in result['markets']:
         detail = []
-        for row in market_rows(result, item):
-            ev = result['readiness']['status'] if projection_only(result) else percent(row['ev'], True) if row['ev'] is not None else 'Unavailable - no price'
+        for row in market_rows(result, item, keep_estimates=keep):
+            ev = (result['readiness']['status'] if (projection_only(result) and not keep)
+                  else percent(row['ev'], True) if row['ev'] is not None else 'Unavailable - no price')
             detail.append(f"{row['selection']}: {percent(row['probability'])} | Odds {price(row['price'])} | EV {ev}")
+        pick_text = recommendation(result, item)
+        if hockey and not item.get('pick'):
+            pick_text = ''  # already stated once, above the markets
+        elif hockey:
+            pick_text = 'PICK: ' + pick_text
         rows.append({'name': 'Full game - ' + item['kind'].title(), 'model': '\n'.join(detail),
-                     'pick': recommendation(result, item), 'extra': f"Push: {percent(item.get('push_prob'))}", 'inline': False})
+                     'pick': pick_text, 'extra': f"Push: {percent(item.get('push_prob'))}", 'inline': False})
     for key, label, segment in periods(result):
         quote_notes = []
         for quote in (result.get('period_market_quotes') or {}).get(key, []):

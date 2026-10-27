@@ -76,9 +76,24 @@ def projection_only(result):
     return isinstance(result.get("readiness"), dict) and result["readiness"].get("eligible") is False
 
 
-def observation_markets(markets, status=PROJECTION_ONLY):
-    """Suppress recommendations in persisted data as well as in formatters."""
-    return [{**m, "ev_a": None, "ev_b": None, "pick": None,
+def observation_markets(markets, status=PROJECTION_ONLY, keep_estimates=False):
+    """Suppress recommendations in persisted data as well as in formatters.
+
+    ``keep_estimates`` retains the model probability priced at the offered odds
+    (``ev_a``/``ev_b``) while still removing every actionable field. It exists for
+    blockers that are about *context* rather than model quality - an unconfirmed
+    starting goalie, for example - where the arithmetic is still valid as an
+    estimate but a bet cannot be recommended. Picks, stakes and recommendations
+    are removed either way, so nothing can reach the value ledger.
+    """
+    return [{**m,
+             "ev_a": None if not keep_estimates else m.get("ev_a"),
+             "ev_b": None if not keep_estimates else m.get("ev_b"),
+             "pick": None,
              "stake_size": None, "stake_basis": "unavailable: projection only",
              "recommendation": "INFO — " + status, "status": status,
-             "note": "Score/probability observation only; EV and betting recommendations disabled"} for m in markets]
+             "estimates_retained": bool(keep_estimates),
+             "note": ("Score/probability observation only; EV is a model estimate and no betting "
+                      "recommendation is issued") if keep_estimates else
+                     "Score/probability observation only; EV and betting recommendations disabled"}
+            for m in markets]
