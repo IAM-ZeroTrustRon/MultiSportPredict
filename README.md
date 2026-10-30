@@ -1,5 +1,7 @@
 # MultiSportPredict
 
+[Portfolio index](https://github.com/IAM-ZeroTrustRon/GRC-IAM-Portfolio) · **Repository role:** Sports-modeling research software.
+
 **A multi-sport handicapper built to evaluate the price of a bet.**
 
 MultiSportPredict combines sport-specific analysis with market odds to look for line discrepancies and positive expected value. Its objective is disciplined long-term return on capital. Picking the most likely winner is only one input: a strong favorite can be poor value at its price, while an underdog can offer value despite being more likely to lose.
